@@ -59,63 +59,21 @@ int main() {
         return -1;
     }
 
-    glfwMakeContextCurrent(window);
-
     if (glfwInit() == GL_FALSE) {
         std::cerr << "Failed to init GLFW" << std::endl;
+        glfwTerminate();
         return -1;
     }
 
     if (gl3wInit()) {
         std::cerr << "Failed to init GL3W" << std::endl;
-        glfwDestroyWindow(window);
+        //glfwDestroyWindow(window);
         glfwTerminate();
-        return 1;
+        return -1;
     }
 
-    glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
-
+    glfwMakeContextCurrent(window);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    
-    //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
-    //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
-    //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
-    //                         
-    GLfloat vertices[] = {
-        0.5f,  0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f
-    };
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-
-    GLuint VAO, VBO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VAO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    //    ┓┏┏┓┳┓┏┳┓•┏┓┏┓┏┓  ┏┓┏┓┳┓┏┓•┏┓
-    //    ┃┃┣ ┣┫ ┃ ┓┃ ┣ ┗┓  ┃ ┃┃┃┃┣ ┓┃┓
-    //    ┗┛┗┛┛┗ ┻ ┗┗┛┗┛┗┛  ┗┛┗┛┛┗┻ ┗┗┛
-    //                     
-    // 1. location in vertex
-    // 2. vec3
-    // 3. GL_FLOAT (vec3)
-    // 4. normalize
-    // 5. stride = difference between each data (can be set to 0 if data is packed for auto complete)
-    // 6. offset (dw)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
 
     //    ┓┏┏┓┳┓┏┳┓┏┓┏┓┏┓  ┏┓┓┏┏┓┳┓┏┓┳┓
     //    ┃┃┣ ┣┫ ┃ ┣  ┃┃   ┗┓┣┫┣┫┃┃┣ ┣┫
@@ -194,20 +152,79 @@ int main() {
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
+    //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
+    //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
+    //                         
+    GLfloat vertices[] = {
+        0.5f,  0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f
+    };
+    GLfloat triangle1[] = {
+        -0.9f, -0.5f, 0.0f,
+        -0.0f, -0.5f, 0.0f,
+        -0.45f, 0.5f, 0.0f
+    };
+    GLfloat triangle2[] = {
+        0.0f, -0.5f, 0.0f,
+        0.9f, -0.5f, 0.0f,
+        0.45f, 0.5f, 0.0f
+    };
+    unsigned int indices[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+
     //    ┳┓┏┓┳┓┳┓┏┓┳┓•┳┓┏┓
     //    ┣┫┣ ┃┃┃┃┣ ┣┫┓┃┃┃┓
     //    ┛┗┗┛┛┗┻┛┗┛┛┗┗┛┗┗┛
     //                     
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    GLuint VAOs[2], VBOs[2];// , EBO;
+    glGenVertexArrays(2, VAOs);
+    glGenBuffers(2, VBOs);
+    //glGenBuffers(1, &EBO);
+
+    // first triangle config
+    glBindVertexArray(VBOs[0]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle1), triangle1, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // second triangle config
+    glBindVertexArray(VBOs[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle2), triangle2, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    // no need to unbind at all as we directly bind a different VAO the next few lines
+    //glBindVertexArray(0);
+
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    //    ┓┏┏┓┳┓┏┳┓•┏┓┏┓┏┓  ┏┓┏┓┳┓┏┓•┏┓
+    //    ┃┃┣ ┣┫ ┃ ┓┃ ┣ ┗┓  ┃ ┃┃┃┃┣ ┓┃┓
+    //    ┗┛┗┛┛┗ ┻ ┗┗┛┗┛┗┛  ┗┛┗┛┛┗┻ ┗┗┛
+    //                     
+    // 1. location in vertex
+    // 2. vec3
+    // 3. GL_FLOAT (vec3)
+    // 4. normalize
+    // 5. stride = difference between each data (can be set to 0 if data is packed for auto complete)
+    // 6. offset (dw)
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
 
     // wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
-    //                                 1
+    //                                 
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
@@ -215,10 +232,16 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
-        glBindVertexArray(VAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 3);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        // draw the first triangle from the first VAO
+        glBindVertexArray(VAOs[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        // draw the second triangle from the second VAO
+        glBindVertexArray(VAOs[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        
+        // no need to unbind it every time
+        //glBindVertexArray(0);
 
         glfwPollEvents();
         glfwSwapBuffers(window);
@@ -228,9 +251,9 @@ int main() {
     //    ┃ ┃ ┣ ┣┫┃┃┓┃┃┃┓
     //    ┗┛┗┛┗┛┛┗┛┗┗┛┗┗┛
     //           
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(2, VAOs);
+    glDeleteBuffers(2, VBOs);
+    //glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 
     glfwTerminate();
