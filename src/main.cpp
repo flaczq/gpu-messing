@@ -21,7 +21,8 @@ void processInput(GLFWwindow* window) {
     }
 }
 
-std::string loadShaderSource(const char* filepath) {
+std::string loadShaderSource(std::string filepath) {
+    filepath = "shaders/" + filepath;
     std::ifstream file(filepath);
     if (!file.is_open()) {
         std::cout << "Cannot open file: " << filepath << std::endl;
@@ -65,15 +66,15 @@ int main() {
         return -1;
     }
 
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
     if (gl3wInit()) {
         std::cerr << "Failed to init GL3W" << std::endl;
-        //glfwDestroyWindow(window);
+        glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
     }
-
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     //    ┓┏┏┓┳┓┏┳┓┏┓┏┓┏┓  ┏┓┓┏┏┓┳┓┏┓┳┓
     //    ┃┃┣ ┣┫ ┃ ┣  ┃┃   ┗┓┣┫┣┫┃┃┣ ┣┫
@@ -81,22 +82,16 @@ int main() {
     //                                 
     GLuint vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    GLint vertexShaderSuccess;
     std::string vertexTriangleFile = loadShaderSource("triangle.vert");
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexShaderSuccess);
-    if (!vertexShaderSuccess) {
-        char infoLog[512];
-        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        std::cout << "Vertex shader error: " << infoLog << std::endl;
-    }
     const char* vertexTriangleSource = vertexTriangleFile.c_str();
+
     glShaderSource(vertexShader, 1, &vertexTriangleSource, NULL);
     glCompileShader(vertexShader);
 
-    GLint vertexShaderCompSuccess;
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexShaderCompSuccess);
-    if (!vertexShaderCompSuccess) {
-        GLchar infoLog[512];
+    GLint vertexShaderSuccess;
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vertexShaderSuccess);
+    if (!vertexShaderSuccess) {
+        char infoLog[512];
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
@@ -107,42 +102,65 @@ int main() {
     //                                    
     GLuint fragmentShader;
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    GLint fragmentShaderSuccess;
     std::string fragmentTriangleFile = loadShaderSource("triangle.frag");
+    const char* fragmentTriangleSource = fragmentTriangleFile.c_str();
+
+    glShaderSource(fragmentShader, 1, &fragmentTriangleSource, NULL);
+    glCompileShader(fragmentShader);
+
+    GLint fragmentShaderSuccess;
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentShaderSuccess);
     if (!fragmentShaderSuccess) {
         char infoLog[512];
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        std::cout << "Fragment shader error: " << infoLog << std::endl;
-    }
-    const char* fragmentTriangleSource = fragmentTriangleFile.c_str();
-    glShaderSource(fragmentShader, 1, &fragmentTriangleSource, NULL);
-    glCompileShader(fragmentShader);
-
-    GLint fragmentShaderCompSuccess;
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragmentShaderCompSuccess);
-    if (!fragmentShaderCompSuccess) {
-        GLchar infoLog[512];
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    GLuint fragment2Shader;
+    fragment2Shader = glCreateShader(GL_FRAGMENT_SHADER);
+    std::string fragment2TriangleFile = loadShaderSource("secondtriangle.frag");
+    const char* fragment2TriangleSource = fragment2TriangleFile.c_str();
+
+    glShaderSource(fragment2Shader, 1, &fragment2TriangleSource, NULL);
+    glCompileShader(fragment2Shader);
+
+    GLint fragment2ShaderSuccess;
+    glGetShaderiv(fragment2Shader, GL_COMPILE_STATUS, &fragment2ShaderSuccess);
+    if (!fragment2ShaderSuccess) {
+        char infoLog[512];
+        glGetShaderInfoLog(fragment2Shader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT2::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
     //    ┓ •┳┓┓┏┓•┳┓┏┓
     //    ┃ ┓┃┃┃┫ ┓┃┃┃┓
     //    ┗┛┗┛┗┛┗┛┗┛┗┗┛
     //                 
-    GLuint shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
+    GLuint shaderPrograms[2];
+    shaderPrograms[0] = glCreateProgram();
+    glAttachShader(shaderPrograms[0], vertexShader);
+    glAttachShader(shaderPrograms[0], fragmentShader);
+    glLinkProgram(shaderPrograms[0]);
 
     GLint shaderProgramSuccess;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &shaderProgramSuccess);
+    glGetProgramiv(shaderPrograms[0], GL_LINK_STATUS, &shaderProgramSuccess);
     if (!shaderProgramSuccess) {
         GLchar infoLog[512];
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
+        glGetProgramInfoLog(shaderPrograms[0], 512, NULL, infoLog);
+        std::cout << "ERROR::LINKING::PROGRAM::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
+    shaderPrograms[1] = glCreateProgram();
+    glAttachShader(shaderPrograms[1], vertexShader);
+    glAttachShader(shaderPrograms[1], fragment2Shader);
+    glLinkProgram(shaderPrograms[1]);
+
+    GLint shaderProgramSuccess2;
+    glGetProgramiv(shaderPrograms[1], GL_LINK_STATUS, &shaderProgramSuccess2);
+    if (!shaderProgramSuccess2) {
+        GLchar infoLog[512];
+        glGetProgramInfoLog(shaderPrograms[1], 512, NULL, infoLog);
+        std::cout << "ERROR::LINKING::PROGRAM1::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
     //    ┏┓┓ ┏┓┏┓┳┓•┳┓┏┓
@@ -151,6 +169,7 @@ int main() {
     //                   
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
+    glDeleteShader(fragment2Shader);
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
@@ -219,7 +238,7 @@ int main() {
     glEnableVertexAttribArray(0);
 
     // wireframe
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
@@ -231,11 +250,12 @@ int main() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        glUseProgram(shaderProgram);
+        glUseProgram(shaderPrograms[0]);
         // draw the first triangle from the first VAO
         glBindVertexArray(VAOs[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
+        glUseProgram(shaderPrograms[1]);
         // draw the second triangle from the second VAO
         glBindVertexArray(VAOs[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -254,7 +274,8 @@ int main() {
     glDeleteVertexArrays(2, VAOs);
     glDeleteBuffers(2, VBOs);
     //glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+    glDeleteProgram(shaderPrograms[0]);
+    glDeleteProgram(shaderPrograms[1]);
 
     glfwTerminate();
     return 0;

@@ -24,8 +24,9 @@
     <None Include="README.md" />
     <None Include="vcpkg.json" />
     <None Include="vcpkg-configuration.json" />
-    <None Include="triangle.vert" />
-    <None Include="triangle.frag" />
+    <None Include="shaders\triangle.vert" />
+    <None Include="shaders\triangle.frag" />
+    <None Include="shaders\secondtriangle.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">

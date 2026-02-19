@@ -24,8 +24,9 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="README.md" />
-    <None Include="triangle.frag" />
-    <None Include="triangle.vert" />
+    <None Include="shaders\secondtriangle.frag" />
+    <None Include="shaders\triangle.frag" />
+    <None Include="shaders\triangle.vert" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
