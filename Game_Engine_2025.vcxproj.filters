@@ -43,6 +43,9 @@
     <Image Include="assets\wall.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
+    <Image Include="assets\awesomeface.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

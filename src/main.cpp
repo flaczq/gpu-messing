@@ -35,6 +35,22 @@ std::string loadShaderSource(std::string filepath) {
     return buffer.str();
 }
 
+double lastTime = glfwGetTime();
+int nbFrames = 0;
+
+void showFPS(GLFWwindow* window) {
+    double currentTime = glfwGetTime();
+    nbFrames++;
+    if (currentTime - lastTime >= 1.0) {
+        double fps = double(nbFrames);
+        double msPerFrame = 1000.0 / double(nbFrames);
+        std::string title = "(C) Uknnowndsn gameengine 2049 - FPS: " + std::to_string((int)fps) + " (" + std::to_string(msPerFrame).substr(0, 4) + " ms)";
+        glfwSetWindowTitle(window, title.c_str());
+        nbFrames = 0;
+        lastTime += 1.0;
+    }
+}
+
 int main() {
     //    ┏┳┓┓┏•┏┓  •┏┓  •┏┳┓
     //     ┃ ┣┫┓┗┓  ┓┗┓  ┓ ┃ 
@@ -86,20 +102,15 @@ int main() {
     //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
     //                         
     GLfloat vertices[] = {
-        // Pozycje         // Kolory         // Współrzędne tekstury  
-        0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // Prawy górny  
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Prawy dolny  
-       -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Lewy dolny  
-       -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // Lewy górny  
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
     };
     GLuint indices[] = {
         0, 1, 3,
         1, 2, 3
-    };
-    GLfloat texCoords[] = {
-        0.0f, 0.0f, // lewy dolny róg 
-        1.0f, 0.0f, // lewy prawy róg
-        0.5f, 1.0f  // górny środkowy róg
     };
 
     //    ┳┓┏┓┏┳┓┏┓•┳┓┏┓
@@ -150,9 +161,9 @@ int main() {
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ 
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛
     //                      
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    GLuint texture1;
+    glGenTextures(1, &texture1);
+    glBindTexture(GL_TEXTURE_2D, texture1);
     // filter parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -160,33 +171,55 @@ int main() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int width, height, nrChannels;
-    // flip loaded texture's on the y-axis.
-    //stbi_set_flip_vertically_on_load(true);
-    unsigned char* wall_data = stbi_load("assets/wall.jpg", &width, &height, &nrChannels, 0);
-    if (wall_data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, wall_data);
+    unsigned char* data = stbi_load("assets/wall.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
-        std::cout << "ERROR::MAIN::FILE_NOT_LOADED_SUCCESFULLY" << std::endl;
+        std::cout << "ERROR::MAIN::WALL_NOT_LOADED_SUCCESFULLY" << std::endl;
     }
+    stbi_image_free(data);
 
-    stbi_image_free(wall_data);
+    GLuint texture2;
+    glGenTextures(1, &texture2);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+    // filter parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    //ourShader.use();
-    //ourShader.setInt("texture", 1);
+    // flip loaded texture's on the y-axis.
+    stbi_set_flip_vertically_on_load(true);
+    data = stbi_load("assets/awesomeface.jpg", &width, &height, &nrChannels, 0);
+    if (data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else {
+        std::cout << "ERROR::MAIN::FACE_NOT_LOADED_SUCCESFULLY" << std::endl;
+    }
+    stbi_image_free(data);
+
+    ourShader.use();
+    ourShader.setInt("texture1", 0);
+    ourShader.setInt("texture2", 1);
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
     //                                 
     while (!glfwWindowShouldClose(window)) {
+        showFPS(window);
         processInput(window);
 
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
 
         ourShader.use();
 
