@@ -43,7 +43,7 @@
     <Image Include="assets\wall.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
-    <Image Include="assets\awesomeface.jpg">
+    <Image Include="assets\abc.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>

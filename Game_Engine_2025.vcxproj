@@ -35,7 +35,7 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\awesomeface.jpg" />
+    <Image Include="assets\abc.jpg" />
     <Image Include="assets\clearlyai.jpg" />
     <Image Include="assets\wall.jpg" />
   </ItemGroup>

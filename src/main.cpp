@@ -191,7 +191,7 @@ int main() {
 
     // flip loaded texture's on the y-axis.
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("assets/clearlyai.jpg", &width, &height, &nrChannels, 0);
+    data = stbi_load("assets/potato.jpg", &width, &height, &nrChannels, 0);
     if (data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
