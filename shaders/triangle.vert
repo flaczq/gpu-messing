@@ -1,14 +1,13 @@
 #version 330 core
-layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 color;
+layout(location = 0) in vec3 aPos;
+layout(location = 1) in vec3 aCol;
+layout(location = 2) in vec2 aTexCoord;
 
 out vec3 ourColor;
-out vec3 pos;
-
-uniform float movedRight;
+out vec2 ourTexCoord;
 
 void main() {
-	gl_Position = vec4(position.x + movedRight, position.yz, 1.0);
-	ourColor = color;
-	pos = gl_Position.xyz;
+	gl_Position = vec4(aPos, 1.0f);
+	ourColor = aCol;
+	ourTexCoord = aTexCoord;
 }

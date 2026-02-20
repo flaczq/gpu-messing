@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="libs\stb_image.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -35,8 +36,10 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg" />
+    <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\shader.h" />
   </ItemGroup>

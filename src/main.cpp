@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "shader.h"
+#include "../libs/stb_image.h"
 
 #include <iostream>
 #include <fstream>
@@ -85,35 +86,42 @@ int main() {
     //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
     //                         
     GLfloat vertices[] = {
-         // pozycje           // kolory
-         0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f,   // dolny prawy
-        -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,   // dolny lewy
-         0.0f,  0.5f, 0.0f,  0.0f, 0.0f, 1.0f    // górny 
+        // Pozycje         // Kolory         // Współrzędne tekstury  
+        0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // Prawy górny  
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // Prawy dolny  
+       -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // Lewy dolny  
+       -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // Lewy górny  
     };
     GLuint indices[] = {
         0, 1, 3,
         1, 2, 3
+    };
+    GLfloat texCoords[] = {
+        0.0f, 0.0f, // lewy dolny róg 
+        1.0f, 0.0f, // lewy prawy róg
+        0.5f, 1.0f  // górny środkowy róg
     };
 
     //    ┳┓┏┓┏┳┓┏┓•┳┓┏┓
     //    ┃┃┣┫ ┃ ┣┫┓┃┃┃┓
     //    ┻┛┛┗ ┻ ┛┗┗┛┗┗┛
     //                  
-    GLuint VAO, VBO;// , EBO;
+    GLuint VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    //glGenBuffers(1, &EBO);
+    glGenBuffers(1, &EBO);
 
     // first triangle config
-    glBindVertexArray(VBO);
+    glBindVertexArray(VAO);
+
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
     // no need to unbind at all as we directly bind a different VAO the next few lines
     //glBindVertexArray(0);
-
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     //    ┓┏┏┓┳┓┏┳┓•┏┓┏┓┏┓  ┏┓┏┓┳┓┏┓•┏┓
     //    ┃┃┣ ┣┫ ┃ ┓┃ ┣ ┗┓  ┃ ┃┃┃┃┣ ┓┃┓
@@ -125,14 +133,47 @@ int main() {
     // 4. normalize
     // 5. stride = difference between each vertex (can be set to 0 if data is packed for auto complete)
     // 6. offset = difference between each location
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    // 1. location in vertex
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    // texture coord
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
 
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓
+    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ 
+    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛
+    //                      
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    // filter parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    int width, height, nrChannels;
+    // flip loaded texture's on the y-axis.
+    //stbi_set_flip_vertically_on_load(true);
+    unsigned char* wall_data = stbi_load("assets/wall.jpg", &width, &height, &nrChannels, 0);
+    if (wall_data) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, wall_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        std::cout << "ERROR::MAIN::FILE_NOT_LOADED_SUCCESFULLY" << std::endl;
+    }
+
+    stbi_image_free(wall_data);
+
+    //ourShader.use();
+    //ourShader.setInt("texture", 1);
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
@@ -144,11 +185,13 @@ int main() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
         ourShader.use();
-        ourShader.setFloat("movedRight", 0.5f);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         // no need to unbind it every time
         //glBindVertexArray(0);
@@ -163,7 +206,7 @@ int main() {
     //           
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    //glDeleteBuffers(1, &EBO);
+    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
