@@ -1,6 +1,8 @@
 ﻿#include <GL/gl3w.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "shader.h"
 #include "../libs/stb_image.h"
@@ -13,6 +15,8 @@
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+float uniformInterpolate = 0.8f;
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     std::cout << "Window changed to " << width << 'x' << height << std::endl;
     glViewport(0, 0, width, height);
@@ -21,6 +25,29 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
+    }
+}
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    bool interpolateChanged = false;
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && uniformInterpolate < 1.0f) {
+        interpolateChanged = true;
+        uniformInterpolate += 0.1f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && uniformInterpolate > 0.0f) {
+        interpolateChanged = true;
+        uniformInterpolate -= 0.1f;
+    }
+
+    if (interpolateChanged) {
+        if (uniformInterpolate < 0.0f) {
+            uniformInterpolate = 0.0f;
+        }
+        if (uniformInterpolate > 1.0f) {
+            uniformInterpolate = 1.0f;
+        }
+        std::cout << "uniformInterpolate: " << uniformInterpolate << std::endl;
     }
 }
 
@@ -154,6 +181,9 @@ int main() {
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
 
+    // unbind VAO
+    glBindVertexArray(0);
+
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -204,6 +234,7 @@ int main() {
     ourShader.use();
     ourShader.setInt("texture1", 0);
     ourShader.setInt("texture2", 1);
+    ourShader.setFloat("interpolate", uniformInterpolate);
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
@@ -212,6 +243,7 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         showFPS(window);
         processInput(window);
+        glfwSetKeyCallback(window, key_callback);
 
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -221,13 +253,35 @@ int main() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
+        // active shaders
         ourShader.use();
 
+        // first transformers
+        glm::mat4 transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+        transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
+
+        // send changed variable
+        ourShader.setMatrix4fv("transform", transform);
+        ourShader.setFloat("interpolate", uniformInterpolate);
+
+        // draw first triangles
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
+        // second transformers
+        transform = glm::mat4(1.0f);
+        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+        GLfloat scaleAmount = sin(glfwGetTime());
+        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
+        ourShader.setMatrix4fv("transform", transform);
+
+        // draw second triangles
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
         // no need to unbind it every time
-        //glBindVertexArray(0);
+        glBindVertexArray(0);
 
         glfwPollEvents();
         glfwSwapBuffers(window);

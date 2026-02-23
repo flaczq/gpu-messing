@@ -37,6 +37,7 @@
   <ItemGroup>
     <Image Include="assets\abc.jpg" />
     <Image Include="assets\clearlyai.jpg" />
+    <Image Include="assets\potato.jpg" />
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
