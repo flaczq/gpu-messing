@@ -29,7 +29,6 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
-    unsigned int vertex, fragment;
     int success;
     char infoLog[512];
 
@@ -73,16 +72,14 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
-
-    //    ┏┓┓ ┏┓┏┓┳┓•┳┓┏┓
-    //    ┃ ┃ ┣ ┣┫┃┃┓┃┃┃┓
-    //    ┗┛┗┛┗┛┛┗┛┗┗┛┗┗┛
-    //                   
+}
+Shader::~Shader() {
     glDeleteShader(vertex);
     glDeleteShader(fragment);
+    glDeleteProgram(ID);
 }
 
-void Shader::use() {
+void Shader::use() const {
     glUseProgram(ID);
 }
 

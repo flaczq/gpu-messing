@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
@@ -41,6 +42,7 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\engine.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\shader.h" />
