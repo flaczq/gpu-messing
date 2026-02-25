@@ -251,7 +251,10 @@ bool Engine::init() {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// set callbacks
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetFramebufferSizeCallback(window, Engine::framebuffer_size_callback);
+    glfwSetCursorPosCallback(window, Engine::mouse_callback);
+    glfwSetScrollCallback(window, Engine::scroll_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	return 1;
 }
@@ -305,9 +308,9 @@ void Engine::run() {
         //GLfloat camZ = cos(glfwGetTime()) * radius;
         glm::mat4 view = glm::mat4(1.0f);
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        // projection (45 FOV)
+        // projection
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(45.0f), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
 
         // send changed variable
         shader->setMatrix4fv("transform", transform);
@@ -415,4 +418,52 @@ void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action,
 void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	std::cout << "Window changed to " << width << 'x' << height << std::endl;
 	glViewport(0, 0, width, height);
+}
+
+void Engine::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
+    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    float xpos = static_cast<float>(xPosIn);
+    float ypos = static_cast<float>(yPosIn);
+
+    if (engine->firstMouse) {
+        engine->lastX = xpos;
+        engine->lastY = ypos;
+        engine->firstMouse = false;
+    }
+
+    float xoffset = xpos - engine->lastX;
+    float yoffset = engine->lastY - ypos; // reversed since y-coordinates go from bottom to top
+    engine->lastX = xpos;
+    engine->lastY = ypos;
+
+    xoffset *= engine->sensitivity;
+    yoffset *= engine->sensitivity;
+
+    engine->yaw += xoffset;
+    engine->pitch += yoffset;
+
+    // make sure that when pitch is out of bounds, screen doesn't get flipped
+    if (engine->pitch > 89.0f) {
+        engine->pitch = 89.0f;
+    }
+    if (engine->pitch < -89.0f) {
+        engine->pitch = -89.0f;
+    }
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(engine->yaw)) * cos(glm::radians(engine->pitch));
+    front.y = sin(glm::radians(engine->pitch));
+    front.z = sin(glm::radians(engine->yaw)) * cos(glm::radians(engine->pitch));
+    engine->cameraFront = glm::normalize(front);
+}
+
+void Engine::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    engine->fov -= (float)yOffset;
+    if (engine->fov < 1.0f) {
+        engine->fov = 1.0f;
+    }
+    if (engine->fov > 90.0f) {
+        engine->fov = 90.0f;
+    }
 }
