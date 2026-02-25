@@ -11,5 +11,6 @@ uniform float interpolate;
 void main()
 {
 	vec2 flippedCoord = 4*vec2(1.0 - TexCoord.x, TexCoord.y);
-	color = mix(texture(texture1, TexCoord), texture(texture2, flippedCoord), interpolate);
+	color = mix(texture(texture1, TexCoord), texture(texture2, TexCoord), interpolate);
+	//color = vec4(ourColor, 1.0f);
 }

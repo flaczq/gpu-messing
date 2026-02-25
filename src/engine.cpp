@@ -51,8 +51,12 @@ bool Engine::init() {
     glfwFocusWindow(window);
     glfwShowWindow(window);
 
-    if (gl3wInit()) {
-        std::cerr << "Failed to init GL3W" << std::endl;
+    // configuration: experimental GgLEW + Z-depth test
+    glewExperimental = GL_TRUE;
+    glEnable(GL_DEPTH_TEST);
+
+    if (glewInit()) {
+        std::cerr << "Failed to init GLEW" << std::endl;
         glfwDestroyWindow(window);
         glfwTerminate();
         return -1;
@@ -71,9 +75,17 @@ bool Engine::init() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     int data_w, data_h, data_ch;
-    unsigned char* data = stbi_load("assets/wall.jpg", &data_w, &data_h, &data_ch, 0);
+    unsigned char* data = stbi_load("assets/potato.jpg", &data_w, &data_h, &data_ch, 0);
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, data_w, data_h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        // data_ch == 1
+        GLenum format = GL_RED;
+        if (data_ch == 3) {
+            format = GL_RGB;
+        } else if (data_ch == 4) {
+            format = GL_RGBA;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {
@@ -91,9 +103,18 @@ bool Engine::init() {
 
     // flip loaded texture's on the y-axis.
     stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("assets/potato.jpg", &data_w, &data_h, &data_ch, 0);
+    data = stbi_load("assets/wall.jpg", &data_w, &data_h, &data_ch, 0);
     if (data) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, data_w, data_h, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        // data_ch == 1
+        GLenum format = GL_RED;
+        if (data_ch == 3) {
+            format = GL_RGB;
+        }
+        else if (data_ch == 4) {
+            format = GL_RGBA;
+        }
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else {
@@ -109,20 +130,78 @@ bool Engine::init() {
     shader->setInt("texture2", 1);
     shader->setFloat("interpolate", uniformInterpolate);
 
+    //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
+    //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
+    //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
+    //                 
+    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+    glm::vec3 cameraRightt = glm::normalize(glm::cross(up, cameraDirection));
+    glm::vec3 cameraUpp = glm::cross(cameraDirection, cameraRightt);
+
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
     //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
     //                         
-    GLfloat vertices[] = {
-        // positions          // colors           // texture coords
-         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left 
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
     GLuint indices[] = {
         0, 1, 3,
         1, 2, 3
+    };
+    cubePositions = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
     //    ┳┓┏┓┏┳┓┏┓•┳┓┏┓
@@ -156,14 +235,14 @@ bool Engine::init() {
     // 5. stride = difference between each vertex (can be set to 0 if data is packed for auto complete)
     // 6. offset = difference between each location
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
     // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    //glEnableVertexAttribArray(1);
     // texture coord
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
 
     // unbind VAO
     glBindVertexArray(0);
@@ -192,7 +271,7 @@ void Engine::run() {
         glfwSetKeyCallback(window, key_callback);
 
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader->use();
 
@@ -200,6 +279,10 @@ void Engine::run() {
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
+
+        GLfloat currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;
 
         // transform objects
         glm::mat4 transform = glm::mat4(1.0f);
@@ -214,37 +297,47 @@ void Engine::run() {
         // 4. clip  + Tviewport   -> screen
 
         // 1. local to world
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        // set scene back a little to see everything
+        //glm::mat4 model = glm::mat4(1.0f);
+        //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        
+        //GLfloat radius = 10.0f;
+        //GLfloat camX = sin(glfwGetTime()) * radius;
+        //GLfloat camZ = cos(glfwGetTime()) * radius;
         glm::mat4 view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         // projection (45 FOV)
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(45.0f), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
 
         // send changed variable
         shader->setMatrix4fv("transform", transform);
-        shader->setMatrix4fv("model", model);
+        //shader->setMatrix4fv("model", model);
         shader->setMatrix4fv("view", view);
         shader->setMatrix4fv("projection", projection);
+        shader->setFloat("interpolate", uniformInterpolate);
 
-        // draw first triangles
+        // drawing many things
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            // rotate faster and faster each cube
+            model = glm::rotate(model, (float)glfwGetTime() * glm::radians(10.0f * (i+1)), glm::vec3(0.5f, 1.0f, 0.0f));
+            shader->setMatrix4fv("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         // second transformers
-        transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
-        GLfloat scaleAmount = sin(glfwGetTime());
-        transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
-        shader->setMatrix4fv("transform", transform);
+        //transform = glm::mat4(1.0f);
+        //transform = glm::translate(transform, glm::vec3(-0.5f, 0.5f, 0.0f));
+        //GLfloat scaleAmount = sin(glfwGetTime());
+        //transform = glm::scale(transform, glm::vec3(scaleAmount, scaleAmount, scaleAmount));
+        //shader->setMatrix4fv("transform", transform);
 
         // draw second triangles
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        // update changes
-        shader->setFloat("interpolate", uniformInterpolate);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // no need to unbind it every time
         glBindVertexArray(0);
@@ -268,9 +361,31 @@ void Engine::showFps(GLFWwindow* window) {
 }
 
 void Engine::processInput(GLFWwindow* window) {
+    // EXIT
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, true);
+        return;
 	}
+
+    // configurable
+    float cameraSpeed = 5.0f * deltaTime;
+    
+    // UP
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        cameraPos += cameraFront * cameraSpeed;
+    }
+    // DOWN
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        cameraPos -= cameraFront * cameraSpeed;
+    }
+    // LEFT
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
+    // RIGHT
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    }
 }
 
 void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {

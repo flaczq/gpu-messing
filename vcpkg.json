@@ -1,6 +1,8 @@
 {
+  "name": "uknnowndsn-gameengine-2049",
+  "version-string": "0.1.0",
   "dependencies": [
-    "gl3w",
+    "glew",
     "glfw3",
     "glm"
   ]
