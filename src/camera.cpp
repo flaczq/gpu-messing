@@ -2,18 +2,18 @@
 #include "engine.h"
 
 Camera::Camera() {
-    cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+    position = glm::vec3(0.0f, 0.0f, 3.0f);
     cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
     cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
     cameraRight = glm::vec3(0.0f, 1.0f, 0.0f); //fake
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-    cameraSpeed = 5.0f;
     firstMouse = true;
     yaw = -90.0f;
     pitch = 0.0f;
     lastX = 800.0f / 2.0f;
     lastY = 600.0f / 2.0f;
+    movementSpeed = 10.0f;
     mouseSensitivity = 0.05f;
     zoom = 45.0f;
     fov = 45.0f;
@@ -32,29 +32,44 @@ bool Camera::init(GLFWwindow* window) {
     return 1;
 }
 
-void Camera::processInput(GLFWwindow* window) {
+void Camera::processInput(GLFWwindow* window, float deltaTime) {
     // EXIT
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
 
-    // UP
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraPos += cameraFront * cameraSpeed;
+        processKeyboard(FORWARD, deltaTime);
     }
-    // DOWN
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraPos -= cameraFront * cameraSpeed;
+        processKeyboard(BACKWARD, deltaTime);
     }
-    // LEFT
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        processKeyboard(LEFT, deltaTime);
     }
-    // RIGHT
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        processKeyboard(RIGHT, deltaTime);
     }
 };
+
+void Camera::processKeyboard(Camera_Movement direction, float deltaTime) {
+    float velocity = movementSpeed * deltaTime;
+    if (direction == FORWARD) {
+        position += cameraFront * velocity;
+    }
+    if (direction == BACKWARD) {
+        position -= cameraFront * velocity;
+    }
+    if (direction == LEFT) {
+        position -= cameraRight * velocity;
+    }
+    if (direction == RIGHT) {
+        position += cameraRight * velocity;
+    }
+
+    // FPS stay on the ground, boy
+    position.y = 0.0f;
+}
 
 void Camera::processMouseScroll(float yOffset) {
     zoom -= (float)yOffset;
@@ -85,12 +100,10 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
     updateCameraVectors();
 }
 
-void Camera::updateDeltaTime(float deltaTime) {
-    cameraSpeed = 5.0f * deltaTime;
-};
-
 glm::mat4 Camera::getViewMatrix() {
-    return glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    return glm::lookAt(position, position + cameraFront, cameraUp);
+    // TODO custom lookAt
+    //return glm::mat4(1.0f);
 };
 
 float Camera::getFov() {
