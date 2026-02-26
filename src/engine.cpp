@@ -62,10 +62,20 @@ bool Engine::init() {
         return -1;
     }
 
-    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓
-    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ 
-    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛
-    //    
+    // ONLY ONCE set 'this' as Engine
+    glfwSetWindowUserPointer(window, this);
+
+    //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
+    //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
+    //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
+    //                 
+    Camera camera;
+    camera.init(window);
+
+    //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
+    //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
+    //    ┗┛┛┗┛┗┻┛┗┛┛┗┗┛
+    //                  
     glGenTextures(1, &texture1);
     glBindTexture(GL_TEXTURE_2D, texture1);
     // filter parameters
@@ -129,16 +139,6 @@ bool Engine::init() {
     shader->setInt("texture1", 0);
     shader->setInt("texture2", 1);
     shader->setFloat("interpolate", uniformInterpolate);
-
-    //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
-    //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
-    //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
-    //                 
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    glm::vec3 cameraRightt = glm::normalize(glm::cross(up, cameraDirection));
-    glm::vec3 cameraUpp = glm::cross(cameraDirection, cameraRightt);
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
@@ -251,10 +251,7 @@ bool Engine::init() {
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// set callbacks
-	glfwSetFramebufferSizeCallback(window, Engine::framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, Engine::mouse_callback);
-    glfwSetScrollCallback(window, Engine::scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 	return 1;
 }
@@ -265,13 +262,12 @@ void Engine::run() {
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
     //                                 
     while (!glfwWindowShouldClose(window)) {
-        showFps(window);
-        processInput(window);
-
-        // set 'this' as Engine
-        glfwSetWindowUserPointer(window, this);
         // set callbacks
         glfwSetKeyCallback(window, key_callback);
+        showFps(window);
+
+        camera.processInput(window);
+        camera.updateDeltaTime(deltaTime);
 
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -283,14 +279,14 @@ void Engine::run() {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        GLfloat currentFrame = glfwGetTime();
+        GLfloat currentFrame = (float)glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
         // transform objects
         glm::mat4 transform = glm::mat4(1.0f);
         transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));
+        transform = glm::rotate(transform, currentFrame, glm::vec3(0.0, 0.0, 1.0));
         transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
 
         // transformation matrix: Vclip = Mprojection * Mview * Mmodel * Vlocal
@@ -307,10 +303,10 @@ void Engine::run() {
         //GLfloat camX = sin(glfwGetTime()) * radius;
         //GLfloat camZ = cos(glfwGetTime()) * radius;
         glm::mat4 view = glm::mat4(1.0f);
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        view = camera.getViewMatrix();
         // projection
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(fov), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.getZoom()), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
 
         // send changed variable
         shader->setMatrix4fv("transform", transform);
@@ -350,6 +346,10 @@ void Engine::run() {
     }
 }
 
+Camera& Engine::getCamera() {
+    return camera;
+}
+
 void Engine::showFps(GLFWwindow* window) {
 	double currentTime = glfwGetTime();
 	nbFrames++;
@@ -363,107 +363,31 @@ void Engine::showFps(GLFWwindow* window) {
 	}
 }
 
-void Engine::processInput(GLFWwindow* window) {
-    // EXIT
-	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, true);
-        return;
-	}
-
-    // configurable
-    float cameraSpeed = 5.0f * deltaTime;
-    
-    // UP
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        cameraPos += cameraFront * cameraSpeed;
-    }
-    // DOWN
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        cameraPos -= cameraFront * cameraSpeed;
-    }
-    // LEFT
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    }
-    // RIGHT
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-    }
-}
-
-void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-	bool interpolateChanged = false;
-
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && engine->uniformInterpolate < 1.0f) {
-		interpolateChanged = true;
-        engine->uniformInterpolate += 0.1f;
-	}
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && engine->uniformInterpolate > 0.0f) {
-		interpolateChanged = true;
-        engine->uniformInterpolate -= 0.1f;
-	}
-
-	if (interpolateChanged) {
-		if (engine->uniformInterpolate < 0.0f) {
-            engine->uniformInterpolate = 0.0f;
-		}
-		if (engine->uniformInterpolate > 1.0f) {
-            engine->uniformInterpolate = 1.0f;
-		}
-		std::cout << "uniformInterpolate: " << engine->uniformInterpolate << std::endl;
-	}
-}
-
 void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	std::cout << "Window changed to " << width << 'x' << height << std::endl;
 	glViewport(0, 0, width, height);
 }
 
-void Engine::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
+void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    float xpos = static_cast<float>(xPosIn);
-    float ypos = static_cast<float>(yPosIn);
+    bool interpolateChanged = false;
 
-    if (engine->firstMouse) {
-        engine->lastX = xpos;
-        engine->lastY = ypos;
-        engine->firstMouse = false;
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && engine->uniformInterpolate < 1.0f) {
+        interpolateChanged = true;
+        engine->uniformInterpolate += 0.1f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && engine->uniformInterpolate > 0.0f) {
+        interpolateChanged = true;
+        engine->uniformInterpolate -= 0.1f;
     }
 
-    float xoffset = xpos - engine->lastX;
-    float yoffset = engine->lastY - ypos; // reversed since y-coordinates go from bottom to top
-    engine->lastX = xpos;
-    engine->lastY = ypos;
-
-    xoffset *= engine->sensitivity;
-    yoffset *= engine->sensitivity;
-
-    engine->yaw += xoffset;
-    engine->pitch += yoffset;
-
-    // make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (engine->pitch > 89.0f) {
-        engine->pitch = 89.0f;
+    if (interpolateChanged) {
+        if (engine->uniformInterpolate < 0.0f) {
+            engine->uniformInterpolate = 0.0f;
+        }
+        if (engine->uniformInterpolate > 1.0f) {
+            engine->uniformInterpolate = 1.0f;
+        }
+        std::cout << "uniformInterpolate: " << engine->uniformInterpolate << std::endl;
     }
-    if (engine->pitch < -89.0f) {
-        engine->pitch = -89.0f;
-    }
-
-    glm::vec3 front;
-    front.x = cos(glm::radians(engine->yaw)) * cos(glm::radians(engine->pitch));
-    front.y = sin(glm::radians(engine->pitch));
-    front.z = sin(glm::radians(engine->yaw)) * cos(glm::radians(engine->pitch));
-    engine->cameraFront = glm::normalize(front);
-}
-
-void Engine::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
-    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    engine->fov -= (float)yOffset;
-    if (engine->fov < 1.0f) {
-        engine->fov = 1.0f;
-    }
-    if (engine->fov > 90.0f) {
-        engine->fov = 90.0f;
-    }
-}
+};
