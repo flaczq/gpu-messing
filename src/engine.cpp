@@ -287,13 +287,12 @@ void Engine::run() {
         transform = glm::rotate(transform, currentFrame, glm::vec3(0.0, 0.0, 1.0));
         transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
 
-        // transformation matrix: Vclip = Mprojection * Mview * Mmodel * Vlocal
-        // 1. local + Mmodel      -> world
-        // 2. world + Mview       -> space
-        // 3. space + Mprojection -> clip
-        // 4. clip  + Tviewport   -> screen
+        // transformation matrix: clip = projectionM * viewM * modelM * local
+        // 1. local * modelM            -> world
+        // 2. world * viewM             -> space (lookAt())
+        // 3. space * projectionM       -> clip
+        // 4. clip  * viewportTransform -> screen
 
-        // 1. local to world
         //glm::mat4 model = glm::mat4(1.0f);
         //model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
         
