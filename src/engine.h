@@ -38,6 +38,8 @@ private:
     GLfloat lastFrame = 0.0f;
 
     void showFps(GLFWwindow* window);
+    void displayPosition(glm::mat4 viewMatrix);
+    void displayCameraAngles(glm::mat4 viewMatrix);
 
     // must be static to be passed as a callback reference and so it needs to use engine->var
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);

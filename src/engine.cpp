@@ -250,8 +250,9 @@ bool Engine::init() {
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-	// set callbacks
+	// set callbacks: window resize, single key click
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glfwSetKeyCallback(window, key_callback);
 
 	return 1;
 }
@@ -262,8 +263,6 @@ void Engine::run() {
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
     //                                 
     while (!glfwWindowShouldClose(window)) {
-        // set callbacks
-        glfwSetKeyCallback(window, key_callback);
         showFps(window);
 
         camera.processInput(window, deltaTime);
@@ -362,31 +361,64 @@ void Engine::showFps(GLFWwindow* window) {
 	}
 }
 
+void Engine::displayPosition(glm::mat4 viewMatrix) {
+    glm::mat4 inverseView = glm::inverse(viewMatrix);
+    glm::vec3 pos = glm::vec3(inverseView[3]);
+
+    std::cout << std::fixed << std::setprecision(2);
+    std::cout << "------- Position Status ------" << std::endl;
+    std::cout << "X: " << std::showpos << pos.x << "   "
+              << "Y: " << std::showpos << pos.y << "   "
+              << "Z: " << std::showpos << pos.z << std::endl << std::endl;
+}
+
+void Engine::displayCameraAngles(glm::mat4 viewMatrix) {
+    glm::vec3 scale;
+    glm::quat orientation;
+    glm::vec3 translation;
+    glm::vec3 skew;
+    glm::vec4 perspective;
+
+    if (glm::decompose(viewMatrix, scale, orientation, translation, skew, perspective)) {
+        glm::vec3 euler = glm::eulerAngles(orientation);
+
+        float pitch = glm::degrees(euler.x);
+        float yaw = glm::degrees(euler.y);
+        float roll = glm::degrees(euler.z);
+
+        std::cout << std::fixed << std::setprecision(2);
+        std::cout << "------------------ Camera Status ------------------" << std::endl;
+        std::cout << "Pitch: " << std::showpos << pitch << " deg   "
+                  << "Yaw: " << std::showpos << yaw << " deg   "
+                  << "Roll: " << std::showpos << roll << " deg" << std::endl << std::endl;
+    }
+}
+
 void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	std::cout << "Window changed to " << width << 'x' << height << std::endl;
 	glViewport(0, 0, width, height);
 }
 
 void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    bool interpolateChanged = false;
 
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS && engine->uniformInterpolate < 1.0f) {
-        interpolateChanged = true;
+    // interpolate mix of textures
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         engine->uniformInterpolate += 0.1f;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && engine->uniformInterpolate > 0.0f) {
-        interpolateChanged = true;
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         engine->uniformInterpolate -= 0.1f;
     }
 
-    if (interpolateChanged) {
-        if (engine->uniformInterpolate < 0.0f) {
-            engine->uniformInterpolate = 0.0f;
-        }
-        if (engine->uniformInterpolate > 1.0f) {
-            engine->uniformInterpolate = 1.0f;
-        }
-        std::cout << "uniformInterpolate: " << engine->uniformInterpolate << std::endl;
+    if (engine->uniformInterpolate < 0.0f) {
+        engine->uniformInterpolate = 0.0f;
+    }
+    if (engine->uniformInterpolate > 1.0f) {
+        engine->uniformInterpolate = 1.0f;
+    }
+
+    // INFO
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+        engine->displayPosition(engine->camera.getViewMatrix());
+        engine->displayCameraAngles(engine->camera.getViewMatrix());
     }
 };

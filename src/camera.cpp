@@ -3,10 +3,11 @@
 
 Camera::Camera() {
     position = glm::vec3(0.0f, 0.0f, 3.0f);
-    cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    cameraRight = glm::vec3(0.0f, 1.0f, 0.0f); //fake
+    front = glm::vec3(0.0f, 0.0f, -1.0f);
+    up = glm::vec3(0.0f, 1.0f, 0.0f);
+    right = glm::vec3(0.0f, 1.0f, 0.0f); //fake
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); //fake
 
     firstMouse = true;
     yaw = -90.0f;
@@ -24,7 +25,7 @@ Camera::~Camera() {
 };
 
 bool Camera::init(GLFWwindow* window) {
-    // set callbacks
+    // set callbacks: mouse, scroll
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -32,6 +33,7 @@ bool Camera::init(GLFWwindow* window) {
     return 1;
 }
 
+// continuous key clicks -> movement
 void Camera::processInput(GLFWwindow* window, float deltaTime) {
     // EXIT
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
@@ -55,16 +57,16 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
 void Camera::processKeyboard(Camera_Movement direction, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
     if (direction == FORWARD) {
-        position += cameraFront * velocity;
+        position += front * velocity;
     }
     if (direction == BACKWARD) {
-        position -= cameraFront * velocity;
+        position -= front * velocity;
     }
     if (direction == LEFT) {
-        position -= cameraRight * velocity;
+        position -= right * velocity;
     }
     if (direction == RIGHT) {
-        position += cameraRight * velocity;
+        position += right * velocity;
     }
 
     // FPS stay on the ground, boy
@@ -89,11 +91,11 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
     pitch += yOffset;
 
     if (constrainPitch) {
-        if (pitch > 45.0f) {
-            pitch = 45.0f;
-        }
         if (pitch < -45.0f) {
             pitch = -45.0f;
+        }
+        if (pitch > 45.0f) {
+            pitch = 45.0f;
         }
     }
 
@@ -101,9 +103,8 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
 }
 
 glm::mat4 Camera::getViewMatrix() {
-    return glm::lookAt(position, position + cameraFront, cameraUp);
-    // TODO custom lookAt
-    //return glm::mat4(1.0f);
+    // camera position, where you looking at, up vector
+    return glm::lookAt(position, position + front, up);
 };
 
 float Camera::getFov() {
@@ -115,20 +116,20 @@ float Camera::getZoom() {
 };
 
 void Camera::updateCameraVectors() {
-    glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(front);
-    cameraRight = glm::normalize(glm::cross(cameraFront, worldUp));
-    cameraUp = glm::normalize(glm::cross(cameraRight, cameraFront));
+    glm::vec3 currFront = glm::vec3(0.0f, 0.0f, 0.0f);
+    currFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    currFront.y = sin(glm::radians(pitch));
+    currFront.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front = glm::normalize(currFront);
+    right = glm::normalize(glm::cross(front, worldUp));
+    up = glm::normalize(glm::cross(right, front));
 }
 
 void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+    Camera& camera = engine->getCamera();
     float xPos = static_cast<float>(xPosIn);
     float yPos = static_cast<float>(yPosIn);
-    Camera& camera = engine->getCamera();
 
     if (camera.firstMouse) {
         camera.lastX = xPos;
@@ -148,5 +149,6 @@ void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
 void Camera::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
     Camera& camera = engine->getCamera();
+
     camera.processMouseScroll(static_cast<float>(yOffset));
 }

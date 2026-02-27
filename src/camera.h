@@ -23,13 +23,15 @@ public:
     glm::mat4 getViewMatrix();
     float getFov();
     float getZoom();
+    glm::vec3 getRotation();
 
 private:
     glm::vec3 position;
-    glm::vec3 cameraFront;
-    glm::vec3 cameraUp;
-    glm::vec3 cameraRight;
+    glm::vec3 front;
+    glm::vec3 up;
+    glm::vec3 right;
     glm::vec3 worldUp;
+    glm::quat orientation;
     bool firstMouse;
     float yaw;
     float pitch;
