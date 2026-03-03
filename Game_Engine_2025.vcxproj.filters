@@ -18,7 +18,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\shaders\shader.cpp">
+    <ClCompile Include="src\utils\shader.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="libs\stb_image.cpp">
@@ -36,8 +36,8 @@
     <None Include="README.md" />
     <None Include="vcpkg.json" />
     <None Include="vcpkg-configuration.json" />
-    <None Include="shaders\triangle.vert" />
-    <None Include="shaders\triangle.frag" />
+    <None Include="shaders\object.vert" />
+    <None Include="shaders\object.frag" />
     <None Include="shaders\light.frag" />
     <None Include="LICENSE" />
     <None Include="Game_Engine_2025.aps" />
@@ -61,7 +61,7 @@
     <ClInclude Include="resource.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\shaders\shader.h">
+    <ClInclude Include="src\utils\shader.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="libs\stb_image.h">

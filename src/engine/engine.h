@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../utils/commongl.h"
-#include "../shaders/shader.h"
+#include "../utils/shader.h"
 #include "../camera/camera.h"
 #include "../../libs/stb_image.h"
 
@@ -19,7 +19,7 @@ public:
 
 private:
     int screen_w, screen_h;
-    Shader* shader;
+    Shader* objectShader;
     Shader* lightShader;
     Camera camera;
 

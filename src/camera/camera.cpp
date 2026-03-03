@@ -51,6 +51,12 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         processKeyboard(RIGHT, deltaTime);
     }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        processKeyboard(UP, deltaTime);
+    }
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        processKeyboard(DOWN, deltaTime);
+    }
 };
 
 void Camera::processKeyboard(Camera_Movement direction, float deltaTime) {
@@ -67,9 +73,15 @@ void Camera::processKeyboard(Camera_Movement direction, float deltaTime) {
     if (direction == RIGHT) {
         position += right * velocity;
     }
+    if (direction == UP) {
+        position += up * velocity;
+    }
+    if (direction == DOWN) {
+        position -= up * velocity;
+    }
 
     // FPS stay on the ground, boy
-    position.y = 0.0f;
+    //position.y = 0.0f;
 }
 
 void Camera::processMouseScroll(float yOffset) {
@@ -108,6 +120,10 @@ glm::mat4 Camera::getViewMatrix() {
 
 float Camera::getZoom() {
     return zoom;
+};
+
+glm::vec3 Camera::getPosition() {
+    return position;
 };
 
 void Camera::updateCameraVectors() {

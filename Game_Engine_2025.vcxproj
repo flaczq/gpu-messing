@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="src\camera\camera.cpp" />
     <ClCompile Include="src\engine\engine.cpp" />
-    <ClCompile Include="src\shaders\shader.cpp" />
+    <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
   </ItemGroup>
@@ -32,8 +32,8 @@
     <None Include="README.md" />
     <None Include="shaders\light.frag" />
     <None Include="shaders\light.vert" />
-    <None Include="shaders\triangle.frag" />
-    <None Include="shaders\triangle.vert" />
+    <None Include="shaders\object.frag" />
+    <None Include="shaders\object.vert" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
@@ -49,7 +49,7 @@
     <ClInclude Include="src\engine\engine.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\shaders\shader.h" />
+    <ClInclude Include="src\utils\shader.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />

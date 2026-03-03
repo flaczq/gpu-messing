@@ -1,13 +1,13 @@
 #include "engine.h"
 
-Engine::Engine(int w, int h) : screen_w(w), screen_h(h), shader(nullptr) {
+Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr) {
 }
 Engine::~Engine() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shader->ID);
+    glDeleteProgram(objectShader->ID);
 
 	glfwTerminate();
 }
@@ -73,10 +73,10 @@ bool Engine::init() {
     Camera camera;
     camera.init(window);
 
-    //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
-    //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
-    //    ┗┛┛┗┛┗┻┛┗┛┛┗┗┛
-    //                  
+    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
+    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
+    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
+    //                        
     glGenTextures(1, &texture1);
     glBindTexture(GL_TEXTURE_2D, texture1);
     // filter parameters
@@ -134,60 +134,55 @@ bool Engine::init() {
     stbi_image_free(data);
 
     // active shaders
-    shader = new Shader("shaders/triangle.vert", "shaders/triangle.frag");
+    objectShader = new Shader("shaders/object.vert", "shaders/object.frag");
     lightShader = new Shader("shaders/light.vert", "shaders/light.frag");
-
-    shader->use();
-    shader->setInt("texture1", 0);
-    shader->setInt("texture2", 1);
-    shader->setFloat("interpolate", uniformInterpolate);
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
     //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
     //                         
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
 
-        -0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
 
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
 
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-        -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f,  0.5f,
-        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
 
-        -0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
     };
 
     //    ┳┓┏┓┏┳┓┏┓•┳┓┏┓
@@ -203,11 +198,15 @@ bool Engine::init() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     glBindVertexArray(VAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
+    // normals
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
 
     glBindVertexArray(lightVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
 
     // no need to unbind at all as we directly bind a different VAO the next few lines
@@ -248,7 +247,9 @@ void Engine::run() {
     //    ┃┃┣┫┣┫┓┣┫┣┫┃ ┣ ┗┓
     //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
     //                     
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    glm::vec3 lightPos(1.2f, 1.0f, 0.0f);
+    float radius = 2.0f;
+    // Phong: light = ambient + diffuse + specular
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
@@ -262,17 +263,21 @@ void Engine::run() {
         glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // ----------------- main shader ----------------- //
-        shader->use();
+        GLfloat currentTime = (float)glfwGetTime();
+        deltaTime = currentTime - lastFrame;
+        lastFrame = currentTime;
+
+        lightPos.x = cos(currentTime) * radius;
+        lightPos.y = sin(currentTime) * radius;
+
+        // ----------------- object shader ----------------- //
+        objectShader->use();
+        objectShader->setVec3fv("lightPos", lightPos);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
-
-        GLfloat currentFrame = (float)glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world
@@ -283,7 +288,7 @@ void Engine::run() {
         // transform
         glm::mat4 transform = glm::mat4(1.0f);
         transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, currentFrame, glm::vec3(0.0, 0.0, 1.0));
+        transform = glm::rotate(transform, currentTime, glm::vec3(0.0, 0.0, 1.0));
         transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
 
         // projection
@@ -297,16 +302,17 @@ void Engine::run() {
         // model
         glm::mat4 model = glm::mat4(1.0f);
         //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        //model = glm::rotate(model, glm::radians(10.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        model = glm::rotate(model, currentTime * glm::radians(33.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
         // send changed variable
-        shader->setMat4fv("transform", transform);
-        shader->setMat4fv("projection", projection);
-        shader->setMat4fv("view", view);
-        shader->setMat4fv("model", model);
-        shader->setFloat("interpolate", uniformInterpolate);
-        shader->setVec3fv("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-        shader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        objectShader->setMat4fv("transform", transform);
+        objectShader->setMat4fv("projection", projection);
+        objectShader->setMat4fv("view", view);
+        objectShader->setMat4fv("model", model);
+        objectShader->setFloat("interpolate", uniformInterpolate);
+        objectShader->setVec3fv("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+        objectShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        objectShader->setVec3fv("viewPos", camera.getPosition());
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
