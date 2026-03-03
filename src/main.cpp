@@ -1,5 +1,5 @@
-﻿#include "commongl.h"
-#include "engine.h"
+﻿#include "utils/commongl.h"
+#include "engine/engine.h"
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;

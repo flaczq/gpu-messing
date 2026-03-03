@@ -1,9 +1,9 @@
 #pragma once
 
-#include "commongl.h"
-#include "shader.h"
-#include "camera.h"
-#include "../libs/stb_image.h"
+#include "../utils/commongl.h"
+#include "../shaders/shader.h"
+#include "../camera/camera.h"
+#include "../../libs/stb_image.h"
 
 class Engine {
 public:
@@ -20,10 +20,12 @@ public:
 private:
     int screen_w, screen_h;
     Shader* shader;
+    Shader* lightShader;
     Camera camera;
 
     GLFWwindow* window;
-    GLuint VAO, VBO, EBO;
+    GLuint VAO, lightVAO;
+    GLuint VBO, EBO;
     GLuint texture1, texture2;
     std::vector<glm::vec3> cubePositions;
 

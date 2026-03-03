@@ -1,6 +1,6 @@
 #pragma once
 
-#include "commongl.h"
+#include "../utils/commongl.h"
 
 enum Camera_Movement {
     FORWARD,
@@ -21,9 +21,7 @@ public:
     void processMouseMovement(float xOffest, float yOffset, GLboolean constrainPitch = true);
 
     glm::mat4 getViewMatrix();
-    float getFov();
     float getZoom();
-    glm::vec3 getRotation();
 
 private:
     glm::vec3 position;
@@ -40,7 +38,6 @@ private:
     float movementSpeed;
     float mouseSensitivity;
     float zoom;
-    float fov;
 
     void updateCameraVectors();
 

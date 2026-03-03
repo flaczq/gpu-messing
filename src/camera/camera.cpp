@@ -1,8 +1,8 @@
-#include "camera.h"
-#include "engine.h"
+#include "../camera/camera.h"
+#include "../engine/engine.h"
 
 Camera::Camera() {
-    position = glm::vec3(0.0f, 0.0f, 3.0f);
+    position = glm::vec3(0.0f, 0.0f, 6.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
     right = glm::vec3(0.0f, 1.0f, 0.0f); //fake
@@ -17,7 +17,6 @@ Camera::Camera() {
     movementSpeed = 10.0f;
     mouseSensitivity = 0.05f;
     zoom = 45.0f;
-    fov = 45.0f;
 
     updateCameraVectors();
 };
@@ -105,10 +104,6 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
 glm::mat4 Camera::getViewMatrix() {
     // camera position, where you looking at, up vector
     return glm::lookAt(position, position + front, up);
-};
-
-float Camera::getFov() {
-    return fov;
 };
 
 float Camera::getZoom() {

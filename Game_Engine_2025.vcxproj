@@ -19,9 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\camera.cpp" />
-    <ClCompile Include="src\engine.cpp" />
-    <ClCompile Include="src\shader.cpp" />
+    <ClCompile Include="src\camera\camera.cpp" />
+    <ClCompile Include="src\engine\engine.cpp" />
+    <ClCompile Include="src\shaders\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
   </ItemGroup>
@@ -30,7 +30,8 @@
     <None Include="Game_Engine_2025.aps" />
     <None Include="LICENSE" />
     <None Include="README.md" />
-    <None Include="shaders\secondtriangle.frag" />
+    <None Include="shaders\light.frag" />
+    <None Include="shaders\light.vert" />
     <None Include="shaders\triangle.frag" />
     <None Include="shaders\triangle.vert" />
     <None Include="vcpkg-configuration.json" />
@@ -43,12 +44,12 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\camera.h" />
-    <ClInclude Include="src\commongl.h" />
-    <ClInclude Include="src\engine.h" />
+    <ClInclude Include="src\camera\camera.h" />
+    <ClInclude Include="src\utils\commongl.h" />
+    <ClInclude Include="src\engine\engine.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\shaders\shader.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />

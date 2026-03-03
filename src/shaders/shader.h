@@ -1,6 +1,6 @@
 #pragma once
 
-#include "commongl.h"
+#include "../utils/commongl.h"
 
 class Shader {
 public:
@@ -13,7 +13,9 @@ public:
 	void setBool(const std::string& name, bool value) const;
 	void setInt(const std::string& name, int value) const;
 	void setFloat(const std::string& name, float value) const;
-	void setMatrix4fv(const std::string& name, const glm::mat4& value) const;
+	void setVec3fv(const std::string& name, const glm::vec3& value) const;
+	void setVec4fv(const std::string& name, const glm::vec4& value) const;
+	void setMat4fv(const std::string& name, const glm::mat4& value) const;
 
 private:
 	unsigned int vertex, fragment;
