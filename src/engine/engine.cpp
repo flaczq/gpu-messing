@@ -248,6 +248,7 @@ void Engine::run() {
     //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
     //                     
     glm::vec3 lightPos(1.2f, 1.0f, 0.0f);
+    glm::vec3 lightColor(1.0f);
     float radius = 2.0f;
     // Phong: light = ambient + diffuse + specular
 
@@ -270,9 +271,12 @@ void Engine::run() {
         lightPos.x = cos(currentTime) * radius;
         lightPos.y = sin(currentTime) * radius;
 
+        lightColor.x = sin(currentTime * 2.0f);
+        lightColor.y = sin(currentTime * 0.7f);
+        lightColor.z = sin(currentTime * 1.3f);
+
         // ----------------- object shader ----------------- //
         objectShader->use();
-        objectShader->setVec3fv("lightPos", lightPos);
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
@@ -302,17 +306,25 @@ void Engine::run() {
         // model
         glm::mat4 model = glm::mat4(1.0f);
         //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, currentTime * glm::radians(33.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        model = glm::rotate(model, currentTime * glm::radians(13.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
-        // send changed variable
+        // vertex
         objectShader->setMat4fv("transform", transform);
         objectShader->setMat4fv("projection", projection);
         objectShader->setMat4fv("view", view);
         objectShader->setMat4fv("model", model);
-        objectShader->setFloat("interpolate", uniformInterpolate);
-        objectShader->setVec3fv("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
-        objectShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        //objectShader->setFloat("interpolate", uniformInterpolate);
+
+        // fragment
         objectShader->setVec3fv("viewPos", camera.getPosition());
+        objectShader->setVec3fv("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        objectShader->setVec3fv("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        objectShader->setVec3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        objectShader->setFloat("material.shininess", 32.0f);
+        objectShader->setVec3fv("light.position", lightPos);
+        objectShader->setVec3fv("light.ambient", lightColor * glm::vec3(0.5f));
+        objectShader->setVec3fv("light.diffuse", lightColor * glm::vec3(0.1f));
+        objectShader->setVec3fv("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
