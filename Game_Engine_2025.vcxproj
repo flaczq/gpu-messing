@@ -40,6 +40,8 @@
   <ItemGroup>
     <Image Include="assets\abc.jpg" />
     <Image Include="assets\clearlyai.jpg" />
+    <Image Include="assets\container2.png" />
+    <Image Include="assets\container2_specular.png" />
     <Image Include="assets\potato.jpg" />
     <Image Include="assets\wall.jpg" />
   </ItemGroup>

@@ -26,7 +26,7 @@ private:
     GLFWwindow* window;
     GLuint VAO, lightVAO;
     GLuint VBO, EBO;
-    GLuint texture1, texture2;
+    GLuint diffuseMap, specularMap;
     std::vector<glm::vec3> cubePositions;
 
     // showFps()

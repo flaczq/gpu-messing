@@ -77,59 +77,59 @@ bool Engine::init() {
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
     //                        
-    glGenTextures(1, &texture1);
-    glBindTexture(GL_TEXTURE_2D, texture1);
-    // filter parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+    glGenTextures(1, &diffuseMap);
     int data_w, data_h, data_ch;
-    unsigned char* data = stbi_load("assets/potato.jpg", &data_w, &data_h, &data_ch, 0);
+    unsigned char* data = stbi_load("assets/container2.png", &data_w, &data_h, &data_ch, 0);
     if (data) {
-        // data_ch == 1
-        GLenum format = GL_RED;
-        if (data_ch == 3) {
+        GLenum format;
+        if (data_ch == 1) {
+            format = GL_RED;
+        } else if (data_ch == 3) {
             format = GL_RGB;
         } else if (data_ch == 4) {
             format = GL_RGBA;
         }
 
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
         glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else {
-        std::cout << "ERROR::MAIN::WALL_NOT_LOADED_SUCCESFULLY" << std::endl;
+
+        // filter parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    } else {
+        std::cout << "ERROR::MAIN::DIFFUSE_MAP_NOT_LOADED_SUCCESFULLY" << std::endl;
     }
     stbi_image_free(data);
 
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-    // filter parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // flip loaded texture's on the y-axis.
-    stbi_set_flip_vertically_on_load(true);
-    data = stbi_load("assets/wall.jpg", &data_w, &data_h, &data_ch, 0);
+    glGenTextures(1, &specularMap);
+    data = stbi_load("assets/container2_specular.png", &data_w, &data_h, &data_ch, 0);
     if (data) {
-        // data_ch == 1
-        GLenum format = GL_RED;
-        if (data_ch == 3) {
+        GLenum format;
+        if (data_ch == 1) {
+            format = GL_RED;
+        }
+        else if (data_ch == 3) {
             format = GL_RGB;
         }
         else if (data_ch == 4) {
             format = GL_RGBA;
         }
 
+        glBindTexture(GL_TEXTURE_2D, specularMap);
         glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
+
+        // filter parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
     else {
-        std::cout << "ERROR::MAIN::FACE_NOT_LOADED_SUCCESFULLY" << std::endl;
+        std::cout << "ERROR::MAIN::SPECULAR_MAP_NOT_LOADED_SUCCESFULLY" << std::endl;
     }
     stbi_image_free(data);
 
@@ -142,95 +142,89 @@ bool Engine::init() {
     //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
     //                         
     float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        // positions          // normals           // texture coords
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,
 
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,
 
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,
 
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
-    //    ┳┓┏┓┏┳┓┏┓•┳┓┏┓
-    //    ┃┃┣┫ ┃ ┣┫┓┃┃┃┓
-    //    ┻┛┛┗ ┻ ┛┗┗┛┗┗┛
-    //                  
+    //    ┓┏┏┓┳┓┏┳┓•┏┓┏┓┏┓
+    //    ┃┃┣ ┣┫ ┃ ┓┃ ┣ ┗┓
+    //    ┗┛┗┛┛┗ ┻ ┗┗┛┗┛┗┛
+    //                    
     glGenVertexArrays(1, &VAO);
-    glGenVertexArrays(1, &lightVAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindVertexArray(VAO);
-    // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    // normals
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    glBindVertexArray(lightVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-
-    // no need to unbind at all as we directly bind a different VAO the next few lines
-    //glBindVertexArray(0);
-
-    //    ┓┏┏┓┳┓┏┳┓•┏┓┏┓┏┓  ┏┓┏┓┳┓┏┓•┏┓
-    //    ┃┃┣ ┣┫ ┃ ┓┃ ┣ ┗┓  ┃ ┃┃┃┃┣ ┓┃┓
-    //    ┗┛┗┛┛┗ ┻ ┗┗┛┗┛┗┛  ┗┛┗┛┛┗┻ ┗┗┛
-    //                     
     // 1. location in vertex
-    // 2. vec3
+    // 2. vec2/vec3
     // 3. GL_FLOAT (vec3)
     // 4. normalize
     // 5. stride = difference between each vertex (can be set to 0 if data is packed for auto complete)
     // 6. offset = difference between each location
+    glBindVertexArray(VAO);
     // position
-    //glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
-    //glEnableVertexAttribArray(0);
-    // color
-    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    //glEnableVertexAttribArray(1);
-    // texture coord
-    //glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    //glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    // normals
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+    // texture coords
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+
+    // lightVAO
+    glGenVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+    // same VBO
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+
+    // no need to unbind at all as we directly bind a different VAO the next few lines
+    //glBindVertexArray(0);
 
     // wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -247,8 +241,8 @@ void Engine::run() {
     //    ┃┃┣┫┣┫┓┣┫┣┫┃ ┣ ┗┓
     //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
     //                     
-    glm::vec3 lightPos(1.2f, 1.0f, 0.0f);
-    glm::vec3 lightColor(1.0f);
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    //glm::vec3 lightColor(1.0f);
     float radius = 2.0f;
     // Phong: light = ambient + diffuse + specular
 
@@ -261,7 +255,7 @@ void Engine::run() {
 
         camera.processInput(window, deltaTime);
 
-        glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         GLfloat currentTime = (float)glfwGetTime();
@@ -271,17 +265,14 @@ void Engine::run() {
         lightPos.x = cos(currentTime) * radius;
         lightPos.y = sin(currentTime) * radius;
 
-        lightColor.x = sin(currentTime * 2.0f);
-        lightColor.y = sin(currentTime * 0.7f);
-        lightColor.z = sin(currentTime * 1.3f);
-
-        // ----------------- object shader ----------------- //
-        objectShader->use();
+        //lightColor.x = sin(currentTime * 2.0f);
+        //lightColor.y = sin(currentTime * 0.7f);
+        //lightColor.z = sin(currentTime * 1.3f);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
+        glBindTexture(GL_TEXTURE_2D, diffuseMap);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        glBindTexture(GL_TEXTURE_2D, specularMap);
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world
@@ -290,10 +281,10 @@ void Engine::run() {
         // 4. clip  * viewportTransform -> screen
 
         // transform
-        glm::mat4 transform = glm::mat4(1.0f);
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, currentTime, glm::vec3(0.0, 0.0, 1.0));
-        transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
+        //glm::mat4 transform = glm::mat4(1.0f);
+        //transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        //transform = glm::rotate(transform, currentTime, glm::vec3(0.0, 0.0, 1.0));
+        //transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
 
         // projection
         glm::mat4 projection = glm::mat4(1.0f);
@@ -308,8 +299,9 @@ void Engine::run() {
         //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         model = glm::rotate(model, currentTime * glm::radians(13.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 
-        // vertex
-        objectShader->setMat4fv("transform", transform);
+        // ----------------- object shader ----------------- //
+        objectShader->use();
+        //objectShader->setMat4fv("transform", transform);
         objectShader->setMat4fv("projection", projection);
         objectShader->setMat4fv("view", view);
         objectShader->setMat4fv("model", model);
@@ -317,13 +309,14 @@ void Engine::run() {
 
         // fragment
         objectShader->setVec3fv("viewPos", camera.getPosition());
-        objectShader->setVec3fv("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-        objectShader->setVec3fv("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-        objectShader->setVec3fv("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-        objectShader->setFloat("material.shininess", 32.0f);
         objectShader->setVec3fv("light.position", lightPos);
-        objectShader->setVec3fv("light.ambient", lightColor * glm::vec3(0.5f));
-        objectShader->setVec3fv("light.diffuse", lightColor * glm::vec3(0.1f));
+
+        objectShader->setInt("material.diffuse", 0);
+        objectShader->setInt("material.specular", 1);
+        objectShader->setFloat("material.shininess", 64.0f);
+
+        objectShader->setVec3fv("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+        objectShader->setVec3fv("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
         objectShader->setVec3fv("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
         glBindVertexArray(VAO);
