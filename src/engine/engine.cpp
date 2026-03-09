@@ -7,9 +7,18 @@ Engine::~Engine() {
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
-    glDeleteProgram(objectShader->ID);
-    glDeleteProgram(spotlightShader->ID);
-    glDeleteProgram(lightShader->ID);
+    
+    // shader itself deletes the shader's ID nad unique_ptr deletes object itself
+    //glDeleteProgram(objectShader->ID);
+    //glDeleteProgram(spotlightShader->ID);
+    //glDeleteProgram(lightShader->ID);
+    // force deleting the shaders
+    objectShader.reset();
+    spotlightShader.reset();
+    lightShader.reset();
+
+    glDeleteTextures(1, &diffuseMap);
+    glDeleteTextures(1, &specularMap);
 
 	glfwTerminate();
 }
@@ -75,19 +84,22 @@ bool Engine::init() {
     Camera camera;
     camera.init(window);
 
-    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓
-    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ 
-    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛
-    //                      
+    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
+    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
+    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
+    //                        
     Texture diffuseMapTexture("assets/container2.png");
     Texture specularMapTexture("assets/container2_specular.png");
     diffuseMap = diffuseMapTexture.getTexture();
     specularMap = specularMapTexture.getTexture();
 
-    // active shaders
-    objectShader = new Shader("shaders/object.vert", "shaders/object.frag");
-    spotlightShader = new Shader("shaders/spotlight.vert", "shaders/spotlight.frag");
-    lightShader = new Shader("shaders/light.vert", "shaders/light.frag");
+    //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
+    //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
+    //    ┗┛┛┗┛┗┻┛┗┛┛┗┗┛
+    //                  
+    objectShader = std::make_unique<Shader>("shaders/object.vert", "shaders/object.frag");
+    spotlightShader = std::make_unique<Shader>("shaders/spotlight.vert", "shaders/spotlight.frag");
+    lightShader = std::make_unique<Shader>("shaders/light.vert", "shaders/light.frag");
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫

@@ -72,10 +72,12 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::LINKING_FAILED: " << vertexPath << " / " << fragmentPath << "\n" << infoLog << std::endl;
     }
+
+    // not used after linking
+    glDeleteShader(fragment);
+    glDeleteShader(vertex);
 }
 Shader::~Shader() {
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
     glDeleteProgram(ID);
 }
 

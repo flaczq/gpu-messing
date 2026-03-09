@@ -20,6 +20,7 @@ Camera::Camera() {
 
     updateCameraVectors();
 };
+
 Camera::~Camera() {
 };
 

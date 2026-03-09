@@ -19,11 +19,13 @@ public:
 
 private:
     int screen_w, screen_h;
-    Shader* objectShader;
-    Shader* spotlightShader;
-    Shader* lightShader;
+    // shaders
+    std::unique_ptr<Shader> objectShader;
+    std::unique_ptr<Shader> spotlightShader;
+    std::unique_ptr<Shader> lightShader;
     // textures
     unsigned int diffuseMap, specularMap;
+    // camera
     Camera camera;
 
     GLFWwindow* window;
