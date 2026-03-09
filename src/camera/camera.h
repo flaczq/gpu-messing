@@ -25,6 +25,7 @@ public:
     glm::mat4 getViewMatrix();
     float getZoom();
     glm::vec3 getPosition();
+    glm::vec3 getFront();
 
 private:
     glm::vec3 position;

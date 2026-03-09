@@ -30,18 +30,23 @@
     <ClCompile Include="src\camera\camera.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="src\utils\texture.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="README.md" />
     <None Include="vcpkg.json" />
     <None Include="vcpkg-configuration.json" />
-    <None Include="shaders\object.vert" />
-    <None Include="shaders\object.frag" />
+    <None Include="shaders\spotlight.vert" />
+    <None Include="shaders\spotlight.frag" />
     <None Include="shaders\light.frag" />
     <None Include="LICENSE" />
     <None Include="Game_Engine_2025.aps" />
     <None Include="shaders\light.vert" />
+    <None Include="shaders\object.frag" />
+    <None Include="shaders\object.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
@@ -80,6 +85,9 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\camera\camera.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\utils\texture.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

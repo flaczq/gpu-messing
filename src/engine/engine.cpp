@@ -1,6 +1,6 @@
 #include "engine.h"
 
-Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr) {
+Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), spotlightShader(nullptr), lightShader(nullptr) {
 }
 Engine::~Engine() {
 	glDeleteVertexArrays(1, &VAO);
@@ -8,6 +8,8 @@ Engine::~Engine() {
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
     glDeleteProgram(objectShader->ID);
+    glDeleteProgram(spotlightShader->ID);
+    glDeleteProgram(lightShader->ID);
 
 	glfwTerminate();
 }
@@ -73,68 +75,18 @@ bool Engine::init() {
     Camera camera;
     camera.init(window);
 
-    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
-    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
-    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
-    //                        
-    glGenTextures(1, &diffuseMap);
-    int data_w, data_h, data_ch;
-    unsigned char* data = stbi_load("assets/container2.png", &data_w, &data_h, &data_ch, 0);
-    if (data) {
-        GLenum format;
-        if (data_ch == 1) {
-            format = GL_RED;
-        } else if (data_ch == 3) {
-            format = GL_RGB;
-        } else if (data_ch == 4) {
-            format = GL_RGBA;
-        }
-
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        // filter parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    } else {
-        std::cout << "ERROR::MAIN::DIFFUSE_MAP_NOT_LOADED_SUCCESFULLY" << std::endl;
-    }
-    stbi_image_free(data);
-
-    glGenTextures(1, &specularMap);
-    data = stbi_load("assets/container2_specular.png", &data_w, &data_h, &data_ch, 0);
-    if (data) {
-        GLenum format;
-        if (data_ch == 1) {
-            format = GL_RED;
-        }
-        else if (data_ch == 3) {
-            format = GL_RGB;
-        }
-        else if (data_ch == 4) {
-            format = GL_RGBA;
-        }
-
-        glBindTexture(GL_TEXTURE_2D, specularMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        // filter parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    }
-    else {
-        std::cout << "ERROR::MAIN::SPECULAR_MAP_NOT_LOADED_SUCCESFULLY" << std::endl;
-    }
-    stbi_image_free(data);
+    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓
+    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ 
+    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛
+    //                      
+    Texture diffuseMapTexture("assets/container2.png");
+    Texture specularMapTexture("assets/container2_specular.png");
+    diffuseMap = diffuseMapTexture.getTexture();
+    specularMap = specularMapTexture.getTexture();
 
     // active shaders
     objectShader = new Shader("shaders/object.vert", "shaders/object.frag");
+    spotlightShader = new Shader("shaders/spotlight.vert", "shaders/spotlight.frag");
     lightShader = new Shader("shaders/light.vert", "shaders/light.frag");
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
@@ -185,6 +137,16 @@ bool Engine::init() {
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
+    cubePositions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+    cubePositions.push_back(glm::vec3(2.0f, 5.0f, -15.0f));
+    cubePositions.push_back(glm::vec3(-1.5f, -2.2f, -2.5f));
+    cubePositions.push_back(glm::vec3(-3.8f, -2.0f, -12.3f));
+    cubePositions.push_back(glm::vec3(2.4f, -0.4f, -3.5f));
+    cubePositions.push_back(glm::vec3(-1.7f, 3.0f, -7.5f));
+    cubePositions.push_back(glm::vec3(1.3f, -2.0f, -2.5f));
+    cubePositions.push_back(glm::vec3(1.5f, 2.0f, -2.5f));
+    cubePositions.push_back(glm::vec3(1.5f, 0.2f, -1.5f));
+    cubePositions.push_back(glm::vec3(-1.3f, 1.0f, -1.5f));
 
     //    ┓┏┏┓┳┓┏┳┓•┏┓┏┓┏┓
     //    ┃┃┣ ┣┫ ┃ ┓┃ ┣ ┗┓
@@ -246,6 +208,17 @@ void Engine::run() {
     float radius = 2.0f;
     // Phong: light = ambient + diffuse + specular
 
+    // static shader configuration
+    // ----------------- object shader ----------------- //
+    objectShader->use();
+    objectShader->setInt("material.diffuse", 0);
+    objectShader->setInt("material.specular", 1);
+
+    // ----------------- spotlight shader ----------------- //
+    /*spotlightShader->use();
+    spotlightShader->setInt("material.diffuse", 0);
+    spotlightShader->setInt("material.specular", 1);*/
+
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
@@ -286,6 +259,9 @@ void Engine::run() {
         //transform = glm::rotate(transform, currentTime, glm::vec3(0.0, 0.0, 1.0));
         //transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
 
+        // model
+        glm::mat4 model = glm::mat4(1.0f);
+
         // projection
         glm::mat4 projection = glm::mat4(1.0f);
         projection = glm::perspective(glm::radians(camera.getZoom()), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
@@ -294,33 +270,79 @@ void Engine::run() {
         glm::mat4 view = glm::mat4(1.0f);
         view = camera.getViewMatrix();
 
-        // model
-        glm::mat4 model = glm::mat4(1.0f);
-        //model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, currentTime * glm::radians(13.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
         // ----------------- object shader ----------------- //
         objectShader->use();
+
         //objectShader->setMat4fv("transform", transform);
         objectShader->setMat4fv("projection", projection);
         objectShader->setMat4fv("view", view);
-        objectShader->setMat4fv("model", model);
         //objectShader->setFloat("interpolate", uniformInterpolate);
 
         // fragment
         objectShader->setVec3fv("viewPos", camera.getPosition());
-        objectShader->setVec3fv("light.position", lightPos);
 
-        objectShader->setInt("material.diffuse", 0);
-        objectShader->setInt("material.specular", 1);
         objectShader->setFloat("material.shininess", 64.0f);
 
+        objectShader->setVec3fv("light.position", lightPos);
+        objectShader->setVec3fv("light.direction", camera.getFront());
+        //objectShader->setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        //objectShader->setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
         objectShader->setVec3fv("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
         objectShader->setVec3fv("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
         objectShader->setVec3fv("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        objectShader->setFloat("light.constant", 1.0f);
+        objectShader->setFloat("light.linear", 0.09f);
+        objectShader->setFloat("light.quadratic", 0.032f);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        for (unsigned int i = 0; i < cubePositions.size(); i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            objectShader->setMat4fv("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+
+        // ----------------- spotlight shader ----------------- //
+        /*spotlightShader->use();
+
+        //spotlightShader->setMat4fv("transform", transform);
+        spotlightShader->setMat4fv("projection", projection);
+        spotlightShader->setMat4fv("view", view);
+        //spotlightShader->setFloat("interpolate", uniformInterpolate);
+
+        // fragment
+        spotlightShader->setVec3fv("viewPos", camera.getPosition());
+
+        spotlightShader->setFloat("material.shininess", 64.0f);
+
+        spotlightShader->setVec3fv("light.position", camera.getPosition());
+        spotlightShader->setVec3fv("light.direction", camera.getFront());
+        spotlightShader->setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+        spotlightShader->setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+        spotlightShader->setVec3fv("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+        spotlightShader->setVec3fv("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+        spotlightShader->setVec3fv("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        spotlightShader->setFloat("light.constant", 1.0f);
+        spotlightShader->setFloat("light.linear", 0.09f);
+        spotlightShader->setFloat("light.quadratic", 0.032f);
+
+        glBindVertexArray(VAO);
+
+        for (unsigned int i = 0; i < cubePositions.size(); i++) {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            spotlightShader->setMat4fv("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }*/
 
         // ----------------- light shader ----------------- //
         lightShader->use();

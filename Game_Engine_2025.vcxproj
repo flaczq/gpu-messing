@@ -24,6 +24,7 @@
     <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
+    <ClCompile Include="src\utils\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -34,6 +35,8 @@
     <None Include="shaders\light.vert" />
     <None Include="shaders\object.frag" />
     <None Include="shaders\object.vert" />
+    <None Include="shaders\spotlight.frag" />
+    <None Include="shaders\spotlight.vert" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
@@ -52,6 +55,7 @@
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\utils\shader.h" />
+    <ClInclude Include="src\utils\texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />

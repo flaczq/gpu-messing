@@ -2,8 +2,8 @@
 
 #include "../utils/commongl.h"
 #include "../utils/shader.h"
+#include "../utils/texture.h"
 #include "../camera/camera.h"
-#include "../../libs/stb_image.h"
 
 class Engine {
 public:
@@ -20,13 +20,15 @@ public:
 private:
     int screen_w, screen_h;
     Shader* objectShader;
+    Shader* spotlightShader;
     Shader* lightShader;
+    // textures
+    unsigned int diffuseMap, specularMap;
     Camera camera;
 
     GLFWwindow* window;
     GLuint VAO, lightVAO;
     GLuint VBO, EBO;
-    GLuint diffuseMap, specularMap;
     std::vector<glm::vec3> cubePositions;
 
     // showFps()
