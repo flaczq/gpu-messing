@@ -27,7 +27,6 @@ private:
     int screen_w, screen_h;
     // shaders
     std::unique_ptr<Shader> objectShader;
-    std::unique_ptr<Shader> spotlightShader;
     std::unique_ptr<Shader> lightShader;
     // textures
     unsigned int diffuseMap, specularMap;
@@ -38,6 +37,7 @@ private:
     GLuint VAO, lightVAO;
     GLuint VBO, EBO;
     std::vector<glm::vec3> cubePositions;
+    std::vector<glm::vec3> pointLightPositions;
 
     // showFps()
     double lastTime = glfwGetTime();
@@ -45,6 +45,7 @@ private:
 
     // changeable variables
     float uniformInterpolate = 0.4f;
+    bool uniformSpotlightOn = false;
     RenderMode renderMode = RenderMode::STANDARD;
 
     GLfloat deltaTime = 0.0f;

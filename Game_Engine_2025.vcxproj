@@ -35,8 +35,6 @@
     <None Include="shaders\light.vert" />
     <None Include="shaders\object.frag" />
     <None Include="shaders\object.vert" />
-    <None Include="shaders\spotlight.frag" />
-    <None Include="shaders\spotlight.vert" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>

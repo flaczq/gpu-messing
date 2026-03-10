@@ -39,8 +39,6 @@
     <None Include="README.md" />
     <None Include="vcpkg.json" />
     <None Include="vcpkg-configuration.json" />
-    <None Include="shaders\spotlight.vert" />
-    <None Include="shaders\spotlight.frag" />
     <None Include="shaders\light.frag" />
     <None Include="LICENSE" />
     <None Include="Game_Engine_2025.aps" />
