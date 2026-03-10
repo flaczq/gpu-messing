@@ -14,7 +14,9 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <variant>
+#include <map>
+#include <vector>
 #include <thread>
 #include <chrono>
-#include <vector>
 #include <iomanip>

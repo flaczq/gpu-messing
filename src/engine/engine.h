@@ -5,6 +5,8 @@
 #include "../utils/texture.h"
 #include "../camera/camera.h"
 
+using UniformTypes = std::variant<float, std::string, bool>;
+
 enum class RenderMode {
     STANDARD = GL_FILL,
     WIREFRAME = GL_LINE,
@@ -28,14 +30,15 @@ private:
     // shaders
     std::unique_ptr<Shader> objectShader;
     std::unique_ptr<Shader> lightShader;
+    std::unique_ptr<Shader> gizmoShader;
     // textures
     unsigned int diffuseMap, specularMap;
     // camera
     Camera camera;
 
     GLFWwindow* window;
-    GLuint VAO, lightVAO;
-    GLuint VBO, EBO;
+    GLuint VAO, lightVAO, gizmoVAO;
+    GLuint VBO, gizmoVBO;
     std::vector<glm::vec3> cubePositions;
     std::vector<glm::vec3> pointLightPositions;
 
@@ -43,9 +46,14 @@ private:
     double lastTime = glfwGetTime();
     int nbFrames = 0;
 
-    // changeable variables
-    float uniformInterpolate = 0.4f;
-    bool uniformSpotlightOn = false;
+    // uniform of changeables
+    std::map<std::string, UniformTypes> uniformVars = {
+        {"interpolate", 0.4f},
+        {"spotlightOn", false},
+        {"gizmoLength", 5.0f},
+        {"gizmoNegative", false}
+    };
+
     RenderMode renderMode = RenderMode::STANDARD;
 
     GLfloat deltaTime = 0.0f;

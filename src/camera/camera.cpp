@@ -83,7 +83,7 @@ void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
     }*/
 
     // FPS stay on the ground, boy
-    position.y = 0.0f;
+    //position.y = 0.0f;
 }
 
 void Camera::processMouseScroll(float yOffset) {

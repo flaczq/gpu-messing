@@ -1,20 +1,19 @@
 #include "engine.h"
 
-Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr) {
+Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gizmoShader(nullptr) {
 }
 Engine::~Engine() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
+	glDeleteVertexArrays(1, &gizmoVAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
+	glDeleteBuffers(1, &gizmoVBO);
     
     // shader itself deletes the shader's ID nad unique_ptr deletes object itself
-    //glDeleteProgram(objectShader->ID);
-    //glDeleteProgram(spotlightShader->ID);
-    //glDeleteProgram(lightShader->ID);
     // force deleting the shaders
     objectShader.reset();
     lightShader.reset();
+    gizmoShader.reset();
 
     Texture::clean(diffuseMap);
     Texture::clean(specularMap);
@@ -96,6 +95,7 @@ bool Engine::init() {
     //                  
     objectShader = std::make_unique<Shader>("shaders/object.vert", "shaders/object.frag");
     lightShader = std::make_unique<Shader>("shaders/light.vert", "shaders/light.frag");
+    gizmoShader = std::make_unique<Shader>("shaders/gizmo.vert", "shaders/gizmo.frag");
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
@@ -145,6 +145,18 @@ bool Engine::init() {
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
+    float gL = std::get<float>(uniformVars["gizmoLength"]);
+    float gizmo[] = {
+        // positions    // colors
+        -gL, 0.0, 0.0,  0.0, 0.0, 0.0,
+         gL, 0.0, 0.0,  1.0, 0.0, 0.0,
+
+        0.0, -gL, 0.0,  0.0, 0.0, 0.0,
+        0.0,  gL, 0.0,  0.0, 1.0, 0.0,
+
+        0.0, 0.0, -gL,  0.0, 0.0, 0.0,
+        0.0, 0.0,  gL,  0.0, 0.0, 1.0,
+    };
     cubePositions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     cubePositions.push_back(glm::vec3(2.0f, 5.0f, -15.0f));
     cubePositions.push_back(glm::vec3(-1.5f, -2.2f, -2.5f));
@@ -166,11 +178,8 @@ bool Engine::init() {
     //                    
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
     // 1. location in vertex
     // 2. vec2/vec3
     // 3. GL_FLOAT (vec3)
@@ -193,12 +202,29 @@ bool Engine::init() {
     glBindVertexArray(lightVAO);
     // same VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
 
+    // gizmoVAO
+    glGenVertexArrays(1, &gizmoVAO);
+    glGenBuffers(1, &gizmoVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, gizmoVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gizmo), gizmo, GL_STATIC_DRAW);
+    glBindVertexArray(gizmoVAO);
+    // gizmoVBO
+    glBindBuffer(GL_ARRAY_BUFFER, gizmoVBO);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+    // antialiasing
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
     // no need to unbind at all as we directly bind a different VAO the next few lines
-    //glBindVertexArray(0);
+    glBindVertexArray(0);
 
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderMode));
@@ -219,17 +245,6 @@ void Engine::run() {
     //glm::vec3 lightColor(1.0f);
     float radius = 2.0f;
     // Phong: light = ambient + diffuse + specular
-
-    // static shader configuration
-    // ----------------- object shader ----------------- //
-    objectShader->use();
-    objectShader->setInt("material.diffuse", 0);
-    objectShader->setInt("material.specular", 1);
-
-    // ----------------- spotlight shader ----------------- //
-    /*spotlightShader->use();
-    spotlightShader->setInt("material.diffuse", 0);
-    spotlightShader->setInt("material.specular", 1);*/
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
@@ -282,15 +297,18 @@ void Engine::run() {
 
         // ----------------- object shader ----------------- //
         objectShader->use();
+        glBindVertexArray(VAO);
 
         // vertex
         objectShader->setMat4fv("projection", projection);
         objectShader->setMat4fv("view", view);
 
         // fragment
-        objectShader->setBool("spotlightOn", uniformSpotlightOn);
+        objectShader->setBool("spotlightOn", std::get<bool>(uniformVars["spotlightOn"]));
         objectShader->setVec3fv("viewPos", camera.getPosition());
 
+        objectShader->setInt("material.diffuse", 0);
+        objectShader->setInt("material.specular", 1);
         objectShader->setFloat("material.shininess", 64.0f);
 
         objectShader->setVec3fv("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
@@ -338,14 +356,11 @@ void Engine::run() {
         objectShader->setFloat("spotlight.linear", 0.09f);
         objectShader->setFloat("spotlight.quadratic", 0.032f);
 
-        glBindVertexArray(VAO);
-
         for (unsigned int i = 0; i < cubePositions.size(); i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
             model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-
             objectShader->setMat4fv("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -353,20 +368,40 @@ void Engine::run() {
 
         // ----------------- light shader ----------------- //
         lightShader->use();
+        glBindVertexArray(lightVAO);
 
+        // vertex
         lightShader->setMat4fv("projection", projection);
         lightShader->setMat4fv("view", view);
 
-        glBindVertexArray(lightVAO);
-
+        // fragment
         for (unsigned int i = 0; i < 4; i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPositions[i] + lightPos);
             model = glm::scale(model, glm::vec3(0.2f));
-
             lightShader->setMat4fv("model", model);
+
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        // ----------------- gizmo shader ----------------- //
+        gizmoShader->use();
+        glBindVertexArray(gizmoVAO);
+
+        // vertex
+        model = glm::mat4(1.0f);
+        gizmoShader->setFloat("gizmoLength", std::get<float>(uniformVars["gizmoLength"]));
+        gizmoShader->setBool("gizmoNegative", std::get<bool>(uniformVars["gizmoNegative"]));
+        gizmoShader->setMat4fv("model", model);
+        gizmoShader->setMat4fv("projection", projection);
+        gizmoShader->setMat4fv("view", view);
+
+        // fragment
+        glDisable(GL_DEPTH_TEST);
+        //glLineWidth(2.0f);
+        glDrawArrays(GL_LINES, 0, 6);
+        //glLineWidth(1.0f);
+        glEnable(GL_DEPTH_TEST);
 
         // no need to unbind it every time
         glBindVertexArray(0);
@@ -434,27 +469,47 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
 void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
 
-    // interpolate mix of textures
+    // INTERPOLATE mix of textures (not used)
+    float& interpolate = std::get<float>(engine->uniformVars["interpolate"]);
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-        engine->uniformInterpolate += 0.1f;
+        interpolate += 0.1f;
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-        engine->uniformInterpolate -= 0.1f;
+        interpolate -= 0.1f;
     }
-
-    if (engine->uniformInterpolate < 0.0f) {
-        engine->uniformInterpolate = 0.0f;
+    if (interpolate < 0.0f) {
+        interpolate = 0.0f;
     }
-    if (engine->uniformInterpolate > 1.0f) {
-        engine->uniformInterpolate = 1.0f;
+    if (interpolate > 1.0f) {
+        interpolate = 1.0f;
     }
 
     // SPOTLIGHT
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        engine->uniformSpotlightOn = !engine->uniformSpotlightOn;
+        bool& spotlightOn = std::get<bool>(engine->uniformVars["spotlightOn"]);
+        spotlightOn = !spotlightOn;
+    }
+    // GIZMO LENGTH
+    float& gizmoLength = std::get<float>(engine->uniformVars["gizmoLength"]);
+    if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
+        gizmoLength += 1.0f;
+    }
+    if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
+        gizmoLength -= 1.0f;
+    }
+    if (gizmoLength < 0.0f) {
+        gizmoLength = 0.0f;
+    }
+    if (gizmoLength > 20.0f) {
+        gizmoLength = 20.0;
+    }
+    // SHOW GIZMO NEGATIVE
+    bool& gizmoNegative = std::get<bool>(engine->uniformVars["gizmoNegative"]);
+    if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
+        gizmoNegative = !gizmoNegative;
     }
 
-    // POSITION, CAMERA INFO
+    // INFO: POSITION, CAMERA
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
         engine->displayPosition(engine->camera.getViewMatrix());
         engine->displayCameraAngles(engine->camera.getViewMatrix());
@@ -476,5 +531,4 @@ void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action,
         glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(engine->renderMode));
         std::cout << "--== Changed RenderMode to: " << renderModeStr << " ==--" << std::endl;
     }
-
 };
