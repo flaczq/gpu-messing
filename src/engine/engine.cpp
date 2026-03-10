@@ -17,8 +17,8 @@ Engine::~Engine() {
     spotlightShader.reset();
     lightShader.reset();
 
-    glDeleteTextures(1, &diffuseMap);
-    glDeleteTextures(1, &specularMap);
+    Texture::clean(diffuseMap);
+    Texture::clean(specularMap);
 
 	glfwTerminate();
 }
@@ -88,10 +88,8 @@ bool Engine::init() {
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
     //                        
-    Texture diffuseMapTexture("assets/container2.png");
-    Texture specularMapTexture("assets/container2_specular.png");
-    diffuseMap = diffuseMapTexture.getTexture();
-    specularMap = specularMapTexture.getTexture();
+    diffuseMap = Texture::load("assets/container2.png");
+    specularMap = Texture::load("assets/container2_specular.png");
 
     //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
     //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
@@ -200,8 +198,8 @@ bool Engine::init() {
     // no need to unbind at all as we directly bind a different VAO the next few lines
     //glBindVertexArray(0);
 
-    // wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // standard, lines (wireframe), points
+    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderMode));
 
 	// set callbacks: window resize, single key click
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -254,10 +252,8 @@ void Engine::run() {
         //lightColor.y = sin(currentTime * 0.7f);
         //lightColor.z = sin(currentTime * 1.3f);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, specularMap);
+        Texture::bind(diffuseMap, 0);
+        Texture::bind(specularMap, 1);
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world
@@ -285,10 +281,8 @@ void Engine::run() {
         // ----------------- object shader ----------------- //
         objectShader->use();
 
-        //objectShader->setMat4fv("transform", transform);
         objectShader->setMat4fv("projection", projection);
         objectShader->setMat4fv("view", view);
-        //objectShader->setFloat("interpolate", uniformInterpolate);
 
         // fragment
         objectShader->setVec3fv("viewPos", camera.getPosition());
@@ -297,8 +291,6 @@ void Engine::run() {
 
         objectShader->setVec3fv("light.position", lightPos);
         objectShader->setVec3fv("light.direction", camera.getFront());
-        //objectShader->setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        //objectShader->setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
         objectShader->setVec3fv("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
         objectShader->setVec3fv("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
         objectShader->setVec3fv("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
@@ -322,10 +314,10 @@ void Engine::run() {
         // ----------------- spotlight shader ----------------- //
         /*spotlightShader->use();
 
-        //spotlightShader->setMat4fv("transform", transform);
+        spotlightShader->setMat4fv("transform", transform);
         spotlightShader->setMat4fv("projection", projection);
         spotlightShader->setMat4fv("view", view);
-        //spotlightShader->setFloat("interpolate", uniformInterpolate);
+        spotlightShader->setFloat("interpolate", uniformInterpolate);
 
         // fragment
         spotlightShader->setVec3fv("viewPos", camera.getPosition());
@@ -400,7 +392,7 @@ void Engine::displayPosition(glm::mat4 viewMatrix) {
     glm::vec3 pos = glm::vec3(inverseView[3]);
 
     std::cout << std::fixed << std::setprecision(2);
-    std::cout << "------- Position Status ------" << std::endl;
+    std::cout << "--== Position Status ==--" << std::endl;
     std::cout << "X: " << std::showpos << pos.x << "   "
               << "Y: " << std::showpos << pos.y << "   "
               << "Z: " << std::showpos << pos.z << std::endl << std::endl;
@@ -421,7 +413,7 @@ void Engine::displayCameraAngles(glm::mat4 viewMatrix) {
         float roll = glm::degrees(euler.z);
 
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "------------------ Camera Status ------------------" << std::endl;
+        std::cout << "--== Camera Status ==--" << std::endl;
         std::cout << "Pitch: " << std::showpos << pitch << " deg   "
                   << "Yaw: " << std::showpos << yaw << " deg   "
                   << "Roll: " << std::showpos << roll << " deg" << std::endl << std::endl;
@@ -432,6 +424,7 @@ void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height
 	glViewport(0, 0, width, height);
 }
 
+// single key click
 void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
 
@@ -455,4 +448,22 @@ void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action,
         engine->displayPosition(engine->camera.getViewMatrix());
         engine->displayCameraAngles(engine->camera.getViewMatrix());
     }
+    
+    // RENDER MODE
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+        std::string renderModeStr;
+        if (engine->renderMode == RenderMode::STANDARD) {
+            engine->renderMode = RenderMode::WIREFRAME;
+            renderModeStr = "WIREFRAME";
+        } else if (engine->renderMode == RenderMode::WIREFRAME) {
+            engine->renderMode = RenderMode::POINTCLOUD;
+            renderModeStr = "POINTCLOUD";
+        } else {
+            engine->renderMode = RenderMode::STANDARD;
+            renderModeStr = "STANDARD";
+        }
+        glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(engine->renderMode));
+        std::cout << "--== Changed RenderMode to: " << renderModeStr << " ==--" << std::endl;
+    }
+
 };

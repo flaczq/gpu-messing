@@ -5,6 +5,12 @@
 #include "../utils/texture.h"
 #include "../camera/camera.h"
 
+enum class RenderMode {
+    STANDARD = GL_FILL,
+    WIREFRAME = GL_LINE,
+    POINTCLOUD = GL_POINT
+};
+
 class Engine {
 public:
     Engine(int w, int h);
@@ -39,6 +45,7 @@ private:
 
     // changeable variables
     float uniformInterpolate = 0.4f;
+    RenderMode renderMode = RenderMode::STANDARD;
 
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;

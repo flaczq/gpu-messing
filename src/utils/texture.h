@@ -1,16 +1,9 @@
 #pragma once
 
 #include "../utils/commongl.h"
-#include "../../libs/stb_image.h"
 
-class Texture {
-public:
-	Texture(const GLchar* path);
-	~Texture();
-
-	unsigned int getTexture();
-
-private:
-	unsigned int ID;
-	unsigned char* data;
+namespace Texture {
+	unsigned int load(const char* path);
+	void bind(unsigned int textureID, unsigned int slot);
+	void clean(unsigned int& textureID);
 };

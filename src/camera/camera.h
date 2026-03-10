@@ -2,7 +2,7 @@
 
 #include "../utils/commongl.h"
 
-enum Camera_Movement {
+enum class CameraDirection {
     FORWARD,
     BACKWARD,
     LEFT,
@@ -18,7 +18,7 @@ public:
 
     bool init(GLFWwindow* window);
     void processInput(GLFWwindow* window, float deltaTime);
-    void processKeyboard(Camera_Movement direction, float deltaTime);
+    void processKeyboard(CameraDirection direction, float deltaTime);
     void processMouseScroll(float yOffset);
     void processMouseMovement(float xOffest, float yOffset, GLboolean constrainPitch = true);
 

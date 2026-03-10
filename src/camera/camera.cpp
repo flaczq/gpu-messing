@@ -40,49 +40,50 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
         glfwSetWindowShouldClose(window, true);
     }
 
+    // MOVEMENT
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        processKeyboard(FORWARD, deltaTime);
+        processKeyboard(CameraDirection::FORWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        processKeyboard(BACKWARD, deltaTime);
+        processKeyboard(CameraDirection::BACKWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        processKeyboard(LEFT, deltaTime);
+        processKeyboard(CameraDirection::LEFT, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        processKeyboard(RIGHT, deltaTime);
+        processKeyboard(CameraDirection::RIGHT, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        processKeyboard(UP, deltaTime);
+        processKeyboard(CameraDirection::UP, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        processKeyboard(DOWN, deltaTime);
+        processKeyboard(CameraDirection::DOWN, deltaTime);
     }
 };
 
-void Camera::processKeyboard(Camera_Movement direction, float deltaTime) {
+void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
-    if (direction == FORWARD) {
+    if (direction == CameraDirection::FORWARD) {
         position += front * velocity;
     }
-    if (direction == BACKWARD) {
+    if (direction == CameraDirection::BACKWARD) {
         position -= front * velocity;
     }
-    if (direction == LEFT) {
+    if (direction == CameraDirection::LEFT) {
         position -= right * velocity;
     }
-    if (direction == RIGHT) {
+    if (direction == CameraDirection::RIGHT) {
         position += right * velocity;
     }
-    if (direction == UP) {
+    /*if (direction == CameraDirection::UP) {
         position += up * velocity;
     }
-    if (direction == DOWN) {
+    if (direction == CameraDirection::DOWN) {
         position -= up * velocity;
-    }
+    }*/
 
     // FPS stay on the ground, boy
-    //position.y = 0.0f;
+    position.y = 0.0f;
 }
 
 void Camera::processMouseScroll(float yOffset) {
@@ -103,11 +104,11 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
     pitch += yOffset;
 
     if (constrainPitch) {
-        if (pitch < -45.0f) {
-            pitch = -45.0f;
+        if (pitch < -90.0f) {
+            pitch = -90.0f;
         }
-        if (pitch > 45.0f) {
-            pitch = 45.0f;
+        if (pitch > 90.0f) {
+            pitch = 90.0f;
         }
     }
 
