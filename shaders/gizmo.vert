@@ -14,8 +14,8 @@ uniform mat4 projection;
 void main() {
 	ourColor = aColor;
 	vec3 gizmoPos = aPos * gizmoLength;
-	if (gizmoNegative) {//FIXTHIS
-		gizmoPos = abs(gizmoPos);
+	if (!gizmoNegative) {
+		gizmoPos = max(vec3(0.0f), gizmoPos);
 	}
 	gl_Position = projection * view * model * vec4(gizmoPos, 1.0f);
 }

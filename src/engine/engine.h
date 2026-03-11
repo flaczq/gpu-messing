@@ -5,7 +5,7 @@
 #include "../utils/texture.h"
 #include "../camera/camera.h"
 
-using UniformTypes = std::variant<float, std::string, bool>;
+using UniformTypes = std::variant<float, std::string, bool, unsigned int>;
 
 enum class RenderMode {
     STANDARD = GL_FILL,
@@ -31,16 +31,18 @@ private:
     std::unique_ptr<Shader> objectShader;
     std::unique_ptr<Shader> lightShader;
     std::unique_ptr<Shader> gizmoShader;
+    std::unique_ptr<Shader> gridShader;
     // textures
     unsigned int diffuseMap, specularMap;
     // camera
     Camera camera;
 
     GLFWwindow* window;
-    GLuint VAO, lightVAO, gizmoVAO;
-    GLuint VBO, gizmoVBO;
+    GLuint VAO, lightVAO, gizmoVAO, gridVAO;
+    GLuint VBO, gizmoVBO, gridVBO;
     std::vector<glm::vec3> cubePositions;
     std::vector<glm::vec3> pointLightPositions;
+    std::vector<glm::vec3> gridPositions;
 
     // showFps()
     double lastTime = glfwGetTime();
@@ -50,8 +52,9 @@ private:
     std::map<std::string, UniformTypes> uniformVars = {
         {"interpolate", 0.4f},
         {"spotlightOn", false},
-        {"gizmoLength", 5.0f},
-        {"gizmoNegative", false}
+        {"gizmoLength", 1.0f},//why when it's 10 adding one multiplies it
+        {"gizmoNegative", false},
+        {"gridSize", 10u}
     };
 
     RenderMode renderMode = RenderMode::STANDARD;

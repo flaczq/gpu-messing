@@ -33,6 +33,8 @@
     <None Include="README.md" />
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
+    <None Include="shaders\grid.frag" />
+    <None Include="shaders\grid.vert" />
     <None Include="shaders\light.frag" />
     <None Include="shaders\light.vert" />
     <None Include="shaders\object.frag" />

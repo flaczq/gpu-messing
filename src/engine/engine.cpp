@@ -1,19 +1,22 @@
 #include "engine.h"
 
-Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gizmoShader(nullptr) {
+Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gizmoShader(nullptr), gridShader(nullptr) {
 }
 Engine::~Engine() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteVertexArrays(1, &gizmoVAO);
+	glDeleteVertexArrays(1, &gridVAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &gizmoVBO);
+	glDeleteBuffers(1, &gridVBO);
     
     // shader itself deletes the shader's ID nad unique_ptr deletes object itself
     // force deleting the shaders
     objectShader.reset();
     lightShader.reset();
     gizmoShader.reset();
+    gridShader.reset();
 
     Texture::clean(diffuseMap);
     Texture::clean(specularMap);
@@ -96,6 +99,7 @@ bool Engine::init() {
     objectShader = std::make_unique<Shader>("shaders/object.vert", "shaders/object.frag");
     lightShader = std::make_unique<Shader>("shaders/light.vert", "shaders/light.frag");
     gizmoShader = std::make_unique<Shader>("shaders/gizmo.vert", "shaders/gizmo.frag");
+    gridShader = std::make_unique<Shader>("shaders/grid.vert", "shaders/grid.frag");
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
@@ -157,6 +161,16 @@ bool Engine::init() {
         0.0, 0.0, -gL,  0.0, 0.0, 0.0,
         0.0, 0.0,  gL,  0.0, 0.0, 1.0,
     };
+    unsigned int gS = std::get<unsigned int>(uniformVars["gridSize"]);
+    for (unsigned int i = 0; i <= gS; i++) {
+        float pos = (float)i;
+        // z axis
+        gridPositions.push_back(glm::vec3(pos, 0.0f, 0.0f));
+        gridPositions.push_back(glm::vec3(pos, 0.0f, (float)gS));
+        // x axis
+        gridPositions.push_back(glm::vec3(0.0f, 0.0f, pos));
+        gridPositions.push_back(glm::vec3((float)gS, 0.0f, pos));
+    }
     cubePositions.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
     cubePositions.push_back(glm::vec3(2.0f, 5.0f, -15.0f));
     cubePositions.push_back(glm::vec3(-1.5f, -2.2f, -2.5f));
@@ -211,7 +225,6 @@ bool Engine::init() {
     glBindBuffer(GL_ARRAY_BUFFER, gizmoVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(gizmo), gizmo, GL_STATIC_DRAW);
     glBindVertexArray(gizmoVAO);
-    // gizmoVBO
     glBindBuffer(GL_ARRAY_BUFFER, gizmoVBO);
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
@@ -219,6 +232,21 @@ bool Engine::init() {
     // color
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
+    // antialiasing
+    glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+
+    // gridVAO
+    glGenVertexArrays(1, &gridVAO);
+    glGenBuffers(1, &gridVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    glBufferData(GL_ARRAY_BUFFER, gridPositions.size() * sizeof(glm::vec3), gridPositions.data(), GL_STATIC_DRAW);
+    glBindVertexArray(gridVAO);
+    // gridVBO
+    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    // position as vec3
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
     // antialiasing
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
@@ -383,6 +411,24 @@ void Engine::run() {
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+
+        // ----------------- grid shader ----------------- //
+        gridShader->use();
+        glBindVertexArray(gridVAO);
+
+        // vertex
+        model = glm::mat4(1.0f);
+        gridShader->setInt("gridSize", std::get<unsigned int>(uniformVars["gridSize"]));
+        gridShader->setMat4fv("model", model);
+        gridShader->setMat4fv("projection", projection);
+        gridShader->setMat4fv("view", view);
+
+        // fragment
+        glDisable(GL_DEPTH_TEST);
+        //glLineWidth(2.0f);
+        glDrawArrays(GL_LINES, 0, gridPositions.size());
+        //glLineWidth(1.0f);
+        glEnable(GL_DEPTH_TEST);
 
         // ----------------- gizmo shader ----------------- //
         gizmoShader->use();

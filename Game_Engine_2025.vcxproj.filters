@@ -47,6 +47,8 @@
     <None Include="shaders\object.vert" />
     <None Include="shaders\gizmo.vert" />
     <None Include="shaders\gizmo.frag" />
+    <None Include="shaders\grid.frag" />
+    <None Include="shaders\grid.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
