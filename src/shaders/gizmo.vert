@@ -5,7 +5,6 @@ layout(location = 1) in vec3 aColor;
 
 out vec3 ourColor;
 
-uniform float gizmoLength;
 uniform bool gizmoNegative;
 uniform mat4 model;
 uniform mat4 view;
@@ -13,7 +12,7 @@ uniform mat4 projection;
 
 void main() {
 	ourColor = aColor;
-	vec3 gizmoPos = aPos * gizmoLength;
+	vec3 gizmoPos = aPos;
 	if (!gizmoNegative) {
 		gizmoPos = max(vec3(0.0f), gizmoPos);
 	}

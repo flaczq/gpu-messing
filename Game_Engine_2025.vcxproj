@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\camera\camera.cpp" />
-    <ClCompile Include="src\engine\engine.cpp" />
+    <ClCompile Include="src\core\core.cpp" />
     <ClCompile Include="src\utils\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
@@ -31,29 +31,29 @@
     <None Include="Game_Engine_2025.aps" />
     <None Include="LICENSE" />
     <None Include="README.md" />
-    <None Include="shaders\gizmo.frag" />
-    <None Include="shaders\gizmo.vert" />
-    <None Include="shaders\grid.frag" />
-    <None Include="shaders\grid.vert" />
-    <None Include="shaders\light.frag" />
-    <None Include="shaders\light.vert" />
-    <None Include="shaders\object.frag" />
-    <None Include="shaders\object.vert" />
+    <None Include="src\shaders\gizmo.frag" />
+    <None Include="src\shaders\gizmo.vert" />
+    <None Include="src\shaders\grid.frag" />
+    <None Include="src\shaders\grid.vert" />
+    <None Include="src\shaders\light.frag" />
+    <None Include="src\shaders\light.vert" />
+    <None Include="src\shaders\object.frag" />
+    <None Include="src\shaders\object.vert" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\abc.jpg" />
-    <Image Include="assets\clearlyai.jpg" />
-    <Image Include="assets\container2.png" />
-    <Image Include="assets\container2_specular.png" />
-    <Image Include="assets\potato.jpg" />
-    <Image Include="assets\wall.jpg" />
+    <Image Include="src\assets\clearlyai.jpg" />
+    <Image Include="src\assets\container2.png" />
+    <Image Include="src\assets\container2_specular.png" />
+    <Image Include="src\assets\potato.jpg" />
+    <Image Include="src\assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\camera\camera.h" />
     <ClInclude Include="src\utils\commongl.h" />
-    <ClInclude Include="src\engine\engine.h" />
+    <ClInclude Include="src\core\core.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\utils\shader.h" />

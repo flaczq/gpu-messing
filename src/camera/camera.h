@@ -11,6 +11,11 @@ enum class CameraDirection {
     DOWN
 };
 
+enum class CameraMode {
+    STANDING,
+    CROUCHING
+};
+
 class Camera {
 public:
     Camera();
@@ -27,6 +32,9 @@ public:
     glm::vec3 getPosition();
     glm::vec3 getFront();
 
+    float getCameraModeHeight();
+    void changeCameraMode();
+
 private:
     glm::vec3 position;
     glm::vec3 front;
@@ -42,6 +50,7 @@ private:
     float movementSpeed;
     float mouseSensitivity;
     float zoom;
+    CameraMode cameraMode = CameraMode::STANDING;
 
     void updateCameraVectors();
 

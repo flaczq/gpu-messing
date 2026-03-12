@@ -18,6 +18,7 @@
 #include <variant>
 #include <map>
 #include <vector>
+#include <algorithm>
 #include <thread>
 #include <chrono>
 #include <iomanip>

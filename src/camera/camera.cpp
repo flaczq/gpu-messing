@@ -1,17 +1,20 @@
 #include "../camera/camera.h"
-#include "../engine/engine.h"
+#include "../core/core.h"
 
 Camera::Camera() {
-    position = glm::vec3(0.0f, 0.0f, 6.0f);
+    position = glm::vec3(6.0f, 1.0f, 6.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
     right = glm::vec3(0.0f, 1.0f, 0.0f); //fake
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); //fake
 
+    // STANDING
+    position.y = getCameraModeHeight();
+
     firstMouse = true;
-    yaw = -90.0f;
-    pitch = 0.0f;
+    yaw = -135.0f;  //STANDING
+    pitch = -11.5f; //STANDING
     lastX = 800.0f / 2.0f;
     lastY = 600.0f / 2.0f;
     movementSpeed = 10.0f;
@@ -81,9 +84,8 @@ void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
     if (direction == CameraDirection::DOWN) {
         position -= up * velocity;
     }*/
-
     // FPS stay on the ground, boy
-    //position.y = 0.0f;
+    position.y = getCameraModeHeight();
 }
 
 void Camera::processMouseScroll(float yOffset) {
@@ -132,6 +134,23 @@ glm::vec3 Camera::getFront() {
     return front;
 };
 
+float Camera::getCameraModeHeight() {
+    if (cameraMode == CameraMode::STANDING) {
+        return 1.75f;
+    }
+    return position.y = 0.85;
+
+}
+
+void Camera::changeCameraMode() {
+    if (cameraMode == CameraMode::STANDING) {
+        cameraMode = CameraMode::CROUCHING;
+    } else {
+        cameraMode = CameraMode::STANDING;
+    }
+    position.y = getCameraModeHeight();
+};
+
 void Camera::updateCameraVectors() {
     glm::vec3 currFront = glm::vec3(0.0f, 0.0f, 0.0f);
     currFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -143,8 +162,8 @@ void Camera::updateCameraVectors() {
 }
 
 void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
-    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    Camera& camera = engine->getCamera();
+    Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
+    Camera& camera = core->getCamera();
     float xPos = static_cast<float>(xPosIn);
     float yPos = static_cast<float>(yPosIn);
 
@@ -164,8 +183,8 @@ void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
 }
 
 void Camera::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
-    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
-    Camera& camera = engine->getCamera();
+    Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
+    Camera& camera = core->getCamera();
 
     camera.processMouseScroll(static_cast<float>(yOffset));
 }

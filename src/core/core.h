@@ -5,7 +5,7 @@
 #include "../utils/texture.h"
 #include "../camera/camera.h"
 
-using UniformTypes = std::variant<float, std::string, bool, unsigned int>;
+using UniformTypes = std::variant<float, std::string, bool>;
 
 enum class RenderMode {
     STANDARD = GL_FILL,
@@ -13,10 +13,10 @@ enum class RenderMode {
     POINTCLOUD = GL_POINT
 };
 
-class Engine {
+class Core {
 public:
-    Engine(int w, int h);
-    ~Engine();
+    Core(int w, int h);
+    ~Core();
 
     bool init();
     void run();
@@ -52,9 +52,8 @@ private:
     std::map<std::string, UniformTypes> uniformVars = {
         {"interpolate", 0.4f},
         {"spotlightOn", false},
-        {"gizmoLength", 1.0f},//why when it's 10 adding one multiplies it
-        {"gizmoNegative", false},
-        {"gridSize", 10u}
+        {"gizmoLength", 10.0f},
+        {"gizmoNegative", false}
     };
 
     RenderMode renderMode = RenderMode::STANDARD;
@@ -66,6 +65,6 @@ private:
     void displayPosition(glm::mat4 viewMatrix);
     void displayCameraAngles(glm::mat4 viewMatrix);
 
-    // must be static to be passed as a callback reference and so it needs to use engine->var
+    // must be static to be passed as a callback reference and so it needs to use core->var
     static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 };

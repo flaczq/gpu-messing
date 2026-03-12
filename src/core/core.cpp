@@ -1,8 +1,8 @@
-#include "engine.h"
+#include "core.h"
 
-Engine::Engine(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gizmoShader(nullptr), gridShader(nullptr) {
+Core::Core(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gizmoShader(nullptr), gridShader(nullptr) {
 }
-Engine::~Engine() {
+Core::~Core() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
 	glDeleteVertexArrays(1, &gizmoVAO);
@@ -24,7 +24,7 @@ Engine::~Engine() {
 	glfwTerminate();
 }
 
-bool Engine::init() {
+bool Core::init() {
     //    ┏┳┓┓┏•┏┓  •┏┓  •┏┳┓
     //     ┃ ┣┫┓┗┓  ┓┗┓  ┓ ┃ 
     //     ┻ ┛┗┗┗┛  ┗┗┛  ┗ ┻ 
@@ -35,7 +35,7 @@ bool Engine::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(screen_w, screen_h, "(C) Uknnowndsn gameengine 2049", nullptr, nullptr);
+    window = glfwCreateWindow(screen_w, screen_h, "(C) Engine Runner 2049", nullptr, nullptr);
     std::cout << R"(
      ## you look lonely, i can fix that ##
       ___   ___  _  _   ___  
@@ -75,7 +75,7 @@ bool Engine::init() {
         return -1;
     }
 
-    // ONLY ONCE set 'this' as Engine
+    // ONLY ONCE set 'this' as Core
     glfwSetWindowUserPointer(window, this);
 
     //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
@@ -149,19 +149,18 @@ bool Engine::init() {
         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
-    float gL = std::get<float>(uniformVars["gizmoLength"]);
     float gizmo[] = {
-        // positions    // colors
-        -gL, 0.0, 0.0,  0.0, 0.0, 0.0,
-         gL, 0.0, 0.0,  1.0, 0.0, 0.0,
+        // positions        // colors
+        -1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 0.0f,
+         1.0f, 0.0f, 0.0f,  1.0f, 0.0f, 0.0f,
 
-        0.0, -gL, 0.0,  0.0, 0.0, 0.0,
-        0.0,  gL, 0.0,  0.0, 1.0, 0.0,
+         0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+         0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
 
-        0.0, 0.0, -gL,  0.0, 0.0, 0.0,
-        0.0, 0.0,  gL,  0.0, 0.0, 1.0,
+         0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+         0.0f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f
     };
-    unsigned int gS = std::get<unsigned int>(uniformVars["gridSize"]);
+    unsigned int gS = 10u;
     for (unsigned int i = 0; i <= gS; i++) {
         float pos = (float)i;
         // z axis
@@ -264,7 +263,7 @@ bool Engine::init() {
 	return 1;
 }
 
-void Engine::run() {
+void Core::run() {
     //    ┓┏┏┓┳┓•┏┓┳┓┓ ┏┓┏┓
     //    ┃┃┣┫┣┫┓┣┫┣┫┃ ┣ ┗┓
     //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
@@ -418,7 +417,6 @@ void Engine::run() {
 
         // vertex
         model = glm::mat4(1.0f);
-        gridShader->setInt("gridSize", std::get<unsigned int>(uniformVars["gridSize"]));
         gridShader->setMat4fv("model", model);
         gridShader->setMat4fv("projection", projection);
         gridShader->setMat4fv("view", view);
@@ -436,7 +434,7 @@ void Engine::run() {
 
         // vertex
         model = glm::mat4(1.0f);
-        gizmoShader->setFloat("gizmoLength", std::get<float>(uniformVars["gizmoLength"]));
+        model = glm::scale(model, glm::vec3(std::get<float>(uniformVars["gizmoLength"])));
         gizmoShader->setBool("gizmoNegative", std::get<bool>(uniformVars["gizmoNegative"]));
         gizmoShader->setMat4fv("model", model);
         gizmoShader->setMat4fv("projection", projection);
@@ -457,24 +455,24 @@ void Engine::run() {
     }
 }
 
-Camera& Engine::getCamera() {
+Camera& Core::getCamera() {
     return camera;
 }
 
-void Engine::showFps(GLFWwindow* window) {
+void Core::showFps(GLFWwindow* window) {
 	double currentTime = glfwGetTime();
 	nbFrames++;
 	if (currentTime - lastTime >= 1.0) {
 		double fps = double(nbFrames);
 		double msPerFrame = 1000.0 / double(nbFrames);
-		std::string title = "(C) Uknnowndsn gameengine 2049 - FPS: " + std::to_string((int)fps) + " (" + std::to_string(msPerFrame).substr(0, 4) + " ms)";
+		std::string title = "(C) Engine Runner 2049 - FPS: " + std::to_string((int)fps) + " (" + std::to_string(msPerFrame).substr(0, 4) + " ms)";
 		glfwSetWindowTitle(window, title.c_str());
 		nbFrames = 0;
 		lastTime += 1.0;
 	}
 }
 
-void Engine::displayPosition(glm::mat4 viewMatrix) {
+void Core::displayPosition(glm::mat4 viewMatrix) {
     glm::mat4 inverseView = glm::inverse(viewMatrix);
     glm::vec3 pos = glm::vec3(inverseView[3]);
 
@@ -485,7 +483,7 @@ void Engine::displayPosition(glm::mat4 viewMatrix) {
               << "Z: " << std::showpos << pos.z << std::endl << std::endl;
 }
 
-void Engine::displayCameraAngles(glm::mat4 viewMatrix) {
+void Core::displayCameraAngles(glm::mat4 viewMatrix) {
     glm::vec3 scale;
     glm::quat orientation;
     glm::vec3 translation;
@@ -507,74 +505,70 @@ void Engine::displayCameraAngles(glm::mat4 viewMatrix) {
     }
 }
 
-void Engine::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void Core::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
 // single key click
-void Engine::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    Engine* engine = static_cast<Engine*>(glfwGetWindowUserPointer(window));
+void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
 
     // INTERPOLATE mix of textures (not used)
-    float& interpolate = std::get<float>(engine->uniformVars["interpolate"]);
+    float& interpolate = std::get<float>(core->uniformVars["interpolate"]);
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
         interpolate += 0.1f;
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
         interpolate -= 0.1f;
     }
-    if (interpolate < 0.0f) {
-        interpolate = 0.0f;
-    }
-    if (interpolate > 1.0f) {
-        interpolate = 1.0f;
+    interpolate = std::clamp(interpolate, 0.0f, 1.0f);
+
+    // CROUCHING/STANDING
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+        core->camera.changeCameraMode();
     }
 
     // SPOTLIGHT
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-        bool& spotlightOn = std::get<bool>(engine->uniformVars["spotlightOn"]);
+        bool& spotlightOn = std::get<bool>(core->uniformVars["spotlightOn"]);
         spotlightOn = !spotlightOn;
     }
     // GIZMO LENGTH
-    float& gizmoLength = std::get<float>(engine->uniformVars["gizmoLength"]);
+    float& gizmoLength = std::get<float>(core->uniformVars["gizmoLength"]);
     if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
         gizmoLength += 1.0f;
     }
     if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
         gizmoLength -= 1.0f;
     }
-    if (gizmoLength < 0.0f) {
-        gizmoLength = 0.0f;
-    }
-    if (gizmoLength > 20.0f) {
-        gizmoLength = 20.0;
-    }
+    gizmoLength = std::clamp(gizmoLength, 0.0f, 20.0f);
+
     // SHOW GIZMO NEGATIVE
-    bool& gizmoNegative = std::get<bool>(engine->uniformVars["gizmoNegative"]);
+    bool& gizmoNegative = std::get<bool>(core->uniformVars["gizmoNegative"]);
     if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
         gizmoNegative = !gizmoNegative;
     }
 
     // INFO: POSITION, CAMERA
     if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-        engine->displayPosition(engine->camera.getViewMatrix());
-        engine->displayCameraAngles(engine->camera.getViewMatrix());
+        core->displayPosition(core->camera.getViewMatrix());
+        core->displayCameraAngles(core->camera.getViewMatrix());
     }
     
     // RENDER MODE
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
         std::string renderModeStr;
-        if (engine->renderMode == RenderMode::STANDARD) {
-            engine->renderMode = RenderMode::WIREFRAME;
+        if (core->renderMode == RenderMode::STANDARD) {
+            core->renderMode = RenderMode::WIREFRAME;
             renderModeStr = "WIREFRAME";
-        } else if (engine->renderMode == RenderMode::WIREFRAME) {
-            engine->renderMode = RenderMode::POINTCLOUD;
+        } else if (core->renderMode == RenderMode::WIREFRAME) {
+            core->renderMode = RenderMode::POINTCLOUD;
             renderModeStr = "POINTCLOUD";
         } else {
-            engine->renderMode = RenderMode::STANDARD;
+            core->renderMode = RenderMode::STANDARD;
             renderModeStr = "STANDARD";
         }
-        glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(engine->renderMode));
+        glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(core->renderMode));
         std::cout << "--== Changed RenderMode to: " << renderModeStr << " ==--" << std::endl;
     }
 };
