@@ -1,17 +1,12 @@
 #pragma once
 
 #include "../utils/commongl.h"
-#include "../utils/shader.h"
-#include "../utils/texture.h"
-#include "../camera/camera.h"
+#include "../renderer/renderer.h"
+#include "../renderer/shader.h"
+#include "../renderer/texture.h"
+#include "../scene/camera.h"
 
 using UniformTypes = std::variant<float, std::string, bool>;
-
-enum class RenderMode {
-    STANDARD = GL_FILL,
-    WIREFRAME = GL_LINE,
-    POINTCLOUD = GL_POINT
-};
 
 class Core {
 public:
@@ -22,6 +17,7 @@ public:
     void run();
 
     Camera& getCamera();
+    Renderer& getRenderer();
 
     static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -34,8 +30,8 @@ private:
     std::unique_ptr<Shader> gridShader;
     // textures
     unsigned int diffuseMap, specularMap;
-    // camera
     Camera camera;
+    Renderer renderer;
 
     GLFWwindow* window;
     GLuint VAO, lightVAO, gizmoVAO, gridVAO;
@@ -55,8 +51,6 @@ private:
         {"gizmoLength", 10.0f},
         {"gizmoNegative", false}
     };
-
-    RenderMode renderMode = RenderMode::STANDARD;
 
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;

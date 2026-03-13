@@ -1,12 +1,12 @@
 #include "core.h"
 
-Core::Core(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gizmoShader(nullptr), gridShader(nullptr) {
+Core::Core(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gridShader(nullptr), gizmoShader(nullptr) {
 }
 Core::~Core() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
+    glDeleteVertexArrays(1, &gridVAO);
 	glDeleteVertexArrays(1, &gizmoVAO);
-	glDeleteVertexArrays(1, &gridVAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &gizmoVBO);
 	glDeleteBuffers(1, &gridVBO);
@@ -37,7 +37,7 @@ bool Core::init() {
 
     window = glfwCreateWindow(screen_w, screen_h, "(C) Engine Runner 2049", nullptr, nullptr);
     std::cout << R"(
-     ## you look lonely, i can fix that ##
+     ## cells interlinked within cells ##
       ___   ___  _  _   ___  
      |__ \ / _ \| || | / _ \ 
         ) | | | | || || (_) |
@@ -85,21 +85,25 @@ bool Core::init() {
     Camera camera;
     camera.init(window);
 
+    // TODO
+    Renderer renderer;
+    //renderer.init();
+
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
     //                        
-    diffuseMap = Texture::load("assets/container2.png");
-    specularMap = Texture::load("assets/container2_specular.png");
+    diffuseMap = Texture::load("../assets/container2.png");
+    specularMap = Texture::load("../assets/container2_specular.png");
 
     //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
     //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
     //    ┗┛┛┗┛┗┻┛┗┛┛┗┗┛
     //                  
-    objectShader = std::make_unique<Shader>("shaders/object.vert", "shaders/object.frag");
-    lightShader = std::make_unique<Shader>("shaders/light.vert", "shaders/light.frag");
-    gizmoShader = std::make_unique<Shader>("shaders/gizmo.vert", "shaders/gizmo.frag");
-    gridShader = std::make_unique<Shader>("shaders/grid.vert", "shaders/grid.frag");
+    objectShader = std::make_unique<Shader>("../shaders/object.vert", "../shaders/object.frag");
+    lightShader = std::make_unique<Shader>("../shaders/light.vert", "../shaders/light.frag");
+    gridShader = std::make_unique<Shader>("../shaders/grid.vert", "../shaders/grid.frag");
+    gizmoShader = std::make_unique<Shader>("../shaders/gizmo.vert", "../shaders/gizmo.frag");
 
     //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
@@ -199,6 +203,7 @@ bool Core::init() {
     // 4. normalize
     // 5. stride = difference between each vertex (can be set to 0 if data is packed for auto complete)
     // 6. offset = difference between each location
+    // -------------------- VAO ------------------- //
     glBindVertexArray(VAO);
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
@@ -209,16 +214,31 @@ bool Core::init() {
     // texture coords
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
+    // -------------------------------------------- //
 
-    // lightVAO
+    // ----------------- lightVAO ----------------- //
     glGenVertexArrays(1, &lightVAO);
     glBindVertexArray(lightVAO);
     // same VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0);
+    // -------------------------------------------- //
 
-    // gizmoVAO
+    // ------------------ gridVAO ----------------- //
+    glGenVertexArrays(1, &gridVAO);
+    glGenBuffers(1, &gridVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    glBufferData(GL_ARRAY_BUFFER, gridPositions.size() * sizeof(glm::vec3), gridPositions.data(), GL_STATIC_DRAW);
+    glBindVertexArray(gridVAO);
+    // gridVBO
+    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
+    // position as vec3
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    // -------------------------------------------- //
+
+    // ----------------- gizmoVAO ----------------- //
     glGenVertexArrays(1, &gizmoVAO);
     glGenBuffers(1, &gizmoVBO);
     glBindBuffer(GL_ARRAY_BUFFER, gizmoVBO);
@@ -234,27 +254,13 @@ bool Core::init() {
     // antialiasing
     glEnable(GL_LINE_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-
-    // gridVAO
-    glGenVertexArrays(1, &gridVAO);
-    glGenBuffers(1, &gridVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
-    glBufferData(GL_ARRAY_BUFFER, gridPositions.size() * sizeof(glm::vec3), gridPositions.data(), GL_STATIC_DRAW);
-    glBindVertexArray(gridVAO);
-    // gridVBO
-    glBindBuffer(GL_ARRAY_BUFFER, gridVBO);
-    // position as vec3
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    // antialiasing
-    glEnable(GL_LINE_SMOOTH);
-    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    // -------------------------------------------- //
 
     // no need to unbind at all as we directly bind a different VAO the next few lines
     glBindVertexArray(0);
 
     // standard, lines (wireframe), points
-    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderMode));
+    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderer.getRenderMode()));
 
 	// set callbacks: window resize, single key click
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -278,13 +284,6 @@ void Core::run() {
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
     //                                 
     while (!glfwWindowShouldClose(window)) {
-        showFps(window);
-
-        camera.processInput(window, deltaTime);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         GLfloat currentTime = static_cast<float>(glfwGetTime());
         deltaTime = currentTime - lastFrame;
         lastFrame = currentTime;
@@ -295,6 +294,12 @@ void Core::run() {
         //lightColor.x = sin(currentTime * 2.0f);
         //lightColor.y = sin(currentTime * 0.7f);
         //lightColor.z = sin(currentTime * 1.3f);
+
+        showFps(window);
+        camera.processInput(window, deltaTime);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         Texture::bind(diffuseMap, 0);
         Texture::bind(specularMap, 1);
@@ -322,7 +327,7 @@ void Core::run() {
         glm::mat4 view = glm::mat4(1.0f);
         view = camera.getViewMatrix();
 
-        // ----------------- object shader ----------------- //
+        // ----------------- object shader ---------------- //
         objectShader->use();
         glBindVertexArray(VAO);
 
@@ -392,6 +397,7 @@ void Core::run() {
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+        // ------------------------------------------------ //
 
         // ----------------- light shader ----------------- //
         lightShader->use();
@@ -410,8 +416,9 @@ void Core::run() {
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
+        // ------------------------------------------------ //
 
-        // ----------------- grid shader ----------------- //
+        // ------------------ grid shader ----------------- //
         gridShader->use();
         glBindVertexArray(gridVAO);
 
@@ -423,10 +430,18 @@ void Core::run() {
 
         // fragment
         glDisable(GL_DEPTH_TEST);
+        // antialiasing
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_BLEND);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glLineWidth(2.0f);
         glDrawArrays(GL_LINES, 0, gridPositions.size());
         //glLineWidth(1.0f);
+        glDisable(GL_LINE_SMOOTH);
+        glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+        // ------------------------------------------------ //
 
         // ----------------- gizmo shader ----------------- //
         gizmoShader->use();
@@ -442,10 +457,18 @@ void Core::run() {
 
         // fragment
         glDisable(GL_DEPTH_TEST);
+        // antialiasing
+        glEnable(GL_LINE_SMOOTH);
+        glEnable(GL_BLEND);
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glLineWidth(2.0f);
         glDrawArrays(GL_LINES, 0, 6);
         //glLineWidth(1.0f);
+        glDisable(GL_LINE_SMOOTH);
+        glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+        // ------------------------------------------------ //
 
         // no need to unbind it every time
         glBindVertexArray(0);
@@ -457,6 +480,10 @@ void Core::run() {
 
 Camera& Core::getCamera() {
     return camera;
+}
+
+Renderer& Core::getRenderer() {
+    return renderer;
 }
 
 void Core::showFps(GLFWwindow* window) {
@@ -477,7 +504,7 @@ void Core::displayPosition(glm::mat4 viewMatrix) {
     glm::vec3 pos = glm::vec3(inverseView[3]);
 
     std::cout << std::fixed << std::setprecision(2);
-    std::cout << "--== Position Status ==--" << std::endl;
+    std::cout << "* Position Status" << std::endl;
     std::cout << "X: " << std::showpos << pos.x << "   "
               << "Y: " << std::showpos << pos.y << "   "
               << "Z: " << std::showpos << pos.z << std::endl << std::endl;
@@ -498,7 +525,7 @@ void Core::displayCameraAngles(glm::mat4 viewMatrix) {
         float roll = glm::degrees(euler.z);
 
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "--== Camera Status ==--" << std::endl;
+        std::cout << "* Camera Status" << std::endl;
         std::cout << "Pitch: " << std::showpos << pitch << " deg   "
                   << "Yaw: " << std::showpos << yaw << " deg   "
                   << "Roll: " << std::showpos << roll << " deg" << std::endl << std::endl;
@@ -515,60 +542,65 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
 
     // INTERPOLATE mix of textures (not used)
     float& interpolate = std::get<float>(core->uniformVars["interpolate"]);
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
         interpolate += 0.1f;
     }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
         interpolate -= 0.1f;
     }
     interpolate = std::clamp(interpolate, 0.0f, 1.0f);
 
     // CROUCHING/STANDING
-    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+    if (key == GLFW_KEY_C && action == GLFW_PRESS) {
         core->camera.changeCameraMode();
     }
 
     // SPOTLIGHT
-    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         bool& spotlightOn = std::get<bool>(core->uniformVars["spotlightOn"]);
         spotlightOn = !spotlightOn;
     }
+    
+    // RENDER MODE
+    if (key == GLFW_KEY_O && action == GLFW_PRESS) {
+        std::string renderModeStr;
+        RenderMode renderMode = core->renderer.getRenderMode();
+        if (renderMode == RenderMode::STANDARD) {
+            renderMode = RenderMode::WIREFRAME;
+            renderModeStr = "WIREFRAME";
+        }
+        else if (renderMode == RenderMode::WIREFRAME) {
+            renderMode = RenderMode::POINTCLOUD;
+            renderModeStr = "POINTCLOUD";
+        }
+        else {
+            renderMode = RenderMode::STANDARD;
+            renderModeStr = "STANDARD";
+        }
+        core->renderer.setRenderMode(renderMode);
+        glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderMode));
+        std::cout << "* Changed RenderMode to: " << renderModeStr << std::endl << std::endl;
+    }
+    
     // GIZMO LENGTH
     float& gizmoLength = std::get<float>(core->uniformVars["gizmoLength"]);
-    if (glfwGetKey(window, GLFW_KEY_PAGE_UP) == GLFW_PRESS) {
+    if (key == GLFW_KEY_PAGE_UP && action == GLFW_PRESS) {
         gizmoLength += 1.0f;
     }
-    if (glfwGetKey(window, GLFW_KEY_PAGE_DOWN) == GLFW_PRESS) {
+    if (key == GLFW_KEY_PAGE_DOWN && action == GLFW_PRESS) {
         gizmoLength -= 1.0f;
     }
     gizmoLength = std::clamp(gizmoLength, 0.0f, 20.0f);
 
-    // SHOW GIZMO NEGATIVE
+    // GIZMO NEGATIVE AXIS
     bool& gizmoNegative = std::get<bool>(core->uniformVars["gizmoNegative"]);
-    if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS) {
+    if (key == GLFW_KEY_HOME && action == GLFW_PRESS) {
         gizmoNegative = !gizmoNegative;
     }
 
     // INFO: POSITION, CAMERA
-    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+    if (key == GLFW_KEY_I && action == GLFW_PRESS) {
         core->displayPosition(core->camera.getViewMatrix());
         core->displayCameraAngles(core->camera.getViewMatrix());
-    }
-    
-    // RENDER MODE
-    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-        std::string renderModeStr;
-        if (core->renderMode == RenderMode::STANDARD) {
-            core->renderMode = RenderMode::WIREFRAME;
-            renderModeStr = "WIREFRAME";
-        } else if (core->renderMode == RenderMode::WIREFRAME) {
-            core->renderMode = RenderMode::POINTCLOUD;
-            renderModeStr = "POINTCLOUD";
-        } else {
-            core->renderMode = RenderMode::STANDARD;
-            renderModeStr = "STANDARD";
-        }
-        glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(core->renderMode));
-        std::cout << "--== Changed RenderMode to: " << renderModeStr << " ==--" << std::endl;
     }
 };

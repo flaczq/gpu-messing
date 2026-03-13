@@ -19,45 +19,51 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\camera\camera.cpp" />
+    <ClCompile Include="src\renderer\mesh.cpp" />
+    <ClCompile Include="src\renderer\model.cpp" />
+    <ClCompile Include="src\renderer\renderer.cpp" />
+    <ClCompile Include="src\scene\camera.cpp" />
     <ClCompile Include="src\core\core.cpp" />
-    <ClCompile Include="src\utils\shader.cpp" />
+    <ClCompile Include="src\renderer\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
-    <ClCompile Include="src\utils\texture.cpp" />
+    <ClCompile Include="src\renderer\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="Game_Engine_2025.aps" />
     <None Include="LICENSE" />
     <None Include="README.md" />
-    <None Include="src\shaders\gizmo.frag" />
-    <None Include="src\shaders\gizmo.vert" />
-    <None Include="src\shaders\grid.frag" />
-    <None Include="src\shaders\grid.vert" />
-    <None Include="src\shaders\light.frag" />
-    <None Include="src\shaders\light.vert" />
-    <None Include="src\shaders\object.frag" />
-    <None Include="src\shaders\object.vert" />
+    <None Include="shaders\gizmo.frag" />
+    <None Include="shaders\gizmo.vert" />
+    <None Include="shaders\grid.frag" />
+    <None Include="shaders\grid.vert" />
+    <None Include="shaders\light.frag" />
+    <None Include="shaders\light.vert" />
+    <None Include="shaders\object.frag" />
+    <None Include="shaders\object.vert" />
     <None Include="vcpkg-configuration.json" />
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\abc.jpg" />
-    <Image Include="src\assets\clearlyai.jpg" />
-    <Image Include="src\assets\container2.png" />
-    <Image Include="src\assets\container2_specular.png" />
-    <Image Include="src\assets\potato.jpg" />
-    <Image Include="src\assets\wall.jpg" />
+    <Image Include="assets\clearlyai.jpg" />
+    <Image Include="assets\container2.png" />
+    <Image Include="assets\container2_specular.png" />
+    <Image Include="assets\potato.jpg" />
+    <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\camera\camera.h" />
+    <ClInclude Include="src\renderer\mesh.h" />
+    <ClInclude Include="src\renderer\model.h" />
+    <ClInclude Include="src\renderer\renderer.h" />
+    <ClInclude Include="src\scene\camera.h" />
     <ClInclude Include="src\utils\commongl.h" />
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="src\utils\shader.h" />
-    <ClInclude Include="src\utils\texture.h" />
+    <ClInclude Include="src\renderer\shader.h" />
+    <ClInclude Include="src\renderer\texture.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />
@@ -157,6 +163,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -173,6 +180,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

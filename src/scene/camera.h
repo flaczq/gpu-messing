@@ -19,20 +19,22 @@ enum class CameraMode {
 class Camera {
 public:
     Camera();
-    ~Camera();
+    // do not worry about deconstruction
+    ~Camera() = default;
 
     bool init(GLFWwindow* window);
-    void processInput(GLFWwindow* window, float deltaTime);
+    void processInput(GLFWwindow* window, float 
+    
+    );
     void processKeyboard(CameraDirection direction, float deltaTime);
     void processMouseScroll(float yOffset);
     void processMouseMovement(float xOffest, float yOffset, GLboolean constrainPitch = true);
 
-    glm::mat4 getViewMatrix();
-    float getZoom();
-    glm::vec3 getPosition();
-    glm::vec3 getFront();
+    glm::mat4 getViewMatrix() const;
+    float getZoom() const;
+    glm::vec3 getPosition() const;
+    glm::vec3 getFront() const;
 
-    float getCameraModeHeight();
     void changeCameraMode();
 
 private:
@@ -53,6 +55,7 @@ private:
     CameraMode cameraMode = CameraMode::STANDING;
 
     void updateCameraVectors();
+    float getCameraModeHeight() const;
 
     // must be static to be passed as a callback reference and so it needs to use camera->var
     static void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);

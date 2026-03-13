@@ -4,6 +4,7 @@
   "dependencies": [
     "glew",
     "glfw3",
-    "glm"
+    "glm",
+    "assimp"
   ]
 }

@@ -18,7 +18,7 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\utils\shader.cpp">
+    <ClCompile Include="src\renderer\shader.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="libs\stb_image.cpp">
@@ -27,10 +27,19 @@
     <ClCompile Include="src\core\core.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\camera\camera.cpp">
+    <ClCompile Include="src\scene\camera.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\utils\texture.cpp">
+    <ClCompile Include="src\renderer\texture.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\renderer.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\model.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="src\renderer\mesh.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -39,34 +48,34 @@
     <None Include="README.md" />
     <None Include="vcpkg.json" />
     <None Include="vcpkg-configuration.json" />
-    <None Include="src\shaders\light.frag" />
+    <None Include="shaders\light.frag" />
     <None Include="LICENSE" />
     <None Include="Game_Engine_2025.aps" />
-    <None Include="src\shaders\light.vert" />
-    <None Include="src\shaders\object.frag" />
-    <None Include="src\shaders\object.vert" />
-    <None Include="src\shaders\gizmo.vert" />
-    <None Include="src\shaders\gizmo.frag" />
-    <None Include="src\shaders\grid.frag" />
-    <None Include="src\shaders\grid.vert" />
+    <None Include="shaders\light.vert" />
+    <None Include="shaders\object.frag" />
+    <None Include="shaders\object.vert" />
+    <None Include="shaders\gizmo.vert" />
+    <None Include="shaders\gizmo.frag" />
+    <None Include="shaders\grid.frag" />
+    <None Include="shaders\grid.vert" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="src\assets\clearlyai.jpg">
+    <Image Include="assets\clearlyai.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
-    <Image Include="src\assets\wall.jpg">
+    <Image Include="assets\wall.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="assets\abc.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
-    <Image Include="src\assets\potato.jpg">
+    <Image Include="assets\potato.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
-    <Image Include="src\assets\container2.png">
+    <Image Include="assets\container2.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
-    <Image Include="src\assets\container2_specular.png">
+    <Image Include="assets\container2_specular.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>
@@ -74,7 +83,7 @@
     <ClInclude Include="resource.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\shader.h">
+    <ClInclude Include="src\renderer\shader.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="libs\stb_image.h">
@@ -86,10 +95,19 @@
     <ClInclude Include="src\utils\commongl.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\camera\camera.h">
+    <ClInclude Include="src\scene\camera.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\texture.h">
+    <ClInclude Include="src\renderer\texture.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\renderer.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\model.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\renderer\mesh.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

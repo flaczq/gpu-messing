@@ -1,4 +1,4 @@
-#include "../camera/camera.h"
+#include "camera.h"
 #include "../core/core.h"
 
 Camera::Camera() {
@@ -9,12 +9,14 @@ Camera::Camera() {
     worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
     orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); //fake
 
-    // STANDING
+    // CameraMode::STANDING
     position.y = getCameraModeHeight();
 
+    // looking at (0,0,0)
+    yaw = -135.0f;  
+    pitch = -11.5f;
+
     firstMouse = true;
-    yaw = -135.0f;  //STANDING
-    pitch = -11.5f; //STANDING
     lastX = 800.0f / 2.0f;
     lastY = 600.0f / 2.0f;
     movementSpeed = 10.0f;
@@ -22,10 +24,7 @@ Camera::Camera() {
     zoom = 45.0f;
 
     updateCameraVectors();
-};
-
-Camera::~Camera() {
-};
+}
 
 bool Camera::init(GLFWwindow* window) {
     // set callbacks: mouse, scroll
@@ -117,28 +116,28 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
     updateCameraVectors();
 }
 
-glm::mat4 Camera::getViewMatrix() {
+glm::mat4 Camera::getViewMatrix() const {
     // camera position, where you looking at, up vector
     return glm::lookAt(position, position + front, up);
 };
 
-float Camera::getZoom() {
+float Camera::getZoom() const {
     return zoom;
 };
 
-glm::vec3 Camera::getPosition() {
+glm::vec3 Camera::getPosition() const {
     return position;
 };
 
-glm::vec3 Camera::getFront() {
+glm::vec3 Camera::getFront() const {
     return front;
 };
 
-float Camera::getCameraModeHeight() {
+float Camera::getCameraModeHeight() const {
     if (cameraMode == CameraMode::STANDING) {
         return 1.75f;
     }
-    return position.y = 0.85;
+    return 0.85f;
 
 }
 
