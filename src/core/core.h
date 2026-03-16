@@ -1,9 +1,11 @@
 #pragma once
 
 #include "../utils/commongl.h"
-#include "../renderer/renderer.h"
 #include "../renderer/shader.h"
-#include "../renderer/texture.h"
+#include "../renderer/textures.h"
+#include "../renderer/mesh.h"
+#include "../renderer/model.h"
+#include "../renderer/renderer.h"
 #include "../scene/camera.h"
 
 using UniformTypes = std::variant<float, std::string, bool>;
@@ -23,13 +25,19 @@ public:
 
 private:
     int screen_w, screen_h;
+
     // shaders
     std::unique_ptr<Shader> objectShader;
     std::unique_ptr<Shader> lightShader;
     std::unique_ptr<Shader> gizmoShader;
     std::unique_ptr<Shader> gridShader;
+
     // textures
     unsigned int diffuseMap, specularMap;
+
+    // mesh, model, camera, renderer
+    Mesh mesh;
+    Model model;
     Camera camera;
     Renderer renderer;
 

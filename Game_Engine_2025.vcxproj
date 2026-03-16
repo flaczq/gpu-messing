@@ -27,7 +27,7 @@
     <ClCompile Include="src\renderer\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
-    <ClCompile Include="src\renderer\texture.cpp" />
+    <ClCompile Include="src\renderer\textures.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -63,7 +63,7 @@
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\renderer\shader.h" />
-    <ClInclude Include="src\renderer\texture.h" />
+    <ClInclude Include="src\renderer\textures.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />

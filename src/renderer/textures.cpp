@@ -1,7 +1,7 @@
-#include "texture.h"
+#include "textures.h"
 #include "../../libs/stb_image.h"
 
-namespace Texture {
+namespace Textures {
     unsigned int load(const char* path) {
         //    ┏┓┏┓┳┓┏┓┳┓┏┓┏┳┓•┳┓┏┓
         //    ┃┓┣ ┃┃┣ ┣┫┣┫ ┃ ┓┃┃┃┓
@@ -37,7 +37,7 @@ namespace Texture {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
         else {
-            std::cout << "ERROR::TEXTURE::NOT_LOADED_SUCCESFULLY: " << path << std::endl;
+            std::cout << "ERROR::TEXTURES::NOT_LOADED_SUCCESFULLY: " << path << std::endl;
         }
 
         stbi_image_free(data);
@@ -45,8 +45,8 @@ namespace Texture {
         return textureID;
     }
 
-    void bind(unsigned int textureID, unsigned int slot) {
-        glActiveTexture(GL_TEXTURE0 + slot);
+    void bind(unsigned int textureID, unsigned int i) {
+        glActiveTexture(GL_TEXTURE0 + i);
         glBindTexture(GL_TEXTURE_2D, textureID);
     }
 

@@ -14,7 +14,8 @@ public:
 	~Renderer() = default;
 
 	RenderMode getRenderMode() const;
-	void setRenderMode(RenderMode n_renderMode);
+	void setRenderMode(RenderMode renderMode);
+
 private:
 	RenderMode renderMode = RenderMode::STANDARD;
 };

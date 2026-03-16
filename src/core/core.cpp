@@ -3,6 +3,7 @@
 Core::Core(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gridShader(nullptr), gizmoShader(nullptr) {
 }
 Core::~Core() {
+    // simple data structures (not meshes)
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteVertexArrays(1, &lightVAO);
     glDeleteVertexArrays(1, &gridVAO);
@@ -18,8 +19,8 @@ Core::~Core() {
     gizmoShader.reset();
     gridShader.reset();
 
-    Texture::clean(diffuseMap);
-    Texture::clean(specularMap);
+    Textures::clean(diffuseMap);
+    Textures::clean(specularMap);
 
 	glfwTerminate();
 }
@@ -78,6 +79,18 @@ bool Core::init() {
     // ONLY ONCE set 'this' as Core
     glfwSetWindowUserPointer(window, this);
 
+    //    ┳┳┓┏┓┏┓┓┏
+    //    ┃┃┃┣ ┗┓┣┫
+    //    ┛ ┗┗┛┗┛┛┗
+    //             
+    //Mesh mesh();
+
+    //    ┳┳┓┏┓┳┓┏┓┓ 
+    //    ┃┃┃┃┃┃┃┣ ┃ 
+    //    ┛ ┗┗┛┻┛┗┛┗┛
+    //               
+    //Model model();
+
     //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
     //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
     //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
@@ -93,8 +106,8 @@ bool Core::init() {
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
     //                        
-    diffuseMap = Texture::load("../assets/container2.png");
-    specularMap = Texture::load("../assets/container2_specular.png");
+    diffuseMap = Textures::load("../assets/container2.png");
+    specularMap = Textures::load("../assets/container2_specular.png");
 
     //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
     //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
@@ -301,8 +314,8 @@ void Core::run() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Texture::bind(diffuseMap, 0);
-        Texture::bind(specularMap, 1);
+        Textures::bind(diffuseMap, 0);
+        Textures::bind(specularMap, 1);
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world

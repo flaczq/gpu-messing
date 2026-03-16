@@ -30,7 +30,7 @@
     <ClCompile Include="src\scene\camera.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\texture.cpp">
+    <ClCompile Include="src\renderer\textures.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\renderer\renderer.cpp">
@@ -98,7 +98,7 @@
     <ClInclude Include="src\scene\camera.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\texture.h">
+    <ClInclude Include="src\renderer\textures.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\renderer\renderer.h">
