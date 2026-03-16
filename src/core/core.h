@@ -26,7 +26,7 @@ public:
 private:
     int screen_w, screen_h;
 
-    // shaders
+    // shaders (little int ptr is created on stack but data itself on heap)
     std::unique_ptr<Shader> objectShader;
     std::unique_ptr<Shader> lightShader;
     std::unique_ptr<Shader> gizmoShader;
@@ -35,11 +35,11 @@ private:
     // textures
     unsigned int diffuseMap, specularMap;
 
-    // data known later then create in on heap: mesh, model
+    // data known later then create in on heap
     std::unique_ptr<Mesh> mesh;
     std::unique_ptr<Model> model;
 
-    // data known at construtor then create it on stack: camera, renderer
+    // data known at start then create it with constructor on stack
     Camera camera;
     Renderer renderer;
 
