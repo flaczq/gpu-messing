@@ -35,9 +35,11 @@ private:
     // textures
     unsigned int diffuseMap, specularMap;
 
-    // mesh, model, camera, renderer
-    Mesh mesh;
-    Model model;
+    // data known later then create in on heap: mesh, model
+    std::unique_ptr<Mesh> mesh;
+    std::unique_ptr<Model> model;
+
+    // data known at construtor then create it on stack: camera, renderer
     Camera camera;
     Renderer renderer;
 

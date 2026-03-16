@@ -12,8 +12,7 @@ Core::~Core() {
 	glDeleteBuffers(1, &gizmoVBO);
 	glDeleteBuffers(1, &gridVBO);
     
-    // shader itself deletes the shader's ID nad unique_ptr deletes object itself
-    // force deleting the shaders
+    // force deleting the shaders -> shader deletes its ID nad unique_ptr deletes object itself
     objectShader.reset();
     lightShader.reset();
     gizmoShader.reset();
@@ -83,13 +82,23 @@ bool Core::init() {
     //    ┃┃┃┣ ┗┓┣┫
     //    ┛ ┗┗┛┗┛┛┗
     //             
-    //Mesh mesh();
+    // TODO
+    //mesh = std::make_unique<Mesh>(NULL, NULL, NULL);
 
     //    ┳┳┓┏┓┳┓┏┓┓ 
     //    ┃┃┃┃┃┃┃┣ ┃ 
     //    ┛ ┗┗┛┻┛┗┛┗┛
     //               
-    //Model model();
+    // TODO
+    //model = std::make_unique<Model>(NULL, NULL, NULL);
+
+    //    ┳┓┏┓┳┓┳┓┏┓┳┓┏┓┳┓
+    //    ┣┫┣ ┃┃┃┃┣ ┣┫┣ ┣┫
+    //    ┛┗┗┛┛┗┻┛┗┛┛┗┗┛┛┗
+    //                    
+    // TODO
+    //Renderer renderer;
+    //renderer.init();
 
     //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
     //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
@@ -97,10 +106,6 @@ bool Core::init() {
     //                 
     Camera camera;
     camera.init(window);
-
-    // TODO
-    Renderer renderer;
-    //renderer.init();
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
