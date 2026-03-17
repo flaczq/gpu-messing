@@ -18,8 +18,8 @@ Core::~Core() {
     gizmoShader.reset();
     gridShader.reset();
 
-    Textures::clean(diffuseMap);
-    Textures::clean(specularMap);
+    TexturePrimitive::clean(diffuseMap);
+    TexturePrimitive::clean(specularMap);
 
 	glfwTerminate();
 }
@@ -97,22 +97,22 @@ bool Core::init() {
     //    ┛┗┗┛┛┗┻┛┗┛┛┗┗┛┛┗
     //                    
     // TODO
-    //Renderer renderer;
+    //Renderer renderer{};
     //renderer.init();
 
     //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
     //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
     //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
     //                 
-    Camera camera;
+    Camera camera{};
     camera.init(window);
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
     //                        
-    diffuseMap = Textures::load("../assets/container2.png");
-    specularMap = Textures::load("../assets/container2_specular.png");
+    diffuseMap = TexturePrimitive::load("../assets/container2.png");
+    specularMap = TexturePrimitive::load("../assets/container2_specular.png");
 
     //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
     //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
@@ -183,7 +183,7 @@ bool Core::init() {
          0.0f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f
     };
     unsigned int gS = 10u;
-    for (unsigned int i = 0; i <= gS; i++) {
+    for (size_t i{}; i <= gS; i++) {
         float pos = (float)i;
         // z axis
         gridPositions.push_back(glm::vec3(pos, 0.0f, 0.0f));
@@ -319,8 +319,8 @@ void Core::run() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Textures::bind(diffuseMap, 0);
-        Textures::bind(specularMap, 1);
+        TexturePrimitive::bind(diffuseMap, 0);
+        TexturePrimitive::bind(specularMap, 1);
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world
@@ -406,7 +406,7 @@ void Core::run() {
         objectShader->setFloat("spotlight.linear", 0.09f);
         objectShader->setFloat("spotlight.quadratic", 0.032f);
 
-        for (unsigned int i = 0; i < cubePositions.size(); i++) {
+        for (size_t i{}; i < cubePositions.size(); i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, cubePositions[i]);
             float angle = 20.0f * i;
@@ -426,7 +426,7 @@ void Core::run() {
         lightShader->setMat4fv("view", view);
 
         // fragment
-        for (unsigned int i = 0; i < 4; i++) {
+        for (size_t i{}; i < 4; i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPositions[i] + lightPos);
             model = glm::scale(model, glm::vec3(0.2f));

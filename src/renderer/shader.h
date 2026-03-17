@@ -6,7 +6,6 @@ class Shader {
 public:
 	unsigned int ID;
 
-	Shader() = default;
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	~Shader();
 

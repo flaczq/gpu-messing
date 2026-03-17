@@ -2,7 +2,7 @@
 
 #include "../utils/commongl.h"
 #include "../renderer/shader.h"
-#include "../renderer/textures.h"
+#include "../renderer/texture_primitive.h"
 #include "../renderer/mesh.h"
 #include "../renderer/model.h"
 #include "../renderer/renderer.h"

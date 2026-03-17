@@ -1,7 +1,7 @@
-#include "textures.h"
+#include "texture_primitive.h"
 #include "../../libs/stb_image.h"
 
-namespace Textures {
+namespace TexturePrimitive {
     unsigned int load(const char* path) {
         //    ┏┓┏┓┳┓┏┓┳┓┏┓┏┳┓•┳┓┏┓
         //    ┃┓┣ ┃┃┣ ┣┫┣┫ ┃ ┓┃┃┃┓
@@ -37,7 +37,7 @@ namespace Textures {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
         else {
-            std::cout << "ERROR::TEXTURES::NOT_LOADED_SUCCESFULLY: " << path << std::endl;
+            std::cout << "ERROR::TEXTURE_PRIMITIVE::LOADED_FAILED: " << path << std::endl;
         }
 
         stbi_image_free(data);
