@@ -15,13 +15,14 @@ Core::~Core() {
     // force deleting the shaders -> shader deletes its ID nad unique_ptr deletes object itself
     objectShader.reset();
     lightShader.reset();
-    gizmoShader.reset();
     gridShader.reset();
+    gizmoShader.reset();
+    modelShader.reset();
 
-    TexturePrimitive::clean(diffuseMap);
-    TexturePrimitive::clean(specularMap);
+    TexturePrimitive::clean(diffuseMapTP);
+    TexturePrimitive::clean(specularMapTP);
 
-	glfwTerminate();
+    glfwTerminate();
 }
 
 bool Core::init() {
@@ -78,26 +79,34 @@ bool Core::init() {
     // ONLY ONCE set 'this' as Core
     glfwSetWindowUserPointer(window, this);
 
-    //    ┳┳┓┏┓┏┓┓┏
-    //    ┃┃┃┣ ┗┓┣┫
-    //    ┛ ┗┗┛┗┛┛┗
-    //             
-    // TODO
-    //mesh = std::make_unique<Mesh>(NULL, NULL, NULL);
+    //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
+    //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
+    //    ┗┛┛┗┛┗┻┛┗┛┛┗┗┛
+    //                  
+    objectShader = std::make_unique<Shader>("../shaders/object.vert", "../shaders/object.frag");
+    lightShader = std::make_unique<Shader>("../shaders/light.vert", "../shaders/light.frag");
+    gridShader = std::make_unique<Shader>("../shaders/grid.vert", "../shaders/grid.frag");
+    gizmoShader = std::make_unique<Shader>("../shaders/gizmo.vert", "../shaders/gizmo.frag");
+    modelShader = std::make_unique<Shader>("../shaders/model.vert", "../shaders/model.frag");
 
-    //    ┳┳┓┏┓┳┓┏┓┓ 
-    //    ┃┃┃┃┃┃┃┣ ┃ 
-    //    ┛ ┗┗┛┻┛┗┛┗┛
-    //               
-    // TODO
-    //model = std::make_unique<Model>(NULL, NULL, NULL);
+    //    ┳┳┓┏┓┳┓┏┓┓   ┏┓  ┳┳┓┏┓┏┓┓┏
+    //    ┃┃┃┃┃┃┃┣ ┃   ┣╋  ┃┃┃┣ ┗┓┣┫
+    //    ┛ ┗┗┛┻┛┗┛┗┛  ┗┻  ┛ ┗┗┛┗┛┛┗
+    //                              
+    modelSoldier = std::make_unique<Model>("../assets/models/Soldier.glb");
+
+    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
+    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
+    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛  ┣┛┛┗┗┛ ┗┻ ┻ ┗┗┛┗┛┗┛
+    //                                           
+    diffuseMapTP = TexturePrimitive::load("../assets/container2.png");
+    specularMapTP = TexturePrimitive::load("../assets/container2_specular.png");
 
     //    ┳┓┏┓┳┓┳┓┏┓┳┓┏┓┳┓
     //    ┣┫┣ ┃┃┃┃┣ ┣┫┣ ┣┫
     //    ┛┗┗┛┛┗┻┛┗┛┛┗┗┛┛┗
     //                    
-    // TODO
-    //Renderer renderer{};
+    Renderer renderer{};
     //renderer.init();
 
     //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
@@ -107,26 +116,10 @@ bool Core::init() {
     Camera camera{};
     camera.init(window);
 
-    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓┏┓
-    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣ ┗┓
-    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛┗┛
-    //                        
-    diffuseMap = TexturePrimitive::load("../assets/container2.png");
-    specularMap = TexturePrimitive::load("../assets/container2_specular.png");
-
-    //    ┏┓┓┏┏┓┳┓┏┓┳┓┏┓
-    //    ┗┓┣┫┣┫┃┃┣ ┣┫┗┓
-    //    ┗┛┛┗┛┗┻┛┗┛┛┗┗┛
-    //                  
-    objectShader = std::make_unique<Shader>("../shaders/object.vert", "../shaders/object.frag");
-    lightShader = std::make_unique<Shader>("../shaders/light.vert", "../shaders/light.frag");
-    gridShader = std::make_unique<Shader>("../shaders/grid.vert", "../shaders/grid.frag");
-    gizmoShader = std::make_unique<Shader>("../shaders/gizmo.vert", "../shaders/gizmo.frag");
-
-    //    •┳┓┏┓┳┳┏┳┓  ┳┓┏┓┏┳┓┏┓
-    //    ┓┃┃┃┃┃┃ ┃   ┃┃┣┫ ┃ ┣┫
-    //    ┗┛┗┣┛┗┛ ┻   ┻┛┛┗ ┻ ┛┗
-    //                         
+    //    ┳┓┏┓┏┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
+    //    ┃┃┣┫ ┃ ┣┫  ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
+    //    ┻┛┛┗ ┻ ┛┗  ┣┛┛┗┗┛ ┗┻ ┻ ┗┗┛┗┛┗┛
+    //                                  
     float vertices[] = {
         // positions          // normals           // texture coords
         -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,
@@ -201,7 +194,7 @@ bool Core::init() {
     cubePositions.push_back(glm::vec3(1.3f, -2.0f, -2.5f));
     cubePositions.push_back(glm::vec3(1.5f, 2.0f, -2.5f));
     cubePositions.push_back(glm::vec3(1.5f, 0.2f, -1.5f));
-    cubePositions.push_back(glm::vec3(-1.3f,  1.0f, -1.5f));
+    cubePositions.push_back(glm::vec3(-1.3f, 1.0f, -1.5f));
     pointLightPositions.push_back(glm::vec3(0.7f, 0.2f, 2.0f));
     pointLightPositions.push_back(glm::vec3(2.3f, -3.3f, -4.0f));
     pointLightPositions.push_back(glm::vec3(-4.0f, 2.0f, -12.0f));
@@ -280,11 +273,11 @@ bool Core::init() {
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderer.getRenderMode()));
 
-	// set callbacks: window resize, single key click
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // set callbacks: window resize, single key click
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetKeyCallback(window, key_callback);
 
-	return 1;
+    return 1;
 }
 
 void Core::run() {
@@ -319,8 +312,8 @@ void Core::run() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        TexturePrimitive::bind(diffuseMap, 0);
-        TexturePrimitive::bind(specularMap, 1);
+        TexturePrimitive::bind(diffuseMapTP, 0);
+        TexturePrimitive::bind(specularMapTP, 1);
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world
@@ -349,11 +342,9 @@ void Core::run() {
         objectShader->use();
         glBindVertexArray(VAO);
 
-        // vertex
         objectShader->setMat4fv("projection", projection);
         objectShader->setMat4fv("view", view);
 
-        // fragment
         objectShader->setBool("spotlightOn", std::get<bool>(uniformVars["spotlightOn"]));
         objectShader->setVec3fv("viewPos", camera.getPosition());
 
@@ -421,11 +412,8 @@ void Core::run() {
         lightShader->use();
         glBindVertexArray(lightVAO);
 
-        // vertex
         lightShader->setMat4fv("projection", projection);
         lightShader->setMat4fv("view", view);
-
-        // fragment
         for (size_t i{}; i < 4; i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPositions[i] + lightPos);
@@ -436,17 +424,29 @@ void Core::run() {
         }
         // ------------------------------------------------ //
 
+        // ----------------- model shader ----------------- //
+        modelShader->use();
+
+        modelShader->setMat4fv("projection", projection);
+        modelShader->setMat4fv("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(2.0f, 3.0f, 4.0f));
+        model = glm::scale(model, glm::vec3(50.0f));
+        modelShader->setMat4fv("model", model);
+
+        modelSoldier->draw(*modelShader);
+
+        // ------------------------------------------------ //
+
         // ------------------ grid shader ----------------- //
         gridShader->use();
         glBindVertexArray(gridVAO);
 
-        // vertex
         model = glm::mat4(1.0f);
         gridShader->setMat4fv("model", model);
         gridShader->setMat4fv("projection", projection);
         gridShader->setMat4fv("view", view);
 
-        // fragment
         glDisable(GL_DEPTH_TEST);
         // antialiasing
         glEnable(GL_LINE_SMOOTH);
@@ -465,7 +465,6 @@ void Core::run() {
         gizmoShader->use();
         glBindVertexArray(gizmoVAO);
 
-        // vertex
         model = glm::mat4(1.0f);
         model = glm::scale(model, glm::vec3(std::get<float>(uniformVars["gizmoLength"])));
         gizmoShader->setBool("gizmoNegative", std::get<bool>(uniformVars["gizmoNegative"]));
@@ -473,7 +472,6 @@ void Core::run() {
         gizmoShader->setMat4fv("projection", projection);
         gizmoShader->setMat4fv("view", view);
 
-        // fragment
         glDisable(GL_DEPTH_TEST);
         // antialiasing
         glEnable(GL_LINE_SMOOTH);
@@ -488,7 +486,7 @@ void Core::run() {
         glEnable(GL_DEPTH_TEST);
         // ------------------------------------------------ //
 
-        // no need to unbind it every time
+        // no need to unbind it every time but w/e
         glBindVertexArray(0);
 
         glfwPollEvents();

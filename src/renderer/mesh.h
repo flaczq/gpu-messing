@@ -23,6 +23,10 @@ struct Texture {
 
 class Mesh {
 public:
+	// move constructor
+	Mesh(Mesh&& other) noexcept;
+	// block copying
+	Mesh(const Mesh&) = delete;
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 	~Mesh();
 

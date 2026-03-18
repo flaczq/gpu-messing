@@ -1,5 +1,20 @@
 #include "mesh.h"
 
+Mesh::Mesh(Mesh&& other) noexcept {
+    this->VAO = other.VAO;
+    this->VBO = other.VBO;
+    this->EBO = other.EBO;
+
+    this->vertices = std::move(other.vertices);
+    this->indices = std::move(other.indices);
+    this->textures = std::move(other.textures);
+
+    // reset IDs to not deconstruct them
+    other.VAO = 0;
+    other.VBO = 0;
+    other.EBO = 0;
+}
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -9,9 +24,15 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 }
 
 Mesh::~Mesh() {
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
+    if (VAO != 0) {
+        glDeleteVertexArrays(1, &VAO);
+    }
+    if (VBO != 0) {
+        glDeleteBuffers(1, &VBO);
+    }
+    if (EBO != 0) {
+        glDeleteBuffers(1, &EBO);
+    }
 }
 
 void Mesh::draw(Shader &shader) {
@@ -43,10 +64,10 @@ void Mesh::draw(Shader &shader) {
     // state reset
     glActiveTexture(GL_TEXTURE0);
 
-    //    ┳┓┳┓┏┓┓ ┏
-    //    ┃┃┣┫┣┫┃┃┃
-    //    ┻┛┛┗┛┗┗┻┛
-    //             
+    //    ┳┓┳┓┏┓┓ ┏•┳┓┏┓
+    //    ┃┃┣┫┣┫┃┃┃┓┃┃┃┓
+    //    ┻┛┛┗┛┗┗┻┛┗┛┗┗┛
+    //                  
     glBindVertexArray(VAO);
     // what to render, number of elements, type, offset
     glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
@@ -83,8 +104,8 @@ void Mesh::setupMesh() {
     glBindVertexArray(VAO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
@@ -99,7 +120,7 @@ void Mesh::setupMesh() {
     glEnableVertexAttribArray(2);
 
     // tangent
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Tangent));
+    /*glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Tangent));
     glEnableVertexAttribArray(3);
 
     // bitangent
@@ -107,12 +128,12 @@ void Mesh::setupMesh() {
     glEnableVertexAttribArray(4);
 
     // boneIDs
-    glVertexAttribPointer(5, 4, GL_INT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, BoneIDs));
+    glVertexAttribIPointer(5, 4, GL_INT, sizeof(Vertex), (GLvoid*)offsetof(Vertex, BoneIDs));
     glEnableVertexAttribArray(5);
 
     // weights
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Weights));
-    glEnableVertexAttribArray(6);
+    glEnableVertexAttribArray(6);*/
 
     // unbind <=> clean up
     glBindVertexArray(0);

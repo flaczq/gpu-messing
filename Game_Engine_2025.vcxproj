@@ -31,6 +31,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\models\Soldier.glb" />
+    <None Include="ATTRIBUTIONS.md" />
     <None Include="Game_Engine_2025.aps" />
     <None Include="LICENSE" />
     <None Include="README.md" />
@@ -40,6 +42,8 @@
     <None Include="shaders\grid.vert" />
     <None Include="shaders\light.frag" />
     <None Include="shaders\light.vert" />
+    <None Include="shaders\model.frag" />
+    <None Include="shaders\model.vert" />
     <None Include="shaders\object.frag" />
     <None Include="shaders\object.vert" />
     <None Include="vcpkg-configuration.json" />

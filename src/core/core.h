@@ -2,9 +2,9 @@
 
 #include "../utils/commongl.h"
 #include "../renderer/shader.h"
-#include "../renderer/texture_primitive.h"
-#include "../renderer/mesh.h"
 #include "../renderer/model.h"
+#include "../renderer/mesh.h"
+#include "../renderer/texture_primitive.h"
 #include "../renderer/renderer.h"
 #include "../scene/camera.h"
 
@@ -29,17 +29,18 @@ private:
     // shaders (little int ptr is created on stack but data itself on heap)
     std::unique_ptr<Shader> objectShader;
     std::unique_ptr<Shader> lightShader;
-    std::unique_ptr<Shader> gizmoShader;
     std::unique_ptr<Shader> gridShader;
+    std::unique_ptr<Shader> gizmoShader;
+    std::unique_ptr<Shader> modelShader;
 
     // textures
-    unsigned int diffuseMap, specularMap;
+    unsigned int diffuseMapTP, specularMapTP;
 
-    // data known later then create in on heap
-    std::unique_ptr<Mesh> mesh;
-    std::unique_ptr<Model> model;
+    // data known later then create in on the heap
+    std::unique_ptr<Model> modelSoldier;
+    //std::unique_ptr<Mesh> mesh;
 
-    // data known at start then create it with constructor on stack
+    // data known at start then create it with constructor on the stack
     Camera camera;
     Renderer renderer;
 

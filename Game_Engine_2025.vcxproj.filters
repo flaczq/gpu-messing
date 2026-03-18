@@ -58,6 +58,10 @@
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\grid.frag" />
     <None Include="shaders\grid.vert" />
+    <None Include="ATTRIBUTIONS.md" />
+    <None Include="assets\models\Soldier.glb" />
+    <None Include="shaders\model.frag" />
+    <None Include="shaders\model.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
