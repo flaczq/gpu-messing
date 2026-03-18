@@ -6,6 +6,10 @@ class Shader {
 public:
 	unsigned int ID;
 
+	Shader(Shader&& other) noexcept;
+	Shader& operator=(Shader&& other) noexcept;
+	Shader(const Shader&) = delete;
+	Shader& operator=(const Shader&) = delete;
 	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
 	~Shader();
 

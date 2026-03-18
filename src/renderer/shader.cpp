@@ -1,5 +1,26 @@
 #include "shader.h"
 
+Shader::Shader(Shader&& other) noexcept {
+    this->ID = other.ID;
+
+    other.ID = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept {
+    if (this != &other) {
+        // delete old GPU program
+        if (this->ID != 0) {
+            glDeleteProgram(this->ID);
+        }
+
+        // copy the new ID
+        this->ID = other.ID;
+
+        other.ID = 0;
+    }
+    return *this;
+}
+
 Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
     //    ┏┓•┓ ┏┓  ┓ ┏┓┏┓┳┓•┳┓┏┓
     //    ┣ ┓┃ ┣   ┃ ┃┃┣┫┃┃┓┃┃┃┓
@@ -78,7 +99,9 @@ Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
     glDeleteShader(vertex);
 }
 Shader::~Shader() {
-    glDeleteProgram(ID);
+    if (ID != 0) {
+        glDeleteProgram(ID);
+    }
 }
 
 void Shader::use() const {

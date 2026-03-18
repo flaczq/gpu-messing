@@ -1,7 +1,15 @@
 #include "core.h"
 
-Core::Core(int w, int h) : screen_w(w), screen_h(h), objectShader(nullptr), lightShader(nullptr), gridShader(nullptr), gizmoShader(nullptr) {
+Core::Core(int w, int h) {
+    screen_w = w;
+    screen_h = h;
+
+    objectShader = nullptr;
+    lightShader = nullptr;
+    gridShader = nullptr;
+    gizmoShader = nullptr;
 }
+
 Core::~Core() {
     // simple data structures (not meshes)
 	glDeleteVertexArrays(1, &VAO);

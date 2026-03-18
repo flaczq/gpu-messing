@@ -15,6 +15,29 @@ Mesh::Mesh(Mesh&& other) noexcept {
     other.EBO = 0;
 }
 
+Mesh& Mesh::operator=(Mesh&& other) noexcept {
+    if (this != &other) {
+        // delete old GPU data
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
+        glDeleteBuffers(1, &EBO);
+
+        // copy the new data
+        this->VAO = other.VAO;
+        this->VBO = other.VBO;
+        this->EBO = other.EBO;
+
+        this->vertices = std::move(other.vertices);
+        this->indices = std::move(other.indices);
+        this->textures = std::move(other.textures);
+
+        other.VAO = 0;
+        other.VBO = 0;
+        other.EBO = 0;
+    }
+    return *this;
+}
+
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
 	this->vertices = vertices;
 	this->indices = indices;
@@ -120,7 +143,7 @@ void Mesh::setupMesh() {
     glEnableVertexAttribArray(2);
 
     // tangent
-    /*glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Tangent));
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Tangent));
     glEnableVertexAttribArray(3);
 
     // bitangent
@@ -133,7 +156,7 @@ void Mesh::setupMesh() {
 
     // weights
     glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Weights));
-    glEnableVertexAttribArray(6);*/
+    glEnableVertexAttribArray(6);
 
     // unbind <=> clean up
     glBindVertexArray(0);
