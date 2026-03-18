@@ -5,4 +5,4 @@
 
 ## Attributions
 
-* [for those who come after](ATTRIBUTIONS.md)
+🖌️ [for those who come after](ATTRIBUTIONS.md)
