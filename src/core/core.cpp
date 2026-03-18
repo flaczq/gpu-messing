@@ -432,20 +432,6 @@ void Core::run() {
         }
         // ------------------------------------------------ //
 
-        // ----------------- model shader ----------------- //
-        modelShader->use();
-
-        modelShader->setMat4fv("projection", projection);
-        modelShader->setMat4fv("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(2.0f, 3.0f, 4.0f));
-        model = glm::scale(model, glm::vec3(50.0f));
-        modelShader->setMat4fv("model", model);
-
-        modelSoldier->draw(*modelShader);
-
-        // ------------------------------------------------ //
-
         // ------------------ grid shader ----------------- //
         gridShader->use();
         glBindVertexArray(gridVAO);
@@ -492,6 +478,23 @@ void Core::run() {
         glDisable(GL_LINE_SMOOTH);
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
+        // ------------------------------------------------ //
+
+        // ----------------- model shader ----------------- //
+        modelShader->use();
+
+        modelShader->setVec3fv("lightDir", glm::vec3(0.5f, -1.0f, -0.5f));
+        modelShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        modelShader->setMat4fv("projection", projection);
+        modelShader->setMat4fv("view", view);
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 3.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, currentTime * glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(100.0f));
+        modelShader->setMat4fv("model", model);
+
+        modelSoldier->draw(*modelShader);
         // ------------------------------------------------ //
 
         // no need to unbind it every time but w/e

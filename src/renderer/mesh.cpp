@@ -78,8 +78,7 @@ void Mesh::draw(Shader &shader) {
         } else if (name == "texture_height") {
             number = std::to_string(heightNr++);
         }
-        shader.setInt("material." + name + number, i);
-
+        shader.setInt("material_" + name + number, i);
 
         glBindTexture(GL_TEXTURE_2D, textures[i].id);
     }
