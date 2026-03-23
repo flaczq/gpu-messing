@@ -36,6 +36,7 @@ public:
     glm::vec3 getFront() const;
 
     void changeCameraMode();
+    void changeGodMode();
 
 private:
     glm::vec3 position;
@@ -52,7 +53,9 @@ private:
     float movementSpeed;
     float mouseSensitivity;
     float zoom;
+
     CameraMode cameraMode = CameraMode::STANDING;
+    bool godMode = false;
 
     void updateCameraVectors();
     float getCameraModeHeight() const;

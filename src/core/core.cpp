@@ -27,8 +27,8 @@ Core::~Core() {
     gizmoShader.reset();
     modelShader.reset();
 
-    TexturePrimitive::clean(diffuseMapTP);
-    TexturePrimitive::clean(specularMapTP);
+    //TexturePrimitive::clean(diffuseMapTP);
+    //TexturePrimitive::clean(specularMapTP);
 
     glfwTerminate();
 }
@@ -107,8 +107,8 @@ bool Core::init() {
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛  ┣┛┛┗┗┛ ┗┻ ┻ ┗┗┛┗┛┗┛
     //                                           
-    diffuseMapTP = TexturePrimitive::load("../assets/container2.png");
-    specularMapTP = TexturePrimitive::load("../assets/container2_specular.png");
+    //diffuseMapTP = TexturePrimitive::load("../assets/container2.png");
+    //specularMapTP = TexturePrimitive::load("../assets/container2_specular.png");
 
     //    ┳┓┏┓┳┓┳┓┏┓┳┓┏┓┳┓
     //    ┣┫┣ ┃┃┃┃┣ ┣┫┣ ┣┫
@@ -293,7 +293,7 @@ void Core::run() {
     //    ┃┃┣┫┣┫┓┣┫┣┫┃ ┣ ┗┓
     //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
     //                     
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    glm::vec3 lightPos(1.0f, 2.0f, 3.0f);
     //glm::vec3 lightColor(1.0f);
     float radius = 2.0f;
     // Phong: light = ambient + diffuse + specular
@@ -320,8 +320,8 @@ void Core::run() {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        TexturePrimitive::bind(diffuseMapTP, 0);
-        TexturePrimitive::bind(specularMapTP, 1);
+        //TexturePrimitive::bind(diffuseMapTP, 0);
+        //TexturePrimitive::bind(specularMapTP, 1);
 
         // transformation matrix: clip = projectionM * viewM * modelM * local
         // 1. local * modelM            -> world
@@ -347,7 +347,7 @@ void Core::run() {
         view = camera.getViewMatrix();
 
         // ----------------- object shader ---------------- //
-        objectShader->use();
+        /*objectShader->use();
         glBindVertexArray(VAO);
 
         objectShader->setMat4fv("projection", projection);
@@ -413,23 +413,30 @@ void Core::run() {
             objectShader->setMat4fv("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        }*/
         // ------------------------------------------------ //
 
         // ----------------- light shader ----------------- //
-        lightShader->use();
+        /*lightShader->use();
         glBindVertexArray(lightVAO);
 
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 3.0f));
+        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, currentTime * glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(0.2f));
+        lightShader->setMat4fv("model", model);
         lightShader->setMat4fv("projection", projection);
         lightShader->setMat4fv("view", view);
-        for (size_t i{}; i < 4; i++) {
+        glDrawArrays(GL_TRIANGLES, 0, 36);*/
+        /*for (size_t i{}; i < 4; i++) {
             model = glm::mat4(1.0f);
             model = glm::translate(model, pointLightPositions[i] + lightPos);
             model = glm::scale(model, glm::vec3(0.2f));
             lightShader->setMat4fv("model", model);
 
             glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
+        }*/
         // ------------------------------------------------ //
 
         // ------------------ grid shader ----------------- //
@@ -577,6 +584,11 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
     }
     interpolate = std::clamp(interpolate, 0.0f, 1.0f);
 
+    // GOD MODE
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        core->camera.changeGodMode();
+    }
+
     // CROUCHING/STANDING
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
         core->camera.changeCameraMode();
@@ -586,6 +598,7 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
     if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         bool& spotlightOn = std::get<bool>(core->uniformVars["spotlightOn"]);
         spotlightOn = !spotlightOn;
+        std::cout << "* Changed spotlight to: " << std::boolalpha << spotlightOn << std::endl << std::endl;
     }
     
     // RENDER MODE

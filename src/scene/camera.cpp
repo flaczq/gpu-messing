@@ -77,14 +77,18 @@ void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
     if (direction == CameraDirection::RIGHT) {
         position += right * velocity;
     }
-    /*if (direction == CameraDirection::UP) {
-        position += up * velocity;
+    // GOD MODE ACTIVATED
+    if (godMode) {
+        if (direction == CameraDirection::UP) {
+            position += up * velocity;
+        }
+        if (direction == CameraDirection::DOWN) {
+            position -= up * velocity;
+        }
+    } else {
+        // FPS stay on the ground, peasant
+        position.y = getCameraModeHeight();
     }
-    if (direction == CameraDirection::DOWN) {
-        position -= up * velocity;
-    }*/
-    // FPS stay on the ground, boy
-    position.y = getCameraModeHeight();
 }
 
 void Camera::processMouseScroll(float yOffset) {
@@ -142,13 +146,22 @@ float Camera::getCameraModeHeight() const {
 }
 
 void Camera::changeCameraMode() {
+    std::string cameraModeStr;
     if (cameraMode == CameraMode::STANDING) {
         cameraMode = CameraMode::CROUCHING;
+        cameraModeStr = "CROUCHING";
     } else {
         cameraMode = CameraMode::STANDING;
+        cameraModeStr = "STANDING";
     }
     position.y = getCameraModeHeight();
+    std::cout << "* Changed camera mode to: " << cameraModeStr << std::endl << std::endl;
 };
+
+void Camera::changeGodMode() {
+    godMode = !godMode;
+    std::cout << "* Changed god mode to: " << godMode << std::endl << std::endl;
+}
 
 void Camera::updateCameraVectors() {
     glm::vec3 currFront = glm::vec3(0.0f, 0.0f, 0.0f);

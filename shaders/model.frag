@@ -17,16 +17,18 @@ void main() {
     // texture color
     vec4 texColor = texture(material_texture_diffuse1, TexCoords);
 
-    // ambient
+    // ambient (background light from far away)
     float ambientStrength = 0.2f;
     vec3 ambient = ambientStrength * lightColor;
 
-    // diffuse
-    // change direction towards the light
+    // diffuse (how much light stays on the object instead of bouncing away)
     vec3 lightDirNorm = normalize(-lightDir);
-    // less angle = more light
+    // max to reject -values and leave only black from under the object
+    // dot() = |a|*|b|*cos(angle) and less angle = more light
     float diff = max(dot(norm, lightDirNorm), 0.0f);
     vec3 diffuse = diff * lightColor;
+
+    // specular (shininess)
 
     vec3 result = (ambient + diffuse) * texColor.rgb;
     FragColor = vec4(result, texColor.a);
