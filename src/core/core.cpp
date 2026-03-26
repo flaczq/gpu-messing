@@ -490,16 +490,20 @@ void Core::run() {
         // ----------------- model shader ----------------- //
         modelShader->use();
 
-        modelShader->setVec3fv("lightDir", glm::vec3(0.5f, -1.0f, -0.5f));
-        modelShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        // scale fix and optimization with CPU computation
+        model = glm::mat4(1.0f);
+        modelShader->setMat3fv("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
         modelShader->setMat4fv("projection", projection);
         modelShader->setMat4fv("view", view);
-        model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(3.0f, 0.0f, 3.0f));
         model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, currentTime * glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::rotate(model, currentTime * glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, glm::vec3(100.0f));
         modelShader->setMat4fv("model", model);
+
+        modelShader->setVec3fv("lightDir", glm::vec3(0.5f, -1.0f, -0.5f));
+        modelShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+        modelShader->setVec3fv("viewPos", camera.getPosition());
 
         modelSoldier->draw(*modelShader);
         // ------------------------------------------------ //

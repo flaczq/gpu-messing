@@ -160,7 +160,7 @@ void Camera::changeCameraMode() {
 
 void Camera::changeGodMode() {
     godMode = !godMode;
-    std::cout << "* Changed god mode to: " << godMode << std::endl << std::endl;
+    std::cout << "* Changed god mode to: " << (godMode ? "true" : "false") << std::endl << std::endl;
 }
 
 void Camera::updateCameraVectors() {
