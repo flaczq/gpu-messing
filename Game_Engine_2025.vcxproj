@@ -19,11 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ecs\systems\render_system.cpp" />
     <ClCompile Include="src\renderer\mesh.cpp" />
     <ClCompile Include="src\renderer\model.cpp" />
     <ClCompile Include="src\renderer\renderer.cpp" />
     <ClCompile Include="src\renderer\texture_primitive.cpp" />
-    <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\ecs\components\camera_component.cpp" />
     <ClCompile Include="src\core\core.cpp" />
     <ClCompile Include="src\renderer\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -58,11 +59,13 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\ecs\components\components.h" />
+    <ClInclude Include="src\ecs\systems\render_system.h" />
     <ClInclude Include="src\renderer\mesh.h" />
     <ClInclude Include="src\renderer\model.h" />
     <ClInclude Include="src\renderer\renderer.h" />
     <ClInclude Include="src\renderer\texture_primitive.h" />
-    <ClInclude Include="src\scene\camera.h" />
+    <ClInclude Include="src\ecs\components\camera_component.h" />
     <ClInclude Include="src\utils\commongl.h" />
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="libs\stb_image.h" />

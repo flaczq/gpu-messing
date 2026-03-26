@@ -24,3 +24,11 @@ struct PointLightComponent {
     glm::vec3 color;
     float intensity;
 };
+
+struct CameraComponent {
+    float fov;
+    float nearPlane;
+    float farPlane;
+    glm::vec3 up;
+    glm::vec3 front;
+};
