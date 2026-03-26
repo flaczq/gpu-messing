@@ -27,8 +27,12 @@ public:
 private:
     entt::registry registry;
 
-    std::map<std::string, std::unique_ptr<Model>> models;
-    std::map<std::string, std::unique_ptr<Shader>> shaders;
+    std::unordered_map<std::string, unsigned int> modelLibrary;
+    std::unordered_map<std::string, unsigned int> shaderLibrary;
+
+    void renderSystems(float dt);
+    void updateSystems(float dt);
+    void movementSystem(float dt);
 
     int screen_w, screen_h;
 
@@ -72,8 +76,6 @@ private:
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;
 
-    void updateSystems(float dt);
-    void renderSystems();
     void showFps(GLFWwindow* window);
     void displayPosition(glm::mat4 viewMatrix);
     void displayCameraAngles(glm::mat4 viewMatrix);

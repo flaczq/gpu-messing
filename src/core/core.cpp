@@ -121,8 +121,8 @@ bool Core::init() {
     //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
     //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
     //                 
-    Camera camera{};
-    camera.init(window);
+    //Camera camera{};
+    //camera.init(window);
 
     //    ┳┓┏┓┏┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //    ┃┃┣┫ ┃ ┣┫  ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -293,244 +293,20 @@ void Core::setup() {
     //    ┣ ┃ ┗┓
     //    ┗┛┗┛┗┛
     //          
-    auto entity = registry.create();
-    registry.emplace<Transform>(entity, glm::vec3(0.0f, 0.0f, 0.0f));
-}
-
-void Core::run() {
-    //    ┓┏┏┓┳┓•┏┓┳┓┓ ┏┓┏┓
-    //    ┃┃┣┫┣┫┓┣┫┣┫┃ ┣ ┗┓
-    //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
-    //                     
-    glm::vec3 lightPos(1.0f, 2.0f, 3.0f);
-    //glm::vec3 lightColor(1.0f);
-    float radius = 2.0f;
-    // Phong: light = ambient + diffuse + specular
-
-    //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
-    //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
-    //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
-    //                                 
-    while (!glfwWindowShouldClose(window)) {
-        GLfloat currentTime = static_cast<float>(glfwGetTime());
-        deltaTime = currentTime - lastFrame;
-        lastFrame = currentTime;
-
-        lightPos.x = cos(currentTime) * radius;
-        lightPos.y = sin(currentTime) * radius;
-
-        //lightColor.x = sin(currentTime * 2.0f);
-        //lightColor.y = sin(currentTime * 0.7f);
-        //lightColor.z = sin(currentTime * 1.3f);
-
-        showFps(window);
-        camera.processInput(window, deltaTime);
-
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //TexturePrimitive::bind(diffuseMapTP, 0);
-        //TexturePrimitive::bind(specularMapTP, 1);
-
-        // transformation matrix: clip = projectionM * viewM * modelM * local
-        // 1. local * modelM            -> world
-        // 2. world * viewM             -> space (lookAt())
-        // 3. space * projectionM       -> clip
-        // 4. clip  * viewportTransform -> screen
-
-        // transform
-        //glm::mat4 transform = glm::mat4(1.0f);
-        //transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        //transform = glm::rotate(transform, currentTime, glm::vec3(0.0, 0.0, 1.0));
-        //transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
-
-        // model
-        glm::mat4 model = glm::mat4(1.0f);
-
-        // projection
-        glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.getZoom()), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
-
-        // view
-        glm::mat4 view = glm::mat4(1.0f);
-        view = camera.getViewMatrix();
-
-        // ----------------- object shader ---------------- //
-        /*objectShader->use();
-        glBindVertexArray(VAO);
-
-        objectShader->setMat4fv("projection", projection);
-        objectShader->setMat4fv("view", view);
-
-        objectShader->setBool("spotlightOn", std::get<bool>(uniformVars["spotlightOn"]));
-        objectShader->setVec3fv("viewPos", camera.getPosition());
-
-        objectShader->setInt("material.diffuse", 0);
-        objectShader->setInt("material.specular", 1);
-        objectShader->setFloat("material.shininess", 64.0f);
-
-        objectShader->setVec3fv("dirLight.direction", glm::vec3(-0.2f, -1.0f, -0.3f));
-        objectShader->setVec3fv("dirLight.ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader->setVec3fv("dirLight.diffuse", glm::vec3(0.4f, 0.4f, 0.4f));
-        objectShader->setVec3fv("dirLight.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-
-        objectShader->setVec3fv("pointLights[0].position", pointLightPositions[0] + lightPos);
-        objectShader->setVec3fv("pointLights[0].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader->setVec3fv("pointLights[0].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        objectShader->setVec3fv("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader->setFloat("pointLights[0].constant", 1.0f);
-        objectShader->setFloat("pointLights[0].linear", 0.09f);
-        objectShader->setFloat("pointLights[0].quadratic", 0.032f);
-        objectShader->setVec3fv("pointLights[1].position", pointLightPositions[1] + lightPos);
-        objectShader->setVec3fv("pointLights[1].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader->setVec3fv("pointLights[1].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        objectShader->setVec3fv("pointLights[1].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader->setFloat("pointLights[1].constant", 1.0f);
-        objectShader->setFloat("pointLights[1].linear", 0.09f);
-        objectShader->setFloat("pointLights[1].quadratic", 0.032f);
-        objectShader->setVec3fv("pointLights[2].position", pointLightPositions[2] + lightPos);
-        objectShader->setVec3fv("pointLights[2].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader->setVec3fv("pointLights[2].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        objectShader->setVec3fv("pointLights[2].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader->setFloat("pointLights[2].constant", 1.0f);
-        objectShader->setFloat("pointLights[2].linear", 0.09f);
-        objectShader->setFloat("pointLights[2].quadratic", 0.032f);
-        objectShader->setVec3fv("pointLights[3].position", pointLightPositions[3] + lightPos);
-        objectShader->setVec3fv("pointLights[3].ambient", glm::vec3(0.05f, 0.05f, 0.05f));
-        objectShader->setVec3fv("pointLights[3].diffuse", glm::vec3(0.8f, 0.8f, 0.8f));
-        objectShader->setVec3fv("pointLights[3].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader->setFloat("pointLights[3].constant", 1.0f);
-        objectShader->setFloat("pointLights[3].linear", 0.09f);
-        objectShader->setFloat("pointLights[3].quadratic", 0.032f);
-
-        objectShader->setVec3fv("spotlight.position", camera.getPosition());
-        objectShader->setVec3fv("spotlight.direction", camera.getFront());
-        objectShader->setFloat("spotlight.cutOff", glm::cos(glm::radians(12.5f)));
-        objectShader->setFloat("spotlight.outerCutOff", glm::cos(glm::radians(15.0f)));
-        objectShader->setVec3fv("spotlight.ambient", glm::vec3(0.0f, 0.0f, 0.0f));
-        objectShader->setVec3fv("spotlight.diffuse", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader->setVec3fv("spotlight.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-        objectShader->setFloat("spotlight.constant", 1.0f);
-        objectShader->setFloat("spotlight.linear", 0.09f);
-        objectShader->setFloat("spotlight.quadratic", 0.032f);
-
-        for (size_t i{}; i < cubePositions.size(); i++) {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            objectShader->setMat4fv("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }*/
-        // ------------------------------------------------ //
-
-        // ----------------- light shader ----------------- //
-        /*lightShader->use();
-        glBindVertexArray(lightVAO);
-
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 3.0f));
-        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, currentTime * glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(0.2f));
-        lightShader->setMat4fv("model", model);
-        lightShader->setMat4fv("projection", projection);
-        lightShader->setMat4fv("view", view);
-        glDrawArrays(GL_TRIANGLES, 0, 36);*/
-        /*for (size_t i{}; i < 4; i++) {
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, pointLightPositions[i] + lightPos);
-            model = glm::scale(model, glm::vec3(0.2f));
-            lightShader->setMat4fv("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }*/
-        // ------------------------------------------------ //
-
-        // ------------------ grid shader ----------------- //
-        gridShader->use();
-        glBindVertexArray(gridVAO);
-
-        model = glm::mat4(1.0f);
-        gridShader->setMat4fv("model", model);
-        gridShader->setMat4fv("projection", projection);
-        gridShader->setMat4fv("view", view);
-
-        glDisable(GL_DEPTH_TEST);
-        // antialiasing
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glLineWidth(2.0f);
-        glDrawArrays(GL_LINES, 0, gridPositions.size());
-        //glLineWidth(1.0f);
-        glDisable(GL_LINE_SMOOTH);
-        glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
-        // ------------------------------------------------ //
-
-        // ----------------- gizmo shader ----------------- //
-        gizmoShader->use();
-        glBindVertexArray(gizmoVAO);
-
-        model = glm::mat4(1.0f);
-        model = glm::scale(model, glm::vec3(std::get<float>(uniformVars["gizmoLength"])));
-        gizmoShader->setBool("gizmoNegative", std::get<bool>(uniformVars["gizmoNegative"]));
-        gizmoShader->setMat4fv("model", model);
-        gizmoShader->setMat4fv("projection", projection);
-        gizmoShader->setMat4fv("view", view);
-
-        glDisable(GL_DEPTH_TEST);
-        // antialiasing
-        glEnable(GL_LINE_SMOOTH);
-        glEnable(GL_BLEND);
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glLineWidth(2.0f);
-        glDrawArrays(GL_LINES, 0, 6);
-        //glLineWidth(1.0f);
-        glDisable(GL_LINE_SMOOTH);
-        glDisable(GL_BLEND);
-        glEnable(GL_DEPTH_TEST);
-        // ------------------------------------------------ //
-
-        // ----------------- model shader ----------------- //
-        modelShader->use();
-
-        // scale fix and optimization with CPU computation
-        model = glm::mat4(1.0f);
-        modelShader->setMat3fv("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-        modelShader->setMat4fv("projection", projection);
-        modelShader->setMat4fv("view", view);
-        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 3.0f));
-        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, currentTime * glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(100.0f));
-        modelShader->setMat4fv("model", model);
-
-        modelShader->setVec3fv("lightDir", glm::vec3(0.5f, -1.0f, -0.5f));
-        modelShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        modelShader->setVec3fv("viewPos", camera.getPosition());
-
-        modelSoldier->draw(*modelShader);
-        // ------------------------------------------------ //
-
-        // no need to unbind it every time but w/e
-        glBindVertexArray(0);
-
-        glfwPollEvents();
-        glfwSwapBuffers(window);
+    for (size_t i{}; i < 10; i++) {
+        auto entity = registry.create();
+        registry.emplace<TransformComponent>(entity, glm::vec3(i * 2.0f, 0.0f, 0.0f));
     }
 }
 
-Camera& Core::getCamera() {
-    return camera;
-}
-
-Renderer& Core::getRenderer() {
-    return renderer;
+void Core::run() {
+    auto transformComponents = registry.view<TransformComponent>();
+    for (auto transformEntity : transformComponents) {
+        auto& transform = transformComponents.get<TransformComponent>(transformEntity);
+        std::cout << glm::to_string(transform.position) << std::endl;
+        std::cout << glm::to_string(transform.rotiation) << std::endl;
+        std::cout << glm::to_string(transform.scale) << std::endl;
+    }
 }
 
 void Core::showFps(GLFWwindow* window) {
@@ -598,7 +374,7 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
     interpolate = std::clamp(interpolate, 0.0f, 1.0f);
 
     // GOD MODE
-    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+    /*if (key == GLFW_KEY_G && action == GLFW_PRESS) {
         core->camera.changeGodMode();
     }
 
@@ -655,5 +431,5 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
     if (key == GLFW_KEY_I && action == GLFW_PRESS) {
         core->displayPosition(core->camera.getViewMatrix());
         core->displayCameraAngles(core->camera.getViewMatrix());
-    }
+    }*/
 };

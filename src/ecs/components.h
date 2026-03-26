@@ -6,6 +6,7 @@
 
 struct TransformComponent {
     glm::vec3 position;
+    // euler angles
     glm::vec3 rotiation;
     glm::vec3 scale{ 1.0f };
 };
