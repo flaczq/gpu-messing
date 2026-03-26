@@ -288,6 +288,15 @@ bool Core::init() {
     return 1;
 }
 
+void Core::setup() {
+    //    ┏┓┏┓┏┓
+    //    ┣ ┃ ┗┓
+    //    ┗┛┗┛┗┛
+    //          
+    auto entity = registry.create();
+    registry.emplace<Transform>(entity, glm::vec3(0.0f, 0.0f, 0.0f));
+}
+
 void Core::run() {
     //    ┓┏┏┓┳┓•┏┓┳┓┓ ┏┓┏┓
     //    ┃┃┣┫┣┫┓┣┫┣┫┃ ┣ ┗┓

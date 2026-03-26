@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../utils/commongl.h"
+#include "../ecs/components.h"
 #include "../renderer/shader.h"
 #include "../renderer/model.h"
 #include "../renderer/mesh.h"
 #include "../renderer/texture_primitive.h"
 #include "../renderer/renderer.h"
-#include "../scene/camera.h"
 
 using UniformTypes = std::variant<float, std::string, bool>;
 
@@ -16,14 +16,20 @@ public:
     ~Core();
 
     bool init();
+    void setup();
     void run();
 
-    Camera& getCamera();
-    Renderer& getRenderer();
+    //Camera& getCamera();
+    //Renderer& getRenderer();
 
     static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 private:
+    entt::registry registry;
+
+    std::map<std::string, std::unique_ptr<Model>> models;
+    std::map<std::string, std::unique_ptr<Shader>> shaders;
+
     int screen_w, screen_h;
 
     // shaders (little int ptr is created on stack but data itself on heap)
@@ -41,8 +47,8 @@ private:
     //std::unique_ptr<Mesh> mesh;
 
     // data known at start then create it with constructor on the stack
-    Camera camera;
-    Renderer renderer;
+    //Camera camera;
+    //Renderer renderer;
 
     GLFWwindow* window;
     GLuint VAO, lightVAO, gizmoVAO, gridVAO;
@@ -66,6 +72,8 @@ private:
     GLfloat deltaTime = 0.0f;
     GLfloat lastFrame = 0.0f;
 
+    void updateSystems(float dt);
+    void renderSystems();
     void showFps(GLFWwindow* window);
     void displayPosition(glm::mat4 viewMatrix);
     void displayCameraAngles(glm::mat4 viewMatrix);

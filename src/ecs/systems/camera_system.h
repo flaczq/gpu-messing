@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../utils/commongl.h"
+#include "../../utils/commongl.h"
 
 enum class CameraDirection {
     FORWARD,
@@ -16,11 +16,11 @@ enum class CameraMode {
     CROUCHING
 };
 
-class Camera {
+class CameraSystem {
 public:
-    Camera();
+    CameraSystem();
     // do not worry about deconstruction
-    ~Camera() = default;
+    ~CameraSystem() = default;
 
     bool init(GLFWwindow* window);
     void processInput(GLFWwindow* window, float 

@@ -1,7 +1,7 @@
-#include "camera.h"
-#include "../core/core.h"
+#include "camera_system.h"
+#include "../../core/core.h"
 
-Camera::Camera() {
+CameraSystem::CameraSystem() {
     position = glm::vec3(6.0f, 1.0f, 6.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -13,7 +13,7 @@ Camera::Camera() {
     position.y = getCameraModeHeight();
 
     // looking at (0,0,0)
-    yaw = -135.0f;  
+    yaw = -135.0f;
     pitch = -11.5f;
 
     firstMouse = true;
@@ -26,7 +26,7 @@ Camera::Camera() {
     updateCameraVectors();
 }
 
-bool Camera::init(GLFWwindow* window) {
+bool CameraSystem::init(GLFWwindow* window) {
     // set callbacks: mouse, scroll
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -36,7 +36,7 @@ bool Camera::init(GLFWwindow* window) {
 }
 
 // continuous key clicks -> movement
-void Camera::processInput(GLFWwindow* window, float deltaTime) {
+void CameraSystem::processInput(GLFWwindow* window, float deltaTime) {
     // EXIT
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
@@ -63,7 +63,7 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
     }
 };
 
-void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
+void CameraSystem::processKeyboard(CameraDirection direction, float deltaTime) {
     float velocity = movementSpeed * deltaTime;
     if (direction == CameraDirection::FORWARD) {
         position += front * velocity;
@@ -91,7 +91,7 @@ void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
     }
 }
 
-void Camera::processMouseScroll(float yOffset) {
+void CameraSystem::processMouseScroll(float yOffset) {
     zoom -= (float)yOffset;
     if (zoom < 1.0f) {
         zoom = 1.0f;
@@ -101,7 +101,7 @@ void Camera::processMouseScroll(float yOffset) {
     }
 };
 
-void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constrainPitch) {
+void CameraSystem::processMouseMovement(float xOffset, float yOffset, GLboolean constrainPitch) {
     xOffset *= mouseSensitivity;
     yOffset *= mouseSensitivity;
 
@@ -120,24 +120,24 @@ void Camera::processMouseMovement(float xOffset, float yOffset, GLboolean constr
     updateCameraVectors();
 }
 
-glm::mat4 Camera::getViewMatrix() const {
+glm::mat4 CameraSystem::getViewMatrix() const {
     // camera position, where you looking at, up vector
     return glm::lookAt(position, position + front, up);
 };
 
-float Camera::getZoom() const {
+float CameraSystem::getZoom() const {
     return zoom;
 };
 
-glm::vec3 Camera::getPosition() const {
+glm::vec3 CameraSystem::getPosition() const {
     return position;
 };
 
-glm::vec3 Camera::getFront() const {
+glm::vec3 CameraSystem::getFront() const {
     return front;
 };
 
-float Camera::getCameraModeHeight() const {
+float CameraSystem::getCameraModeHeight() const {
     if (cameraMode == CameraMode::STANDING) {
         return 1.75f;
     }
@@ -145,7 +145,7 @@ float Camera::getCameraModeHeight() const {
 
 }
 
-void Camera::changeCameraMode() {
+void CameraSystem::changeCameraMode() {
     std::string cameraModeStr;
     if (cameraMode == CameraMode::STANDING) {
         cameraMode = CameraMode::CROUCHING;
@@ -158,12 +158,12 @@ void Camera::changeCameraMode() {
     std::cout << "* Changed camera mode to: " << cameraModeStr << std::endl << std::endl;
 };
 
-void Camera::changeGodMode() {
+void CameraSystem::changeGodMode() {
     godMode = !godMode;
     std::cout << "* Changed god mode to: " << (godMode ? "true" : "false") << std::endl << std::endl;
 }
 
-void Camera::updateCameraVectors() {
+void CameraSystem::updateCameraVectors() {
     glm::vec3 currFront = glm::vec3(0.0f, 0.0f, 0.0f);
     currFront.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     currFront.y = sin(glm::radians(pitch));
@@ -173,7 +173,7 @@ void Camera::updateCameraVectors() {
     up = glm::normalize(glm::cross(right, front));
 }
 
-void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
+void CameraSystem::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
     Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
     Camera& camera = core->getCamera();
     float xPos = static_cast<float>(xPosIn);
@@ -194,7 +194,7 @@ void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
     camera.processMouseMovement(xOffset, yOffset);
 }
 
-void Camera::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
+void CameraSystem::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
     Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
     Camera& camera = core->getCamera();
 
