@@ -29,14 +29,13 @@ void main() {
     float diff = max(dot(norm, lightDirNorm), 0.0f);
     vec3 diffuse = diff * lightColor;
 
-    // specular (shininess)
+    // specular (blinn-phong)
     float specularStrength = 0.5f;
-    uint shininessStrenght = 32u;
     vec3 viewDir = normalize(viewPos - FragPos);
-    vec3 reflectDir = reflect(norm, -lightDir);  
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0f), shininessStrenght);
-    vec3 specular = specularStrength * spec * lightColor;  
+    vec3 halfwayDir = normalize(lightDirNorm + viewDir);
+    float spec = pow(max(dot(norm, halfwayDir), 0.0f), 64.0f);
+    vec3 specular = specularStrength * spec * lightColor;
 
-    vec3 result = (ambient + diffuse) * texColor.rgb;
+    vec3 result = (ambient + diffuse + specular) * texColor.rgb;
     FragColor = vec4(result, texColor.a);
 }
