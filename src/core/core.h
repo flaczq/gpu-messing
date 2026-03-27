@@ -6,13 +6,14 @@
 #include "../renderer/mesh.h"
 #include "../renderer/texture_primitive.h"
 #include "../renderer/renderer.h"
-#include "../scene/camera.h"
+#include "../manager/scene_manager.h"
+#include "camera.h"
 
 using UniformTypes = std::variant<float, std::string, bool>;
 
 class Core {
 public:
-    Core(int w, int h);
+    Core(unsigned int width, unsigned int height);
     ~Core();
 
     bool init();
@@ -24,7 +25,7 @@ public:
     static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 private:
-    int screen_w, screen_h;
+    unsigned int screenWidth, screenHeight;
 
     // shaders (little int ptr is created on stack but data itself on heap)
     std::unique_ptr<Shader> objectShader;
@@ -41,8 +42,9 @@ private:
     //std::unique_ptr<Mesh> mesh;
 
     // data known at start then create it with constructor on the stack
-    Camera camera;
+    //Camera camera;
     Renderer renderer;
+    SceneManager sceneManager;
 
     GLFWwindow* window;
     GLuint VAO, lightVAO, gizmoVAO, gridVAO;
@@ -51,9 +53,11 @@ private:
     std::vector<glm::vec3> pointLightPositions;
     std::vector<glm::vec3> gridPositions;
 
-    // showFps()
+    // for showFps()
     double lastTime = glfwGetTime();
-    int nbFrames = 0;
+    unsigned int nbFrames = 0u;
+
+    float lastFrame = 0.0f;
 
     // uniform of changeables
     std::map<std::string, UniformTypes> uniformVars = {
@@ -63,13 +67,8 @@ private:
         {"gizmoNegative", false}
     };
 
-    GLfloat deltaTime = 0.0f;
-    GLfloat lastFrame = 0.0f;
 
-    void showFps(GLFWwindow* window);
+    void showFps(GLFWwindow* window, double currentTime);
     void displayPosition(glm::mat4 viewMatrix);
     void displayCameraAngles(glm::mat4 viewMatrix);
-
-    // must be static to be passed as a callback reference and so it needs to use core->var
-    static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 };

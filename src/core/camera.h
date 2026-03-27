@@ -18,25 +18,22 @@ enum class CameraMode {
 
 class Camera {
 public:
-    Camera();
-    // do not worry about deconstruction
-    ~Camera() = default;
+    Camera(GLFWwindow* window);
 
     bool init(GLFWwindow* window);
-    void processInput(GLFWwindow* window, float 
-    
-    );
-    void processKeyboard(CameraDirection direction, float deltaTime);
+    void processInput(GLFWwindow* window, float dt);
+    void processKeyboard(CameraDirection direction, float dt);
     void processMouseScroll(float yOffset);
     void processMouseMovement(float xOffest, float yOffset, GLboolean constrainPitch = true);
 
     glm::mat4 getViewMatrix() const;
-    float getZoom() const;
+    float getFov() const;
+    float getAspect() const;
     glm::vec3 getPosition() const;
     glm::vec3 getFront() const;
 
-    void changeCameraMode();
-    void changeGodMode();
+    void toggleCameraMode();
+    void toggleGodMode();
 
 private:
     glm::vec3 position;
@@ -52,7 +49,8 @@ private:
     float lastY;
     float movementSpeed;
     float mouseSensitivity;
-    float zoom;
+    float fov;
+    float aspect;
 
     CameraMode cameraMode = CameraMode::STANDING;
     bool godMode = false;

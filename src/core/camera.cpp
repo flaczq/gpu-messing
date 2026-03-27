@@ -1,7 +1,10 @@
 #include "camera.h"
 #include "../core/core.h"
 
-Camera::Camera() {
+Camera::Camera(GLFWwindow* window) {
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+
     position = glm::vec3(6.0f, 1.0f, 6.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
     up = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -13,7 +16,7 @@ Camera::Camera() {
     position.y = getCameraModeHeight();
 
     // looking at (0,0,0)
-    yaw = -135.0f;  
+    yaw = -135.0f;
     pitch = -11.5f;
 
     firstMouse = true;
@@ -21,7 +24,8 @@ Camera::Camera() {
     lastY = 600.0f / 2.0f;
     movementSpeed = 10.0f;
     mouseSensitivity = 0.05f;
-    zoom = 45.0f;
+    fov = 45.0f;
+    aspect = (float)width / (float)height;
 
     updateCameraVectors();
 }
@@ -36,7 +40,7 @@ bool Camera::init(GLFWwindow* window) {
 }
 
 // continuous key clicks -> movement
-void Camera::processInput(GLFWwindow* window, float deltaTime) {
+void Camera::processInput(GLFWwindow* window, float dt) {
     // EXIT
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
@@ -44,27 +48,27 @@ void Camera::processInput(GLFWwindow* window, float deltaTime) {
 
     // MOVEMENT
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        processKeyboard(CameraDirection::FORWARD, deltaTime);
+        processKeyboard(CameraDirection::FORWARD, dt);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        processKeyboard(CameraDirection::BACKWARD, deltaTime);
+        processKeyboard(CameraDirection::BACKWARD, dt);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        processKeyboard(CameraDirection::LEFT, deltaTime);
+        processKeyboard(CameraDirection::LEFT, dt);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        processKeyboard(CameraDirection::RIGHT, deltaTime);
+        processKeyboard(CameraDirection::RIGHT, dt);
     }
     if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
-        processKeyboard(CameraDirection::UP, deltaTime);
+        processKeyboard(CameraDirection::UP, dt);
     }
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-        processKeyboard(CameraDirection::DOWN, deltaTime);
+        processKeyboard(CameraDirection::DOWN, dt);
     }
 };
 
-void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
-    float velocity = movementSpeed * deltaTime;
+void Camera::processKeyboard(CameraDirection direction, float dt) {
+    float velocity = movementSpeed * dt;
     if (direction == CameraDirection::FORWARD) {
         position += front * velocity;
     }
@@ -92,12 +96,12 @@ void Camera::processKeyboard(CameraDirection direction, float deltaTime) {
 }
 
 void Camera::processMouseScroll(float yOffset) {
-    zoom -= (float)yOffset;
-    if (zoom < 1.0f) {
-        zoom = 1.0f;
+    fov -= (float)yOffset;
+    if (fov < 1.0f) {
+        fov = 1.0f;
     }
-    if (zoom > 90.0f) {
-        zoom = 90.0f;
+    if (fov > 90.0f) {
+        fov = 90.0f;
     }
 };
 
@@ -125,8 +129,12 @@ glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(position, position + front, up);
 };
 
-float Camera::getZoom() const {
-    return zoom;
+float Camera::getFov() const {
+    return fov;
+};
+
+float Camera::getAspect() const {
+    return aspect;
 };
 
 glm::vec3 Camera::getPosition() const {
@@ -145,7 +153,7 @@ float Camera::getCameraModeHeight() const {
 
 }
 
-void Camera::changeCameraMode() {
+void Camera::toggleCameraMode() {
     std::string cameraModeStr;
     if (cameraMode == CameraMode::STANDING) {
         cameraMode = CameraMode::CROUCHING;
@@ -158,7 +166,7 @@ void Camera::changeCameraMode() {
     std::cout << "* Changed camera mode to: " << cameraModeStr << std::endl << std::endl;
 };
 
-void Camera::changeGodMode() {
+void Camera::toggleGodMode() {
     godMode = !godMode;
     std::cout << "* Changed god mode to: " << (godMode ? "true" : "false") << std::endl << std::endl;
 }

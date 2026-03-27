@@ -11,11 +11,17 @@ enum class RenderMode {
 class Renderer {
 public:
 	Renderer();
-	~Renderer() = default;
 
+	bool init(GLFWwindow* window);
 	RenderMode getRenderMode() const;
-	void setRenderMode(RenderMode renderMode);
+	void toggleRenderMode();
+	void beginFrame() const;
+	void endFrame() const;
 
 private:
+	GLFWwindow* window;
 	RenderMode renderMode = RenderMode::STANDARD;
+
+	// must be static to be passed as a callback reference and so it needs to use core->var
+	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 };

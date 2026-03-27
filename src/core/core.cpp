@@ -1,13 +1,14 @@
 #include "core.h"
 
-Core::Core(int w, int h) {
-    screen_w = w;
-    screen_h = h;
+Core::Core(unsigned int width, unsigned int height) {
+    screenWidth = width;
+    screenHeight = height;
 
     objectShader = nullptr;
     lightShader = nullptr;
     gridShader = nullptr;
     gizmoShader = nullptr;
+    //modelShader = nullptr;
 }
 
 Core::~Core() {
@@ -25,7 +26,7 @@ Core::~Core() {
     lightShader.reset();
     gridShader.reset();
     gizmoShader.reset();
-    modelShader.reset();
+    //modelShader.reset();
 
     //TexturePrimitive::clean(diffuseMapTP);
     //TexturePrimitive::clean(specularMapTP);
@@ -44,7 +45,7 @@ bool Core::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(screen_w, screen_h, "(C) Engine Runner 2049", nullptr, nullptr);
+    window = glfwCreateWindow(screenWidth, screenHeight, "(C) Engine Runner 2049", nullptr, nullptr);
     std::cout << R"(
      ## cells interlinked within cells ##
       ___   ___  _  _   ___  
@@ -95,13 +96,13 @@ bool Core::init() {
     lightShader = std::make_unique<Shader>("../shaders/light.vert", "../shaders/light.frag");
     gridShader = std::make_unique<Shader>("../shaders/grid.vert", "../shaders/grid.frag");
     gizmoShader = std::make_unique<Shader>("../shaders/gizmo.vert", "../shaders/gizmo.frag");
-    modelShader = std::make_unique<Shader>("../shaders/model.vert", "../shaders/model.frag");
+    //modelShader = std::make_unique<Shader>("../shaders/model.vert", "../shaders/model.frag");
 
     //    ┳┳┓┏┓┳┓┏┓┓   ┏┓  ┳┳┓┏┓┏┓┓┏
     //    ┃┃┃┃┃┃┃┣ ┃   ┣╋  ┃┃┃┣ ┗┓┣┫
     //    ┛ ┗┗┛┻┛┗┛┗┛  ┗┻  ┛ ┗┗┛┗┛┛┗
     //                              
-    modelSoldier = std::make_unique<Model>("../assets/models/Soldier.glb");
+    //modelSoldier = std::make_unique<Model>("../assets/models/Soldier.glb");
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -115,14 +116,21 @@ bool Core::init() {
     //    ┛┗┗┛┛┗┻┛┗┛┛┗┗┛┛┗
     //                    
     Renderer renderer{};
-    //renderer.init();
+    renderer.init(window);
 
     //    ┏┓┏┓┳┳┓┏┓┳┓┏┓
     //    ┃ ┣┫┃┃┃┣ ┣┫┣┫
     //    ┗┛┛┗┛ ┗┗┛┛┗┛┗
     //                 
-    Camera camera{};
-    camera.init(window);
+    //Camera camera{};
+    //camera.init(window);
+
+    //    ┏┓┏┓┏┓┳┓┏┓  ┳┳┓┏┓┳┓┏┓┏┓┏┓┳┓
+    //    ┗┓┃ ┣ ┃┃┣   ┃┃┃┣┫┃┃┣┫┃┓┣ ┣┫
+    //    ┗┛┗┛┗┛┛┗┗┛  ┛ ┗┛┗┛┗┛┗┗┛┗┛┛┗
+    //                               
+    SceneManager sceneManager{};
+    sceneManager.init(window);
 
     //    ┳┓┏┓┏┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //    ┃┃┣┫ ┃ ┣┫  ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -278,11 +286,7 @@ bool Core::init() {
     // no need to unbind at all as we directly bind a different VAO the next few lines
     glBindVertexArray(0);
 
-    // standard, lines (wireframe), points
-    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderer.getRenderMode()));
-
-    // set callbacks: window resize, single key click
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    // set callbacks: single key click
     glfwSetKeyCallback(window, key_callback);
 
     return 1;
@@ -294,40 +298,38 @@ void Core::run() {
     //    ┗┛┛┗┛┗┗┛┗┻┛┗┛┗┛┗┛
     //                     
     glm::vec3 lightPos(1.0f, 2.0f, 3.0f);
-    //glm::vec3 lightColor(1.0f);
     float radius = 2.0f;
-    // Phong: light = ambient + diffuse + specular
 
     //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
     //                                 
     while (!glfwWindowShouldClose(window)) {
-        GLfloat currentTime = static_cast<float>(glfwGetTime());
-        deltaTime = currentTime - lastFrame;
+        // values (deltaTime)
+        float currentTime = static_cast<float>(glfwGetTime());
+        float dt = currentTime - lastFrame;
         lastFrame = currentTime;
 
         lightPos.x = cos(currentTime) * radius;
         lightPos.y = sin(currentTime) * radius;
 
-        //lightColor.x = sin(currentTime * 2.0f);
-        //lightColor.y = sin(currentTime * 0.7f);
-        //lightColor.z = sin(currentTime * 1.3f);
+        // bonus
+        showFps(window, currentTime);
 
-        showFps(window);
-        camera.processInput(window, deltaTime);
+        // events
+        glfwPollEvents();
+        //camera.processInput(window, dt);
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // physics, movement, ai, collisions
+        sceneManager.update(dt);
 
+        // rendering at last
+        renderer.beginFrame();
+        sceneManager.render();
+
+        // !! OLD BUT GOLD !! DELETE SOON !!
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
-
-        // transformation matrix: clip = projectionM * viewM * modelM * local
-        // 1. local * modelM            -> world
-        // 2. world * viewM             -> space (lookAt())
-        // 3. space * projectionM       -> clip
-        // 4. clip  * viewportTransform -> screen
 
         // transform
         //glm::mat4 transform = glm::mat4(1.0f);
@@ -335,12 +337,14 @@ void Core::run() {
         //transform = glm::rotate(transform, currentTime, glm::vec3(0.0, 0.0, 1.0));
         //transform = glm::scale(transform, glm::vec3(1.5f, 0.5f, 1.5f));
 
+        Camera& camera = sceneManager.getCurrentScene().getCamera();
+
         // model
         glm::mat4 model = glm::mat4(1.0f);
 
         // projection
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(camera.getZoom()), (float)screen_w / (float)screen_h, 1.0f, 100.0f);
+        projection = glm::perspective(glm::radians(camera.getFov()), camera.getAspect(), 1.0f, 100.0f);
 
         // view
         glm::mat4 view = glm::mat4(1.0f);
@@ -486,46 +490,21 @@ void Core::run() {
         glDisable(GL_BLEND);
         glEnable(GL_DEPTH_TEST);
         // ------------------------------------------------ //
+        // !! OLD BUT GOLD !! DELETE SOON !!
 
-        // ----------------- model shader ----------------- //
-        modelShader->use();
-
-        // scale fix and optimization with CPU computation
-        modelShader->setMat4fv("projection", projection);
-        modelShader->setMat4fv("view", view);
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(3.0f, 0.0f, 3.0f));
-        model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        model = glm::rotate(model, currentTime * glm::radians(60.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-        model = glm::scale(model, glm::vec3(100.0f));
-        modelShader->setMat4fv("model", model);
-        modelShader->setMat3fv("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
-
-        modelShader->setVec3fv("lightDir", glm::vec3(0.5f, -1.0f, -0.5f));
-        modelShader->setVec3fv("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-        modelShader->setVec3fv("viewPos", camera.getPosition());
-
-        modelSoldier->draw(*modelShader);
-        // ------------------------------------------------ //
-
-        // no need to unbind it every time but w/e
-        glBindVertexArray(0);
-
-        glfwPollEvents();
-        glfwSwapBuffers(window);
+        renderer.endFrame();
     }
 }
 
 Camera& Core::getCamera() {
-    return camera;
+    return sceneManager.getCurrentScene().getCamera();
 }
 
 Renderer& Core::getRenderer() {
     return renderer;
 }
 
-void Core::showFps(GLFWwindow* window) {
-	double currentTime = glfwGetTime();
+void Core::showFps(GLFWwindow* window, double currentTime) {
 	nbFrames++;
 	if (currentTime - lastTime >= 1.0) {
 		double fps = double(nbFrames);
@@ -570,32 +549,14 @@ void Core::displayCameraAngles(glm::mat4 viewMatrix) {
     }
 }
 
-void Core::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-	glViewport(0, 0, width, height);
-}
-
 // single key click
 void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
-
-    // INTERPOLATE mix of textures (not used)
-    float& interpolate = std::get<float>(core->uniformVars["interpolate"]);
-    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-        interpolate += 0.1f;
-    }
-    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-        interpolate -= 0.1f;
-    }
-    interpolate = std::clamp(interpolate, 0.0f, 1.0f);
-
-    // GOD MODE
-    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-        core->camera.changeGodMode();
-    }
+    Camera& camera = core->sceneManager.getCurrentScene().getCamera();
 
     // CROUCHING/STANDING
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-        core->camera.changeCameraMode();
+        camera.toggleCameraMode();
     }
 
     // SPOTLIGHT
@@ -604,28 +565,27 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
         spotlightOn = !spotlightOn;
         std::cout << "* Changed spotlight to: " << std::boolalpha << spotlightOn << std::endl << std::endl;
     }
-    
+
+    //    ┳┓┏┓┳┓┳┳┏┓
+    //    ┃┃┣ ┣┫┃┃┃┓
+    //    ┻┛┗┛┻┛┗┛┗┛
+    //              
+    #ifdef _DEBUG
+    // GOD MODE
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        camera.toggleGodMode();
+    }
+
+    // SCENES
+    if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+        core->sceneManager.toggleScene(window);
+    }
+
     // RENDER MODE
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-        std::string renderModeStr;
-        RenderMode renderMode = core->renderer.getRenderMode();
-        if (renderMode == RenderMode::STANDARD) {
-            renderMode = RenderMode::WIREFRAME;
-            renderModeStr = "WIREFRAME";
-        }
-        else if (renderMode == RenderMode::WIREFRAME) {
-            renderMode = RenderMode::POINTCLOUD;
-            renderModeStr = "POINTCLOUD";
-        }
-        else {
-            renderMode = RenderMode::STANDARD;
-            renderModeStr = "STANDARD";
-        }
-        core->renderer.setRenderMode(renderMode);
-        glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderMode));
-        std::cout << "* Changed RenderMode to: " << renderModeStr << std::endl << std::endl;
+        core->renderer.toggleRenderMode();
     }
-    
+
     // GIZMO LENGTH
     float& gizmoLength = std::get<float>(core->uniformVars["gizmoLength"]);
     if (key == GLFW_KEY_PAGE_UP && action == GLFW_PRESS) {
@@ -644,7 +604,18 @@ void Core::key_callback(GLFWwindow* window, int key, int scancode, int action, i
 
     // INFO: POSITION, CAMERA
     if (key == GLFW_KEY_I && action == GLFW_PRESS) {
-        core->displayPosition(core->camera.getViewMatrix());
-        core->displayCameraAngles(core->camera.getViewMatrix());
+        core->displayPosition(camera.getViewMatrix());
+        core->displayCameraAngles(camera.getViewMatrix());
     }
+
+    // INTERPOLATE mix of textures (not used)
+    float& interpolate = std::get<float>(core->uniformVars["interpolate"]);
+    if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+        interpolate += 0.1f;
+    }
+    if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+        interpolate -= 0.1f;
+    }
+    interpolate = std::clamp(interpolate, 0.0f, 1.0f);
+    #endif
 };

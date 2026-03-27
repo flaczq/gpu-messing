@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\scene\soldier_scene.cpp" />
+    <ClCompile Include="src\manager\scene_manager.cpp" />
     <ClCompile Include="src\renderer\mesh.cpp" />
     <ClCompile Include="src\renderer\model.cpp" />
     <ClCompile Include="src\renderer\renderer.cpp" />
     <ClCompile Include="src\renderer\texture_primitive.cpp" />
-    <ClCompile Include="src\scene\camera.cpp" />
+    <ClCompile Include="src\core\camera.cpp" />
     <ClCompile Include="src\core\core.cpp" />
     <ClCompile Include="src\renderer\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -58,16 +60,20 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\scene\soldier_scene.h" />
+    <ClInclude Include="src\manager\scene_manager.h" />
     <ClInclude Include="src\renderer\mesh.h" />
     <ClInclude Include="src\renderer\model.h" />
     <ClInclude Include="src\renderer\renderer.h" />
     <ClInclude Include="src\renderer\texture_primitive.h" />
-    <ClInclude Include="src\scene\camera.h" />
+    <ClInclude Include="src\core\camera.h" />
+    <ClInclude Include="src\scene\scene.h" />
     <ClInclude Include="src\utils\commongl.h" />
     <ClInclude Include="src\core\core.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\renderer\shader.h" />
+    <ClInclude Include="src\utils\component.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />
