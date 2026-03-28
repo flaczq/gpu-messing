@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../utils/commongl.h"
+#include "../utils/config.h"
 
 class Shader {
 public:

@@ -17,11 +17,6 @@ void Model::draw(Shader& shader) {
 	}
 }
 
-// cannot copy, must be a reference
-std::vector<Mesh>& Model::getMeshes() {
-	return meshes;
-}
-
 void Model::loadModel(const std::string& modelPath) {
 	Assimp::Importer importer{};
 	// convert all primitives into triangles | flip texture Y axis | generate smooth normals (if missing) | calculate tangents
@@ -83,6 +78,10 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// Tangent TODO
 
 		// Bitangent TODO
+
+		// boneIDs TODO
+
+		// weights TODO
 
 		vertices.push_back(vertex);
 	}

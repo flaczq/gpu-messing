@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../utils/commongl.h"
-#include "../renderer/shader.h"
-#include "../renderer/mesh.h"
+#include "../utils/config.h"
+#include "../graphics/shader.h"
+#include "../graphics/mesh.h"
 
 class Model {
 public:
@@ -10,10 +10,10 @@ public:
 	~Model();
 
 	void draw(Shader& shader);
-	std::vector<Mesh>& getMeshes();
+
+	std::vector<Mesh> meshes;
 
 private:
-	std::vector<Mesh> meshes;
 	std::string directory;
 	std::vector<Texture> texturesLoaded;
 

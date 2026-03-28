@@ -1,43 +1,28 @@
 #pragma once
 
-#include "../utils/commongl.h"
-
-enum class CameraDirection {
-    FORWARD,
-    BACKWARD,
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN
-};
-
-enum class CameraMode {
-    STANDING,
-    CROUCHING
-};
+#include "../utils/config.h"
 
 class Camera {
 public:
-    Camera(GLFWwindow* window);
+    Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
-    bool init(GLFWwindow* window);
-    void processInput(GLFWwindow* window, float dt);
+    bool init();
+    void processInput(float dt);
     void processKeyboard(CameraDirection direction, float dt);
     void processMouseScroll(float yOffset);
     void processMouseMovement(float xOffest, float yOffset, GLboolean constrainPitch = true);
 
     glm::mat4 getViewMatrix() const;
-    float getFov() const;
-    float getAspect() const;
-    glm::vec3 getPosition() const;
-    glm::vec3 getFront() const;
 
     void toggleCameraMode();
     void toggleGodMode();
 
-private:
     glm::vec3 position;
     glm::vec3 front;
+    float fov;
+    float aspect;
+
+private:
     glm::vec3 up;
     glm::vec3 right;
     glm::vec3 worldUp;
@@ -49,9 +34,8 @@ private:
     float lastY;
     float movementSpeed;
     float mouseSensitivity;
-    float fov;
-    float aspect;
 
+    GLFWwindow* window = nullptr;
     CameraMode cameraMode = CameraMode::STANDING;
     bool godMode = false;
 

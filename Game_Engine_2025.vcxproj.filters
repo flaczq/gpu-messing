@@ -18,34 +18,34 @@
     <ClCompile Include="src\main.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\shader.cpp">
+    <ClCompile Include="src\graphics\shader.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="libs\stb_image.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\core\core.cpp">
+    <ClCompile Include="src\core\back_end.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\core\camera.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\renderer.cpp">
+    <ClCompile Include="src\core\renderer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\model.cpp">
+    <ClCompile Include="src\graphics\model.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\mesh.cpp">
+    <ClCompile Include="src\graphics\mesh.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\renderer\texture_primitive.cpp">
+    <ClCompile Include="src\graphics\texture_primitive.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\manager\scene_manager.cpp">
+    <ClCompile Include="src\managers\scene_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\scene\soldier_scene.cpp">
+    <ClCompile Include="src\scenes\soldier_scene.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -93,13 +93,13 @@
     <ClInclude Include="resource.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\shader.h">
+    <ClInclude Include="src\graphics\shader.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="libs\stb_image.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\core\core.h">
+    <ClInclude Include="src\core\back_end.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\commongl.h">
@@ -108,28 +108,28 @@
     <ClInclude Include="src\core\camera.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\renderer.h">
+    <ClInclude Include="src\core\renderer.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\model.h">
+    <ClInclude Include="src\graphics\model.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\mesh.h">
+    <ClInclude Include="src\graphics\mesh.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\renderer\texture_primitive.h">
+    <ClInclude Include="src\graphics\texture_primitive.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\component.h">
+    <ClInclude Include="src\scenes\scene.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\scene.h">
+    <ClInclude Include="src\managers\scene_manager.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\manager\scene_manager.h">
+    <ClInclude Include="src\scenes\soldier_scene.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\scene\soldier_scene.h">
+    <ClInclude Include="src\utils\config.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

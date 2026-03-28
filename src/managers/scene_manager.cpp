@@ -1,36 +1,40 @@
 #include "scene_manager.h"
-#include "../scene/soldier_scene.h"
+#include "../scenes/soldier_scene.h"
 
-bool SceneManager::init(GLFWwindow* window) {
-	std::unique_ptr<Scene> defaultScene = std::make_unique<SoldierScene>();
+SceneManager::SceneManager(Camera* camera) {
+	this->camera = camera;
+}
+
+bool SceneManager::init() {
+	std::unique_ptr<Scene> defaultScene = std::make_unique<SoldierScene>(camera);
 	currentScene = std::move(defaultScene);
-	currentScene->init(window);
+	currentScene->init();
 
 	return 1;
 }
 
-void SceneManager::toggleScene(GLFWwindow* window) {
+void SceneManager::toggleScene() {
 	if (currentScene) {
 		currentScene->end();
 	}
 
 	std::unique_ptr<Scene> nextScene;
 	std::string sceneIDStr;
-	if (currentScene->getSceneID() == SceneID::SOLDIER) {
+	if (currentScene->sceneID == SceneID::SOLDIER) {
 		// FIXME TODO
-		nextScene = std::make_unique<SoldierScene>();
+		nextScene = std::make_unique<SoldierScene>(camera);
 		sceneIDStr = "LIGHTS_ROOM";
-	} else if (currentScene->getSceneID() == SceneID::LIGHTS_ROOM) {
+	} else if (currentScene->sceneID == SceneID::LIGHTS_ROOM) {
 		// FIXME TODO
-		nextScene = std::make_unique<SoldierScene>();
+		nextScene = std::make_unique<SoldierScene>(camera);
 		sceneIDStr = "REAL_GAME";
 	} else {
-		nextScene = std::make_unique<SoldierScene>();
+		nextScene = std::make_unique<SoldierScene>(camera);
 		sceneIDStr = "SOLDIER";
 	}
 
 	currentScene = std::move(nextScene);
-	currentScene->init(window);
+	currentScene->init();
 	std::cout << "* Changed CurrentScene to: " << sceneIDStr << std::endl << std::endl;
 }
 
@@ -44,8 +48,4 @@ void SceneManager::render() {
 	if (currentScene) {
 		currentScene->render();
 	}
-}
-
-Scene& SceneManager::getCurrentScene() {
-	return *currentScene;
 }

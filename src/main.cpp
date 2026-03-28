@@ -1,18 +1,17 @@
-﻿#include "utils/commongl.h"
-#include "core/core.h"
+﻿#include "utils/config.h"
+#include "core/back_end.h"
 
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 768;
+const int s_width = 1280;
+const int s_height = 768;
 
 int main() {
-    // Engine only for WINdows openGL
-    Core core(SCREEN_WIDTH, SCREEN_HEIGHT);
+    auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, s_width, s_height);
 
-    if (!core.init()) {
+    if (!backEnd->init()) {
         return -1;
     }
 
-    core.run();
+    backEnd->run();
 
     return 0;
 }

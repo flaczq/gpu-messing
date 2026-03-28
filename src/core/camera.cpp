@@ -1,9 +1,8 @@
 #include "camera.h"
-#include "../core/core.h"
+#include "../core/back_end.h"
 
-Camera::Camera(GLFWwindow* window) {
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight) {
+    this->window = window;
 
     position = glm::vec3(6.0f, 1.0f, 6.0f);
     front = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -22,15 +21,15 @@ Camera::Camera(GLFWwindow* window) {
     firstMouse = true;
     lastX = 800.0f / 2.0f;
     lastY = 600.0f / 2.0f;
-    movementSpeed = 10.0f;
+    movementSpeed = 5.0f;
     mouseSensitivity = 0.05f;
     fov = 45.0f;
-    aspect = (float)width / (float)height;
+    aspect = (float)screenWidth / (float)screenHeight;
 
     updateCameraVectors();
 }
 
-bool Camera::init(GLFWwindow* window) {
+bool Camera::init() {
     // set callbacks: mouse, scroll
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
@@ -40,7 +39,7 @@ bool Camera::init(GLFWwindow* window) {
 }
 
 // continuous key clicks -> movement
-void Camera::processInput(GLFWwindow* window, float dt) {
+void Camera::processInput(float dt) {
     // EXIT
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
@@ -129,28 +128,11 @@ glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(position, position + front, up);
 };
 
-float Camera::getFov() const {
-    return fov;
-};
-
-float Camera::getAspect() const {
-    return aspect;
-};
-
-glm::vec3 Camera::getPosition() const {
-    return position;
-};
-
-glm::vec3 Camera::getFront() const {
-    return front;
-};
-
 float Camera::getCameraModeHeight() const {
     if (cameraMode == CameraMode::STANDING) {
         return 1.75f;
     }
     return 0.85f;
-
 }
 
 void Camera::toggleCameraMode() {
@@ -182,29 +164,26 @@ void Camera::updateCameraVectors() {
 }
 
 void Camera::mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn) {
-    Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
-    Camera& camera = core->getCamera();
+    BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
     float xPos = static_cast<float>(xPosIn);
     float yPos = static_cast<float>(yPosIn);
 
-    if (camera.firstMouse) {
-        camera.lastX = xPos;
-        camera.lastY = yPos;
-        camera.firstMouse = false;
+    if (backEnd->camera->firstMouse) {
+        backEnd->camera->lastX = xPos;
+        backEnd->camera->lastY = yPos;
+        backEnd->camera->firstMouse = false;
     }
 
-    float xOffset = xPos - camera.lastX;
-    float yOffset = camera.lastY - yPos;
+    float xOffset = xPos - backEnd->camera->lastX;
+    float yOffset = backEnd->camera->lastY - yPos;
 
-    camera.lastX = xPos;
-    camera.lastY = yPos;
+    backEnd->camera->lastX = xPos;
+    backEnd->camera->lastY = yPos;
 
-    camera.processMouseMovement(xOffset, yOffset);
+    backEnd->camera->processMouseMovement(xOffset, yOffset);
 }
 
 void Camera::scroll_callback(GLFWwindow* window, double xOffset, double yOffset) {
-    Core* core = static_cast<Core*>(glfwGetWindowUserPointer(window));
-    Camera& camera = core->getCamera();
-
-    camera.processMouseScroll(static_cast<float>(yOffset));
+    BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
+    backEnd->camera->processMouseScroll(static_cast<float>(yOffset));
 }

@@ -98,16 +98,6 @@ void Mesh::draw(Shader &shader) {
     glBindVertexArray(0);
 }
 
-std::vector<Vertex> Mesh::getVertices() const {
-    return vertices;
-}
-std::vector<unsigned int> Mesh::getIndices() const {
-    return indices;
-}
-std::vector<Texture> Mesh::getTextures() const {
-    return textures;
-}
-
 void Mesh::setupMesh() {
     //    ┏┓┏┓┏┳┓┳┳┏┓
     //    ┗┓┣  ┃ ┃┃┃┃

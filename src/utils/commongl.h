@@ -23,6 +23,7 @@
 #include <thread>
 #include <chrono>
 #include <iomanip>
+#include <stdexcept>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

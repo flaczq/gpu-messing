@@ -1,26 +1,20 @@
 #pragma once
 
-#include "../utils/commongl.h"
-
-enum class RenderMode {
-	STANDARD = GL_FILL,
-	WIREFRAME = GL_LINE,
-	POINTCLOUD = GL_POINT
-};
+#include "../utils/config.h"
 
 class Renderer {
 public:
-	Renderer();
+	Renderer(GLFWwindow* window);
 
-	bool init(GLFWwindow* window);
-	RenderMode getRenderMode() const;
+	bool init();
 	void toggleRenderMode();
-	void beginFrame() const;
-	void endFrame() const;
+	void beginFrame();
+	void endFrame();
+
+	RenderMode renderMode = RenderMode::STANDARD;
 
 private:
-	GLFWwindow* window;
-	RenderMode renderMode = RenderMode::STANDARD;
+	GLFWwindow* window = nullptr;
 
 	// must be static to be passed as a callback reference and so it needs to use core->var
 	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);

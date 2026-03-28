@@ -1,23 +1,17 @@
 #include "renderer.h"
 
-Renderer::Renderer() {
-    window = nullptr;
+Renderer::Renderer(GLFWwindow* window) {
+    this->window = window;
 }
 
-bool Renderer::init(GLFWwindow* window) {
-    this->window = window;
-
+bool Renderer::init() {
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(renderMode));
 
     // set callbacks: window resize
-    glfwSetFramebufferSizeCallback(this->window, framebuffer_size_callback);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     return 1;
-}
-
-RenderMode Renderer::getRenderMode() const {
-    return renderMode;
 }
 
 void Renderer::toggleRenderMode() {
@@ -36,7 +30,7 @@ void Renderer::toggleRenderMode() {
     std::cout << "* Changed RenderMode to: " << renderModeStr << std::endl << std::endl;
 }
 
-void Renderer::beginFrame() const {
+void Renderer::beginFrame() {
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
@@ -45,7 +39,7 @@ void Renderer::beginFrame() const {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::endFrame() const {
+void Renderer::endFrame() {
     // no need to unbind it every time but w/e
     glBindVertexArray(0);
 
