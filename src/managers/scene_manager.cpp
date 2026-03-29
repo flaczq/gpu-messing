@@ -1,15 +1,16 @@
-#include "../scenes/soldier_scene.h"
+#include "../configs/log_config.hpp"
+#include "../cores/camera.h"
 #include "../scenes/scene.h"
+#include "../scenes/soldier_scene.h"
 #include "scene_manager.h"
 #include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
 
-class Camera;
-
-SceneManager::SceneManager(Camera* camera) {
-	m_camera = camera;
+SceneManager::SceneManager(Camera* camera)
+	: m_camera(camera)
+{
 }
 
 SceneManager::~SceneManager() = default;
@@ -19,7 +20,7 @@ bool SceneManager::init() {
 	m_currentScene = std::make_unique<SoldierScene>(m_camera);
 	m_currentScene->init();
 
-	return 1;
+	return true;
 }
 
 void SceneManager::toggleScene() {
@@ -36,7 +37,7 @@ void SceneManager::toggleScene() {
 	} else if (m_currentScene->getSceneID() == SceneID::LIGHTS_ROOM) {
 		// FIXME TODO
 		nextScene = std::make_unique<SoldierScene>(m_camera);
-		sceneIDStr = "REAL_GAME";
+		sceneIDStr = "FPS_GAME";
 	} else {
 		nextScene = std::make_unique<SoldierScene>(m_camera);
 		sceneIDStr = "SOLDIER";
@@ -44,7 +45,7 @@ void SceneManager::toggleScene() {
 
 	m_currentScene = std::move(nextScene);
 	m_currentScene->init();
-	std::cout << "* Changed CurrentScene to: " << sceneIDStr << std::endl;
+	LOG_D("Changed CurrentScene to: " << sceneIDStr);
 }
 
 void SceneManager::update(float dt) const {
@@ -53,7 +54,7 @@ void SceneManager::update(float dt) const {
 	}
 }
 
-void SceneManager::render() const {
+void SceneManager::renderFrame() const {
 	if (m_currentScene) {
 		m_currentScene->render();
 	}

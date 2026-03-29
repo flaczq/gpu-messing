@@ -6,3 +6,6 @@
 ## Attributions
 
 🖌️ [for those who come after](ATTRIBUTIONS.md)
+
+## What it can do for now
+![army](army.png)

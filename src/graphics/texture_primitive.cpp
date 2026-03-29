@@ -1,6 +1,7 @@
-#include "texture_primitive.h"
-#include "../configs/gl_config.hpp"
 #include "../../libs/stb_image.h"
+#include "../configs/gl_config.hpp"
+#include "../configs/log_config.hpp"
+#include "texture_primitive.h"
 #include <iostream>
 
 namespace TexturePrimitive {
@@ -39,7 +40,7 @@ namespace TexturePrimitive {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         }
         else {
-            std::cout << "ERROR::TEXTURE_PRIMITIVE::LOADED_FAILED: " << path << std::endl;
+            LOG_E("TEXTURE_PRIMITIVE::LOADED_FAILED: " << path);
         }
 
         stbi_image_free(data);

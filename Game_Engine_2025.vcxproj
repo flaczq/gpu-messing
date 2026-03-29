@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\managers\resource_manager.cpp" />
     <ClCompile Include="src\scenes\scene.cpp" />
     <ClCompile Include="src\scenes\soldier_scene.cpp" />
     <ClCompile Include="src\managers\scene_manager.cpp" />
@@ -61,6 +62,8 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\configs\log_config.hpp" />
+    <ClInclude Include="src\managers\resource_manager.h" />
     <ClInclude Include="src\configs\gl_config.hpp" />
     <ClInclude Include="src\configs\math_config.hpp" />
     <ClInclude Include="src\graphics\graphics_types.hpp" />

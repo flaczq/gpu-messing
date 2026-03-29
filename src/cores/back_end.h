@@ -2,6 +2,9 @@
 
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
+#include "../managers/scene_manager.h"
+#include "camera.h"
+#include "renderer.h"
 #include <memory>
 
 enum class GraphicsAPI {
@@ -9,14 +12,9 @@ enum class GraphicsAPI {
     VULKAN
 };
 
-class Camera;
-class Renderer;
-class SceneManager;
-
 class BackEnd {
 public:
     BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int height);
-    ~BackEnd();
 
     bool init();
     void run();
@@ -31,9 +29,9 @@ private:
     unsigned int m_screenWidth{}, m_screenHeight{};
 
     GLFWwindow* m_window = nullptr;
-    std::unique_ptr<Camera> m_camera = nullptr;
-    std::unique_ptr<Renderer> m_renderer = nullptr;
-    std::unique_ptr<SceneManager> m_sceneManager = nullptr;
+    std::unique_ptr<Camera> m_camera;
+    std::unique_ptr<Renderer> m_renderer;
+    std::unique_ptr<SceneManager> m_sceneManager;
 
     // textures
     //unsigned int diffuseMapTP, specularMapTP;

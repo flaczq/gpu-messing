@@ -13,9 +13,8 @@ public:
 	bool init();
 	void toggleScene();
 	void update(float dt) const;
-	void render() const;
+	void renderFrame() const;
 private:
 	Camera* m_camera = nullptr;
-
-	std::unique_ptr<Scene> m_currentScene = nullptr;
+	std::unique_ptr<Scene> m_currentScene;
 };

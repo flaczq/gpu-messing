@@ -1,27 +1,26 @@
-#include "soldier_scene.h"
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../cores/camera.h"
 #include "../graphics/graphics_types.hpp"
 #include "../graphics/mesh.h"
 #include "../graphics/model.h"
-#include "../graphics/shader.h"
+#include "../managers/resource_manager.h"
 #include "scene.h"
+#include "soldier_scene.h"
 #include <memory>
 #include <vector>
 
-SoldierScene::SoldierScene(Camera* camera) {
-    m_camera = camera;
-
-    m_soldier = std::make_unique<Model>("../assets/models/Soldier.glb");
-    m_soldierShader = std::make_unique<Shader>("../shaders/model.vert", "../shaders/model.frag");
-    m_lightShader = std::make_unique<Shader>("../shaders/light.vert", "../shaders/light.frag");
+SoldierScene::SoldierScene(Camera* camera)
+    : m_camera(camera)
+{
 }
 
 void SoldierScene::init() {
+    m_soldier = std::make_unique<Model>("../assets/models/Soldier.glb");
+
     std::vector<Vertex> lightVertices = calculateLightVertices();
     std::vector<unsigned int> lightIndices = calculateLightIndices();
-    std::vector<Texture> lightTextures;
+    std::vector<Texture*> lightTextures;
     m_lightMarker = std::make_unique<Mesh>(lightVertices, lightIndices, lightTextures);
 }
 
@@ -43,11 +42,26 @@ void SoldierScene::update(float dt) {
     // 2. world * viewM             -> space (lookAt())
     // 3. space * projectionM       -> clip
     // 4. clip  * viewportTransform -> screen
-    m_soldierModel = glm::mat4(1.0f);
-    m_soldierModel = glm::translate(m_soldierModel, m_soldierPos);
-    m_soldierModel = glm::rotate(m_soldierModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    //m_soldierModel = glm::rotate(m_soldierModel, glm::radians(rotation), glm::vec3(0.0f, 0.0f, 1.0f));
-    m_soldierModel = glm::scale(m_soldierModel, glm::vec3(100.0f));
+    if (m_soldierModels.capacity() < soldiersCount) {
+        m_soldierModels.reserve(soldiersCount);
+    }
+    m_soldierModels.clear();
+    int side = static_cast<int>(std::sqrt(soldiersCount));
+    float spacing = 1.0f;
+    for (size_t i{}; i < soldiersCount; i++) {
+        float gridX = static_cast<float>(i % side);
+        float gridZ = static_cast<float>(i / side);
+        glm::vec3 relativePos = glm::vec3(gridX * spacing, 0.0f, gridZ * spacing);
+        glm::vec3 tr = relativePos + m_soldierPos;
+        float angle = i * 30.0f;
+
+        glm::mat4 soldierModel = glm::mat4(1.0f);
+        soldierModel = glm::translate(soldierModel, tr);
+        soldierModel = glm::rotate(soldierModel, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        //soldierModel = glm::rotate(soldierModel, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+        soldierModel = glm::scale(soldierModel, glm::vec3(100.0f));
+        m_soldierModels.push_back(soldierModel);
+    }
 
     // projection
     m_projection = glm::mat4(1.0f);
@@ -58,40 +72,43 @@ void SoldierScene::update(float dt) {
     m_view = m_camera->getViewMatrix();
 
     // additional
-    m_normalMatrix = glm::transpose(glm::inverse(glm::mat3(m_soldierModel)));
+    m_normalMatrix = glm::transpose(glm::inverse(glm::mat3(m_soldierModels[0])));
 
     // LIGHT
     glm::vec3 lightMarkerPos = m_soldierPos - (glm::normalize(m_lightDir) * 5.0f);
-    //lightMarkerPos.y += 2.0f;
+    lightMarkerPos.y += 2.0f;
     m_lightModel = glm::mat4(1.0f);
     m_lightModel = glm::translate(m_lightModel, lightMarkerPos);
     m_lightModel = glm::scale(m_lightModel, glm::vec3(0.2f));
 }
 
 void SoldierScene::render() {
-    // SOLDIER
-    m_soldierShader->use();
+    // SOLDIERS
+    auto* soldierShader = ResourceManager::getShader("model_shader");
+    soldierShader->use();
 
-    // scale fix and optimization with CPU computation
-    m_soldierShader->setMat4fv("projection", m_projection);
-    m_soldierShader->setMat4fv("view", m_view);
-    m_soldierShader->setMat4fv("model", m_soldierModel);
-    m_soldierShader->setMat3fv("normalMatrix", m_normalMatrix);
+    soldierShader->setMat4fv("projection", m_projection);
+    soldierShader->setMat4fv("view", m_view);
+    soldierShader->setMat3fv("normalMatrix", m_normalMatrix);
 
-    m_soldierShader->setVec3fv("lightDir", m_lightDir);
-    m_soldierShader->setVec3fv("lightColor", glm::vec3(1.0f));
-    m_soldierShader->setVec3fv("viewPos", m_camera->getPosition());
+    soldierShader->setVec3fv("lightDir", m_lightDir);
+    soldierShader->setVec3fv("lightColor", glm::vec3(1.0f));
+    soldierShader->setVec3fv("viewPos", m_camera->getPosition());
 
-    m_soldier->draw(*m_soldierShader);
+    for (const auto& soldierModel : m_soldierModels) {
+        soldierShader->setMat4fv("model", soldierModel);
+        m_soldier->draw(*soldierShader);
+    }
 
     // LIGHT
-    m_lightShader->use();
+    auto* lightShader = ResourceManager::getShader("light_shader");
+    lightShader->use();
 
-    m_lightShader->setMat4fv("projection", m_projection);
-    m_lightShader->setMat4fv("view", m_view);
-    m_lightShader->setMat4fv("model", m_lightModel);
+    lightShader->setMat4fv("projection", m_projection);
+    lightShader->setMat4fv("view", m_view);
+    lightShader->setMat4fv("model", m_lightModel);
 
-    m_lightMarker->draw(*m_lightShader);
+    m_lightMarker->draw(*lightShader);
 }
 
 void SoldierScene::end() {

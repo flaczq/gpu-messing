@@ -1,15 +1,9 @@
 #pragma once
 
-#include <string>
 #include "../configs/math_config.hpp"
+#include <string>
 
 constexpr auto MAX_BONE_INFLUENCE = 4;
-
-struct Texture {
-	unsigned int id;
-	std::string type;
-	std::string path;
-};
 
 struct Vertex {
 	glm::vec3 Position;
@@ -19,4 +13,10 @@ struct Vertex {
 	glm::vec3 Bitangent;
 	int BoneIDs[MAX_BONE_INFLUENCE];
 	float Weights[MAX_BONE_INFLUENCE];
+};
+
+struct Texture {
+	unsigned int id;
+	std::string type;
+	std::string path;
 };

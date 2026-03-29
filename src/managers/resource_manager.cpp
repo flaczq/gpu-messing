@@ -1,0 +1,178 @@
+#include "../../libs/stb_image.h"
+#include "../configs/log_config.hpp"
+#include "../graphics/graphics_types.hpp"
+#include "../graphics/shader.h"
+#include "resource_manager.h"
+#include <assimp/scene.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <unordered_map>
+
+void ResourceManager::loadShader(const std::string& name, const char* vertPath, const char* fragPath) {
+	if (m_shaders.find(name) != m_shaders.end()) {
+		LOG_D("Already loaded Shader: " << name);
+		return;
+	}
+
+	m_shaders[name] = std::make_unique<Shader>(vertPath, fragPath);
+}
+
+void ResourceManager::loadTexture(const std::string& name, const char* path, const std::string& typeName) {
+	if (m_textures.find(name) != m_textures.end()) {
+		LOG_D("Already loaded Texture: " << name);
+		return;
+	}
+
+	Texture texture;
+	texture.id = loadTextureFromFile(path);
+	texture.type = typeName;
+	texture.path = path;
+
+	m_textures[name] = std::move(texture);
+}
+
+Shader* ResourceManager::getShader(const std::string& name) {
+	auto it = m_shaders.find(name);
+	if (it == m_shaders.end()) {
+		LOG_E("RESOURCE_MANAGER::GET_SHADER_NULLPTR: " << name);
+		return nullptr;
+	}
+
+	return it->second.get();
+}
+
+Texture* ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {
+	auto it = m_textures.find(path);
+	// just load if texture is cached
+	if (it != m_textures.end()) {
+		LOG_D("Using cache for Texture: " << path);
+		return &(it->second);
+	}
+
+	Texture texture;
+	texture.type = type;
+	texture.path = path;
+
+	// check if texture is embedded (.glb file)
+	if (scene) {
+		// filename for Assimp
+		size_t lastSlash = path.find_last_of('/');
+		std::string filename = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
+		const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(filename.c_str());
+		// again check if texture is embedded or outside (.png file)
+		if (embeddedTexture) {
+			texture.id = loadTextureFromMemory(embeddedTexture, path);
+		} else {
+			texture.id = loadTextureFromFile(path);
+		}
+	} else {
+		texture.id = loadTextureFromFile(path);
+	}
+
+	m_textures[path] = texture;
+	return &m_textures[path];
+}
+
+void ResourceManager::clear() {
+	for (auto& pair : m_shaders) {
+		glDeleteProgram(pair.second->getID());
+	}
+	m_shaders.clear();
+
+	for (auto& pair : m_textures) {
+		if (pair.second.id != 0) {
+			glDeleteTextures(1, &pair.second.id);
+		}
+	}
+	m_textures.clear();
+}
+
+unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem, std::string path) {
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	//stbi_set_flip_vertically_on_load(true);
+
+	int width, height, channels;
+	unsigned char* data;
+	bool isStbiData = false;
+	bool isBGR = false;
+	if (textureMem->mHeight == 0) {
+		// compressed texture format (PNG/JPG), force 4 channels (RGBA)
+		data = stbi_load_from_memory(reinterpret_cast<unsigned char*>(textureMem->pcData), textureMem->mWidth, &width, &height, &channels, 4);
+		// just to be sure
+		channels = 4;
+		isStbiData = true;
+		isBGR = false;
+	} else {
+		// raw data (ARGB/BGRA)
+		width = textureMem->mWidth;
+		height = textureMem->mHeight;
+		// 4 bytes
+		unsigned int bufforSize = width * height * 4;
+		// allocate buffor
+		data = (unsigned char*)malloc(bufforSize);
+		if (data) {
+			memcpy(data, textureMem->pcData, bufforSize);
+		}
+		channels = 4;
+		isStbiData = false;
+		isBGR = true;
+	}
+
+	if (data) {
+		uploadToGPU(data, textureID, width, height, channels, isBGR);
+
+		if (isStbiData) {
+			stbi_image_free(data);
+		} else {
+			free(data);
+		}
+	} else {
+		LOG_E("RESOURCE_MANAGER::ASSIMP_LOAD_TEXTURE_FROM_MEMORY_FAILED: " << path);
+	}
+
+	return textureID;
+}
+
+unsigned int ResourceManager::loadTextureFromFile(std::string path) {
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	//stbi_set_flip_vertically_on_load(true);
+
+	int width, height, channels;
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
+	if (data) {
+		// always RGB/RGBA so isBGR = false
+		uploadToGPU(data, textureID, width, height, channels, false);
+		stbi_image_free(data);
+	} else {
+		LOG_E("RESOURCE_MANAGER::ASSIMP_LOAD_TEXTURE_FROM_FILE_FAILED: " << path);
+	}
+
+	return textureID;
+}
+
+void ResourceManager::uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR) {
+	GLenum gpuFormat = GL_RGBA;
+	GLenum dataFormat = GL_RGBA;
+
+	if (channels == 1) {
+		gpuFormat = dataFormat = GL_RED;
+	} else if (channels == 3) {
+		gpuFormat = dataFormat = (isBGR) ? GL_BGR : GL_RGB;
+	} else if (channels == 4) {
+		gpuFormat = GL_RGBA;
+		dataFormat = (isBGR) ? GL_BGR : GL_RGBA;
+	}
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, gpuFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	// filter params
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}

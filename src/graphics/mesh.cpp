@@ -1,20 +1,19 @@
-#include "mesh.h"
-#include "shader.h"
 #include "../configs/gl_config.hpp"
 #include "graphics_types.hpp"
-#include <vector>
-#include <utility>
+#include "mesh.h"
+#include "shader.h"
 #include <string>
+#include <utility>
+#include <vector>
 
-Mesh::Mesh(Mesh&& other) noexcept {
-    m_VAO = other.m_VAO;
-    m_VBO = other.m_VBO;
-    m_EBO = other.m_EBO;
-
-    m_vertices = std::move(other.m_vertices);
-    m_indices = std::move(other.m_indices);
-    m_textures = std::move(other.m_textures);
-
+Mesh::Mesh(Mesh&& other) noexcept
+    : m_VAO(other.m_VAO),
+      m_VBO(other.m_VBO),
+      m_EBO(other.m_EBO),
+      m_vertices(std::move(other.m_vertices)),
+      m_indices(std::move(other.m_indices)),
+      m_textures(std::move(other.m_textures))
+{
     // reset IDs to not deconstruct them
     other.m_VAO = 0;
     other.m_VBO = 0;
@@ -44,24 +43,19 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
-    m_vertices = vertices;
-    m_indices = indices;
-    m_textures = textures;
-
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures)
+    : m_vertices(vertices),
+      m_indices(indices),
+      m_textures(textures)
+{
 	setupMesh();
 }
 
 Mesh::~Mesh() {
-    if (m_VAO != 0) {
-        glDeleteVertexArrays(1, &m_VAO);
-    }
-    if (m_VBO != 0) {
-        glDeleteBuffers(1, &m_VBO);
-    }
-    if (m_EBO != 0) {
-        glDeleteBuffers(1, &m_EBO);
-    }
+    // OpenGL ignores glDeleteVertexArrays(0) and glDeleteBuffers(0), so no need to check
+    glDeleteVertexArrays(1, &m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_EBO);
 }
 
 void Mesh::draw(Shader &shader) {
@@ -74,7 +68,7 @@ void Mesh::draw(Shader &shader) {
         glActiveTexture(GL_TEXTURE0 + i);
 
         std::string number;
-        std::string name = m_textures[i].type;
+        std::string name = m_textures[i]->type;
         if (name == "diffuse") {
             number = std::to_string(diffuseNr++);
         } else if (name == "specular") {
@@ -84,9 +78,11 @@ void Mesh::draw(Shader &shader) {
         } else if (name == "height") {
             number = std::to_string(heightNr++);
         }
-        shader.setInt("material." + name + "_" + number, i);
+        // FIXME more than one of each material type
+        //shader.setInt("material." + name + number, i);
+        shader.setInt("material." + name + "1", i);
 
-        glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
+        glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);
     }
 
     // state reset

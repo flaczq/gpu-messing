@@ -1,8 +1,10 @@
 #version 330 core
 
 struct Material {
-	sampler2D diffuse_1;
-	sampler2D specular_1;
+	sampler2D diffuse1;
+	sampler2D specular1;
+	sampler2D normal1;
+	sampler2D height1;
 };
 
 out vec4 FragColor;
@@ -21,7 +23,7 @@ void main() {
 	vec3 norm = normalize(Normal);
 
     // texture color
-    vec4 texColor = texture(material.diffuse_1, TexCoords);
+    vec4 texColor = texture(material.diffuse1, TexCoords);
 
     // ambient (background light from far away)
     float ambientStrength = 0.2f;

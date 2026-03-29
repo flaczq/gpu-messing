@@ -1,10 +1,12 @@
-#include "renderer.h"
 #include "../configs/gl_config.hpp"
-#include <string>
+#include "../configs/log_config.hpp"
+#include "renderer.h"
 #include <iostream>
+#include <string>
 
-Renderer::Renderer(GLFWwindow* window) {
-    m_window = window;
+Renderer::Renderer(GLFWwindow* window)
+    : m_window(window)
+{
 }
 
 bool Renderer::init() {
@@ -14,7 +16,7 @@ bool Renderer::init() {
     // set callbacks: window resize
     glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 
-    return 1;
+    return true;
 }
 
 void Renderer::toggleRenderMode() {
@@ -30,7 +32,7 @@ void Renderer::toggleRenderMode() {
         renderModeStr = "STANDARD";
     }
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-    std::cout << "* Changed RenderMode to: " << renderModeStr << std::endl;
+    LOG_D("Changed RenderMode to: " << renderModeStr);
 }
 
 void Renderer::beginFrame() {

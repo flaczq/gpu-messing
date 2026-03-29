@@ -1,35 +1,28 @@
+#include "../configs/gl_config.hpp"
+#include "../configs/log_config.hpp"
+#include "../configs/math_config.hpp"
+#include "../managers/resource_manager.h"
+#include "../managers/scene_manager.h"
 #include "back_end.h"
 #include "camera.h"
 #include "renderer.h"
-#include "../configs/gl_config.hpp"
-#include "../configs/math_config.hpp"
-#include "../managers/scene_manager.h"
-#include <memory>
-#include <iostream>
-#include <string>
-#include <thread>
 #include <iomanip>
 #include <ios>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <thread>
 
-BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int height) {
+BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int height)
+    : m_screenWidth(width),
+      m_screenHeight(height)
+{
     if (graphicsAPI == GraphicsAPI::OPEN_GL) {
-        std::cout << "*** OpenGL for Windows" << std::endl << std::endl;
+        LOG("*** OpenGL for Windows");
     } else if (graphicsAPI == GraphicsAPI::VULKAN) {
-        std::cout << "*** Vulkan for Windows" << std::endl << std::endl;
+        LOG_E("*** Vulkan for Windows - Not implemented... yet");
         throw std::logic_error("Not implemented for Vulkan... yet");
     }
-
-    m_screenWidth = width;
-    m_screenHeight = height;
-}
-
-BackEnd::~BackEnd() {
-    // simple data structures (not meshes)
-
-    //TexturePrimitive::clean(diffuseMapTP);
-    //TexturePrimitive::clean(specularMapTP);
-
-    glfwTerminate();
 }
 
 bool BackEnd::init() {
@@ -44,7 +37,7 @@ bool BackEnd::init() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     m_window = glfwCreateWindow(m_screenWidth, m_screenHeight, "(C) Engine Runner 2049", nullptr, nullptr);
-    std::cout << R"(
+    LOG(R"(
      ## cells interlinked within cells ##
       ___   ___  _  _   ___  
      |__ \ / _ \| || | / _ \ 
@@ -52,21 +45,21 @@ bool BackEnd::init() {
        / /| | | |__   _\__, |
       / /_| |_| |  | |  / / 
      |____|\___/   |_| /_/  
-    )" << std::endl;
+    )");
 
     if (m_window == nullptr) {
-        std::cerr << "Failed to create GLFW window" << std::endl;
+        LOG_E("Failed to create GLFW window");
         glfwTerminate();
-        return -1;
+        return false;
     }
 
     if (glfwInit() == GL_FALSE) {
-        std::cerr << "Failed to init GLFW" << std::endl;
+        LOG_E("Failed to init GLFW");
         glfwTerminate();
-        return -1;
+        return false;
     }
 
-    // sleep and make openGL window focused
+    // sleep and make OpenGL window focused
     glfwMakeContextCurrent(m_window);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     glfwFocusWindow(m_window);
@@ -77,10 +70,10 @@ bool BackEnd::init() {
     glEnable(GL_DEPTH_TEST);
 
     if (glewInit()) {
-        std::cerr << "Failed to init GLEW" << std::endl;
+        LOG_E("Failed to init GLEW");
         glfwDestroyWindow(m_window);
         glfwTerminate();
-        return -1;
+        return false;
     }
 
     // ONLY ONCE set 'this' as BackEnd
@@ -97,6 +90,13 @@ bool BackEnd::init() {
     m_sceneManager = std::make_unique<SceneManager>(m_camera.get());
     m_sceneManager->init();
 
+    //    ┳┓┏┓┏┓┏┓┳┳┳┓┏┓┏┓┏┓
+    //    ┣┫┣ ┗┓┃┃┃┃┣┫┃ ┣ ┗┓
+    //    ┛┗┗┛┗┛┗┛┗┛┛┗┗┛┗┛┗┛
+    //                      
+    ResourceManager::loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
+
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
     //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛  ┣┛┛┗┗┛ ┗┻ ┻ ┗┗┛┗┛┗┛
@@ -107,7 +107,7 @@ bool BackEnd::init() {
     // set callbacks: single key click
     glfwSetKeyCallback(m_window, key_callback);
 
-    return 1;
+    return true;
 }
 
 void BackEnd::run() {
@@ -118,9 +118,9 @@ void BackEnd::run() {
     glm::vec3 lightPos(1.0f, 2.0f, 3.0f);
     float radius = 2.0f;
 
-    //    ┳┳┓┏┓•┳┓  ┏┓┏┓┳┳┓┏┓  ┓ ┏┓┏┓┏┓
-    //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
-    //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
+    //    ┳┳┓┏┓•┳┓   ┓ ┏┓┏┓┏┓
+    //    ┃┃┃┣┫┓┃┃   ┃ ┃┃┃┃┃┃
+    //    ┛ ┗┛┗┗┛┗   ┗┛┗┛┗┛┣┛
     //                                 
     while (!glfwWindowShouldClose(m_window)) {
         // values (deltaTime)
@@ -130,24 +130,33 @@ void BackEnd::run() {
         lightPos.x = cos(currentTime) * radius;
         lightPos.y = sin(currentTime) * radius;
 
-        // bonus
-        showFps(m_window, currentTime);
-
-        // events
-        glfwPollEvents();
         m_camera->processInput(dt);
 
         // physics, movement, ai, collisions
         m_sceneManager->update(dt);
 
-        // rendering at last
+        // renderrring at last
         m_renderer->beginFrame();
-        m_sceneManager->render();
+        m_sceneManager->renderFrame();
         m_renderer->endFrame();
-
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
+        
+        // bonus
+        showFps(m_window, currentTime);
+
+        // events
+        glfwPollEvents();
     }
+
+    //    ┏┓┏┓┳┳┓┏┓  ┏┓┓┏┏┓┳┓
+    //    ┃┓┣┫┃┃┃┣   ┃┃┃┃┣ ┣┫
+    //    ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┛┗
+    //                       
+    ResourceManager::clear();
+
+    glfwDestroyWindow(m_window);
+    glfwTerminate();
 }
 
 Camera* BackEnd::getCamera() const {
@@ -179,10 +188,10 @@ void BackEnd::displayPosition(glm::mat4 viewMatrix) {
     glm::vec3 pos = glm::vec3(inverseView[3]);
 
     std::cout << std::fixed << std::setprecision(2);
-    std::cout << "* Position Status" << std::endl;
-    std::cout << "X: " << std::showpos << pos.x << "   "
+    LOG_D("Position: "
+        << "X: " << std::showpos << pos.x << "   "
         << "Y: " << std::showpos << pos.y << "   "
-        << "Z: " << std::showpos << pos.z << std::endl;
+        << "Z: " << std::showpos << pos.z);
 }
 
 void BackEnd::displayCameraAngles(glm::mat4 viewMatrix) {
@@ -200,10 +209,10 @@ void BackEnd::displayCameraAngles(glm::mat4 viewMatrix) {
         float roll = glm::degrees(euler.z);
 
         std::cout << std::fixed << std::setprecision(2);
-        std::cout << "* Camera Status" << std::endl;
-        std::cout << "Pitch: " << std::showpos << pitch << " deg   "
+        LOG_D("Camera: "
+            << "Pitch: " << std::showpos << pitch << " deg   "
             << "Yaw: " << std::showpos << yaw << " deg   "
-            << "Roll: " << std::showpos << roll << " deg" << std::endl;
+            << "Roll: " << std::showpos << roll << " deg");
     }
 }
 
@@ -220,7 +229,7 @@ void BackEnd::key_callback(GLFWwindow* window, int key, int scancode, int action
     /*if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         bool& spotlightOn = std::get<bool>(backEnd->uniformVars["spotlightOn"]);
         spotlightOn = !spotlightOn;
-        std::cout << "* Changed spotlight to: " << std::boolalpha << spotlightOn << std::endl;
+        LOG_D("Changed spotlight to: " << std::boolalpha << spotlightOn);
     }*/
 
     //    ┳┓┏┓┳┓┳┳┏┓

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include "graphics_types.hpp"
+#include <vector>
 
 class Shader;
 
@@ -15,7 +15,7 @@ public:
 	Mesh(const Mesh&) = delete;
 	// block copy assignment operator
 	Mesh& operator=(const Mesh&) = delete;
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures);
 	~Mesh();
 
 	void draw(Shader &shader);
@@ -25,7 +25,7 @@ private:
 
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
-	std::vector<Texture> m_textures;
+	std::vector<Texture*> m_textures;
 
 	void setupMesh();
 };

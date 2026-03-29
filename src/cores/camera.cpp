@@ -1,35 +1,33 @@
-#include "camera.h"
-#include "back_end.h"
 #include "../configs/gl_config.hpp"
+#include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
+#include "back_end.h"
+#include "camera.h"
+#include <ios>
 #include <iostream>
 #include <string>
 
-Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight) {
-    m_window = window;
-
-    m_position = glm::vec3(6.0f, 1.0f, 6.0f);
-    m_front = glm::vec3(0.0f, 0.0f, -1.0f);
-    m_up = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_right = glm::vec3(0.0f, 1.0f, 0.0f); //fake
-    m_worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_orientation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f); //fake
-
+Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight)
+    : m_window(window),
+      m_position(6.0f, 1.0f, 6.0f),
+      m_front(0.0f, 0.0f, -1.0f),
+      m_up(0.0f, 1.0f, 0.0f),
+      m_right(1.0f, 0.0f, 0.0f),
+      m_worldUp(0.0f, 1.0f, 0.0f),
+      m_orientation(1.0f, 0.0f, 0.0f, 0.0f),
+      // looking at (0,0,0)
+      m_yaw(-135.0f),
+      m_pitch(-11.5f),
+      m_firstMouse(true),
+      m_lastX(screenWidth / 2.0f),
+      m_lastY(screenHeight / 2.0f),
+      m_movementSpeed(5.0f),
+      m_mouseSensitivity(0.05f),
+      m_fov(45.0f),
+      m_aspect((float)screenWidth / (float)screenHeight)
+{
     // CameraMode::STANDING
     m_position.y = getCameraModeHeight();
-
-    // looking at (0,0,0)
-    m_yaw = -135.0f;
-    m_pitch = -11.5f;
-
-    m_firstMouse = true;
-    m_lastX = 800.0f / 2.0f;
-    m_lastY = 600.0f / 2.0f;
-    m_movementSpeed = 5.0f;
-    m_mouseSensitivity = 0.05f;
-    m_fov = 45.0f;
-    m_aspect = (float)screenWidth / (float)screenHeight;
-
     updateCameraVectors();
 }
 
@@ -39,7 +37,7 @@ bool Camera::init() {
     glfwSetScrollCallback(m_window, scroll_callback);
     glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    return 1;
+    return true;
 }
 
 // continuous key clicks -> movement
@@ -161,20 +159,20 @@ void Camera::toggleCameraMode() {
         cameraModeStr = "STANDING";
     }
     m_position.y = getCameraModeHeight();
-    std::cout << "* Changed camera mode to: " << cameraModeStr << std::endl;
+    LOG_D("Changed camera mode to: " << cameraModeStr);
 };
 
 void Camera::toggleGodMode() {
     m_godMode = !m_godMode;
-    std::cout << "* Changed god mode to: " << (m_godMode ? "true" : "false") << std::endl;
+    LOG_D("Changed god mode to: " << std::boolalpha << m_godMode);
 }
 
 void Camera::updateCameraVectors() {
-    glm::vec3 currFront = glm::vec3(0.0f, 0.0f, 0.0f);
-    currFront.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    currFront.y = sin(glm::radians(m_pitch));
-    currFront.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    m_front = glm::normalize(currFront);
+    glm::vec3 currentFront = glm::vec3(0.0f, 0.0f, 0.0f);
+    currentFront.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    currentFront.y = sin(glm::radians(m_pitch));
+    currentFront.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    m_front = glm::normalize(currentFront);
     m_right = glm::normalize(glm::cross(m_front, m_worldUp));
     m_up = glm::normalize(glm::cross(m_right, m_front));
 }
