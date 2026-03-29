@@ -1,4 +1,15 @@
 #include "back_end.h"
+#include "camera.h"
+#include "renderer.h"
+#include "../configs/gl_config.hpp"
+#include "../configs/math_config.hpp"
+#include "../managers/scene_manager.h"
+#include <memory>
+#include <iostream>
+#include <string>
+#include <thread>
+#include <iomanip>
+#include <ios>
 
 BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int height) {
     if (graphicsAPI == GraphicsAPI::OPEN_GL) {
@@ -8,8 +19,8 @@ BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int heigh
         throw std::logic_error("Not implemented for Vulkan... yet");
     }
 
-    screenWidth = width;
-    screenHeight = height;
+    m_screenWidth = width;
+    m_screenHeight = height;
 }
 
 BackEnd::~BackEnd() {
@@ -32,7 +43,7 @@ bool BackEnd::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(screenWidth, screenHeight, "(C) Engine Runner 2049", nullptr, nullptr);
+    m_window = glfwCreateWindow(m_screenWidth, m_screenHeight, "(C) Engine Runner 2049", nullptr, nullptr);
     std::cout << R"(
      ## cells interlinked within cells ##
       ___   ___  _  _   ___  
@@ -43,7 +54,7 @@ bool BackEnd::init() {
      |____|\___/   |_| /_/  
     )" << std::endl;
 
-    if (window == nullptr) {
+    if (m_window == nullptr) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
@@ -56,10 +67,10 @@ bool BackEnd::init() {
     }
 
     // sleep and make openGL window focused
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(m_window);
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    glfwFocusWindow(window);
-    glfwShowWindow(window);
+    glfwFocusWindow(m_window);
+    glfwShowWindow(m_window);
 
     // configuration: experimental GgLEW + Z-depth test
     glewExperimental = GL_TRUE;
@@ -67,24 +78,24 @@ bool BackEnd::init() {
 
     if (glewInit()) {
         std::cerr << "Failed to init GLEW" << std::endl;
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(m_window);
         glfwTerminate();
         return -1;
     }
 
     // ONLY ONCE set 'this' as BackEnd
-    glfwSetWindowUserPointer(window, this);
+    glfwSetWindowUserPointer(m_window, this);
 
     //    •┳┓•┏┳┓
     //    ┓┃┃┓ ┃ 
     //    ┗┛┗┗ ┻ 
     //           
-    camera = std::make_unique<Camera>(window, screenWidth, screenHeight);
-    camera->init();
-    renderer = std::make_unique<Renderer>(window);
-    renderer->init();
-    sceneManager = std::make_unique<SceneManager>(camera.get());
-    sceneManager->init();
+    m_camera = std::make_unique<Camera>(m_window, m_screenWidth, m_screenHeight);
+    m_camera->init();
+    m_renderer = std::make_unique<Renderer>(m_window);
+    m_renderer->init();
+    m_sceneManager = std::make_unique<SceneManager>(m_camera.get());
+    m_sceneManager->init();
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -94,7 +105,7 @@ bool BackEnd::init() {
     //specularMapTP = TexturePrimitive::load("../assets/container2_specular.png");
 
     // set callbacks: single key click
-    glfwSetKeyCallback(window, key_callback);
+    glfwSetKeyCallback(m_window, key_callback);
 
     return 1;
 }
@@ -111,43 +122,55 @@ void BackEnd::run() {
     //    ┃┃┃┣┫┓┃┃  ┃┓┣┫┃┃┃┣   ┃ ┃┃┃┃┃┃
     //    ┛ ┗┛┗┗┛┗  ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┣┛
     //                                 
-    while (!glfwWindowShouldClose(window)) {
+    while (!glfwWindowShouldClose(m_window)) {
         // values (deltaTime)
         float currentTime = static_cast<float>(glfwGetTime());
-        float dt = currentTime - lastFrame;
-        lastFrame = currentTime;
+        float dt = currentTime - m_lastFrame;
+        m_lastFrame = currentTime;
         lightPos.x = cos(currentTime) * radius;
         lightPos.y = sin(currentTime) * radius;
 
         // bonus
-        showFps(window, currentTime);
+        showFps(m_window, currentTime);
 
         // events
         glfwPollEvents();
-        camera->processInput(dt);
+        m_camera->processInput(dt);
 
         // physics, movement, ai, collisions
-        sceneManager->update(dt);
+        m_sceneManager->update(dt);
 
         // rendering at last
-        renderer->beginFrame();
-        sceneManager->render();
-        renderer->endFrame();
+        m_renderer->beginFrame();
+        m_sceneManager->render();
+        m_renderer->endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
     }
 }
 
+Camera* BackEnd::getCamera() const {
+    return m_camera.get();
+}
+
+Renderer* BackEnd::getRenderer() const {
+    return m_renderer.get();
+}
+
+SceneManager* BackEnd::getSceneManager() const {
+    return m_sceneManager.get();
+}
+
 void BackEnd::showFps(GLFWwindow* window, double currentTime) {
-    nbFrames++;
-    if (currentTime - lastTime >= 1.0) {
-        double fps = double(nbFrames);
-        double msPerFrame = 1000.0 / double(nbFrames);
+    m_nbFrames++;
+    if (currentTime - m_lastTime >= 1.0) {
+        double fps = double(m_nbFrames);
+        double msPerFrame = 1000.0 / double(m_nbFrames);
         std::string title = "(C) Engine Runner 2049 - FPS: " + std::to_string((int)fps) + " (" + std::to_string(msPerFrame).substr(0, 4) + " ms)";
         glfwSetWindowTitle(window, title.c_str());
-        nbFrames = 0;
-        lastTime += 1.0;
+        m_nbFrames = 0;
+        m_lastTime += 1.0;
     }
 }
 
@@ -190,7 +213,7 @@ void BackEnd::key_callback(GLFWwindow* window, int key, int scancode, int action
 
     // CROUCHING/STANDING
     if (key == GLFW_KEY_C && action == GLFW_PRESS) {
-        backEnd->camera->toggleCameraMode();
+        backEnd->getCamera()->toggleCameraMode();
     }
 
     // SPOTLIGHT
@@ -207,23 +230,23 @@ void BackEnd::key_callback(GLFWwindow* window, int key, int scancode, int action
     #ifdef _DEBUG
     // GOD MODE
     if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-        backEnd->camera->toggleGodMode();
+        backEnd->getCamera()->toggleGodMode();
     }
 
     // SCENES
     if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-        backEnd->sceneManager->toggleScene();
+        backEnd->getSceneManager()->toggleScene();
     }
 
     // RENDER MODE
     if (key == GLFW_KEY_O && action == GLFW_PRESS) {
-        backEnd->renderer->toggleRenderMode();
+        backEnd->getRenderer()->toggleRenderMode();
     }
 
     // INFO: POSITION, CAMERA
     if (key == GLFW_KEY_I && action == GLFW_PRESS) {
-        backEnd->displayPosition(backEnd->camera->getViewMatrix());
-        backEnd->displayCameraAngles(backEnd->camera->getViewMatrix());
+        backEnd->displayPosition(backEnd->getCamera()->getViewMatrix());
+        backEnd->displayCameraAngles(backEnd->getCamera()->getViewMatrix());
     }
     #endif
 };

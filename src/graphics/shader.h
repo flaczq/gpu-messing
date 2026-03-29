@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../utils/config.h"
+#include "../configs/gl_config.hpp"
+#include "../configs/math_config.hpp"
+#include <string>
 
 class Shader {
 public:
-	unsigned int ID;
-
 	Shader(Shader&& other) noexcept;
 	Shader& operator=(Shader&& other) noexcept;
 	Shader(const Shader&) = delete;
@@ -23,5 +23,6 @@ public:
 	void setMat4fv(const std::string& name, const glm::mat4& value) const;
 
 private:
-	unsigned int vertex, fragment;
+	unsigned int m_ID{};
+	unsigned int m_vertex{}, m_fragment{};
 };

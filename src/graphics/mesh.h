@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../utils/config.h"
-#include "../graphics/shader.h"
+#include <vector>
+#include "graphics_types.hpp"
+
+class Shader;
 
 class Mesh {
 public:
@@ -18,12 +20,12 @@ public:
 
 	void draw(Shader &shader);
 
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-
 private:
-	unsigned int VAO, VBO, EBO;
+	unsigned int m_VAO{}, m_VBO{}, m_EBO{};
+
+	std::vector<Vertex> m_vertices;
+	std::vector<unsigned int> m_indices;
+	std::vector<Texture> m_textures;
 
 	void setupMesh();
 };

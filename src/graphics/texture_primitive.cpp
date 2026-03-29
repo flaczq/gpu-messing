@@ -1,5 +1,7 @@
 #include "texture_primitive.h"
+#include "../configs/gl_config.hpp"
 #include "../../libs/stb_image.h"
+#include <iostream>
 
 namespace TexturePrimitive {
     unsigned int load(const char* path) {

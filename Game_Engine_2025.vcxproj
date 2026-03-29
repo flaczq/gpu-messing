@@ -19,14 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\scenes\scene.cpp" />
     <ClCompile Include="src\scenes\soldier_scene.cpp" />
     <ClCompile Include="src\managers\scene_manager.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\model.cpp" />
-    <ClCompile Include="src\core\renderer.cpp" />
+    <ClCompile Include="src\cores\renderer.cpp" />
     <ClCompile Include="src\graphics\texture_primitive.cpp" />
-    <ClCompile Include="src\core\camera.cpp" />
-    <ClCompile Include="src\core\back_end.cpp" />
+    <ClCompile Include="src\cores\camera.cpp" />
+    <ClCompile Include="src\cores\back_end.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
@@ -60,20 +61,21 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\configs\gl_config.hpp" />
+    <ClInclude Include="src\configs\math_config.hpp" />
+    <ClInclude Include="src\graphics\graphics_types.hpp" />
     <ClInclude Include="src\scenes\soldier_scene.h" />
     <ClInclude Include="src\managers\scene_manager.h" />
     <ClInclude Include="src\graphics\mesh.h" />
     <ClInclude Include="src\graphics\model.h" />
-    <ClInclude Include="src\core\renderer.h" />
+    <ClInclude Include="src\cores\renderer.h" />
     <ClInclude Include="src\graphics\texture_primitive.h" />
-    <ClInclude Include="src\core\camera.h" />
+    <ClInclude Include="src\cores\camera.h" />
     <ClInclude Include="src\scenes\scene.h" />
-    <ClInclude Include="src\utils\commongl.h" />
-    <ClInclude Include="src\core\back_end.h" />
+    <ClInclude Include="src\cores\back_end.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphics\shader.h" />
-    <ClInclude Include="src\utils\config.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />

@@ -1,60 +1,66 @@
 #include "mesh.h"
+#include "shader.h"
+#include "../configs/gl_config.hpp"
+#include "graphics_types.hpp"
+#include <vector>
+#include <utility>
+#include <string>
 
 Mesh::Mesh(Mesh&& other) noexcept {
-    this->VAO = other.VAO;
-    this->VBO = other.VBO;
-    this->EBO = other.EBO;
+    m_VAO = other.m_VAO;
+    m_VBO = other.m_VBO;
+    m_EBO = other.m_EBO;
 
-    this->vertices = std::move(other.vertices);
-    this->indices = std::move(other.indices);
-    this->textures = std::move(other.textures);
+    m_vertices = std::move(other.m_vertices);
+    m_indices = std::move(other.m_indices);
+    m_textures = std::move(other.m_textures);
 
     // reset IDs to not deconstruct them
-    other.VAO = 0;
-    other.VBO = 0;
-    other.EBO = 0;
+    other.m_VAO = 0;
+    other.m_VBO = 0;
+    other.m_EBO = 0;
 }
 
 Mesh& Mesh::operator=(Mesh&& other) noexcept {
     if (this != &other) {
         // delete old GPU data
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        glDeleteBuffers(1, &EBO);
+        glDeleteVertexArrays(1, &m_VAO);
+        glDeleteBuffers(1, &m_VBO);
+        glDeleteBuffers(1, &m_EBO);
 
         // copy the new data
-        this->VAO = other.VAO;
-        this->VBO = other.VBO;
-        this->EBO = other.EBO;
+        m_VAO = other.m_VAO;
+        m_VBO = other.m_VBO;
+        m_EBO = other.m_EBO;
 
-        this->vertices = std::move(other.vertices);
-        this->indices = std::move(other.indices);
-        this->textures = std::move(other.textures);
+        m_vertices = std::move(other.m_vertices);
+        m_indices = std::move(other.m_indices);
+        m_textures = std::move(other.m_textures);
 
-        other.VAO = 0;
-        other.VBO = 0;
-        other.EBO = 0;
+        other.m_VAO = 0;
+        other.m_VBO = 0;
+        other.m_EBO = 0;
     }
     return *this;
 }
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) {
-	this->vertices = vertices;
-	this->indices = indices;
-	this->textures = textures;
+    m_vertices = vertices;
+    m_indices = indices;
+    m_textures = textures;
 
 	setupMesh();
 }
 
 Mesh::~Mesh() {
-    if (VAO != 0) {
-        glDeleteVertexArrays(1, &VAO);
+    if (m_VAO != 0) {
+        glDeleteVertexArrays(1, &m_VAO);
     }
-    if (VBO != 0) {
-        glDeleteBuffers(1, &VBO);
+    if (m_VBO != 0) {
+        glDeleteBuffers(1, &m_VBO);
     }
-    if (EBO != 0) {
-        glDeleteBuffers(1, &EBO);
+    if (m_EBO != 0) {
+        glDeleteBuffers(1, &m_EBO);
     }
 }
 
@@ -64,23 +70,23 @@ void Mesh::draw(Shader &shader) {
     unsigned int normalNr = 1;
     unsigned int heightNr = 1;
 
-    for (size_t i{}; i < textures.size(); i++) {
+    for (size_t i{}; i < m_textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
 
         std::string number;
-        std::string name = textures[i].type;
-        if (name == "texture_diffuse") {
+        std::string name = m_textures[i].type;
+        if (name == "diffuse") {
             number = std::to_string(diffuseNr++);
-        } else if (name == "texture_specular") {
+        } else if (name == "specular") {
             number = std::to_string(specularNr++);
-        } else if (name == "texture_normal") {
+        } else if (name == "normal") {
             number = std::to_string(normalNr++);
-        } else if (name == "texture_height") {
+        } else if (name == "height") {
             number = std::to_string(heightNr++);
         }
-        shader.setInt("material_" + name + number, i);
+        shader.setInt("material." + name + "_" + number, i);
 
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
     }
 
     // state reset
@@ -90,9 +96,9 @@ void Mesh::draw(Shader &shader) {
     //    ┃┃┣┫┣┫┃┃┃┓┃┃┃┓
     //    ┻┛┛┗┛┗┗┻┛┗┛┗┗┛
     //                  
-    glBindVertexArray(VAO);
+    glBindVertexArray(m_VAO);
     // what to render, number of elements, type, offset
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
 
     // unbind <=> clean up
     glBindVertexArray(0);
@@ -103,9 +109,9 @@ void Mesh::setupMesh() {
     //    ┗┓┣  ┃ ┃┃┃┃
     //    ┗┛┗┛ ┻ ┗┛┣┛
     //               
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    glGenVertexArrays(1, &m_VAO);
+    glGenBuffers(1, &m_VBO);
+    glGenBuffers(1, &m_EBO);
 
     // 1. location in vertex
     // 2. type: vec2/vec3/int/float (2/3/4/4)
@@ -113,11 +119,11 @@ void Mesh::setupMesh() {
     // 4. normalize
     // 5. stride = difference between each vertex (can be set to 0 if data is packed for auto complete)
     // 6. offset = difference between each location
-    glBindVertexArray(VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
+    glBindVertexArray(m_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+    glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(unsigned int), m_indices.data(), GL_STATIC_DRAW);
     
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);

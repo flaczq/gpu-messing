@@ -1,12 +1,17 @@
 #version 330 core
 
+struct Material {
+	sampler2D diffuse_1;
+	sampler2D specular_1;
+};
+
 out vec4 FragColor;
 
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
 
-uniform sampler2D material_texture_diffuse1;
+uniform Material material;
 uniform vec3 lightDir;
 uniform vec3 lightColor;
 uniform vec3 viewPos;
@@ -16,7 +21,7 @@ void main() {
 	vec3 norm = normalize(Normal);
 
     // texture color
-    vec4 texColor = texture(material_texture_diffuse1, TexCoords);
+    vec4 texColor = texture(material.diffuse_1, TexCoords);
 
     // ambient (background light from far away)
     float ambientStrength = 0.2f;

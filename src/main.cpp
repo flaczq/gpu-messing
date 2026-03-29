@@ -1,11 +1,13 @@
-﻿#include "utils/config.h"
-#include "core/back_end.h"
+﻿#pragma once
 
-const int s_width = 1280;
-const int s_height = 768;
+#include "cores/back_end.h"
+#include <memory>
+
+constexpr int SCREEN_WIDTH = 1280;
+constexpr int SCREEN_HEIGHT = 768;
 
 int main() {
-    auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, s_width, s_height);
+    auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     if (!backEnd->init()) {
         return -1;

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "../utils/config.h"
-#include "../scenes/scene.h"
+#include <memory>
+
+class Scene;
+class Camera;
 
 class SceneManager {
 public:
@@ -9,11 +11,10 @@ public:
 
 	bool init();
 	void toggleScene();
-	void update(float dt);
-	void render();
-
-	std::unique_ptr<Scene> currentScene;
-
+	void update(float dt) const;
+	void render() const;
 private:
-	Camera* camera = nullptr;
+	Camera* m_camera = nullptr;
+
+	std::unique_ptr<Scene> m_currentScene = nullptr;
 };

@@ -1,19 +1,30 @@
 #include "model.h"
+#include "mesh.h"
 #include "../../libs/stb_image.h"
+#include "graphics_types.hpp"
+#include "../configs/gl_config.hpp"
+#include <vector>
+#include <string>
+#include <iostream>
+#include <map>
+#include <utility>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 Model::Model(const std::string& modelPath) {
 	loadModel(modelPath);
 }
 
 Model::~Model() {
-	for (auto& tex : texturesLoaded) {
-		glDeleteTextures(1, &tex.id);
+	for (auto& it : m_texturesLoaded) {
+		glDeleteTextures(1, &it.second.id);
 	}
 }
 
 void Model::draw(Shader& shader) {
-	for (size_t i{}; i < meshes.size(); i++) {
-		meshes[i].draw(shader);
+	for (size_t i{}; i < m_meshes.size(); i++) {
+		m_meshes[i].draw(shader);
 	}
 }
 
@@ -26,7 +37,7 @@ void Model::loadModel(const std::string& modelPath) {
 		return;
 	}
 
-	directory = modelPath.substr(0, modelPath.find_last_of('/'));
+	m_directory = modelPath.substr(0, modelPath.find_last_of('/'));
 
 	processNode(scene->mRootNode, scene);
 }
@@ -36,7 +47,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 	for (size_t i{}; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		Mesh newMesh = processMesh(mesh, scene);
-		meshes.push_back(std::move(newMesh));
+		m_meshes.push_back(std::move(newMesh));
 	}
 
 	// recursive: process all nodes' children
@@ -98,11 +109,11 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		// diffuse maps
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", scene);
+		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", scene);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// specular maps
-		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", scene);
+		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", scene);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
@@ -117,32 +128,29 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType 
 		// load texture into str
 		mat->GetTexture(type, i, &str);
 		const char* pathOrMem = str.C_Str();
-		bool skip = false;
-		for (size_t j{}; j < texturesLoaded.size(); j++) {
-			// just copy if texture was already loaded (optimization)
-			if (std::strcmp(texturesLoaded[j].path.data(), pathOrMem) == 0) {
-				textures.push_back(texturesLoaded[j]);
-				skip = true;
-				break;
-			}
+		
+		auto it = m_texturesLoaded.find(pathOrMem);
+		// just load if texture was already cached
+		if (it != m_texturesLoaded.end()) {
+			textures.push_back(it->second);
+			continue;
 		}
 
-		if (!skip) {
-			Texture texture;
-			std::string filename = directory + '/' + std::string(pathOrMem);
-			const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(pathOrMem);
-			// check if texture is embedded (.glb file) or outside (.png file)
-			if (embeddedTexture) {
-				texture.id = loadTextureFromMemory(embeddedTexture, filename);
-			} else {
-				texture.id = loadTextureFromFile(filename);
-			}
-
-			texture.type = typeName;
-			texture.path = pathOrMem;
-			textures.push_back(texture);
-			texturesLoaded.push_back(texture);
+		// load if not already cached
+		Texture texture;
+		std::string filename = m_directory + '/' + std::string(pathOrMem);
+		const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(pathOrMem);
+		// check if texture is embedded (.glb file) or outside (.png file)
+		if (embeddedTexture) {
+			texture.id = loadTextureFromMemory(embeddedTexture, filename);
+		} else {
+			texture.id = loadTextureFromFile(filename);
 		}
+
+		texture.type = typeName;
+		texture.path = pathOrMem;
+		textures.push_back(texture);
+		m_texturesLoaded.emplace(pathOrMem, texture);
 	}
 
 	return textures;
@@ -153,13 +161,41 @@ unsigned int Model::loadTextureFromMemory(const aiTexture* textureMem, std::stri
 	glGenTextures(1, &textureID);
 	//stbi_set_flip_vertically_on_load(true);
 
-	int data_w, data_h, data_ch;
-	// compressed texture format: ARGB8888
-	unsigned int bufferSize = textureMem->mHeight == 0 ? textureMem->mWidth : textureMem->mWidth * textureMem->mHeight * 4;
-	unsigned char* data = stbi_load_from_memory(reinterpret_cast<unsigned char*>(textureMem->pcData), bufferSize, &data_w, &data_h, &data_ch, 0);
-
+	int width, height, channels;
+	unsigned char* data;
+	bool isStbiData = false;
+	bool isBGR = false;
+	if (textureMem->mHeight == 0) {
+		// compressed texture format (PNG/JPG), force 4 channels (RGBA)
+		data = stbi_load_from_memory(reinterpret_cast<unsigned char*>(textureMem->pcData), textureMem->mWidth, &width, &height, &channels, 4);
+		// just to be sure
+		channels = 4;
+		isStbiData = true;
+		isBGR = false;
+	} else {
+		// raw data (ARGB/BGRA)
+		width = textureMem->mWidth;
+		height = textureMem->mHeight;
+		// 4 bytes
+		unsigned int bufforSize = width * height * 4;
+		// allocate buffor
+		data = (unsigned char*)malloc(bufforSize);
+		if (data) {
+			memcpy(data, textureMem->pcData, bufforSize);
+		}
+		channels = 4;
+		isStbiData = false;
+		isBGR = true;
+	}
+	
 	if (data) {
-		loadTexture(data, textureID, data_w, data_h, data_ch);
+		loadTexture(data, textureID, width, height, channels, isBGR);
+
+		if (isStbiData) {
+			stbi_image_free(data);
+		} else {
+			free(data);
+		}
 	} else {
 		std::cout << "ERROR::MODEL::ASSIMP_LOAD_FROM_MEMORY_FAILED: " << filename << std::endl;
 	}
@@ -172,10 +208,12 @@ unsigned int Model::loadTextureFromFile(std::string filename) {
 	glGenTextures(1, &textureID);
 	//stbi_set_flip_vertically_on_load(true);
 
-	int data_w, data_h, data_ch;
-	unsigned char* data = stbi_load(filename.c_str(), &data_w, &data_h, &data_ch, 0);
+	int width, height, channels;
+	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 	if (data) {
-		loadTexture(data, textureID, data_w, data_h, data_ch);
+		// always RGB/RGBA so isBGR = false
+		loadTexture(data, textureID, width, height, channels, false);
+		stbi_image_free(data);
 	} else {
 		std::cout << "ERROR::MODEL::ASSIMP_LOAD_FROM_FILE_FAILED: " << filename << std::endl;
 	}
@@ -183,19 +221,21 @@ unsigned int Model::loadTextureFromFile(std::string filename) {
 	return textureID;
 }
 
-void Model::loadTexture(unsigned char* data, unsigned int& textureID, int data_w, int data_h, int data_ch) {
-	// data_ch == 1
-	GLenum format = GL_RED;
-	if (data_ch == 2) {
-		format = GL_RG;
-	} else if (data_ch == 3) {
-		format = GL_RGB;
-	} else if (data_ch == 4) {
-		format = GL_RGBA;
+void Model::loadTexture(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR) {
+	GLenum gpuFormat = GL_RGBA;
+	GLenum dataFormat = GL_RGBA;
+	
+	if (channels == 1) {
+		gpuFormat = dataFormat = GL_RED;
+	} else if (channels == 3) {
+		gpuFormat = dataFormat = isBGR ? GL_BGR : GL_RGB;
+	} else if (channels == 4) {
+		gpuFormat = GL_RGBA;
+		dataFormat = isBGR ? GL_BGR : GL_RGBA;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, format, data_w, data_h, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, gpuFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	// filter params
@@ -203,6 +243,4 @@ void Model::loadTexture(unsigned char* data, unsigned int& textureID, int data_w
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	stbi_image_free(data);
 }
