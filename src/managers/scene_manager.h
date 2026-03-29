@@ -8,6 +8,7 @@ class Camera;
 class SceneManager {
 public:
 	SceneManager(Camera* camera);
+	~SceneManager();
 
 	bool init();
 	void toggleScene();

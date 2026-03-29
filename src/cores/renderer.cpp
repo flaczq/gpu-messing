@@ -30,7 +30,7 @@ void Renderer::toggleRenderMode() {
         renderModeStr = "STANDARD";
     }
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-    std::cout << "* Changed RenderMode to: " << renderModeStr << std::endl << std::endl;
+    std::cout << "* Changed RenderMode to: " << renderModeStr << std::endl;
 }
 
 void Renderer::beginFrame() {

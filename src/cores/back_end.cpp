@@ -182,7 +182,7 @@ void BackEnd::displayPosition(glm::mat4 viewMatrix) {
     std::cout << "* Position Status" << std::endl;
     std::cout << "X: " << std::showpos << pos.x << "   "
         << "Y: " << std::showpos << pos.y << "   "
-        << "Z: " << std::showpos << pos.z << std::endl << std::endl;
+        << "Z: " << std::showpos << pos.z << std::endl;
 }
 
 void BackEnd::displayCameraAngles(glm::mat4 viewMatrix) {
@@ -203,7 +203,7 @@ void BackEnd::displayCameraAngles(glm::mat4 viewMatrix) {
         std::cout << "* Camera Status" << std::endl;
         std::cout << "Pitch: " << std::showpos << pitch << " deg   "
             << "Yaw: " << std::showpos << yaw << " deg   "
-            << "Roll: " << std::showpos << roll << " deg" << std::endl << std::endl;
+            << "Roll: " << std::showpos << roll << " deg" << std::endl;
     }
 }
 
@@ -220,7 +220,7 @@ void BackEnd::key_callback(GLFWwindow* window, int key, int scancode, int action
     /*if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         bool& spotlightOn = std::get<bool>(backEnd->uniformVars["spotlightOn"]);
         spotlightOn = !spotlightOn;
-        std::cout << "* Changed spotlight to: " << std::boolalpha << spotlightOn << std::endl << std::endl;
+        std::cout << "* Changed spotlight to: " << std::boolalpha << spotlightOn << std::endl;
     }*/
 
     //    ┳┓┏┓┳┓┳┳┏┓

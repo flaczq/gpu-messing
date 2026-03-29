@@ -161,12 +161,12 @@ void Camera::toggleCameraMode() {
         cameraModeStr = "STANDING";
     }
     m_position.y = getCameraModeHeight();
-    std::cout << "* Changed camera mode to: " << cameraModeStr << std::endl << std::endl;
+    std::cout << "* Changed camera mode to: " << cameraModeStr << std::endl;
 };
 
 void Camera::toggleGodMode() {
     m_godMode = !m_godMode;
-    std::cout << "* Changed god mode to: " << (m_godMode ? "true" : "false") << std::endl << std::endl;
+    std::cout << "* Changed god mode to: " << (m_godMode ? "true" : "false") << std::endl;
 }
 
 void Camera::updateCameraVectors() {

@@ -12,6 +12,8 @@ SceneManager::SceneManager(Camera* camera) {
 	m_camera = camera;
 }
 
+SceneManager::~SceneManager() = default;
+
 bool SceneManager::init() {
 	// default scene
 	m_currentScene = std::make_unique<SoldierScene>(m_camera);
@@ -42,7 +44,7 @@ void SceneManager::toggleScene() {
 
 	m_currentScene = std::move(nextScene);
 	m_currentScene->init();
-	std::cout << "* Changed CurrentScene to: " << sceneIDStr << std::endl << std::endl;
+	std::cout << "* Changed CurrentScene to: " << sceneIDStr << std::endl;
 }
 
 void SceneManager::update(float dt) const {
