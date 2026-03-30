@@ -16,8 +16,8 @@ public:
 	SoldierScene(Camera* camera);
 
 	void init() override;
-	void update(float dt) override;
-	void render() override;
+	void fixedUpdate(float fixedt) override;
+	void render(float alpha) override;
 	void end() override;
 
 private:
@@ -34,6 +34,7 @@ private:
 	glm::mat3 m_normalMatrix = glm::mat3(1.0f);
 	glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f));
 	glm::vec3 m_soldierPos = glm::vec3(3.0f, 0.0f, 3.0f);
+	glm::vec3 m_soldierPreviousPos = glm::vec3(3.0f, 0.0f, 3.0f);
 	float m_rotation = 0.0f;
 	float m_rotationSpeed = 50.0f;
 	size_t soldiersCount = 10;

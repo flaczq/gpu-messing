@@ -48,14 +48,14 @@ void SceneManager::toggleScene() {
 	LOG_D("Changed CurrentScene to: " << sceneIDStr);
 }
 
-void SceneManager::update(float dt) const {
+void SceneManager::fixedUpdate(float fixedt) const {
 	if (m_currentScene) {
-		m_currentScene->update(dt);
+		m_currentScene->fixedUpdate(fixedt);
 	}
 }
 
-void SceneManager::renderFrame() const {
+void SceneManager::renderFrame(float alpha) const {
 	if (m_currentScene) {
-		m_currentScene->render();
+		m_currentScene->render(alpha);
 	}
 }

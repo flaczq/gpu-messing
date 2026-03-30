@@ -22,10 +22,7 @@ public:
     Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
     bool init();
-    void processInput(float dt);
-    void processKeyboard(CameraDirection direction, float dt);
-    void processMouseScroll(float yOffset);
-    void processMouseMovement(float xOffest, float yOffset, GLboolean constrainPitch = true);
+    void processInput(double dt);
 
     glm::mat4 getViewMatrix() const;
     glm::vec3 getPosition() const;
@@ -35,7 +32,6 @@ public:
     void toggleCameraMode();
     void toggleGodMode();
 
-
 private:
     glm::vec3 m_position{};
     glm::vec3 m_front{};
@@ -43,24 +39,20 @@ private:
     glm::vec3 m_right{};
     glm::vec3 m_worldUp{};
     glm::quat m_orientation{};
-    bool m_firstMouse{};
     float m_fov{};
     float m_aspect{};
     float m_yaw{};
     float m_pitch{};
-    float m_lastX{};
-    float m_lastY{};
     float m_movementSpeed{};
     float m_mouseSensitivity{};
 
+    bool m_godMode = false;
     GLFWwindow* m_window = nullptr;
     CameraMode m_cameraMode = CameraMode::STANDING;
-    bool m_godMode = false;
 
+    void processKeyboard(CameraDirection direction, double dt);
+    void processMouseScroll(float yoffset);
+    void processMouseMovement(float xoffest, float yoffset, GLboolean constrainPitch = true);
     void updateCameraVectors();
     float getCameraModeHeight() const;
-
-    // must be static to be passed as a callback reference and so it needs to use camera->var
-    static void mouse_callback(GLFWwindow* window, double xPosIn, double yPosIn);
-    static void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
 };

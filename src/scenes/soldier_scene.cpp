@@ -24,15 +24,15 @@ void SoldierScene::init() {
     m_lightMarker = std::make_unique<Mesh>(lightVertices, lightIndices, lightTextures);
 }
 
-void SoldierScene::update(float dt) {
+void SoldierScene::fixedUpdate(float fixedt) {
     // SOLDIER
     static float time = 0.0f;
-    time += dt;
+    time += fixedt;
     float x = sin(time);
     float z = cos(time);
     m_lightDir = glm::normalize(glm::vec3(x, -1.0f, z));
 
-    m_rotation += m_rotationSpeed * dt;
+    m_rotation += m_rotationSpeed * fixedt;
     if (m_rotation >= 360.0f) {
         m_rotation -= 360.0f;
     }
@@ -82,7 +82,7 @@ void SoldierScene::update(float dt) {
     m_lightModel = glm::scale(m_lightModel, glm::vec3(0.2f));
 }
 
-void SoldierScene::render() {
+void SoldierScene::render(float alpha) {
     // SOLDIERS
     auto* soldierShader = ResourceManager::getShader("model_shader");
     soldierShader->use();

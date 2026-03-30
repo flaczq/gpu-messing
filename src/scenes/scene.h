@@ -11,8 +11,8 @@ public:
 	virtual ~Scene() = default;
 
 	virtual void init() = 0;
-	virtual void update(float dt) = 0;
-	virtual void render() = 0;
+	virtual void fixedUpdate(float fixedt) = 0;
+	virtual void render(float alpha) = 0;
 	virtual void end() = 0;
 
 	SceneID getSceneID() const;
