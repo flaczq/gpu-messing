@@ -1,13 +1,13 @@
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
+#include "../graphics/renderer.h"
 #include "../managers/input_manager.h"
 #include "../managers/resource_manager.h"
 #include "../managers/scene_manager.h"
 #include "../physics/physics_world.h"
 #include "back_end.h"
 #include "camera.h"
-#include "renderer.h"
 #include <iomanip>
 #include <ios>
 #include <iostream>
@@ -98,8 +98,8 @@ bool BackEnd::init() {
     //    ┣┫┣ ┗┓┃┃┃┃┣┫┃ ┣ ┗┓
     //    ┛┗┗┛┗┛┗┛┗┛┛┗┗┛┗┛┗┛
     //                      
-    ResourceManager::loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
-    ResourceManager::loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
+    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::getInstance().loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -147,13 +147,13 @@ void BackEnd::run() {
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
-            m_physicsWorld->savePreviousState();
+            m_physicsWorld->saveState();
             m_physicsWorld->fixedUpdate(static_cast<float>(FIXED_DT));
             m_sceneManager->fixedUpdate(static_cast<float>(FIXED_DT));
             m_accumulator -= FIXED_DT;
         }
 
-        // Interpolation (what?)
+        // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
         // renderrring at last
         m_renderer->beginFrame();
@@ -174,7 +174,7 @@ void BackEnd::run() {
     //    ┃┓┣┫┃┃┃┣   ┃┃┃┃┣ ┣┫
     //    ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┛┗
     //                       
-    ResourceManager::clear();
+    ResourceManager::getInstance().clear();
 
     glfwDestroyWindow(m_window);
     glfwTerminate();
@@ -215,22 +215,6 @@ void BackEnd::processCommonInput() {
         displayCameraAngles(view);
     }
     #endif
-}
-
-Camera* BackEnd::getCamera() const {
-    return m_camera.get();
-}
-
-Renderer* BackEnd::getRenderer() const {
-    return m_renderer.get();
-}
-
-SceneManager* BackEnd::getSceneManager() const {
-    return m_sceneManager.get();
-}
-
-PhysicsWorld* BackEnd::getPhysicsWorld() const {
-    return m_physicsWorld.get();
 }
 
 void BackEnd::showFps(GLFWwindow* window, double currentTime) {

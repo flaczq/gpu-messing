@@ -18,7 +18,7 @@ void PhysicsWorld::fixedUpdate(float fixedt) const {
 	}
 }
 
-void PhysicsWorld::savePreviousState() {
+void PhysicsWorld::saveState() {
 }
 
 void PhysicsWorld::togglePhysics() {

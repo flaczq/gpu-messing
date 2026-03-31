@@ -126,7 +126,7 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
 		// unique key for ResourceManager
 		std::string fullPath = m_directory + '/' + pathOrMem;
 
-		Texture* texture = ResourceManager::getTexture(fullPath, typeName, scene);
+		Texture* texture = ResourceManager::getInstance().getTexture(fullPath, typeName, scene);
 		if (texture) {
 			textures.push_back(texture);
 		}

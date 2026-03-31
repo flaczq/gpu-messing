@@ -9,6 +9,14 @@
 #include <string>
 #include <unordered_map>
 
+ResourceManager& ResourceManager::getInstance() {
+	static ResourceManager instance;
+	return instance;
+}
+
+ResourceManager::ResourceManager() {
+}
+
 void ResourceManager::loadShader(const std::string& name, const char* vertPath, const char* fragPath) {
 	if (m_shaders.find(name) != m_shaders.end()) {
 		LOG_D("Already loaded Shader: " << name);

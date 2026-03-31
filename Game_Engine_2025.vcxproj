@@ -19,15 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\game\components\component.cpp" />
+    <ClCompile Include="src\game\entities\game_object.cpp" />
     <ClCompile Include="src\managers\input_manager.cpp" />
     <ClCompile Include="src\physics\physics_world.cpp" />
     <ClCompile Include="src\managers\resource_manager.cpp" />
-    <ClCompile Include="src\scenes\scene.cpp" />
     <ClCompile Include="src\scenes\soldier_scene.cpp" />
     <ClCompile Include="src\managers\scene_manager.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\model.cpp" />
-    <ClCompile Include="src\cores\renderer.cpp" />
+    <ClCompile Include="src\graphics\renderer.cpp" />
     <ClCompile Include="src\graphics\texture_primitive.cpp" />
     <ClCompile Include="src\cores\camera.cpp" />
     <ClCompile Include="src\cores\back_end.cpp" />
@@ -64,6 +65,9 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\game\components\component.h" />
+    <ClInclude Include="src\game\components\components_types.hpp" />
+    <ClInclude Include="src\game\entities\game_object.h" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\physics\physics_world.h" />
     <ClInclude Include="src\configs\log_config.hpp" />
@@ -75,7 +79,7 @@
     <ClInclude Include="src\managers\scene_manager.h" />
     <ClInclude Include="src\graphics\mesh.h" />
     <ClInclude Include="src\graphics\model.h" />
-    <ClInclude Include="src\cores\renderer.h" />
+    <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\graphics\texture_primitive.h" />
     <ClInclude Include="src\cores\camera.h" />
     <ClInclude Include="src\scenes\scene.h" />

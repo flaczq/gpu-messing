@@ -4,8 +4,6 @@
 #include "../configs/math_config.hpp"
 #include "../graphics/graphics_types.hpp"
 #include "scene.h"
-#include <memory>
-#include <vector>
 
 class Camera;
 class Model;
@@ -17,11 +15,13 @@ public:
 
 	void init() override;
 	void fixedUpdate(float fixedt) override;
-	void render(float alpha) override;
+	void renderFrame(float alpha) override;
 	void end() override;
 
 private:
 	SceneID m_sceneID = SceneID::SOLDIER;
+	std::vector<std::unique_ptr<GameObject>> m_gameObjects;
+
 	Camera* m_camera = nullptr;
 
 	std::unique_ptr<Model> m_soldier;

@@ -2,10 +2,10 @@
 
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
+#include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
 #include "../physics/physics_world.h"
 #include "camera.h"
-#include "renderer.h"
 #include <memory>
 
 enum class GraphicsAPI {
@@ -21,10 +21,10 @@ public:
     void run();
     void processCommonInput();
 
-    Camera* getCamera() const;
-    Renderer* getRenderer() const;
-    SceneManager* getSceneManager() const;
-    PhysicsWorld* getPhysicsWorld() const;
+    Camera* getCamera() const { return m_camera.get(); }
+    Renderer* getRenderer() const { return m_renderer.get(); }
+    SceneManager* getSceneManager() const { return m_sceneManager.get(); }
+    PhysicsWorld* getPhysicsWorld() const { return m_physicsWorld.get(); }
 
 private:
     unsigned int m_screenWidth{}, m_screenHeight{};

@@ -9,25 +9,29 @@
 
 class ResourceManager {
 public:
-	static void loadShader(const std::string& name, const char* vertPath, const char* fragPath);
+	// Meyer's Singleton
+	static ResourceManager& getInstance();
+	ResourceManager(const ResourceManager&) = delete;
+	void operator=(const ResourceManager&) = delete;
+
+	void loadShader(const std::string& name, const char* vertPath, const char* fragPath);
 	// used to manually load some textures
-	static void loadTexture(const std::string& name, const char* path, const std::string& typeName);
+	void loadTexture(const std::string& name, const char* path, const std::string& typeName);
 
-	static Shader* getShader(const std::string& name);
+	Shader* getShader(const std::string& name);
 	// used by Assimp to load textures from Model
-	static Texture* getTexture(const std::string& path, const std::string& type, const aiScene* scene);
+	Texture* getTexture(const std::string& path, const std::string& type, const aiScene* scene);
 
-	static void clear();
+	void clear();
 
 private:
-	// singleton
-	ResourceManager() = default;
+	// hidden constructor
+	ResourceManager();
 
-	// no need to define them in the .cpp
-	inline static std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
-	inline static std::unordered_map<std::string, Texture> m_textures;
+	std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
+	std::unordered_map<std::string, Texture> m_textures;
 
-	static unsigned int loadTextureFromMemory(const aiTexture* embedded, std::string filename);
-	static unsigned int loadTextureFromFile(std::string filename);
-	static void uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
+	unsigned int loadTextureFromMemory(const aiTexture* embedded, std::string filename);
+	unsigned int loadTextureFromFile(std::string filename);
+	void uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
 };

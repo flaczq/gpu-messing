@@ -6,7 +6,7 @@ public:
 
 	bool init();
 	void fixedUpdate(float fixedt) const;
-	void savePreviousState();
+	void saveState();
 
 	void togglePhysics();
 

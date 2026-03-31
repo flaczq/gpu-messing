@@ -56,6 +56,6 @@ void SceneManager::fixedUpdate(float fixedt) const {
 
 void SceneManager::renderFrame(float alpha) const {
 	if (m_currentScene) {
-		m_currentScene->render(alpha);
+		m_currentScene->renderFrame(alpha);
 	}
 }

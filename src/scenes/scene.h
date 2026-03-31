@@ -1,5 +1,9 @@
 #pragma once
 
+#include "../game/entities/game_object.h"
+#include <memory>
+#include <vector>
+
 enum class SceneID {
 	SOLDIER,
 	LIGHTS_ROOM,
@@ -12,11 +16,13 @@ public:
 
 	virtual void init() = 0;
 	virtual void fixedUpdate(float fixedt) = 0;
-	virtual void render(float alpha) = 0;
+	virtual void renderFrame(float alpha) = 0;
 	virtual void end() = 0;
 
-	SceneID getSceneID() const;
+	SceneID getSceneID() const { return m_sceneID; }
+	std::vector<std::unique_ptr<GameObject>> getGameObjects() const { return m_gameObjects; }
 
 private:
 	SceneID m_sceneID{};
+	std::vector<std::unique_ptr<GameObject>> m_gameObjects;
 };

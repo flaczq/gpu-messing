@@ -5,6 +5,7 @@
 #include "../graphics/mesh.h"
 #include "../graphics/model.h"
 #include "../managers/resource_manager.h"
+#include "../game/entities/game_object.h"
 #include "scene.h"
 #include "soldier_scene.h"
 #include <memory>
@@ -22,6 +23,9 @@ void SoldierScene::init() {
     std::vector<unsigned int> lightIndices = calculateLightIndices();
     std::vector<Texture*> lightTextures;
     m_lightMarker = std::make_unique<Mesh>(lightVertices, lightIndices, lightTextures);
+
+    auto soldierGO = std::make_shared<GameObject>();
+    soldierGO->addComponent
 }
 
 void SoldierScene::fixedUpdate(float fixedt) {
@@ -82,9 +86,13 @@ void SoldierScene::fixedUpdate(float fixedt) {
     m_lightModel = glm::scale(m_lightModel, glm::vec3(0.2f));
 }
 
-void SoldierScene::render(float alpha) {
+void SoldierScene::renderFrame(float alpha) {
+    for (auto& gameObject : m_gameObjects) {
+        gameObject->draw();
+    }
+
     // SOLDIERS
-    auto* soldierShader = ResourceManager::getShader("model_shader");
+    /*auto* soldierShader = ResourceManager::getInstance().getShader("model_shader");
     soldierShader->use();
 
     soldierShader->setMat4fv("projection", m_projection);
@@ -101,14 +109,14 @@ void SoldierScene::render(float alpha) {
     }
 
     // LIGHT
-    auto* lightShader = ResourceManager::getShader("light_shader");
+    auto* lightShader = ResourceManager::getInstance().getShader("light_shader");
     lightShader->use();
 
     lightShader->setMat4fv("projection", m_projection);
     lightShader->setMat4fv("view", m_view);
     lightShader->setMat4fv("model", m_lightModel);
 
-    m_lightMarker->draw(*lightShader);
+    m_lightMarker->draw(*lightShader);*/
 }
 
 void SoldierScene::end() {

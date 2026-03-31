@@ -25,12 +25,12 @@ public:
     void processInput(double dt);
 
     glm::mat4 getViewMatrix() const;
-    glm::vec3 getPosition() const;
-    float getFov() const;
-    float getAspect() const;
-
     void toggleCameraMode();
     void toggleGodMode();
+
+    glm::vec3 getPosition() const { return m_position; }
+    float getFov() const { return m_fov; }
+    float getAspect() const { return m_aspect; }
 
 private:
     glm::vec3 m_position{};

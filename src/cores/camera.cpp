@@ -72,25 +72,6 @@ glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(m_position, m_position + m_front, m_up);
 }
 
-glm::vec3 Camera::getPosition() const {
-    return m_position;
-}
-
-float Camera::getFov() const {
-    return m_fov;
-}
-
-float Camera::getAspect() const {
-    return m_aspect;
-}
-
-float Camera::getCameraModeHeight() const {
-    if (m_cameraMode == CameraMode::STANDING) {
-        return 1.75f;
-    }
-    return 0.85f;
-}
-
 void Camera::toggleCameraMode() {
     std::string cameraModeStr;
     if (m_cameraMode == CameraMode::STANDING) {
@@ -175,4 +156,11 @@ void Camera::updateCameraVectors() {
     m_front = glm::normalize(currentFront);
     m_right = glm::normalize(glm::cross(m_front, m_worldUp));
     m_up = glm::normalize(glm::cross(m_right, m_front));
+}
+
+float Camera::getCameraModeHeight() const {
+    if (m_cameraMode == CameraMode::STANDING) {
+        return 1.75f;
+    }
+    return 0.85f;
 }
