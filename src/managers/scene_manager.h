@@ -12,6 +12,7 @@ public:
 
 	bool init();
 	void toggleScene();
+	void saveState() const;
 	void fixedUpdate(float fixedt) const;
 	void renderFrame(float alpha) const;
 

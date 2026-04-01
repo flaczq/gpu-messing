@@ -4,6 +4,9 @@
 #include "../configs/math_config.hpp"
 #include "../graphics/graphics_types.hpp"
 #include "scene.h"
+#include <memory>
+#include <utility>
+#include <vector>
 
 class Camera;
 class Model;
@@ -14,14 +17,13 @@ public:
 	SoldierScene(Camera* camera);
 
 	void init() override;
+	void saveState() override;
 	void fixedUpdate(float fixedt) override;
 	void renderFrame(float alpha) override;
 	void end() override;
 
 private:
 	SceneID m_sceneID = SceneID::SOLDIER;
-	std::vector<std::unique_ptr<GameObject>> m_gameObjects;
-
 	Camera* m_camera = nullptr;
 
 	std::unique_ptr<Model> m_soldier;
@@ -34,7 +36,6 @@ private:
 	glm::mat3 m_normalMatrix = glm::mat3(1.0f);
 	glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f));
 	glm::vec3 m_soldierPos = glm::vec3(3.0f, 0.0f, 3.0f);
-	glm::vec3 m_soldierPreviousPos = glm::vec3(3.0f, 0.0f, 3.0f);
 	float m_rotation = 0.0f;
 	float m_rotationSpeed = 50.0f;
 	size_t soldiersCount = 10;

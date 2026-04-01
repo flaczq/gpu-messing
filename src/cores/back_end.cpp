@@ -147,8 +147,9 @@ void BackEnd::run() {
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
-            m_physicsWorld->saveState();
-            m_physicsWorld->fixedUpdate(static_cast<float>(FIXED_DT));
+            //m_physicsWorld->saveState();
+            //m_physicsWorld->fixedUpdate(static_cast<float>(FIXED_DT));
+            m_sceneManager->saveState();
             m_sceneManager->fixedUpdate(static_cast<float>(FIXED_DT));
             m_accumulator -= FIXED_DT;
         }
@@ -210,7 +211,7 @@ void BackEnd::processCommonInput() {
 
     // INFO: POSITION, CAMERA
     if (input.isKeyPressed(GLFW_KEY_I)) {
-        glm::mat4 view = m_camera->getViewMatrix();
+        glm::mat4 view = m_camera->getViewMatrix(0.0f);
         displayPosition(view);
         displayCameraAngles(view);
     }

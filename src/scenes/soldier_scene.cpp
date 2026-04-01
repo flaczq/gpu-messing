@@ -1,14 +1,17 @@
+#include "../components/transform_component.h"
 #include "../configs/gl_config.hpp"
+#include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../cores/camera.h"
+#include "../entities/game_entity.h"
 #include "../graphics/graphics_types.hpp"
 #include "../graphics/mesh.h"
 #include "../graphics/model.h"
 #include "../managers/resource_manager.h"
-#include "../game/entities/game_object.h"
 #include "scene.h"
 #include "soldier_scene.h"
 #include <memory>
+#include <utility>
 #include <vector>
 
 SoldierScene::SoldierScene(Camera* camera)
@@ -24,8 +27,21 @@ void SoldierScene::init() {
     std::vector<Texture*> lightTextures;
     m_lightMarker = std::make_unique<Mesh>(lightVertices, lightIndices, lightTextures);
 
-    auto soldierGO = std::make_shared<GameObject>();
-    soldierGO->addComponent
+    auto soldierGO = std::make_unique<GameEntity>();
+    soldierGO->addComponent<TransformComponent>(m_soldierPos);
+
+    m_gameEntities.push_back(std::move(soldierGO));
+}
+
+void SoldierScene::saveState() {
+    for (auto& gameEntity : m_gameEntities) {
+        auto transform = gameEntity->getTransform();
+        if (!transform) {
+            continue;
+        }
+
+        transform->saveState();
+    }
 }
 
 void SoldierScene::fixedUpdate(float fixedt) {
@@ -73,7 +89,7 @@ void SoldierScene::fixedUpdate(float fixedt) {
 
     // view
     m_view = glm::mat4(1.0f);
-    m_view = m_camera->getViewMatrix();
+    //m_view = m_camera->getViewMatrix();
 
     // additional
     m_normalMatrix = glm::transpose(glm::inverse(glm::mat3(m_soldierModels[0])));
@@ -87,8 +103,28 @@ void SoldierScene::fixedUpdate(float fixedt) {
 }
 
 void SoldierScene::renderFrame(float alpha) {
-    for (auto& gameObject : m_gameObjects) {
-        gameObject->draw();
+    auto* soldierShader = ResourceManager::getInstance().getShader("model_shader");
+    soldierShader->use();
+
+    for (auto& gameEntity : m_gameEntities) {
+        auto transform = gameEntity->getTransform();
+        if (!transform) {
+            continue;
+        }
+
+        glm::mat4 model = transform->getInterpolatedMatrix(alpha);
+        glm::mat4 view = m_camera->getViewMatrix(alpha);
+
+        soldierShader->setMat4fv("projection", m_projection);
+        soldierShader->setMat4fv("view", view);
+        soldierShader->setMat3fv("normalMatrix", m_normalMatrix);
+        soldierShader->setMat4fv("model", model);
+
+        soldierShader->setVec3fv("lightDir", m_lightDir);
+        soldierShader->setVec3fv("lightColor", glm::vec3(1.0f));
+        soldierShader->setVec3fv("viewPos", m_camera->getPosition());
+
+        m_soldier->draw(*soldierShader);
     }
 
     // SOLDIERS

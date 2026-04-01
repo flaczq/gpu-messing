@@ -13,7 +13,8 @@ SceneManager::SceneManager(Camera* camera)
 {
 }
 
-SceneManager::~SceneManager() = default;
+SceneManager::~SceneManager() {
+};
 
 bool SceneManager::init() {
 	// default scene
@@ -46,6 +47,13 @@ void SceneManager::toggleScene() {
 	m_currentScene = std::move(nextScene);
 	m_currentScene->init();
 	LOG_D("Changed CurrentScene to: " << sceneIDStr);
+}
+
+void SceneManager::saveState() const {
+	m_camera->saveState();
+	if (m_currentScene) {
+		m_currentScene->saveState();
+	}
 }
 
 void SceneManager::fixedUpdate(float fixedt) const {

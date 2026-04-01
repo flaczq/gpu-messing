@@ -19,11 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\game\components\component.cpp" />
-    <ClCompile Include="src\game\entities\game_object.cpp" />
+    <ClCompile Include="src\components\component.cpp" />
+    <ClCompile Include="src\entities\game_entity.cpp" />
     <ClCompile Include="src\managers\input_manager.cpp" />
     <ClCompile Include="src\physics\physics_world.cpp" />
     <ClCompile Include="src\managers\resource_manager.cpp" />
+    <ClCompile Include="src\scenes\scene.cpp" />
     <ClCompile Include="src\scenes\soldier_scene.cpp" />
     <ClCompile Include="src\managers\scene_manager.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
+    <ClCompile Include="src\components\transform_component.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -65,9 +67,9 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\game\components\component.h" />
-    <ClInclude Include="src\game\components\components_types.hpp" />
-    <ClInclude Include="src\game\entities\game_object.h" />
+    <ClInclude Include="src\components\component.h" />
+    <ClInclude Include="src\components\components_types.hpp" />
+    <ClInclude Include="src\entities\game_entity.h" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\physics\physics_world.h" />
     <ClInclude Include="src\configs\log_config.hpp" />
@@ -87,6 +89,7 @@
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphics\shader.h" />
+    <ClInclude Include="src\components\transform_component.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />

@@ -57,10 +57,16 @@
     <ClCompile Include="src\managers\input_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\entities\game_object.cpp">
+    <ClCompile Include="src\entities\game_entity.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\components\component.cpp">
+    <ClCompile Include="src\components\component.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="src\components\transform_component.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scenes\scene.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -162,13 +168,16 @@
     <ClInclude Include="src\managers\input_manager.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\entities\game_object.h">
+    <ClInclude Include="src\entities\game_entity.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\components\component.h">
+    <ClInclude Include="src\components\component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\game\components\components_types.hpp">
+    <ClInclude Include="src\components\components_types.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\components\transform_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

@@ -22,9 +22,9 @@ public:
     Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
     bool init();
+    void saveState();
     void processInput(double dt);
-
-    glm::mat4 getViewMatrix() const;
+    glm::mat4 getViewMatrix(float alpha) const;
     void toggleCameraMode();
     void toggleGodMode();
 
@@ -34,6 +34,7 @@ public:
 
 private:
     glm::vec3 m_position{};
+    glm::vec3 m_previousPosition{};
     glm::vec3 m_front{};
     glm::vec3 m_up{};
     glm::vec3 m_right{};
@@ -42,11 +43,14 @@ private:
     float m_fov{};
     float m_aspect{};
     float m_yaw{};
+    float m_previousYaw{};
     float m_pitch{};
+    float m_previousPitch{};
     float m_movementSpeed{};
     float m_mouseSensitivity{};
 
     bool m_godMode = false;
+    bool m_cKeyPressed = false;
     GLFWwindow* m_window = nullptr;
     CameraMode m_cameraMode = CameraMode::STANDING;
 

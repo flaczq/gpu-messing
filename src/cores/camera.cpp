@@ -11,6 +11,7 @@
 Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight)
     : m_window(window),
       m_position(6.0f, 1.0f, 6.0f),
+      m_previousPosition(6.0f, 1.0f, 6.0f),
       m_front(0.0f, 0.0f, -1.0f),
       m_up(0.0f, 1.0f, 0.0f),
       m_right(1.0f, 0.0f, 0.0f),
@@ -18,7 +19,9 @@ Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screen
       m_orientation(1.0f, 0.0f, 0.0f, 0.0f),
       // looking at (0,0,0)
       m_yaw(-135.0f),
+      m_previousYaw(-135.0f),
       m_pitch(-11.5f),
+      m_previousPitch(-11.5f),
       m_movementSpeed(5.0f),
       m_mouseSensitivity(0.05f),
       m_fov(45.0f),
@@ -34,6 +37,12 @@ bool Camera::init() {
     return true;
 }
 
+void Camera::saveState() {
+    m_previousPosition = m_position;
+    m_previousYaw = m_yaw;
+    m_previousPitch = m_pitch;
+}
+
 // continuous key clicks -> movement
 void Camera::processInput(double dt) {
     auto& input = InputManager::getInstance();
@@ -42,7 +51,7 @@ void Camera::processInput(double dt) {
     processMouseMovement(input.getOffsetX(), input.getOffsetY());
 
     // CROUCHING/STANDING
-    if (input.isKeyPressed(GLFW_KEY_C)) {
+    if (input.isKeyPressed(GLFW_KEY_C) && !m_cKeyPressed) {
         toggleCameraMode();
     }
 
@@ -65,10 +74,21 @@ void Camera::processInput(double dt) {
     if (input.isKeyPressed(GLFW_KEY_Q)) {
         processKeyboard(CameraDirection::DOWN, dt);
     }
+
+    m_cKeyPressed = input.isKeyPressed(GLFW_KEY_C);
 };
 
-glm::mat4 Camera::getViewMatrix() const {
+glm::mat4 Camera::getViewMatrix(float alpha) const {
+    glm::vec3 interpolatedPosition = glm::mix(m_previousPosition, m_position, alpha);
+    float interpolatedPitch = glm::mix(m_previousPitch, m_pitch, alpha);
+    float interpolatedYaw = glm::mix(m_previousYaw, m_yaw, alpha);
+    glm::vec3 front = glm::vec3(1.0f);
+    front.x = cos(glm::radians(interpolatedYaw)) * cos(glm::radians(interpolatedPitch));
+    front.y = sin(glm::radians(interpolatedPitch));
+    front.z = sin(glm::radians(interpolatedYaw)) * cos(glm::radians(interpolatedPitch));
+
     // camera position, where you looking at, up vector
+    //return glm::lookAt(interpolatedPosition, interpolatedPosition + glm::normalize(front), m_up);
     return glm::lookAt(m_position, m_position + m_front, m_up);
 }
 
