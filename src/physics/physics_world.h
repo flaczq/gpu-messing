@@ -4,11 +4,12 @@ class PhysicsWorld {
 public:
 	PhysicsWorld();
 
-	bool init();
+	void init();
 	void fixedUpdate(float fixedt) const;
 	void saveState();
 
-	void togglePhysics();
+	bool isActive() const { return m_active; }
+	void setActive(bool active) { m_active = active; }
 
 private:
 	bool m_active{};

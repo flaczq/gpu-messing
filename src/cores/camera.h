@@ -22,9 +22,9 @@ public:
     Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
     bool init();
-    void saveState();
-    void processInput(double dt);
-    glm::mat4 getViewMatrix(float alpha) const;
+    void update();
+    void lateUpdate(double dt);
+    glm::mat4 getViewMatrix() const;
     void toggleCameraMode();
     void toggleGodMode();
 

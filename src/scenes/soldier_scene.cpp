@@ -20,7 +20,10 @@ SoldierScene::SoldierScene(Camera* camera)
 }
 
 void SoldierScene::init() {
+    // TODO move to ResourceManager
     m_soldier = std::make_unique<Model>("../assets/models/Soldier.glb");
+    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::getInstance().loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
 
     std::vector<Vertex> lightVertices = calculateLightVertices();
     std::vector<unsigned int> lightIndices = calculateLightIndices();
@@ -113,7 +116,7 @@ void SoldierScene::renderFrame(float alpha) {
         }
 
         glm::mat4 model = transform->getInterpolatedMatrix(alpha);
-        glm::mat4 view = m_camera->getViewMatrix(alpha);
+        glm::mat4 view = m_camera->getViewMatrix();
 
         soldierShader->setMat4fv("projection", m_projection);
         soldierShader->setMat4fv("view", view);

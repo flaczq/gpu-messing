@@ -4,5 +4,4 @@
 #include <utility>
 #include <vector>
 
-Scene::~Scene() {
-}
+Scene::~Scene() = default;

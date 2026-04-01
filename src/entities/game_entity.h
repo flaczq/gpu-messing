@@ -12,26 +12,12 @@
 class GameEntity {
 public:
 	template <typename T, typename... TArgs>
-	T& addComponent(TArgs&&... args) {
-		auto component = std::make_unique<T>(std::forward<TArgs>(args)...);
-		T* componentPtr = component.get();
-		componentPtr->m_owner = this;
-		//unsigned int id = ComponentType<T>::getID();
-		//m_componentsMap[id] = c;
-
-		if constexpr (std::is_base_of_v<TransformComponent, T>) {
-			m_transform = static_cast<TransformComponent*>(componentPtr);
-		} else if constexpr (std::is_base_of_v<TransformComponent, T>) {
-			m_renderer = static_cast<TransformComponent*>(componentPtr);
-		}
-
-		m_components.push_back(std::move(component));
-		return *componentPtr;
-	}
+	T& addComponent(TArgs&&... args);
 
 	void render(float alpha);
 	
 	TransformComponent* getTransform() { return m_transform; }
+	TransformComponent* getRender() { return m_renderer; }
 
 private:
 	std::vector<std::unique_ptr<Component>> m_components;

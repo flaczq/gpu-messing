@@ -13,8 +13,7 @@ SceneManager::SceneManager(Camera* camera)
 {
 }
 
-SceneManager::~SceneManager() {
-};
+SceneManager::~SceneManager() = default;
 
 bool SceneManager::init() {
 	// default scene
@@ -50,7 +49,6 @@ void SceneManager::toggleScene() {
 }
 
 void SceneManager::saveState() const {
-	m_camera->saveState();
 	if (m_currentScene) {
 		m_currentScene->saveState();
 	}

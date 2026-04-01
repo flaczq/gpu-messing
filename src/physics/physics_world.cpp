@@ -4,10 +4,7 @@
 PhysicsWorld::PhysicsWorld() {
 }
 
-bool PhysicsWorld::init() {
-	m_active = true;
-
-	return true;
+void PhysicsWorld::init() {
 }
 
 void PhysicsWorld::fixedUpdate(float fixedt) const {
@@ -19,9 +16,4 @@ void PhysicsWorld::fixedUpdate(float fixedt) const {
 }
 
 void PhysicsWorld::saveState() {
-}
-
-void PhysicsWorld::togglePhysics() {
-	m_active = !m_active;
-	LOG_D("Changed PhysicsWorld to: " << std::boolalpha << m_active);
 }

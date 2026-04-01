@@ -14,8 +14,8 @@ void TransformComponent::saveState() {
 }
 
 glm::mat4 TransformComponent::getInterpolatedMatrix(float alpha) const {
-	glm::vec3 interpolatedPosition = glm::mix(m_previousPosition, m_position, alpha);
-	glm::mat4 model = glm::translate(glm::mat4(1.0f), interpolatedPosition);
+	glm::vec3 interPos = glm::mix(m_previousPosition, m_position, alpha);
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), interPos);
 	model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(100.0f));
 	return model;

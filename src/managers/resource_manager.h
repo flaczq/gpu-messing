@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../graphics/graphics_types.hpp"
+#include "../graphics/model.h"
 #include "../graphics/shader.h"
 #include <assimp/scene.h>
 #include <memory>
@@ -28,6 +29,7 @@ private:
 	// hidden constructor
 	ResourceManager();
 
+	std::unordered_map<std::string, std::unique_ptr<Model>> m_models;
 	std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
 	std::unordered_map<std::string, Texture> m_textures;
 

@@ -1,6 +1,7 @@
 #include "../../libs/stb_image.h"
 #include "../configs/log_config.hpp"
 #include "../graphics/graphics_types.hpp"
+#include "../graphics/model.h"
 #include "../graphics/shader.h"
 #include "resource_manager.h"
 #include <assimp/scene.h>

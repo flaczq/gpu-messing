@@ -91,15 +91,13 @@ bool BackEnd::init() {
     m_renderer->init();
     m_sceneManager = std::make_unique<SceneManager>(m_camera.get());
     m_sceneManager->init();
-    m_physicsWorld = std::make_unique<PhysicsWorld>();
-    m_physicsWorld->init();
+    //m_physicsWorld = std::make_unique<PhysicsWorld>();
+    //m_physicsWorld->init();
 
     //    ┳┓┏┓┏┓┏┓┳┳┳┓┏┓┏┓┏┓
     //    ┣┫┣ ┗┓┃┃┃┃┣┫┃ ┣ ┗┓
     //    ┛┗┗┛┗┛┗┛┗┛┛┗┗┛┗┛┗┛
     //                      
-    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
-    ResourceManager::getInstance().loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -143,7 +141,7 @@ void BackEnd::run() {
 
         // game logic: physics, movement, ai, collisions
         processCommonInput();
-        m_camera->processInput(dt);
+        m_camera->update();
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
@@ -153,6 +151,8 @@ void BackEnd::run() {
             m_sceneManager->fixedUpdate(static_cast<float>(FIXED_DT));
             m_accumulator -= FIXED_DT;
         }
+
+        m_camera->lateUpdate(dt);
 
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
@@ -211,7 +211,7 @@ void BackEnd::processCommonInput() {
 
     // INFO: POSITION, CAMERA
     if (input.isKeyPressed(GLFW_KEY_I)) {
-        glm::mat4 view = m_camera->getViewMatrix(0.0f);
+        glm::mat4 view = m_camera->getViewMatrix();
         displayPosition(view);
         displayCameraAngles(view);
     }

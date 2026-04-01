@@ -27,9 +27,6 @@ Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screen
       m_fov(45.0f),
       m_aspect((float)screenWidth / (float)screenHeight)
 {
-    // CameraMode::STANDING
-    m_position.y = getCameraModeHeight();
-
     updateCameraVectors();
 }
 
@@ -37,14 +34,8 @@ bool Camera::init() {
     return true;
 }
 
-void Camera::saveState() {
-    m_previousPosition = m_position;
-    m_previousYaw = m_yaw;
-    m_previousPitch = m_pitch;
-}
-
 // continuous key clicks -> movement
-void Camera::processInput(double dt) {
+void Camera::update() {
     auto& input = InputManager::getInstance();
 
     processMouseScroll(input.getScrollOffset());
@@ -54,6 +45,12 @@ void Camera::processInput(double dt) {
     if (input.isKeyPressed(GLFW_KEY_C) && !m_cKeyPressed) {
         toggleCameraMode();
     }
+
+    m_cKeyPressed = input.isKeyPressed(GLFW_KEY_C);
+};
+
+void Camera::lateUpdate(double dt) {
+    auto& input = InputManager::getInstance();
 
     // MOVEMENT
     if (input.isKeyPressed(GLFW_KEY_W)) {
@@ -75,20 +72,12 @@ void Camera::processInput(double dt) {
         processKeyboard(CameraDirection::DOWN, dt);
     }
 
-    m_cKeyPressed = input.isKeyPressed(GLFW_KEY_C);
+    updateCameraVectors();
 };
 
-glm::mat4 Camera::getViewMatrix(float alpha) const {
-    glm::vec3 interpolatedPosition = glm::mix(m_previousPosition, m_position, alpha);
-    float interpolatedPitch = glm::mix(m_previousPitch, m_pitch, alpha);
-    float interpolatedYaw = glm::mix(m_previousYaw, m_yaw, alpha);
-    glm::vec3 front = glm::vec3(1.0f);
-    front.x = cos(glm::radians(interpolatedYaw)) * cos(glm::radians(interpolatedPitch));
-    front.y = sin(glm::radians(interpolatedPitch));
-    front.z = sin(glm::radians(interpolatedYaw)) * cos(glm::radians(interpolatedPitch));
-
+glm::mat4 Camera::getViewMatrix() const {
+    // no need for interpolation (camera works every frame)
     // camera position, where you looking at, up vector
-    //return glm::lookAt(interpolatedPosition, interpolatedPosition + glm::normalize(front), m_up);
     return glm::lookAt(m_position, m_position + m_front, m_up);
 }
 
@@ -101,7 +90,6 @@ void Camera::toggleCameraMode() {
         m_cameraMode = CameraMode::STANDING;
         cameraModeStr = "STANDING";
     }
-    m_position.y = getCameraModeHeight();
     LOG_D("Changed camera mode to: " << cameraModeStr);
 };
 
@@ -164,8 +152,6 @@ void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constr
             m_pitch = 90.0f;
         }
     }
-
-    updateCameraVectors();
 }
 
 void Camera::updateCameraVectors() {
@@ -176,6 +162,10 @@ void Camera::updateCameraVectors() {
     m_front = glm::normalize(currentFront);
     m_right = glm::normalize(glm::cross(m_front, m_worldUp));
     m_up = glm::normalize(glm::cross(m_right, m_front));
+
+    if (!m_godMode) {
+        m_position.y = getCameraModeHeight();
+    }
 }
 
 float Camera::getCameraModeHeight() const {
