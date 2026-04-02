@@ -15,7 +15,15 @@ ResourceManager& ResourceManager::getInstance() {
 	return instance;
 }
 
-ResourceManager::ResourceManager() {
+ResourceManager::ResourceManager() = default;
+
+void ResourceManager::loadModel(const std::string& name, const std::string& path) {
+	if (m_models.find(name) != m_models.end()) {
+		LOG_D("Already loaded Model: " << name);
+		return;
+	}
+
+	m_models[name] = std::make_shared<Model>(path);
 }
 
 void ResourceManager::loadShader(const std::string& name, const char* vertPath, const char* fragPath) {
@@ -24,7 +32,7 @@ void ResourceManager::loadShader(const std::string& name, const char* vertPath, 
 		return;
 	}
 
-	m_shaders[name] = std::make_unique<Shader>(vertPath, fragPath);
+	m_shaders[name] = std::make_shared<Shader>(vertPath, fragPath);
 }
 
 void ResourceManager::loadTexture(const std::string& name, const char* path, const std::string& typeName) {
@@ -33,12 +41,23 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 		return;
 	}
 
-	Texture texture;
-	texture.id = loadTextureFromFile(path);
-	texture.type = typeName;
-	texture.path = path;
+	unsigned int textureID = loadTextureFromFile(path);
+	auto texture = std::make_shared<Texture>();
+	texture->id = textureID;
+	texture->type = typeName;
+	texture->path = path;
 
-	m_textures[name] = std::move(texture);
+	m_textures[path] = std::move(texture);
+}
+
+Model* ResourceManager::getModel(const std::string& name) {
+	auto it = m_models.find(name);
+	if (it == m_models.end()) {
+		LOG_E("RESOURCE_MANAGER::GET_MODEL_NULLPTR: " << name);
+		return nullptr;
+	}
+
+	return it->second.get();
 }
 
 Shader* ResourceManager::getShader(const std::string& name) {
@@ -52,48 +71,42 @@ Shader* ResourceManager::getShader(const std::string& name) {
 }
 
 Texture* ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {
-	auto it = m_textures.find(path);
+	// filename for Assimp
+	size_t lastSlash = path.find_last_of('/');
+	std::string filename = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
+	
+	auto it = m_textures.find(filename);
 	// just load if texture is cached
 	if (it != m_textures.end()) {
 		LOG_D("Using cache for Texture: " << path);
-		return &(it->second);
+		return it->second.get();
 	}
 
-	Texture texture;
-	texture.type = type;
-	texture.path = path;
+	auto texture = std::make_shared<Texture>();
+	texture->type = type;
+	texture->path = path;
 
 	// check if texture is embedded (.glb file)
 	if (scene) {
-		// filename for Assimp
-		size_t lastSlash = path.find_last_of('/');
-		std::string filename = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
 		const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(filename.c_str());
 		// again check if texture is embedded or outside (.png file)
 		if (embeddedTexture) {
-			texture.id = loadTextureFromMemory(embeddedTexture, path);
+			texture->id = loadTextureFromMemory(embeddedTexture, path);
 		} else {
-			texture.id = loadTextureFromFile(path);
+			texture->id = loadTextureFromFile(path);
 		}
 	} else {
-		texture.id = loadTextureFromFile(path);
+		texture->id = loadTextureFromFile(path);
 	}
 
-	m_textures[path] = texture;
-	return &m_textures[path];
+
+	m_textures[filename] = std::move(texture);
+	return m_textures[filename].get();
 }
 
 void ResourceManager::clear() {
-	for (auto& pair : m_shaders) {
-		glDeleteProgram(pair.second->getID());
-	}
+	m_models.clear();
 	m_shaders.clear();
-
-	for (auto& pair : m_textures) {
-		if (pair.second.id != 0) {
-			glDeleteTextures(1, &pair.second.id);
-		}
-	}
 	m_textures.clear();
 }
 

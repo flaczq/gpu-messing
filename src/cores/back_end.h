@@ -49,6 +49,6 @@ private:
     static constexpr double FIXED_DT = 1.0 / 60.0;
 
     void showFps(GLFWwindow* window, double currentTime);
-    void displayPosition(glm::mat4 viewMatrix);
-    void displayCameraAngles(glm::mat4 viewMatrix);
+    void displayPosition();
+    void displayCameraAngles();
 };

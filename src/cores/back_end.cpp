@@ -141,7 +141,7 @@ void BackEnd::run() {
 
         // game logic: physics, movement, ai, collisions
         processCommonInput();
-        m_camera->update();
+        m_camera->update(dt);
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
@@ -152,7 +152,7 @@ void BackEnd::run() {
             m_accumulator -= FIXED_DT;
         }
 
-        m_camera->lateUpdate(dt);
+        m_camera->lateUpdate();
 
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
@@ -211,9 +211,8 @@ void BackEnd::processCommonInput() {
 
     // INFO: POSITION, CAMERA
     if (input.isKeyPressed(GLFW_KEY_I)) {
-        glm::mat4 view = m_camera->getViewMatrix();
-        displayPosition(view);
-        displayCameraAngles(view);
+        displayPosition();
+        displayCameraAngles();
     }
     #endif
 }
@@ -231,8 +230,9 @@ void BackEnd::showFps(GLFWwindow* window, double currentTime) {
     }
 }
 
-void BackEnd::displayPosition(glm::mat4 viewMatrix) {
-    glm::mat4 inverseView = glm::inverse(viewMatrix);
+void BackEnd::displayPosition() {
+    glm::mat4 view = m_camera->getViewMatrix();
+    glm::mat4 inverseView = glm::inverse(view);
     glm::vec3 pos = glm::vec3(inverseView[3]);
 
     std::cout << std::fixed << std::setprecision(2);
@@ -242,14 +242,15 @@ void BackEnd::displayPosition(glm::mat4 viewMatrix) {
         << "Z: " << std::showpos << pos.z);
 }
 
-void BackEnd::displayCameraAngles(glm::mat4 viewMatrix) {
+void BackEnd::displayCameraAngles() {
+    glm::mat4 view = m_camera->getViewMatrix();
     glm::vec3 scale;
     glm::quat orientation;
     glm::vec3 translation;
     glm::vec3 skew;
     glm::vec4 perspective;
 
-    if (glm::decompose(viewMatrix, scale, orientation, translation, skew, perspective)) {
+    if (glm::decompose(view, scale, orientation, translation, skew, perspective)) {
         glm::vec3 euler = glm::eulerAngles(orientation);
 
         float pitch = glm::degrees(euler.x);

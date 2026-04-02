@@ -44,9 +44,9 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 }
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture*> textures)
-    : m_vertices(vertices),
-      m_indices(indices),
-      m_textures(textures)
+    : m_vertices(std::move(vertices)),
+      m_indices(std::move(indices)),
+      m_textures(std::move(textures))
 {
 	setupMesh();
 }

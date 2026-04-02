@@ -22,32 +22,30 @@ public:
     Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
 
     bool init();
-    void update();
-    void lateUpdate(double dt);
-    glm::mat4 getViewMatrix() const;
+    void update(double dt);
+    void lateUpdate();
     void toggleCameraMode();
     void toggleGodMode();
 
+    glm::mat4 getViewMatrix() const { return m_view; }
     glm::vec3 getPosition() const { return m_position; }
     float getFov() const { return m_fov; }
     float getAspect() const { return m_aspect; }
 
 private:
+    static constexpr glm::vec3 WORLD_UP = glm::vec3(0.0f, 1.0f, 0.0f);
+    static constexpr float MOVEMENT_SPEED = 5.0f;
+    static constexpr float MOUSE_SENSITIVITY = 0.05f;
+
+    glm::mat4 m_view{};
     glm::vec3 m_position{};
-    glm::vec3 m_previousPosition{};
     glm::vec3 m_front{};
     glm::vec3 m_up{};
     glm::vec3 m_right{};
-    glm::vec3 m_worldUp{};
-    glm::quat m_orientation{};
     float m_fov{};
     float m_aspect{};
     float m_yaw{};
-    float m_previousYaw{};
     float m_pitch{};
-    float m_previousPitch{};
-    float m_movementSpeed{};
-    float m_mouseSensitivity{};
 
     bool m_godMode = false;
     bool m_cKeyPressed = false;

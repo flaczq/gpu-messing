@@ -20,10 +20,10 @@ SoldierScene::SoldierScene(Camera* camera)
 }
 
 void SoldierScene::init() {
-    // TODO move to ResourceManager
-    m_soldier = std::make_unique<Model>("../assets/models/Soldier.glb");
-    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
-    ResourceManager::getInstance().loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
+    auto& resourceManager = ResourceManager::getInstance();
+    resourceManager.loadModel("soldier", "../assets/models/Soldier.glb");
+    resourceManager.loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
+    resourceManager.loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
 
     std::vector<Vertex> lightVertices = calculateLightVertices();
     std::vector<unsigned int> lightIndices = calculateLightIndices();
