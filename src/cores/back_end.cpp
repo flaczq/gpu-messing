@@ -194,11 +194,6 @@ void BackEnd::processCommonInput() {
     //    ┻┛┗┛┻┛┗┛┗┛
     //              
     #ifdef _DEBUG
-    // GOD MODE
-    if (input.isKeyPressed(GLFW_KEY_G)) {
-        m_camera->toggleGodMode();
-    }
-
     // SCENES
     if (input.isKeyPressed(GLFW_KEY_P)) {
         m_sceneManager->toggleScene();

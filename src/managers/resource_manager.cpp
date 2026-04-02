@@ -50,24 +50,24 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 	m_textures[path] = std::move(texture);
 }
 
-Model* ResourceManager::getModel(const std::string& name) {
+std::shared_ptr<Model> ResourceManager::getModel(const std::string& name) {
 	auto it = m_models.find(name);
 	if (it == m_models.end()) {
 		LOG_E("RESOURCE_MANAGER::GET_MODEL_NULLPTR: " << name);
 		return nullptr;
 	}
 
-	return it->second.get();
+	return it->second;
 }
 
-Shader* ResourceManager::getShader(const std::string& name) {
+std::shared_ptr<Shader> ResourceManager::getShader(const std::string& name) {
 	auto it = m_shaders.find(name);
 	if (it == m_shaders.end()) {
 		LOG_E("RESOURCE_MANAGER::GET_SHADER_NULLPTR: " << name);
 		return nullptr;
 	}
 
-	return it->second.get();
+	return it->second;
 }
 
 Texture* ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {

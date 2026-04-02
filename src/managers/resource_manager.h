@@ -20,8 +20,8 @@ public:
 	// used to manually load texture from file
 	void loadTexture(const std::string& name, const char* path, const std::string& typeName);
 
-	Model* getModel(const std::string& name);
-	Shader* getShader(const std::string& name);
+	std::shared_ptr<Model> getModel(const std::string& name);
+	std::shared_ptr<Shader> getShader(const std::string& name);
 	// used by Assimp to load textures from Model
 	Texture* getTexture(const std::string& path, const std::string& type, const aiScene* scene);
 

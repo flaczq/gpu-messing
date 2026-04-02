@@ -1,31 +1,22 @@
 #include "../components/component.h"
 #include "../components/components_types.hpp"
+#include "../components/render_component.h"
 #include "../components/transform_component.h"
+#include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "game_entity.h"
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
 
-template <typename T, typename... TArgs>
-T& GameEntity::addComponent(TArgs&&... args) {
-	auto comp = std::make_unique<T>(std::forward<TArgs>(args)...);
-	T* compPtr = comp.get();
-	compPtr->m_owner = this;
-	//unsigned int id = ComponentType<T>::getID();
-	//m_componentsMap[id] = c;
-
-	if constexpr (std::is_base_of_v<TransformComponent, T>) {
-		m_transform = static_cast<TransformComponent*>(compPtr);
-	} else if constexpr (std::is_base_of_v<TransformComponent, T>) {
-		m_renderer = static_cast<TransformComponent*>(compPtr);
-	}
-
-	m_components.push_back(std::move(comp));
-	return *compPtr;
+GameEntity::GameEntity(const std::string& name)
+	: m_name(name)
+{
+	LOG_D("GameEntity: " << name << " created!");
 }
 
 void GameEntity::render(float alpha) {
-	m_renderer->getInterpolatedMatrix(alpha);
+	m_render->draw(alpha);
 }

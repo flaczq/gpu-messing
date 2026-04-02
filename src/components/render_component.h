@@ -1,0 +1,21 @@
+#pragma once
+
+#include "../configs/math_config.hpp"
+#include "../graphics/model.h"
+#include "../graphics/shader.h"
+#include "component.h"
+#include <memory>
+
+class RenderComponent : public Component {
+public:
+	RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
+
+	void draw(float alpha);
+
+	Model* getModel() const { return m_model.get(); }
+	Shader* getShader() const { return m_shader.get(); }
+
+private:
+	std::shared_ptr<Model> m_model;
+	std::shared_ptr<Shader> m_shader;
+};

@@ -11,7 +11,7 @@
 Camera::Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight)
     : m_window(window),
       m_view(0.0f),
-      m_position(6.0f, 1.0f, 6.0f),
+      m_position(6.0f, 1.75f, 6.0f),
       m_front(0.0f, 0.0f, -1.0f),
       m_up(0.0f, 1.0f, 0.0f),
       m_right(1.0f, 0.0f, 0.0f),
@@ -40,6 +40,11 @@ void Camera::update(double dt) {
         toggleCameraMode();
     }
 
+    // GOD MODE
+    if (input.isKeyPressed(GLFW_KEY_G) && !m_gKeyPressed) {
+        toggleGodMode();
+    }
+
     // MOVEMENT
     if (input.isKeyPressed(GLFW_KEY_W)) {
         processKeyboard(CameraDirection::FORWARD, dt);
@@ -61,6 +66,7 @@ void Camera::update(double dt) {
     }
 
     m_cKeyPressed = input.isKeyPressed(GLFW_KEY_C);
+    m_gKeyPressed = input.isKeyPressed(GLFW_KEY_G);
 };
 
 void Camera::lateUpdate() {
@@ -80,11 +86,13 @@ void Camera::toggleCameraMode() {
         m_cameraMode = CameraMode::STANDING;
         cameraModeStr = "STANDING";
     }
+    m_position.y = getCameraModeHeight();
     LOG_D("Changed camera mode to: " << cameraModeStr);
 };
 
 void Camera::toggleGodMode() {
     m_godMode = !m_godMode;
+    m_position.y = getCameraModeHeight();
     LOG_D("Changed god mode to: " << std::boolalpha << m_godMode);
 }
 

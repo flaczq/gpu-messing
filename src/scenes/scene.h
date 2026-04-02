@@ -21,11 +21,8 @@ public:
 	virtual void renderFrame(float alpha) = 0;
 	virtual void end() = 0;
 
-	SceneID getSceneID() const { return m_sceneID; }
+	virtual SceneID getID() const = 0;
 
 protected:
 	std::vector<std::unique_ptr<GameEntity>> m_gameEntities;
-
-private:
-	SceneID m_sceneID{};
 };

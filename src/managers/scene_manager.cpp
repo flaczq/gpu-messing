@@ -30,11 +30,11 @@ void SceneManager::toggleScene() {
 
 	std::unique_ptr<Scene> nextScene;
 	std::string sceneIDStr;
-	if (m_currentScene->getSceneID() == SceneID::SOLDIER) {
+	if (m_currentScene->getID() == SceneID::SOLDIER) {
 		// FIXME TODO
 		nextScene = std::make_unique<SoldierScene>(m_camera);
 		sceneIDStr = "LIGHTS_ROOM";
-	} else if (m_currentScene->getSceneID() == SceneID::LIGHTS_ROOM) {
+	} else if (m_currentScene->getID() == SceneID::LIGHTS_ROOM) {
 		// FIXME TODO
 		nextScene = std::make_unique<SoldierScene>(m_camera);
 		sceneIDStr = "FPS_GAME";

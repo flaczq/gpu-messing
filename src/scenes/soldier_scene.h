@@ -21,24 +21,17 @@ public:
 	void fixedUpdate(float fixedt) override;
 	void renderFrame(float alpha) override;
 	void end() override;
+	SceneID getID() const override { return SceneID::SOLDIER; }
 
 private:
-	SceneID m_sceneID = SceneID::SOLDIER;
+	static constexpr glm::vec3 SOLDIER_POSITION = glm::vec3(3.0f, 0.0f, 3.0f);
+	static constexpr glm::vec3 SOLDIER_ROTATION = glm::vec3(-90.0f, 0.0f, 0.0f);
+	static constexpr glm::vec3 SOLDIER_SCALE = glm::vec3(100.0f);
+
 	Camera* m_camera = nullptr;
-
-	std::unique_ptr<Model> m_soldier;
-	std::unique_ptr<Mesh> m_lightMarker;
-	std::vector<glm::mat4> m_soldierModels;
-
-	glm::mat4 m_lightModel = glm::mat4(1.0f);
-	glm::mat4 m_projection = glm::mat4(1.0f);
-	glm::mat4 m_view = glm::mat4(1.0f);
-	glm::mat3 m_normalMatrix = glm::mat3(1.0f);
 	glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f));
-	glm::vec3 m_soldierPos = glm::vec3(3.0f, 0.0f, 3.0f);
-	float m_rotation = 0.0f;
-	float m_rotationSpeed = 50.0f;
-	size_t soldiersCount = 10;
+
+	std::unique_ptr<Mesh> m_lightMarker;
 
 	std::vector<Vertex> calculateLightVertices();
 	std::vector<unsigned int> calculateLightIndices();
