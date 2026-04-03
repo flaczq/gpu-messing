@@ -12,6 +12,7 @@
 #include "scene.h"
 #include "soldier_scene.h"
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -34,21 +35,22 @@ void SoldierScene::init() {
         return;
     }
 
-    auto soldierGO = std::make_unique<GameEntity>("soldier_1");
-    soldierGO->addComponent<TransformComponent>(SOLDIER_POSITION, SOLDIER_ROTATION, SOLDIER_SCALE);
-    soldierGO->addComponent<RenderComponent>(soldierModel, modelShader);
-    m_gameEntities.push_back(std::move(soldierGO));
-
-    // 2nd SOLDIER
-    auto soldierTwoGO = std::make_unique<GameEntity>("soldier_2");
-    soldierTwoGO->addComponent<TransformComponent>(SOLDIER_POSITION + glm::vec3(3.0f, 0.0f, 0.0f), SOLDIER_ROTATION + glm::vec3(0.0f, 0.0f, 180.0f), SOLDIER_SCALE);
-    soldierTwoGO->addComponent<RenderComponent>(soldierModel, modelShader);
-    m_gameEntities.push_back(std::move(soldierTwoGO));
+    float spacing = 1.5f;
+    for (size_t i{}; i < 100; i++) {
+        unsigned int row = i / 10;
+        unsigned int col = i % 10;
+        glm::vec3 pos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
+        glm::vec3 rot = SOLDIER_ROTATION + glm::vec3(0.0f, 0.0f, 180.0f * (row%2+i%2));
+        auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
+        soldierGO->addComponent<TransformComponent>(pos, rot, SOLDIER_SCALE);
+        soldierGO->addComponent<RenderComponent>(soldierModel, modelShader);
+        m_gameEntities.push_back(std::move(soldierGO));
+    }
 
     // LIGHT
     std::vector<Vertex> lightVertices = calculateLightVertices();
     std::vector<unsigned int> lightIndices = calculateLightIndices();
-    std::vector<Texture*> lightTextures;
+    std::vector<std::shared_ptr<Texture>> lightTextures;
     m_lightMarker = std::make_unique<Mesh>(lightVertices, lightIndices, lightTextures);
 }
 
@@ -76,11 +78,12 @@ void SoldierScene::fixedUpdate(float fixedt) {
     float z = cos(time);
     m_lightDir = glm::normalize(glm::vec3(x, -1.0f, z));*/
 
-    float time = glfwGetTime();
+    float time = static_cast<float>(glfwGetTime());
     glm::vec3 newRot = SOLDIER_ROTATION + glm::vec3(0.0f, 0.0f, 180.0f);
     newRot.z += time * 100.0f;
     for (auto& gameEntity : m_gameEntities) {
-        if (gameEntity->getName() == "soldier_2") {
+        auto nr = gameEntity->getName().substr(gameEntity->getName().find_last_of('_')+1);
+        if (std::stoi(nr)%3 == 0) {
             gameEntity->getTransform()->setRotation(newRot);
         }
     }

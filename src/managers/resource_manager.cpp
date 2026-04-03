@@ -47,7 +47,7 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 	texture->type = typeName;
 	texture->path = path;
 
-	m_textures[path] = std::move(texture);
+	m_textures[name] = std::move(texture);
 }
 
 std::shared_ptr<Model> ResourceManager::getModel(const std::string& name) {
@@ -70,16 +70,16 @@ std::shared_ptr<Shader> ResourceManager::getShader(const std::string& name) {
 	return it->second;
 }
 
-Texture* ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {
+std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {
 	// filename for Assimp
 	size_t lastSlash = path.find_last_of('/');
-	std::string filename = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
+	std::string name = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
 	
-	auto it = m_textures.find(filename);
+	auto it = m_textures.find(name);
 	// just load if texture is cached
 	if (it != m_textures.end()) {
 		LOG_D("Using cache for Texture: " << path);
-		return it->second.get();
+		return it->second;
 	}
 
 	auto texture = std::make_shared<Texture>();
@@ -88,7 +88,7 @@ Texture* ResourceManager::getTexture(const std::string& path, const std::string&
 
 	// check if texture is embedded (.glb file)
 	if (scene) {
-		const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(filename.c_str());
+		const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(name.c_str());
 		// again check if texture is embedded or outside (.png file)
 		if (embeddedTexture) {
 			texture->id = loadTextureFromMemory(embeddedTexture, path);
@@ -100,8 +100,8 @@ Texture* ResourceManager::getTexture(const std::string& path, const std::string&
 	}
 
 
-	m_textures[filename] = std::move(texture);
-	return m_textures[filename].get();
+	m_textures[name] = std::move(texture);
+	return m_textures[name];
 }
 
 void ResourceManager::clear() {
@@ -110,7 +110,7 @@ void ResourceManager::clear() {
 	m_textures.clear();
 }
 
-unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem, std::string path) {
+unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem, const std::string& path) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	//stbi_set_flip_vertically_on_load(true);
@@ -157,7 +157,7 @@ unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem,
 	return textureID;
 }
 
-unsigned int ResourceManager::loadTextureFromFile(std::string path) {
+unsigned int ResourceManager::loadTextureFromFile(const std::string& path) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	//stbi_set_flip_vertically_on_load(true);

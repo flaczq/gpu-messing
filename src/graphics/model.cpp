@@ -56,7 +56,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
-	std::vector<Texture*> textures;
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	// vertices
 	for (size_t i{}; i < mesh->mNumVertices; i++) {
@@ -107,19 +107,19 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		// diffuse maps
-		std::vector<Texture*> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", scene);
+		auto diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", scene);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// specular maps
-		std::vector<Texture*> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", scene);
+		auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", scene);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
 	return std::make_unique<Mesh>(std::move(vertices), std::move(indices), std::move(textures));
 }
 
-std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene) const {
-	std::vector<Texture*> textures;
+std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene) const {
+	std::vector<std::shared_ptr<Texture>> textures;
 
 	for (size_t i{}; i < mat->GetTextureCount(type); i++) {
 		aiString str;
@@ -129,7 +129,7 @@ std::vector<Texture*> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType
 		// unique key for ResourceManager
 		std::string fullPath = m_directory + '/' + pathOrMem;
 
-		Texture* texture = ResourceManager::getInstance().getTexture(fullPath, typeName, scene);
+		auto texture = ResourceManager::getInstance().getTexture(fullPath, typeName, scene);
 		if (texture) {
 			textures.push_back(texture);
 		}

@@ -32,8 +32,6 @@ public:
 		m_components.push_back(std::move(comp));
 		return *compPtr;
 	}
-
-	void render(float alpha);
 	
 	const std::string& getName() const { return m_name; }
 	TransformComponent* getTransform() { return m_transform; }

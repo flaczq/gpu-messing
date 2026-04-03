@@ -23,7 +23,7 @@ public:
 	std::shared_ptr<Model> getModel(const std::string& name);
 	std::shared_ptr<Shader> getShader(const std::string& name);
 	// used by Assimp to load textures from Model
-	Texture* getTexture(const std::string& path, const std::string& type, const aiScene* scene);
+	std::shared_ptr<Texture> getTexture(const std::string& path, const std::string& type, const aiScene* scene);
 
 	void clear();
 
@@ -35,7 +35,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
 	std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
 
-	unsigned int loadTextureFromMemory(const aiTexture* embedded, std::string filename);
-	unsigned int loadTextureFromFile(std::string filename);
+	unsigned int loadTextureFromMemory(const aiTexture* textureMem, const std::string& path);
+	unsigned int loadTextureFromFile(const std::string& path);
 	void uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
 };

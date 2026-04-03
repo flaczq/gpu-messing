@@ -16,7 +16,3 @@ GameEntity::GameEntity(const std::string& name)
 {
 	LOG_D("GameEntity: " << name << " created!");
 }
-
-void GameEntity::render(float alpha) {
-	m_render->draw(alpha);
-}
