@@ -18,7 +18,7 @@ public:
 	virtual void init() = 0;
 	virtual void saveState() = 0;
 	virtual void fixedUpdate(float fixedt) = 0;
-	virtual void renderFrame(float alpha) = 0;
+	virtual void update(float alpha) = 0;
 	virtual void end() = 0;
 
 	virtual SceneID getID() const = 0;

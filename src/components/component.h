@@ -12,8 +12,9 @@ public:
 	Component& operator=(const Component&) = delete;
 
 	virtual void onInit() {}
-	virtual void onUpdate(float dt) {}
-	virtual void onLateUpdate(float dt) {}
+	virtual void onFixedUpdate(float fixedt) const {}
+	virtual void onUpdate(float alpha) const {}
+	virtual void onEnd() {}
 
 	bool isActive() const { return m_active; }
 	void setActive(bool active) { m_active = active; }

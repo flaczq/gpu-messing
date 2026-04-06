@@ -42,6 +42,10 @@ void Renderer::beginFrame() {
 
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Z-depth test
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
 }
 
 void Renderer::endFrame() {

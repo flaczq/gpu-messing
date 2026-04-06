@@ -19,25 +19,27 @@ ResourceManager::ResourceManager() = default;
 
 void ResourceManager::loadModel(const std::string& name, const std::string& path) {
 	if (m_models.find(name) != m_models.end()) {
-		LOG_D("Already loaded Model: " << name);
+		LOG("Already loaded Model: " << name);
 		return;
 	}
 
 	m_models[name] = std::make_shared<Model>(path);
+	LOG("Loading Model: " << name << " from path: " << path);
 }
 
 void ResourceManager::loadShader(const std::string& name, const char* vertPath, const char* fragPath) {
 	if (m_shaders.find(name) != m_shaders.end()) {
-		LOG_D("Already loaded Shader: " << name);
+		LOG("Already loaded Shader: " << name);
 		return;
 	}
 
 	m_shaders[name] = std::make_shared<Shader>(vertPath, fragPath);
+	LOG("Loading Shader: " << name << " from path: " << vertPath << " and " << fragPath);
 }
 
 void ResourceManager::loadTexture(const std::string& name, const char* path, const std::string& typeName) {
 	if (m_textures.find(name) != m_textures.end()) {
-		LOG_D("Already loaded Texture: " << name);
+		LOG("Already loaded Texture: " << name);
 		return;
 	}
 
@@ -48,6 +50,7 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 	texture->path = path;
 
 	m_textures[name] = std::move(texture);
+	LOG("Loading Texture: " << name << " from path: " << path);
 }
 
 std::shared_ptr<Model> ResourceManager::getModel(const std::string& name) {

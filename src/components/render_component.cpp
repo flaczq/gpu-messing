@@ -16,7 +16,7 @@ RenderComponent::RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<S
 
 void RenderComponent::draw(float alpha) {
 	if (!isActive()) {
-		LOG_D("RenderComponent not active");
+		LOG_D("RenderComponent is not active");
 		return;
 	}
 

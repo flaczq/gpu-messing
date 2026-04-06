@@ -29,9 +29,13 @@ void SoldierScene::init() {
 
     // SOLDIER
     auto soldierModel = resourceManager.getModel("soldier_model");
+    if (!soldierModel) {
+        LOG_E("No model for soldier...");
+        return;
+    }
     auto modelShader = resourceManager.getShader("model_shader");
-    if (!soldierModel || !modelShader) {
-        LOG_D("No model or shader for soldier...");
+    if (!modelShader) {
+        LOG_E("No shader for soldier...");
         return;
     }
 
@@ -40,10 +44,11 @@ void SoldierScene::init() {
         unsigned int row = i / 10;
         unsigned int col = i % 10;
         glm::vec3 pos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
-        glm::vec3 rot = SOLDIER_ROTATION + glm::vec3(0.0f, 0.0f, 180.0f * (row%2+i%2));
+        glm::quat rotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
         auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
-        soldierGO->addComponent<TransformComponent>(pos, rot, SOLDIER_SCALE);
+        soldierGO->addComponent<TransformComponent>(pos, rotQ, SOLDIER_SCALE);
         soldierGO->addComponent<RenderComponent>(soldierModel, modelShader);
+        soldierGO->init();
         m_gameEntities.push_back(std::move(soldierGO));
     }
 
@@ -56,12 +61,11 @@ void SoldierScene::init() {
 
 void SoldierScene::saveState() {
     for (auto& gameEntity : m_gameEntities) {
-        auto transform = gameEntity->getTransform();
-        if (!transform) {
+        if (!gameEntity->checkStatus()) {
             continue;
         }
 
-        transform->saveState();
+        gameEntity->getTransform()->saveState();
     }
 }
 
@@ -79,9 +83,14 @@ void SoldierScene::fixedUpdate(float fixedt) {
     m_lightDir = glm::normalize(glm::vec3(x, -1.0f, z));*/
 
     float time = static_cast<float>(glfwGetTime());
-    glm::vec3 newRot = SOLDIER_ROTATION + glm::vec3(0.0f, 0.0f, 180.0f);
-    newRot.z += time * 100.0f;
+    glm::quat newRot = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(90.0f) * time, glm::vec3(0.0f, 0.0f, 1.0f));
     for (auto& gameEntity : m_gameEntities) {
+        if (!gameEntity->checkStatus()) {
+            continue;
+        }
+
+        gameEntity->fixedUpdate(fixedt);
+
         auto nr = gameEntity->getName().substr(gameEntity->getName().find_last_of('_')+1);
         if (std::stoi(nr)%3 == 0) {
             gameEntity->getTransform()->setRotation(newRot);
@@ -89,21 +98,24 @@ void SoldierScene::fixedUpdate(float fixedt) {
     }
 }
 
-void SoldierScene::renderFrame(float alpha) {
+void SoldierScene::update(float alpha) {
+    //    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┳┓┏┓┳┳┓┏┓
+    //    ┣┫┣ ┃┃┃┃┣ ┣┫  ┣ ┣┫┣┫┃┃┃┣ 
+    //    ┛┗┗┛┛┗┻┛┗┛┛┗  ┻ ┛┗┛┗┛ ┗┗┛
+    //                             
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(m_camera->getFov()), m_camera->getAspect(), m_camera->getNearPlane(), m_camera->getFarPlane());
     glm::mat4 view = m_camera->getViewMatrix();
     glm::vec3 viewPos = m_camera->getPosition();
 
     for (auto& gameEntity : m_gameEntities) {
-        auto transform = gameEntity->getTransform();
-        auto render = gameEntity->getRender();
-        if (!transform || !render) {
-            LOG_D("No transform or render for some entity...");
+        if (!gameEntity->checkStatus()) {
             continue;
         }
 
-        auto* shader = render->getShader();
+        gameEntity->update(alpha);
+
+        auto* shader = gameEntity->getRender()->getShader();
         shader->use();
 
         shader->setMat4fv("projection", projection);
@@ -113,7 +125,7 @@ void SoldierScene::renderFrame(float alpha) {
         shader->setVec3fv("lightColor", glm::vec3(1.0f));
         shader->setVec3fv("viewPos", viewPos);
 
-        render->draw(alpha);
+        gameEntity->getRender()->draw(alpha);
     }
 
     // LIGHT
@@ -133,7 +145,13 @@ void SoldierScene::renderFrame(float alpha) {
 }
 
 void SoldierScene::end() {
-    //audio.stop()
+    for (auto& gameEntity : m_gameEntities) {
+        if (!gameEntity->checkStatus()) {
+            continue;
+        }
+
+        gameEntity->end();
+    }
 }
 
 std::vector<Vertex> SoldierScene::calculateLightVertices() {

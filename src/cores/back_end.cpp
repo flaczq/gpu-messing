@@ -67,9 +67,8 @@ bool BackEnd::init() {
     glfwFocusWindow(m_window);
     glfwShowWindow(m_window);
 
-    // configuration: experimental GgLEW + Z-depth test
+    // configuration: experimental GgLEW
     glewExperimental = GL_TRUE;
-    glEnable(GL_DEPTH_TEST);
 
     if (glewInit()) {
         LOG_E("Failed to init GLEW");
@@ -158,7 +157,7 @@ void BackEnd::run() {
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
         // renderrring at last
         m_renderer->beginFrame();
-        m_sceneManager->renderFrame(alpha);
+        m_sceneManager->update(alpha);
         m_renderer->endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);
@@ -195,20 +194,24 @@ void BackEnd::processCommonInput() {
     //              
     #ifdef _DEBUG
     // SCENES
-    if (input.isKeyPressed(GLFW_KEY_P)) {
+    if (input.isKeyPressed(GLFW_KEY_P) && !m_pKeyPressed) {
         m_sceneManager->toggleScene();
     }
 
     // RENDER MODE
-    if (input.isKeyPressed(GLFW_KEY_O)) {
+    if (input.isKeyPressed(GLFW_KEY_O) && !m_oKeyPressed) {
         m_renderer->toggleRenderMode();
     }
 
     // INFO: POSITION, CAMERA
-    if (input.isKeyPressed(GLFW_KEY_I)) {
+    if (input.isKeyPressed(GLFW_KEY_I) && !m_iKeyPressed) {
         displayPosition();
         displayCameraAngles();
     }
+
+    m_pKeyPressed = input.isKeyPressed(GLFW_KEY_P);
+    m_oKeyPressed = input.isKeyPressed(GLFW_KEY_O);
+    m_iKeyPressed = input.isKeyPressed(GLFW_KEY_I);
     #endif
 }
 

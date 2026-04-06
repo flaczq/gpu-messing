@@ -38,6 +38,8 @@ private:
     // textures
     //unsigned int diffuseMapTP, specularMapTP;
 
+    bool m_pKeyPressed = false, m_oKeyPressed = false, m_iKeyPressed = false;
+
     // for showFps()
     double m_fpsLastTime{};
     unsigned int m_fpsNr = 0u;

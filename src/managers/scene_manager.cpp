@@ -24,20 +24,24 @@ bool SceneManager::init() {
 }
 
 void SceneManager::toggleScene() {
-	if (m_currentScene) {
-		m_currentScene->end();
-	}
-
 	std::unique_ptr<Scene> nextScene;
 	std::string sceneIDStr;
-	if (m_currentScene->getID() == SceneID::SOLDIER) {
-		// FIXME TODO
-		nextScene = std::make_unique<SoldierScene>(m_camera);
-		sceneIDStr = "LIGHTS_ROOM";
-	} else if (m_currentScene->getID() == SceneID::LIGHTS_ROOM) {
-		// FIXME TODO
-		nextScene = std::make_unique<SoldierScene>(m_camera);
-		sceneIDStr = "FPS_GAME";
+
+	if (m_currentScene) {
+		m_currentScene->end();
+
+		if (m_currentScene->getID() == SceneID::SOLDIER) {
+			// FIXME TODO
+			nextScene = std::make_unique<SoldierScene>(m_camera);
+			sceneIDStr = "LIGHTS_ROOM";
+		} else if (m_currentScene->getID() == SceneID::LIGHTS_ROOM) {
+			// FIXME TODO
+			nextScene = std::make_unique<SoldierScene>(m_camera);
+			sceneIDStr = "FPS_GAME";
+		} else {
+			nextScene = std::make_unique<SoldierScene>(m_camera);
+			sceneIDStr = "SOLDIER";
+		}
 	} else {
 		nextScene = std::make_unique<SoldierScene>(m_camera);
 		sceneIDStr = "SOLDIER";
@@ -60,8 +64,8 @@ void SceneManager::fixedUpdate(float fixedt) const {
 	}
 }
 
-void SceneManager::renderFrame(float alpha) const {
+void SceneManager::update(float alpha) const {
 	if (m_currentScene) {
-		m_currentScene->renderFrame(alpha);
+		m_currentScene->update(alpha);
 	}
 }

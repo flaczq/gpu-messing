@@ -37,7 +37,7 @@ public:
 private:
     static constexpr glm::vec3 WORLD_UP = glm::vec3(0.0f, 1.0f, 0.0f);
     static constexpr float MOVEMENT_SPEED = 5.0f;
-    static constexpr float MOUSE_SENSITIVITY = 0.05f;
+    static constexpr float MOUSE_SENSITIVITY = 0.1f;
     static constexpr float NEAR_PLANE = 0.1f;
     static constexpr float FAR_PLANE = 100.0f;
 

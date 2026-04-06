@@ -14,7 +14,7 @@ public:
 	void toggleScene();
 	void saveState() const;
 	void fixedUpdate(float fixedt) const;
-	void renderFrame(float alpha) const;
+	void update(float alpha) const;
 
 private:
 	Camera* m_camera = nullptr;

@@ -16,3 +16,44 @@ GameEntity::GameEntity(const std::string& name)
 {
 	LOG_D("GameEntity: " << name << " created!");
 }
+
+bool GameEntity::checkStatus() const {
+	if (!m_alive) {
+		LOG_D("GameEntity: " << m_name << " -> not alive!");
+		return false;
+	}
+	if (!m_transform) {
+		LOG_D("GameEntity: " << m_name << " -> no TransformComponent!");
+		return false;
+	}
+	if (!m_render) {
+		LOG_D("GameEntity: " << m_name << " -> no RenderComponent!");
+		return false;
+	}
+
+	return true;
+}
+
+void GameEntity::init() {
+	for (auto& c : m_components) {
+		c->onInit();
+	}
+}
+
+void GameEntity::fixedUpdate(float fixedt) const {
+	for (auto& c : m_components) {
+		c->onFixedUpdate(fixedt);
+	}
+}
+
+void GameEntity::update(float alpha) const {
+	for (auto& c : m_components) {
+		c->onUpdate(alpha);
+	}
+}
+
+void GameEntity::end() {
+	for (auto& c : m_components) {
+		c->onEnd();
+	}
+}

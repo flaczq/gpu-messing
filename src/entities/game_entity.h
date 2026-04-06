@@ -17,29 +17,38 @@ public:
 
 	template <typename T, typename... TArgs>
 	T& addComponent(TArgs&&... args) {
-		auto comp = std::make_unique<T>(std::forward<TArgs>(args)...);
-		T* compPtr = comp.get();
-		compPtr->m_owner = this;
-		//unsigned int id = ComponentType<T>::getID();
+		auto c = std::make_unique<T>(std::forward<TArgs>(args)...);
+		T* cPtr = c.get();
+		cPtr->m_owner = this;
+		//unsigned int id = ComponentCounter<T>::getTypeID();
 		//m_componentsMap[id] = c;
 
 		if constexpr (std::is_base_of_v<TransformComponent, T>) {
-			m_transform = static_cast<TransformComponent*>(compPtr);
+			m_transform = static_cast<TransformComponent*>(cPtr);
 		} else if constexpr (std::is_base_of_v<RenderComponent, T>) {
-			m_render = static_cast<RenderComponent*>(compPtr);
+			m_render = static_cast<RenderComponent*>(cPtr);
 		}
 
-		m_components.push_back(std::move(comp));
-		return *compPtr;
+		m_components.push_back(std::move(c));
+		return *cPtr;
 	}
-	
+
+	bool checkStatus() const;
+	void init();
+	void fixedUpdate(float fixedt) const;
+	void update(float alpha) const;
+	void end();
+
 	const std::string& getName() const { return m_name; }
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
+	void setAlive(bool alive) { m_alive = alive; }
 
 private:
 	std::string m_name;
 	std::vector<std::unique_ptr<Component>> m_components;
+
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
+	bool m_alive = true;
 };
