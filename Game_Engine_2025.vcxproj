@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\graphics\mesh_generator.cpp" />
     <ClCompile Include="src\components\render_component.cpp" />
     <ClCompile Include="src\components\component.cpp" />
     <ClCompile Include="src\entities\game_entity.cpp" />
@@ -68,6 +69,7 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\mesh_generator.h" />
     <ClInclude Include="src\components\render_component.h" />
     <ClInclude Include="src\components\component.h" />
     <ClInclude Include="src\components\components_types.hpp" />

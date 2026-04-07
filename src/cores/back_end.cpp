@@ -135,6 +135,8 @@ void BackEnd::run() {
         m_lastTime = currentTime;
         m_accumulator += dt;
 
+        // copy keys from last frame
+        InputManager::getInstance().update();
         // events to call InputManager
         glfwPollEvents();
 
@@ -163,7 +165,7 @@ void BackEnd::run() {
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
 
-        // reset input changes
+        // reset input changes for mouse
         InputManager::getInstance().reset();
 
         // bonus
@@ -194,24 +196,20 @@ void BackEnd::processCommonInput() {
     //              
     #ifdef _DEBUG
     // SCENES
-    if (input.isKeyPressed(GLFW_KEY_P) && !m_pKeyPressed) {
+    if (input.isKeyPressed(GLFW_KEY_P)) {
         m_sceneManager->toggleScene();
     }
 
     // RENDER MODE
-    if (input.isKeyPressed(GLFW_KEY_O) && !m_oKeyPressed) {
+    if (input.isKeyPressed(GLFW_KEY_O)) {
         m_renderer->toggleRenderMode();
     }
 
     // INFO: POSITION, CAMERA
-    if (input.isKeyPressed(GLFW_KEY_I) && !m_iKeyPressed) {
+    if (input.isKeyPressed(GLFW_KEY_I)) {
         displayPosition();
         displayCameraAngles();
     }
-
-    m_pKeyPressed = input.isKeyPressed(GLFW_KEY_P);
-    m_oKeyPressed = input.isKeyPressed(GLFW_KEY_O);
-    m_iKeyPressed = input.isKeyPressed(GLFW_KEY_I);
     #endif
 }
 

@@ -13,9 +13,11 @@ public:
     InputManager(const InputManager&) = delete;
     void operator=(const InputManager&) = delete;
 
+    void update();
     void processMouseMovement(double xpos, double ypos);
     void processMouseScroll(double yoffset);
     void setKeyState(int key, bool pressed);
+    bool isKeyDown(int key) const;
     bool isKeyPressed(int key) const;
     void reset();
 
@@ -28,7 +30,8 @@ private:
     InputManager();
 
     // last key index
-    bool m_keys[GLFW_KEY_LAST] = { false };
+    bool m_currKeys[GLFW_KEY_LAST] = { false };
+    bool m_prevKeys[GLFW_KEY_LAST] = { false };
     bool m_firstMouse = true;
     float m_lastX{}, m_lastY{};
     float m_offsetX{}, m_offsetY{};

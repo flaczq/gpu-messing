@@ -6,6 +6,13 @@
 #include "component.h"
 #include <memory>
 
+struct RenderContext {
+	glm::mat4 view;
+	glm::mat4 projection;
+	glm::vec3 viewPos;
+	glm::vec3 lightDir;
+};
+
 class RenderComponent : public Component {
 public:
 	RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);

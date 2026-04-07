@@ -23,6 +23,7 @@ public:
 	void setMat4fv(const std::string& name, const glm::mat4& value) const;
 
 	unsigned int getID() const { return m_ID; }
+
 private:
 	unsigned int m_ID{};
 	unsigned int m_vertex{}, m_fragment{};

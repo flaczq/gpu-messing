@@ -36,37 +36,34 @@ void Camera::update(double dt) {
     processMouseMovement(input.getOffsetX(), input.getOffsetY());
 
     // CROUCHING/STANDING
-    if (input.isKeyPressed(GLFW_KEY_C) && !m_cKeyPressed) {
+    if (input.isKeyPressed(GLFW_KEY_C)) {
         toggleCameraMode();
     }
 
     // GOD MODE
-    if (input.isKeyPressed(GLFW_KEY_G) && !m_gKeyPressed) {
+    if (input.isKeyPressed(GLFW_KEY_G)) {
         toggleGodMode();
     }
 
     // MOVEMENT
-    if (input.isKeyPressed(GLFW_KEY_W)) {
+    if (input.isKeyDown(GLFW_KEY_W)) {
         processKeyboard(CameraDirection::FORWARD, dt);
     }
-    if (input.isKeyPressed(GLFW_KEY_S)) {
+    if (input.isKeyDown(GLFW_KEY_S)) {
         processKeyboard(CameraDirection::BACKWARD, dt);
     }
-    if (input.isKeyPressed(GLFW_KEY_A)) {
+    if (input.isKeyDown(GLFW_KEY_A)) {
         processKeyboard(CameraDirection::LEFT, dt);
     }
-    if (input.isKeyPressed(GLFW_KEY_D)) {
+    if (input.isKeyDown(GLFW_KEY_D)) {
         processKeyboard(CameraDirection::RIGHT, dt);
     }
-    if (input.isKeyPressed(GLFW_KEY_E)) {
+    if (input.isKeyDown(GLFW_KEY_E)) {
         processKeyboard(CameraDirection::UP, dt);
     }
-    if (input.isKeyPressed(GLFW_KEY_Q)) {
+    if (input.isKeyDown(GLFW_KEY_Q)) {
         processKeyboard(CameraDirection::DOWN, dt);
     }
-
-    m_cKeyPressed = input.isKeyPressed(GLFW_KEY_C);
-    m_gKeyPressed = input.isKeyPressed(GLFW_KEY_G);
 };
 
 void Camera::lateUpdate() {

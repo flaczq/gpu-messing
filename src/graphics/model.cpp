@@ -17,6 +17,10 @@ Model::Model(const std::string& path) {
 	loadModel(path);
 }
 
+Model::Model(std::unique_ptr<Mesh> mesh) {
+	m_meshes.push_back(std::move(mesh));
+}
+
 Model::~Model() = default;
 
 void Model::draw(Shader& shader) {

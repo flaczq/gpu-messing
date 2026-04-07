@@ -52,7 +52,6 @@ private:
     float m_pitch{};
 
     bool m_godMode = false;
-    bool m_cKeyPressed = false, m_gKeyPressed = false;
     GLFWwindow* m_window = nullptr;
     CameraMode m_cameraMode = CameraMode::STANDING;
 

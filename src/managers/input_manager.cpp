@@ -14,7 +14,12 @@ InputManager::InputManager()
       m_scrollOffset(0.0f)
 {
     // just to be sure
-    std::fill(std::begin(m_keys), std::end(m_keys), false);
+    std::fill(std::begin(m_currKeys), std::end(m_currKeys), false);
+    std::fill(std::begin(m_prevKeys), std::end(m_prevKeys), false);
+}
+
+void InputManager::update() {
+    memcpy(m_prevKeys, m_currKeys, sizeof(m_currKeys));
 }
 
 void InputManager::processMouseMovement(double xpos, double ypos) {
@@ -36,11 +41,17 @@ void InputManager::processMouseScroll(double scrollOffset) {
 }
 
 void InputManager::setKeyState(int key, bool pressed) {
-    m_keys[key] = pressed;
+    m_currKeys[key] = pressed;
+}
+
+bool InputManager::isKeyDown(int key) const {
+    // continuous click
+    return m_currKeys[key];
 }
 
 bool InputManager::isKeyPressed(int key) const {
-    return m_keys[key];
+    // single click
+    return m_currKeys[key] && !m_prevKeys[key];
 }
 
 void InputManager::reset() {

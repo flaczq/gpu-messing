@@ -16,6 +16,7 @@ class Mesh;
 class Model {
 public:
 	Model(const std::string& path);
+	Model(std::unique_ptr<Mesh> mesh);
 	~Model();
 
 	void draw(Shader& shader);

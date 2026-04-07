@@ -26,6 +26,15 @@ void SoldierScene::init() {
     resourceManager.loadModel("soldier_model", "../assets/models/Soldier.glb");
     resourceManager.loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
     resourceManager.loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
+    resourceManager.loadShader("floor_shader", "../shaders/grid.vert", "../shaders/grid.frag");
+
+    // FLOOR
+    auto floorGO = std::make_unique<GameEntity>("floor");
+    floorGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f));
+    floorGO->addComponent<RenderComponent>(nullptr, nullptr);
+    //floorGO->setAlive(false);
+    floorGO->init();
+    m_gameEntities.push_back(std::move(floorGO));
 
     // SOLDIER
     auto soldierModel = resourceManager.getModel("soldier_model");
@@ -91,9 +100,11 @@ void SoldierScene::fixedUpdate(float fixedt) {
 
         gameEntity->fixedUpdate(fixedt);
 
-        auto nr = gameEntity->getName().substr(gameEntity->getName().find_last_of('_')+1);
-        if (std::stoi(nr)%3 == 0) {
-            gameEntity->getTransform()->setRotation(newRot);
+        if (gameEntity->getName().starts_with("soldier_")) {
+            auto nr = gameEntity->getName().substr(gameEntity->getName().find_last_of('_') + 1);
+            if (std::stoi(nr) % 3 == 0) {
+                gameEntity->getTransform()->setRotation(newRot);
+            }
         }
     }
 }
