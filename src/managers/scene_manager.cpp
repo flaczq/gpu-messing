@@ -1,5 +1,5 @@
 #include "../configs/log_config.hpp"
-#include "../cores/camera.h"
+#include "../game/camera.h"
 #include "../scenes/scene.h"
 #include "../scenes/soldier_scene.h"
 #include "scene_manager.h"

@@ -27,7 +27,7 @@
     <ClCompile Include="src\cores\back_end.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\cores\camera.cpp">
+    <ClCompile Include="src\game\camera.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\renderer.cpp">
@@ -51,13 +51,13 @@
     <ClCompile Include="src\managers\resource_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\physics\physics_world.cpp">
+    <ClCompile Include="src\game\physics_world.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\managers\input_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\entities\game_entity.cpp">
+    <ClCompile Include="src\game\game_entity.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\components\component.cpp">
@@ -129,7 +129,7 @@
     <ClInclude Include="src\cores\back_end.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\cores\camera.h">
+    <ClInclude Include="src\game\camera.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\renderer.h">
@@ -168,13 +168,13 @@
     <ClInclude Include="src\configs\log_config.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\physics\physics_world.h">
+    <ClInclude Include="src\game\physics_world.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\managers\input_manager.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\entities\game_entity.h">
+    <ClInclude Include="src\game\game_entity.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\components\component.h">

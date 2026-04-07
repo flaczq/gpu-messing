@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../entities/game_entity.h"
+#include "../game/game_entity.h"
 #include <memory>
 #include <utility>
 #include <vector>

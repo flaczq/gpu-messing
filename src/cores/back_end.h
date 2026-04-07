@@ -2,10 +2,10 @@
 
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
+#include "../game/camera.h"
+#include "../game/physics_world.h"
 #include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
-#include "../physics/physics_world.h"
-#include "camera.h"
 #include <memory>
 
 enum class GraphicsAPI {

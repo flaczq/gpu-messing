@@ -22,9 +22,9 @@
     <ClCompile Include="src\graphics\mesh_generator.cpp" />
     <ClCompile Include="src\components\render_component.cpp" />
     <ClCompile Include="src\components\component.cpp" />
-    <ClCompile Include="src\entities\game_entity.cpp" />
+    <ClCompile Include="src\game\game_entity.cpp" />
     <ClCompile Include="src\managers\input_manager.cpp" />
-    <ClCompile Include="src\physics\physics_world.cpp" />
+    <ClCompile Include="src\game\physics_world.cpp" />
     <ClCompile Include="src\managers\resource_manager.cpp" />
     <ClCompile Include="src\scenes\scene.cpp" />
     <ClCompile Include="src\scenes\soldier_scene.cpp" />
@@ -33,7 +33,7 @@
     <ClCompile Include="src\graphics\model.cpp" />
     <ClCompile Include="src\graphics\renderer.cpp" />
     <ClCompile Include="src\graphics\texture_primitive.cpp" />
-    <ClCompile Include="src\cores\camera.cpp" />
+    <ClCompile Include="src\game\camera.cpp" />
     <ClCompile Include="src\cores\back_end.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -73,9 +73,9 @@
     <ClInclude Include="src\components\render_component.h" />
     <ClInclude Include="src\components\component.h" />
     <ClInclude Include="src\components\components_types.hpp" />
-    <ClInclude Include="src\entities\game_entity.h" />
+    <ClInclude Include="src\game\game_entity.h" />
     <ClInclude Include="src\managers\input_manager.h" />
-    <ClInclude Include="src\physics\physics_world.h" />
+    <ClInclude Include="src\game\physics_world.h" />
     <ClInclude Include="src\configs\log_config.hpp" />
     <ClInclude Include="src\managers\resource_manager.h" />
     <ClInclude Include="src\configs\gl_config.hpp" />
@@ -87,7 +87,7 @@
     <ClInclude Include="src\graphics\model.h" />
     <ClInclude Include="src\graphics\renderer.h" />
     <ClInclude Include="src\graphics\texture_primitive.h" />
-    <ClInclude Include="src\cores\camera.h" />
+    <ClInclude Include="src\game\camera.h" />
     <ClInclude Include="src\scenes\scene.h" />
     <ClInclude Include="src\cores\back_end.h" />
     <ClInclude Include="libs\stb_image.h" />
