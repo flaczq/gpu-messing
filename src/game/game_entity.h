@@ -5,6 +5,7 @@
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/math_config.hpp"
+#include <iostream>
 #include <memory>
 #include <string>
 #include <type_traits>

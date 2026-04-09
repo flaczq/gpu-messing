@@ -2,6 +2,7 @@
 
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
+#include <vector>
 
 enum class CameraDirection {
     FORWARD,
@@ -19,16 +20,18 @@ enum class CameraMode {
 
 class Camera {
 public:
-    Camera(GLFWwindow* window, unsigned int screenWidth, unsigned int screenHeight);
+    Camera(unsigned int screenWidth, unsigned int screenHeight);
 
     bool init();
+    void updateAspect(int width, int height);
     void update(double dt);
-    void lateUpdate();
+    void lateUpdate(double dt);
     void toggleCameraMode();
     void toggleGodMode();
 
     glm::mat4 getViewMatrix() const { return m_view; }
-    glm::vec3 getPosition() const { return m_position; }
+    glm::vec3 getViewPos() const { return m_viewPos; }
+    glm::mat4 getProjection() const { return m_projection; }
     float getFov() const { return m_fov; }
     float getAspect() const { return m_aspect; }
     float getNearPlane() const { return NEAR_PLANE; }
@@ -42,22 +45,27 @@ private:
     static constexpr float FAR_PLANE = 100.0f;
 
     glm::mat4 m_view{};
-    glm::vec3 m_position{};
+    glm::vec3 m_viewPos{};
+    glm::mat4 m_projection{};
     glm::vec3 m_front{};
     glm::vec3 m_up{};
     glm::vec3 m_right{};
-    float m_fov{};
-    float m_aspect{};
     float m_yaw{};
     float m_pitch{};
+    float m_fov{};
+    float m_aspect{};
+    bool m_currDirections[6] = { false };
 
+    bool m_projectionDirty = false;
+    bool m_godModeChanged = false;
+    bool m_cameraModeChanged = false;
     bool m_godMode = false;
-    GLFWwindow* m_window = nullptr;
     CameraMode m_cameraMode = CameraMode::STANDING;
 
     void processKeyboard(CameraDirection direction, double dt);
     void processMouseScroll(float yoffset);
     void processMouseMovement(float xoffest, float yoffset, GLboolean constrainPitch = true);
     void updateCameraVectors();
+    void updateProjection();
     float getCameraModeHeight() const;
 };

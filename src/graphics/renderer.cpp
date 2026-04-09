@@ -1,5 +1,6 @@
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
+#include "../cores/back_end.h"
 #include "renderer.h"
 #include <iostream>
 #include <string>
@@ -56,5 +57,8 @@ void Renderer::endFrame() {
 }
 
 void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
+    backEnd->getCamera()->updateAspect(width, height);
+
     glViewport(0, 0, width, height);
 }

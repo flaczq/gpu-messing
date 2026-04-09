@@ -19,6 +19,7 @@ public:
 
 private:
 	GLFWwindow* m_window = nullptr;
+	Camera* m_camera = nullptr;
 
 	RenderMode m_renderMode = RenderMode::STANDARD;
 

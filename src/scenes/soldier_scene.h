@@ -32,6 +32,7 @@ private:
 	Camera* m_camera = nullptr;
 	glm::vec3 m_lightDir = glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f));
 
+	std::unique_ptr<Mesh> m_floor;
 	std::unique_ptr<Mesh> m_lightMarker;
 
 	std::vector<Vertex> calculateLightVertices();

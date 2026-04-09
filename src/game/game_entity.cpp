@@ -19,7 +19,7 @@ GameEntity::GameEntity(const std::string& name, const bool alive, const bool sol
 	LOG_D("GameEntity: " << name << " created!");
 }
 
-// TODO delete this, instead create entites queue
+// TODO delete this, instead create entities queue
 bool GameEntity::checkStatus() const {
 	if (!m_alive) {
 		LOG_D("GameEntity: " << m_name << " -> not alive!");

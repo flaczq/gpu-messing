@@ -7,6 +7,7 @@
 #include "../game/game_entity.h"
 #include "../graphics/graphics_types.hpp"
 #include "../graphics/mesh.h"
+#include "../graphics/mesh_generator.h"
 #include "../graphics/model.h"
 #include "../managers/resource_manager.h"
 #include "scene.h"
@@ -28,37 +29,41 @@ void SoldierScene::init() {
     resourceManager.loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
     resourceManager.loadShader("floor_shader", "../shaders/grid.vert", "../shaders/grid.frag");
 
-    // FLOOR
-    auto floorGO = std::make_unique<GameEntity>("floor", true, true);
-    floorGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f));
-    floorGO->addComponent<RenderComponent>(nullptr, nullptr);
-    //floorGO->setAlive(false);
-    floorGO->init();
-    m_gameEntities.push_back(std::move(floorGO));
+    auto floorShader = resourceManager.getShader("floor_shader");
+    if (!floorShader) {
+        LOG_E("No shader for floor...");
+    } else {
+        // FLOOR
+        //auto floorGO = std::make_unique<GameEntity>("floor", true, true);
+        //floorGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f));
+        //floorGO->addComponent<RenderComponent>(nullptr, floorShader);
+        //floorGO->init();
+        //m_gameEntities.push_back(std::move(floorGO));
+    }
+    m_floor = std::make_unique<Mesh>(MeshGenerator::createPlane(10.0f, 3.3f));
 
     // SOLDIER
     auto soldierModel = resourceManager.getModel("soldier_model");
     if (!soldierModel) {
         LOG_E("No model for soldier...");
-        return;
     }
     auto modelShader = resourceManager.getShader("model_shader");
     if (!modelShader) {
         LOG_E("No shader for soldier...");
-        return;
     }
-
-    float spacing = 1.5f;
-    for (size_t i{}; i < 100; i++) {
-        unsigned int row = i / 10;
-        unsigned int col = i % 10;
-        glm::vec3 pos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
-        glm::quat rotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
-        auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
-        soldierGO->addComponent<TransformComponent>(pos, rotQ, SOLDIER_SCALE);
-        soldierGO->addComponent<RenderComponent>(soldierModel, modelShader);
-        soldierGO->init();
-        m_gameEntities.push_back(std::move(soldierGO));
+    if (soldierModel && modelShader) {
+        float spacing = 1.5f;
+        for (size_t i{}; i < 100; i++) {
+            unsigned int row = i / 10;
+            unsigned int col = i % 10;
+            glm::vec3 pos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
+            glm::quat rotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
+            auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
+            soldierGO->addComponent<TransformComponent>(pos, rotQ, SOLDIER_SCALE);
+            soldierGO->addComponent<RenderComponent>(soldierModel, modelShader);
+            soldierGO->init();
+            m_gameEntities.push_back(std::move(soldierGO));
+        }
     }
 
     // LIGHT
@@ -122,15 +127,13 @@ void SoldierScene::update(float alpha) {
     //    ┣┫┣ ┃┃┃┃┣ ┣┫  ┣ ┣┫┣┫┃┃┃┣ 
     //    ┛┗┗┛┛┗┻┛┗┛┛┗  ┻ ┛┗┛┗┛ ┗┗┛
     //                             
-    glm::mat4 projection = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(m_camera->getFov()), m_camera->getAspect(), m_camera->getNearPlane(), m_camera->getFarPlane());
+    glm::mat4 projection = m_camera->getProjection();
     glm::mat4 view = m_camera->getViewMatrix();
-    glm::vec3 viewPos = m_camera->getPosition();
+    glm::vec3 viewPos = m_camera->getViewPos();
     RenderContext ctx = {
-        view,
         projection,
-        viewPos,
-        m_lightDir
+        view,
+        viewPos
     };
 
     for (auto& gameEntity : m_gameEntities) {
@@ -147,10 +150,25 @@ void SoldierScene::update(float alpha) {
         auto* shader = render->getShader();
         shader->use();
 
+        shader->setVec3fv("lightDir", m_lightDir);
         shader->setVec3fv("lightColor", glm::vec3(1.0f));
 
         render->draw(alpha, ctx);
     }
+
+    // FLOOR
+    glm::vec3 floorPos = glm::vec3(0.0f);
+    glm::mat4 floorModel = glm::mat4(1.0f);
+    floorModel = glm::translate(floorModel, floorPos);
+
+    auto floorShader = ResourceManager::getInstance().getShader("floor_shader");
+    floorShader->use();
+
+    floorShader->setMat4fv("projection", projection);
+    floorShader->setMat4fv("view", view);
+    floorShader->setMat4fv("model", floorModel);
+
+    m_floor->draw(*floorShader);
 
     // LIGHT
     glm::vec3 lightMarkerPos = SOLDIER_POSITION - (glm::normalize(m_lightDir) * 5.0f);

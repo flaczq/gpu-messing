@@ -84,7 +84,7 @@ bool BackEnd::init() {
     //    ┓┃┃┓ ┃ 
     //    ┗┛┗┗ ┻ 
     //           
-    m_camera = std::make_unique<Camera>(m_window, m_screenWidth, m_screenHeight);
+    m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
     m_camera->init();
     m_renderer = std::make_unique<Renderer>(m_window);
     m_renderer->init();
@@ -140,10 +140,6 @@ void BackEnd::run() {
         // events to call InputManager
         glfwPollEvents();
 
-        // game logic: physics, movement, ai, collisions
-        processCommonInput();
-        m_camera->update(dt);
-
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
             //m_physicsWorld->saveState();
@@ -153,10 +149,14 @@ void BackEnd::run() {
             m_accumulator -= FIXED_DT;
         }
 
-        m_camera->lateUpdate();
-
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
+
+        // game logic: physics, movement, ai, collisions
+        processCommonInput();
+        m_camera->update(dt);
+        m_camera->lateUpdate(dt);
+
         // renderrring at last
         m_renderer->beginFrame();
         m_sceneManager->update(alpha);
