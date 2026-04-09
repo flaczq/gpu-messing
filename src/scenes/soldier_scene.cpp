@@ -29,7 +29,7 @@ void SoldierScene::init() {
     resourceManager.loadShader("floor_shader", "../shaders/grid.vert", "../shaders/grid.frag");
 
     // FLOOR
-    auto floorGO = std::make_unique<GameEntity>("floor");
+    auto floorGO = std::make_unique<GameEntity>("floor", true, true);
     floorGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f));
     floorGO->addComponent<RenderComponent>(nullptr, nullptr);
     //floorGO->setAlive(false);
@@ -70,11 +70,15 @@ void SoldierScene::init() {
 
 void SoldierScene::saveState() {
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus()) {
+        if (!gameEntity->checkStatus() || gameEntity->isSolid()) {
+            continue;
+        }
+        auto* transform = gameEntity->getTransform();
+        if (!transform->isActive()) {
             continue;
         }
 
-        gameEntity->getTransform()->saveState();
+        transform->saveState();
     }
 }
 
@@ -94,7 +98,11 @@ void SoldierScene::fixedUpdate(float fixedt) {
     float time = static_cast<float>(glfwGetTime());
     glm::quat newRot = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(90.0f) * time, glm::vec3(0.0f, 0.0f, 1.0f));
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus()) {
+        if (!gameEntity->checkStatus() || gameEntity->isSolid()) {
+            continue;
+        }
+        auto* transform = gameEntity->getTransform();
+        if (!transform->isActive()) {
             continue;
         }
 
@@ -103,7 +111,7 @@ void SoldierScene::fixedUpdate(float fixedt) {
         if (gameEntity->getName().starts_with("soldier_")) {
             auto nr = gameEntity->getName().substr(gameEntity->getName().find_last_of('_') + 1);
             if (std::stoi(nr) % 3 == 0) {
-                gameEntity->getTransform()->setRotation(newRot);
+                transform->setRotation(newRot);
             }
         }
     }
@@ -118,25 +126,30 @@ void SoldierScene::update(float alpha) {
     projection = glm::perspective(glm::radians(m_camera->getFov()), m_camera->getAspect(), m_camera->getNearPlane(), m_camera->getFarPlane());
     glm::mat4 view = m_camera->getViewMatrix();
     glm::vec3 viewPos = m_camera->getPosition();
+    RenderContext ctx = {
+        view,
+        projection,
+        viewPos,
+        m_lightDir
+    };
 
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus()) {
+        if (!gameEntity->checkStatus() || gameEntity->isSolid()) {
+            continue;
+        }
+        auto* render = gameEntity->getRender();
+        if (!render->isActive()) {
             continue;
         }
 
         gameEntity->update(alpha);
 
-        auto* shader = gameEntity->getRender()->getShader();
+        auto* shader = render->getShader();
         shader->use();
 
-        shader->setMat4fv("projection", projection);
-        shader->setMat4fv("view", view);
-
-        shader->setVec3fv("lightDir", m_lightDir);
         shader->setVec3fv("lightColor", glm::vec3(1.0f));
-        shader->setVec3fv("viewPos", viewPos);
 
-        gameEntity->getRender()->draw(alpha);
+        render->draw(alpha, ctx);
     }
 
     // LIGHT

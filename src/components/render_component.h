@@ -17,7 +17,7 @@ class RenderComponent : public Component {
 public:
 	RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Shader> shader);
 
-	void draw(float alpha);
+	void draw(float alpha, RenderContext ctx);
 
 	Model* getModel() const { return m_model.get(); }
 	Shader* getShader() const { return m_shader.get(); }

@@ -11,12 +11,15 @@
 #include <utility>
 #include <vector>
 
-GameEntity::GameEntity(const std::string& name)
-	: m_name(name)
+GameEntity::GameEntity(const std::string& name, const bool alive, const bool solid)
+	: m_name(name),
+	  m_alive(alive),
+	  m_solid(solid)
 {
 	LOG_D("GameEntity: " << name << " created!");
 }
 
+// TODO delete this, instead create entites queue
 bool GameEntity::checkStatus() const {
 	if (!m_alive) {
 		LOG_D("GameEntity: " << m_name << " -> not alive!");

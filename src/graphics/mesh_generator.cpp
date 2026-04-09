@@ -44,4 +44,12 @@ namespace MeshGenerator {
 
 		return Mesh(vertices, indices, textures);
 	}
+
+	Mesh createCube(float width, float depth, float height) {
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<std::shared_ptr<Texture>> textures;
+		//TODO
+		return Mesh(vertices, indices, textures);
+	}
 }
