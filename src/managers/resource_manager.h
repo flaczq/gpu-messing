@@ -15,7 +15,7 @@ public:
 	ResourceManager(const ResourceManager&) = delete;
 	void operator=(const ResourceManager&) = delete;
 
-	// add model with meshes created via MeshGenerator
+	// add model with mesh from MeshGenerator
 	void addModel(const std::string& name, std::shared_ptr<Model> model);
 	void loadModel(const std::string& name, const std::string& path);
 	void loadMaterial(const std::string& name, const char* vertPath, const char* fragPath);

@@ -88,7 +88,7 @@ bool BackEnd::init() {
     m_camera->init();
     m_renderer = std::make_unique<Renderer>(m_window);
     m_renderer->init();
-    m_sceneManager = std::make_unique<SceneManager>(m_camera.get());
+    m_sceneManager = std::make_unique<SceneManager>(m_camera.get(), m_renderer.get());
     m_sceneManager->init();
     //m_physicsWorld = std::make_unique<PhysicsWorld>();
     //m_physicsWorld->init();
@@ -153,7 +153,7 @@ void BackEnd::run() {
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
 
         // game logic: physics, movement, ai, collisions
-        processCommonInput();
+        processGlobalInput();
         m_camera->update(dt);
         m_camera->lateUpdate(dt);
 
@@ -182,7 +182,7 @@ void BackEnd::run() {
     glfwTerminate();
 }
 
-void BackEnd::processCommonInput() {
+void BackEnd::processGlobalInput() {
     auto& input = InputManager::getInstance();
 
     // EXIT

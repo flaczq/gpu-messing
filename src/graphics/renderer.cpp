@@ -1,4 +1,5 @@
 #include "../configs/gl_config.hpp"
+#include "../configs/math_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../cores/back_end.h"
 #include "renderer.h"
@@ -8,6 +9,10 @@
 Renderer::Renderer(GLFWwindow* window)
     : m_window(window)
 {
+    m_renderLight = {
+        glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
+        glm::vec3(1.0f)
+    };
 }
 
 bool Renderer::init() {

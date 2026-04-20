@@ -19,7 +19,6 @@ public:
 
     bool init();
     void run();
-    void processCommonInput();
 
     Camera* getCamera() const { return m_camera.get(); }
     Renderer* getRenderer() const { return m_renderer.get(); }
@@ -48,6 +47,7 @@ private:
     double m_accumulator = 0.0;
     static constexpr double FIXED_DT = 1.0 / 60.0;
 
+    void processGlobalInput();
     void showFps(GLFWwindow* window, double currentTime);
     void displayPosition();
     void displayCameraAngles();

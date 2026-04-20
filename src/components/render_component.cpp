@@ -21,14 +21,15 @@ void RenderComponent::onInit() {
 }
 
 void RenderComponent::draw(float alpha, RenderContext ctx) {
-	auto* shader = m_material->getShader();
-	glm::mat4 model = m_transform->getInterpolatedMatrix(alpha);
-	glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
+	glm::mat4 modelMatrix = m_transform->getInterpolatedModelMatrix(alpha);
+	glm::mat3 normalMatrix = m_transform->getNormalMatrix(modelMatrix);
+	m_transform->setDirty(false);
 
+	auto* shader = m_material->getShader();
 	shader->setMat4fv("projection", ctx.projection);
 	shader->setMat4fv("view", ctx.view);
 	shader->setVec3fv("viewPos", ctx.viewPos);
-	shader->setMat4fv("model", model);
+	shader->setMat4fv("model", modelMatrix);
 	shader->setMat3fv("normalMatrix", normalMatrix);
 
 	m_model->draw(*shader);

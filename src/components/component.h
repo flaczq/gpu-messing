@@ -12,7 +12,7 @@ public:
 	Component& operator=(const Component&) = delete;
 
 	virtual void onInit() {}
-	virtual void onFixedUpdate(float fixedt) const {}
+	virtual void onFixedUpdate(float fixedt) {}
 	virtual void onUpdate(float alpha) const {}
 	virtual void onEnd() {}
 

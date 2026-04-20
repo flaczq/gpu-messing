@@ -45,7 +45,7 @@ namespace MeshGenerator {
 		return Mesh(vertices, indices, textures);
 	}
 
-	Mesh createCube(float width, float height, float depth, float uvTiling) {
+	Mesh createCuboid(float width, float height, float depth, float uvTiling) {
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
@@ -118,5 +118,17 @@ namespace MeshGenerator {
 		textures = {};
 
 		return Mesh(vertices, indices, textures);
+	}
+
+	std::vector<Mesh> createRoom(float width, float height, float depth, float uvTiling) {
+		std::vector<Mesh> meshes;
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<std::shared_ptr<Texture>> textures;
+
+		// TODO
+		meshes.push_back(Mesh(vertices, indices, textures));
+
+		return meshes;
 	}
 }

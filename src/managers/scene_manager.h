@@ -2,12 +2,13 @@
 
 #include <memory>
 
-class Scene;
 class Camera;
+class Renderer;
+class Scene;
 
 class SceneManager {
 public:
-	SceneManager(Camera* camera);
+	SceneManager(Camera* camera, Renderer* renderer);
 	~SceneManager();
 
 	bool init();
@@ -18,5 +19,7 @@ public:
 
 private:
 	Camera* m_camera = nullptr;
+	Renderer* m_renderer = nullptr;
+
 	std::unique_ptr<Scene> m_currentScene;
 };
