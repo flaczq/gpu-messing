@@ -1,6 +1,7 @@
 #include "../../libs/stb_image.h"
 #include "../configs/log_config.hpp"
 #include "../graphics/graphics_types.hpp"
+#include "../graphics/material.h"
 #include "../graphics/model.h"
 #include "../graphics/shader.h"
 #include "resource_manager.h"
@@ -17,6 +18,16 @@ ResourceManager& ResourceManager::getInstance() {
 
 ResourceManager::ResourceManager() = default;
 
+void ResourceManager::addModel(const std::string& name, std::shared_ptr<Model> model) {
+	if (m_models.find(name) != m_models.end()) {
+		LOG("Already added Model: " << name);
+		return;
+	}
+
+	m_models[name] = model;
+	LOG("Added Model: " << name << " with meshes");
+}
+
 void ResourceManager::loadModel(const std::string& name, const std::string& path) {
 	if (m_models.find(name) != m_models.end()) {
 		LOG("Already loaded Model: " << name);
@@ -27,14 +38,15 @@ void ResourceManager::loadModel(const std::string& name, const std::string& path
 	LOG("Loading Model: " << name << " from path: " << path);
 }
 
-void ResourceManager::loadShader(const std::string& name, const char* vertPath, const char* fragPath) {
-	if (m_shaders.find(name) != m_shaders.end()) {
-		LOG("Already loaded Shader: " << name);
+void ResourceManager::loadMaterial(const std::string& name, const char* vertPath, const char* fragPath) {
+	if (m_materials.find(name) != m_materials.end()) {
+		LOG("Already loaded Material: " << name);
 		return;
 	}
 
-	m_shaders[name] = std::make_shared<Shader>(vertPath, fragPath);
-	LOG("Loading Shader: " << name << " from path: " << vertPath << " and " << fragPath);
+	auto shader = std::make_shared<Shader>(vertPath, fragPath);
+	m_materials[name] = std::make_shared<Material>(shader);
+	LOG("Loading Material: " << name << " from path: " << vertPath << " and " << fragPath);
 }
 
 void ResourceManager::loadTexture(const std::string& name, const char* path, const std::string& typeName) {
@@ -63,10 +75,10 @@ std::shared_ptr<Model> ResourceManager::getModel(const std::string& name) {
 	return it->second;
 }
 
-std::shared_ptr<Shader> ResourceManager::getShader(const std::string& name) {
-	auto it = m_shaders.find(name);
-	if (it == m_shaders.end()) {
-		LOG_E("RESOURCE_MANAGER::GET_SHADER_NULLPTR: " << name);
+std::shared_ptr<Material> ResourceManager::getMaterial(const std::string& name) {
+	auto it = m_materials.find(name);
+	if (it == m_materials.end()) {
+		LOG_E("RESOURCE_MANAGER::GET_MATERIAL_NULLPTR: " << name);
 		return nullptr;
 	}
 
@@ -109,7 +121,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, co
 
 void ResourceManager::clear() {
 	m_models.clear();
-	m_shaders.clear();
+	m_materials.clear();
 	m_textures.clear();
 }
 

@@ -11,10 +11,10 @@
 #include <utility>
 #include <vector>
 
-GameEntity::GameEntity(const std::string& name, const bool alive, const bool solid)
+GameEntity::GameEntity(const std::string& name, const bool solid, const bool alive)
 	: m_name(name),
-	  m_alive(alive),
-	  m_solid(solid)
+	  m_solid(solid),
+	  m_alive(alive)
 {
 	LOG_D("GameEntity: " << name << " created!");
 }

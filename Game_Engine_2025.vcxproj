@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\graphics\material.cpp" />
     <ClCompile Include="src\graphics\mesh_generator.cpp" />
     <ClCompile Include="src\components\render_component.cpp" />
     <ClCompile Include="src\components\component.cpp" />
@@ -51,6 +52,8 @@
     <None Include="shaders\gizmo.vert" />
     <None Include="shaders\grid.frag" />
     <None Include="shaders\grid.vert" />
+    <None Include="shaders\lambert.frag" />
+    <None Include="shaders\lambert.vert" />
     <None Include="shaders\light.frag" />
     <None Include="shaders\light.vert" />
     <None Include="shaders\model.frag" />
@@ -69,6 +72,7 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\graphics\material.h" />
     <ClInclude Include="src\graphics\mesh_generator.h" />
     <ClInclude Include="src\components\render_component.h" />
     <ClInclude Include="src\components\component.h" />

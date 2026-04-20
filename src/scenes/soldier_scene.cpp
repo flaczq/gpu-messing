@@ -6,6 +6,7 @@
 #include "../game/camera.h"
 #include "../game/game_entity.h"
 #include "../graphics/graphics_types.hpp"
+#include "../graphics/material.h"
 #include "../graphics/mesh.h"
 #include "../graphics/mesh_generator.h"
 #include "../graphics/model.h"
@@ -24,43 +25,48 @@ SoldierScene::SoldierScene(Camera* camera)
 
 void SoldierScene::init() {
     auto& resourceManager = ResourceManager::getInstance();
+    // MODELS
+    auto floorMesh = MeshGenerator::createCube(16.0f, 3.0f, 15.0f);
+    auto floorMeshPtr = std::make_unique<Mesh>(std::move(floorMesh));
+    auto floorModel = std::make_shared<Model>(std::move(floorMeshPtr));
+    resourceManager.addModel("floor_model", floorModel);
     resourceManager.loadModel("soldier_model", "../assets/models/Soldier.glb");
-    resourceManager.loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
-    resourceManager.loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
-    resourceManager.loadShader("floor_shader", "../shaders/grid.vert", "../shaders/grid.frag");
+    // MATERIALS with SHADERS
+    resourceManager.loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
+    resourceManager.loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
+    resourceManager.loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
 
-    auto floorShader = resourceManager.getShader("floor_shader");
-    if (!floorShader) {
-        LOG_E("No shader for floor...");
-    } else {
-        // FLOOR
-        //auto floorGO = std::make_unique<GameEntity>("floor", true, true);
-        //floorGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(0.0f));
-        //floorGO->addComponent<RenderComponent>(nullptr, floorShader);
-        //floorGO->init();
-        //m_gameEntities.push_back(std::move(floorGO));
+    // FLOOR
+    floorModel = resourceManager.getModel("floor_model");
+    auto floorMaterial = resourceManager.getMaterial("floor_material");
+    if (floorModel && floorMaterial) {
+        // MATERIAL UNIFORMS
+        //floorMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
+
+        glm::quat fRotQ = glm::angleAxis(FLOOR_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
+        auto floorGO = std::make_unique<GameEntity>("floor", true);
+        floorGO->addComponent<TransformComponent>(FLOOR_POSITION, fRotQ, FLOOR_SCALE);
+        floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
+        floorGO->init();
+        m_gameEntities.push_back(std::move(floorGO));
     }
-    m_floor = std::make_unique<Mesh>(MeshGenerator::createPlane(10.0f, 3.3f));
 
     // SOLDIER
     auto soldierModel = resourceManager.getModel("soldier_model");
-    if (!soldierModel) {
-        LOG_E("No model for soldier...");
-    }
-    auto modelShader = resourceManager.getShader("model_shader");
-    if (!modelShader) {
-        LOG_E("No shader for soldier...");
-    }
-    if (soldierModel && modelShader) {
+    auto soldierMaterial = resourceManager.getMaterial("soldier_material");
+    if (soldierModel && soldierMaterial) {
+        // MATERIAL UNIFORMS
+        //soldierMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
+
         float spacing = 1.5f;
         for (size_t i{}; i < 100; i++) {
             unsigned int row = i / 10;
             unsigned int col = i % 10;
-            glm::vec3 pos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
-            glm::quat rotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::vec3 sPos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
+            glm::quat sRotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
             auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
-            soldierGO->addComponent<TransformComponent>(pos, rotQ, SOLDIER_SCALE);
-            soldierGO->addComponent<RenderComponent>(soldierModel, modelShader);
+            soldierGO->addComponent<TransformComponent>(sPos, sRotQ, SOLDIER_SCALE);
+            soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
             soldierGO->init();
             m_gameEntities.push_back(std::move(soldierGO));
         }
@@ -75,7 +81,7 @@ void SoldierScene::init() {
 
 void SoldierScene::saveState() {
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus() || gameEntity->isSolid()) {
+        if (!gameEntity->checkStatus()) {
             continue;
         }
         auto* transform = gameEntity->getTransform();
@@ -93,17 +99,18 @@ void SoldierScene::fixedUpdate(float fixedt) {
     // 2. world * viewM             -> space (lookAt())
     // 3. space * projectionM       -> clip
     // 4. clip  * viewportTransform -> screen
-    // SOLDIER
-    /*static float time = 0.0f;
-    time += fixedt;
-    float x = sin(time);
-    float z = cos(time);
+    // LIGHT
+    /*static float tt = 0.0f;
+    tt += fixedt;
+    float x = sin(tt);
+    float z = cos(tt);
     m_lightDir = glm::normalize(glm::vec3(x, -1.0f, z));*/
 
+    // SOLDIER
     float time = static_cast<float>(glfwGetTime());
     glm::quat newRot = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(90.0f) * time, glm::vec3(0.0f, 0.0f, 1.0f));
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus() || gameEntity->isSolid()) {
+        if (!gameEntity->checkStatus()) {
             continue;
         }
         auto* transform = gameEntity->getTransform();
@@ -136,8 +143,9 @@ void SoldierScene::update(float alpha) {
         viewPos
     };
 
+    // TODO shader sorting
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus() || gameEntity->isSolid()) {
+        if (!gameEntity->checkStatus()) {
             continue;
         }
         auto* render = gameEntity->getRender();
@@ -147,28 +155,15 @@ void SoldierScene::update(float alpha) {
 
         gameEntity->update(alpha);
 
-        auto* shader = render->getShader();
-        shader->use();
+        auto* material = render->getMaterial();
+        material->apply();
 
+        auto* shader = material->getShader();
         shader->setVec3fv("lightDir", m_lightDir);
         shader->setVec3fv("lightColor", glm::vec3(1.0f));
 
         render->draw(alpha, ctx);
     }
-
-    // FLOOR
-    glm::vec3 floorPos = glm::vec3(0.0f);
-    glm::mat4 floorModel = glm::mat4(1.0f);
-    floorModel = glm::translate(floorModel, floorPos);
-
-    auto floorShader = ResourceManager::getInstance().getShader("floor_shader");
-    floorShader->use();
-
-    floorShader->setMat4fv("projection", projection);
-    floorShader->setMat4fv("view", view);
-    floorShader->setMat4fv("model", floorModel);
-
-    m_floor->draw(*floorShader);
 
     // LIGHT
     glm::vec3 lightMarkerPos = SOLDIER_POSITION - (glm::normalize(m_lightDir) * 5.0f);
@@ -176,7 +171,8 @@ void SoldierScene::update(float alpha) {
     lightModel = glm::translate(lightModel, lightMarkerPos);
     lightModel = glm::scale(lightModel, glm::vec3(0.2f));
 
-    auto lightShader = ResourceManager::getInstance().getShader("light_shader");
+    auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
+    auto lightShader = lightMaterial->getShader();
     lightShader->use();
 
     lightShader->setMat4fv("projection", projection);

@@ -14,7 +14,7 @@
 
 class GameEntity {
 public:
-	GameEntity(const std::string& name = "Entity", const bool alive = true, const bool solid = false);
+	GameEntity(const std::string& name = "Entity", const bool solid = false, const bool alive = true);
 
 	template <typename T, typename... TArgs>
 	T& addComponent(TArgs&&... args) {
@@ -43,10 +43,8 @@ public:
 	const std::string& getName() const { return m_name; }
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
-	bool isAlive() const { return m_alive; }
-	void setAlive(bool alive) { m_alive = alive; }
 	bool isSolid() const { return m_solid; }
-	void setSolid(bool solid) { m_solid = solid; }
+	bool isAlive() const { return m_alive; }
 
 private:
 	std::string m_name;
@@ -54,6 +52,6 @@ private:
 
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
-	bool m_alive = true;
 	bool m_solid = false;
+	bool m_alive = true;
 };
