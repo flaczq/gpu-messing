@@ -27,7 +27,7 @@ public:
 	// used by Assimp to load textures from Model
 	std::shared_ptr<Texture> getTexture(const std::string& path, const std::string& type, const aiScene* scene);
 
-	void clear();
+	void end();
 
 private:
 	// hidden constructor

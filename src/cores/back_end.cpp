@@ -86,10 +86,9 @@ bool BackEnd::init() {
     //           
     m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
     m_camera->init();
-    m_renderer = std::make_unique<Renderer>(m_window);
-    m_renderer->init();
-    m_sceneManager = std::make_unique<SceneManager>(m_camera.get(), m_renderer.get());
+    m_sceneManager = std::make_unique<SceneManager>(m_camera.get());
     m_sceneManager->init();
+    Renderer::getInstance().init(m_window);
     //m_physicsWorld = std::make_unique<PhysicsWorld>();
     //m_physicsWorld->init();
 
@@ -105,7 +104,8 @@ bool BackEnd::init() {
     //diffuseMapTP = TexturePrimitive::load("../assets/container2.png");
     //specularMapTP = TexturePrimitive::load("../assets/container2_specular.png");
 
-    // set callbacks: single key click, mouse, scroll
+    // set callbacks: window resize, single key click, mouse, scroll
+    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
     glfwSetKeyCallback(m_window, key_callback);
     glfwSetCursorPosCallback(m_window, mouse_callback);
     glfwSetScrollCallback(m_window, scroll_callback);
@@ -158,9 +158,9 @@ void BackEnd::run() {
         m_camera->lateUpdate(dt);
 
         // renderrring at last
-        m_renderer->beginFrame();
+        Renderer::getInstance().beginFrame();
         m_sceneManager->update(alpha);
-        m_renderer->endFrame();
+        Renderer::getInstance().endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
@@ -176,9 +176,10 @@ void BackEnd::run() {
     //    ┃┓┣┫┃┃┃┣   ┃┃┃┃┣ ┣┫
     //    ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┛┗
     //                       
-    ResourceManager::getInstance().clear();
+    ResourceManager::getInstance().end();
 
     glfwDestroyWindow(m_window);
+    m_window = nullptr;
     glfwTerminate();
 }
 
@@ -202,7 +203,7 @@ void BackEnd::processGlobalInput() {
 
     // RENDER MODE
     if (input.isKeyPressed(GLFW_KEY_O)) {
-        m_renderer->toggleRenderMode();
+        Renderer::getInstance().toggleRenderMode();
     }
 
     // INFO: POSITION, CAMERA

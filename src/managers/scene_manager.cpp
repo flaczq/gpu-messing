@@ -9,9 +9,8 @@
 #include <string>
 #include <utility>
 
-SceneManager::SceneManager(Camera* camera, Renderer* renderer)
-	: m_camera(camera),
-	  m_renderer(renderer)
+SceneManager::SceneManager(Camera* camera)
+	: m_camera(camera)
 {
 }
 
@@ -19,7 +18,7 @@ SceneManager::~SceneManager() = default;
 
 bool SceneManager::init() {
 	// default scene
-	m_currentScene = std::make_unique<SoldierScene>(m_camera, m_renderer);
+	m_currentScene = std::make_unique<SoldierScene>(m_camera);
 	m_currentScene->init();
 
 	return true;
@@ -34,18 +33,18 @@ void SceneManager::toggleScene() {
 
 		if (m_currentScene->getID() == SceneID::SOLDIER) {
 			// FIXME TODO
-			nextScene = std::make_unique<SoldierScene>(m_camera, m_renderer);
+			nextScene = std::make_unique<SoldierScene>(m_camera);
 			sceneIDStr = "LIGHTS_ROOM";
 		} else if (m_currentScene->getID() == SceneID::LIGHTS_ROOM) {
 			// FIXME TODO
-			nextScene = std::make_unique<SoldierScene>(m_camera, m_renderer);
+			nextScene = std::make_unique<SoldierScene>(m_camera);
 			sceneIDStr = "FPS_GAME";
 		} else {
-			nextScene = std::make_unique<SoldierScene>(m_camera, m_renderer);
+			nextScene = std::make_unique<SoldierScene>(m_camera);
 			sceneIDStr = "SOLDIER";
 		}
 	} else {
-		nextScene = std::make_unique<SoldierScene>(m_camera, m_renderer);
+		nextScene = std::make_unique<SoldierScene>(m_camera);
 		sceneIDStr = "SOLDIER";
 	}
 

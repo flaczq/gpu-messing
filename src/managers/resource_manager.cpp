@@ -119,7 +119,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, co
 	return m_textures[name];
 }
 
-void ResourceManager::clear() {
+void ResourceManager::end() {
 	m_models.clear();
 	m_materials.clear();
 	m_textures.clear();

@@ -14,11 +14,16 @@ struct RenderLight {
 	glm::vec3 color;
 };
 
+void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
 class Renderer {
 public:
-	Renderer(GLFWwindow* window);
+	// Meyer's Singleton
+	static Renderer& getInstance();
+	Renderer(const Renderer&) = delete;
+	void operator=(const Renderer&) = delete;
 
-	bool init();
+	bool init(GLFWwindow* window);
 	void toggleRenderMode();
 	void beginFrame();
 	void endFrame();
@@ -27,10 +32,12 @@ public:
 	void setLightDir(glm::vec3 lightDir) { m_renderLight.direction = lightDir; }
 
 private:
+	// hidden constructor
+	Renderer();
+
 	GLFWwindow* m_window = nullptr;
 	RenderMode m_renderMode = RenderMode::STANDARD;
 	RenderLight m_renderLight{};
 
 	// must be static to be passed as a callback reference and so it needs to use core->var
-	static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 };

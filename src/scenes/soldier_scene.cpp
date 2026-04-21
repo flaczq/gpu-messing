@@ -20,9 +20,8 @@
 #include <utility>
 #include <vector>
 
-SoldierScene::SoldierScene(Camera* camera, Renderer* renderer)
-    : m_camera(camera),
-      m_renderer(renderer)
+SoldierScene::SoldierScene(Camera* camera)
+    : m_camera(camera)
 {
 }
 
@@ -90,7 +89,7 @@ void SoldierScene::init() {
         auto lightGO = std::make_unique<GameEntity>("light");
         lightGO->addComponent<TransformComponent>(LIGHT_POSITION, lRotQ, LIGHT_SCALE);
         lightGO->addComponent<RenderComponent>(lightModel, lightMaterial);
-        lightGO->addComponent<DirLightMovementComponent>(m_renderer);
+        lightGO->addComponent<DirLightMovementComponent>();
         lightGO->init();
         m_gameEntities.push_back(std::move(lightGO));
     }
@@ -147,7 +146,7 @@ void SoldierScene::update(float alpha) {
     glm::mat4 projection = m_camera->getProjection();
     glm::mat4 view = m_camera->getViewMatrix();
     glm::vec3 viewPos = m_camera->getViewPos();
-    RenderLight* renderLight = m_renderer->getRenderLight();
+    RenderLight* renderLight = Renderer::getInstance().getRenderLight();
     RenderContext ctx = {
         projection,
         view,

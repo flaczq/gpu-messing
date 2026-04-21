@@ -11,11 +11,10 @@
 class Camera;
 class Model;
 class Mesh;
-class Renderer;
 
 class SoldierScene : public Scene {
 public:
-	SoldierScene(Camera* camera, Renderer* renderer);
+	SoldierScene(Camera* camera);
 
 	void init() override;
 	void saveState() override;
@@ -37,5 +36,4 @@ private:
 	static constexpr glm::vec3 LIGHT_SCALE = glm::vec3(0.2f);
 
 	Camera* m_camera = nullptr;
-	Renderer* m_renderer = nullptr;
 };

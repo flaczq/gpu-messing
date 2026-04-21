@@ -4,7 +4,6 @@
 #include "../configs/math_config.hpp"
 #include "../game/camera.h"
 #include "../game/physics_world.h"
-#include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
 #include <memory>
 
@@ -21,7 +20,6 @@ public:
     void run();
 
     Camera* getCamera() const { return m_camera.get(); }
-    Renderer* getRenderer() const { return m_renderer.get(); }
     SceneManager* getSceneManager() const { return m_sceneManager.get(); }
     PhysicsWorld* getPhysicsWorld() const { return m_physicsWorld.get(); }
 
@@ -30,7 +28,6 @@ private:
 
     GLFWwindow* m_window = nullptr;
     std::unique_ptr<Camera> m_camera;
-    std::unique_ptr<Renderer> m_renderer;
     std::unique_ptr<SceneManager> m_sceneManager;
     std::unique_ptr<PhysicsWorld> m_physicsWorld;
 

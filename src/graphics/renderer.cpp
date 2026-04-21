@@ -6,21 +6,22 @@
 #include <iostream>
 #include <string>
 
-Renderer::Renderer(GLFWwindow* window)
-    : m_window(window)
-{
+Renderer& Renderer::getInstance() {
+    static Renderer instance;
+    return instance;
+}
+
+Renderer::Renderer() = default;
+
+bool Renderer::init(GLFWwindow* window) {
+    m_window = window;
     m_renderLight = {
         glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
         glm::vec3(1.0f)
     };
-}
 
-bool Renderer::init() {
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-
-    // set callbacks: window resize
-    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
 
     return true;
 }
@@ -61,7 +62,7 @@ void Renderer::endFrame() {
     glfwSwapBuffers(m_window);
 }
 
-void Renderer::framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
     backEnd->getCamera()->updateAspect(width, height);
 
