@@ -139,10 +139,10 @@ void SoldierScene::fixedUpdate(float fixedt) {
 }
 
 void SoldierScene::update(float alpha) {
-    //    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┳┓┏┓┳┳┓┏┓
-    //    ┣┫┣ ┃┃┃┃┣ ┣┫  ┣ ┣┫┣┫┃┃┃┣ 
-    //    ┛┗┗┛┛┗┻┛┗┛┛┗  ┻ ┛┗┛┗┛ ┗┗┛
-    //                             
+    //    ┓    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┏┓┏┓┏┓
+    //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
+    //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
+    //                               
     glm::mat4 projection = m_camera->getProjection();
     glm::mat4 view = m_camera->getViewMatrix();
     glm::vec3 viewPos = m_camera->getViewPos();
@@ -178,10 +178,8 @@ void SoldierScene::update(float alpha) {
 
 void SoldierScene::end() {
     for (auto& gameEntity : m_gameEntities) {
-        /*if (!gameEntity->checkStatus()) {
-            continue;
-        }*/
-
         gameEntity->end();
     }
+
+    m_gameEntities.clear();
 }

@@ -20,7 +20,6 @@ public:
     void run();
 
     Camera* getCamera() const { return m_camera.get(); }
-    SceneManager* getSceneManager() const { return m_sceneManager.get(); }
     PhysicsWorld* getPhysicsWorld() const { return m_physicsWorld.get(); }
 
 private:
@@ -28,7 +27,6 @@ private:
 
     GLFWwindow* m_window = nullptr;
     std::unique_ptr<Camera> m_camera;
-    std::unique_ptr<SceneManager> m_sceneManager;
     std::unique_ptr<PhysicsWorld> m_physicsWorld;
 
     // textures

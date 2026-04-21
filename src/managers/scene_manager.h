@@ -7,16 +7,22 @@ class Scene;
 
 class SceneManager {
 public:
-	SceneManager(Camera* camera);
-	~SceneManager();
+	// Meyer's Singleton
+	static SceneManager& getInstance();
+	SceneManager(const SceneManager&) = delete;
+	void operator=(const SceneManager&) = delete;
 
-	bool init();
+	bool init(Camera* camera);
 	void toggleScene();
 	void saveState() const;
 	void fixedUpdate(float fixedt) const;
 	void update(float alpha) const;
+	void end() const;
 
 private:
+	// hidden constructor
+	SceneManager();
+
 	Camera* m_camera = nullptr;
 
 	std::unique_ptr<Scene> m_currentScene;

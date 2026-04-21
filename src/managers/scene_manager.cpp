@@ -9,14 +9,16 @@
 #include <string>
 #include <utility>
 
-SceneManager::SceneManager(Camera* camera)
-	: m_camera(camera)
-{
+SceneManager& SceneManager::getInstance() {
+	static SceneManager instance;
+	return instance;
 }
 
-SceneManager::~SceneManager() = default;
+SceneManager::SceneManager() = default;
 
-bool SceneManager::init() {
+bool SceneManager::init(Camera* camera) {
+	m_camera = camera;
+
 	// default scene
 	m_currentScene = std::make_unique<SoldierScene>(m_camera);
 	m_currentScene->init();
@@ -68,5 +70,11 @@ void SceneManager::fixedUpdate(float fixedt) const {
 void SceneManager::update(float alpha) const {
 	if (m_currentScene) {
 		m_currentScene->update(alpha);
+	}
+}
+
+void SceneManager::end() const {
+	if (m_currentScene) {
+		m_currentScene->end();
 	}
 }

@@ -1,4 +1,5 @@
 #include "../configs/gl_config.hpp"
+#include "../configs/log_config.hpp"
 #include "graphics_types.hpp"
 #include "mesh.h"
 #include "shader.h"

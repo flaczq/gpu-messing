@@ -38,6 +38,4 @@ private:
 	GLFWwindow* m_window = nullptr;
 	RenderMode m_renderMode = RenderMode::STANDARD;
 	RenderLight m_renderLight{};
-
-	// must be static to be passed as a callback reference and so it needs to use core->var
 };

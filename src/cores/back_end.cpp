@@ -86,8 +86,7 @@ bool BackEnd::init() {
     //           
     m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
     m_camera->init();
-    m_sceneManager = std::make_unique<SceneManager>(m_camera.get());
-    m_sceneManager->init();
+    SceneManager::getInstance().init(m_camera.get());
     Renderer::getInstance().init(m_window);
     //m_physicsWorld = std::make_unique<PhysicsWorld>();
     //m_physicsWorld->init();
@@ -144,8 +143,8 @@ void BackEnd::run() {
         while (m_accumulator >= FIXED_DT) {
             //m_physicsWorld->saveState();
             //m_physicsWorld->fixedUpdate(static_cast<float>(FIXED_DT));
-            m_sceneManager->saveState();
-            m_sceneManager->fixedUpdate(static_cast<float>(FIXED_DT));
+            SceneManager::getInstance().saveState();
+            SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));
             m_accumulator -= FIXED_DT;
         }
 
@@ -159,7 +158,7 @@ void BackEnd::run() {
 
         // renderrring at last
         Renderer::getInstance().beginFrame();
-        m_sceneManager->update(alpha);
+        SceneManager::getInstance().update(alpha);
         Renderer::getInstance().endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);
@@ -176,6 +175,7 @@ void BackEnd::run() {
     //    ┃┓┣┫┃┃┃┣   ┃┃┃┃┣ ┣┫
     //    ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┛┗
     //                       
+    SceneManager::getInstance().end();
     ResourceManager::getInstance().end();
 
     glfwDestroyWindow(m_window);
@@ -198,7 +198,7 @@ void BackEnd::processGlobalInput() {
     #ifdef _DEBUG
     // SCENES
     if (input.isKeyPressed(GLFW_KEY_P)) {
-        m_sceneManager->toggleScene();
+        SceneManager::getInstance().toggleScene();
     }
 
     // RENDER MODE
