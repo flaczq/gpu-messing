@@ -18,24 +18,6 @@ GameEntity::GameEntity(const std::string& name)
 	LOG_D("GameEntity: " << name << " created!");
 }
 
-// TODO delete this, instead create entities queue
-bool GameEntity::checkStatus() const {
-	if (!m_alive) {
-		LOG_D("GameEntity: " << m_name << " -> not alive!");
-		return false;
-	}
-	if (!m_transform) {
-		LOG_D("GameEntity: " << m_name << " -> no TransformComponent!");
-		return false;
-	}
-	if (!m_render) {
-		LOG_D("GameEntity: " << m_name << " -> no RenderComponent!");
-		return false;
-	}
-
-	return true;
-}
-
 void GameEntity::init() {
 	for (auto& c : m_components) {
 		c->onInit();

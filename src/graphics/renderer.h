@@ -14,7 +14,7 @@ enum class RendererRenderMode {
 	POINTCLOUD = GL_POINT
 };
 enum class RendererQueueType {
-	STANDARD,
+	FIRST,
 	STENCIL,
 	OUTLINE
 };
@@ -61,7 +61,7 @@ private:
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
 	RendererLight m_rendererLight{};
 
-	std::vector<RendererCommand> m_standardQueue;
+	std::vector<RendererCommand> m_firstQueue;
 	std::vector<RendererCommand> m_stencilQueue;
 	std::vector<RendererCommand> m_outlineQueue;
 

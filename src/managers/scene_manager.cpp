@@ -73,6 +73,12 @@ void SceneManager::update(float alpha) const {
 	}
 }
 
+void SceneManager::lateUpdate() const {
+	if (m_currentScene) {
+		m_currentScene->lateUpdate();
+	}
+}
+
 void SceneManager::end() const {
 	if (m_currentScene) {
 		m_currentScene->end();

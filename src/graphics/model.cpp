@@ -128,7 +128,7 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* ma
 	for (size_t i{}; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		// load texture into str
-		mat->GetTexture(type, i, &str);
+		mat->GetTexture(type, static_cast<unsigned int>(i), &str);
 		std::string pathOrMem = str.C_Str();
 		// unique key for ResourceManager
 		std::string fullPath = m_directory + '/' + pathOrMem;

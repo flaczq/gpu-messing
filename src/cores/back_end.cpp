@@ -164,6 +164,8 @@ void BackEnd::run() {
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
 
+        // game entities clean up
+        SceneManager::getInstance().lateUpdate();
         // reset input changes for mouse
         InputManager::getInstance().reset();
 

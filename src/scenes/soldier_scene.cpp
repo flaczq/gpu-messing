@@ -95,10 +95,9 @@ void SoldierScene::init() {
     auto lightModel = resourceManager.getModel("light_model");
     auto lightMaterial = resourceManager.getMaterial("light_material");
     if (lightModel && lightMaterial) {
-        glm::quat lRotQ = glm::angleAxis(LIGHT_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
         auto lightGO = std::make_unique<GameEntity>("light");
         lightGO->setAbstract(true);
-        lightGO->addComponent<TransformComponent>(LIGHT_POSITION, lRotQ, LIGHT_SCALE);
+        lightGO->addComponent<TransformComponent>(LIGHT_POSITION, glm::quat(), LIGHT_SCALE);
         lightGO->addComponent<RenderComponent>(lightModel, lightMaterial);
         lightGO->addComponent<DirLightMovementComponent>();
         lightGO->init();
@@ -113,9 +112,9 @@ void SoldierScene::init() {
         //soldierMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
 
         float spacing = 1.5f;
-        for (size_t i{}; i < 100; i++) {
-            unsigned int row = i / 10;
-            unsigned int col = i % 10;
+        for (size_t i{}; i < 49; i++) {
+            size_t row = i / 7;
+            size_t col = i % 7;
             glm::vec3 sPos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
             glm::quat sRotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
             auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
@@ -125,81 +124,82 @@ void SoldierScene::init() {
             m_gameEntities.push_back(std::move(soldierGO));
         }
     }
+
+    // FIXME hardcoded max: 100
+    m_aliveGameEntities.reserve(100);
+    m_deadGameEntities.reserve(100);
+
+    for (auto& gameEntity : m_gameEntities) {
+        if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
+            m_aliveGameEntities.push_back(gameEntity.get());
+        } else {
+            m_deadGameEntities.push_back(gameEntity.get());
+        }
+    }
 }
 
 void SoldierScene::saveState() {
-    for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus()) {
-            continue;
-        }
-        auto* transform = gameEntity->getTransform();
-        if (!transform->isActive()) {
-            continue;
-        }
-
+    for (auto& aliveGameEntity : m_aliveGameEntities) {
+        auto* transform = aliveGameEntity->getTransform();
         transform->saveState();
     }
 }
 
 void SoldierScene::fixedUpdate(float fixedt) {
-    // SOLDIER
-    for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus()) {
-            continue;
-        }
-        auto* transform = gameEntity->getTransform();
-        if (!transform->isActive()) {
-            continue;
-        }
+    for (auto& aliveGameEntity : m_aliveGameEntities) {
+        aliveGameEntity->fixedUpdate(fixedt);
 
-        gameEntity->fixedUpdate(fixedt);
-
-        /*if (transform->getOwner()->getName().starts_with("soldier_")) {
-            float time = static_cast<float>(glfwGetTime());
-            glm::quat newRot = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)) * glm::angleAxis(glm::radians(90.0f) * time, glm::vec3(0.0f, 0.0f, 1.0f));
-            auto nr = transform->getOwner()->getName().substr(transform->getOwner()->getName().find_last_of('_') + 1);
-            if (std::stoi(nr) % 3 == 0) {
-                transform->setRotation(newRot);
-            }
-        }*/
+        if (aliveGameEntity->getName().starts_with("soldier_15")) {
+            aliveGameEntity->destroy();
+        }
     }
 }
 
 void SoldierScene::update(float alpha) {
-    //    ┓    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┏┓┏┓┏┓
-    //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
-    //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
-    //                               
-    for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->checkStatus()) {
-            continue;
-        }
-        auto* transform = gameEntity->getTransform();
-        if (!transform->isActive()) {
-            continue;
-        }
-        auto* render = gameEntity->getRender();
-        if (!render->isActive()) {
-            continue;
-        }
+    for (auto& aliveGameEntity : m_aliveGameEntities) {
+        aliveGameEntity->update(alpha);
 
-        gameEntity->update(alpha);
-
+        auto* transform = aliveGameEntity->getTransform();
+        auto* render = aliveGameEntity->getRender();
         auto* model = render->getModel();
         auto* material = render->getMaterial();
         glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
         glm::mat3 normalMatrix = transform->getNormalMatrix(modelMatrix);
         transform->setDirty(false);
+        RendererQueueType queueType = aliveGameEntity->getRendererQueueType();
         RendererCommand command = {
             model,
             material,
             modelMatrix,
             normalMatrix
         };
-        Renderer::getInstance().registerInQueue(gameEntity->getRendererQueueType(), command);
+        Renderer::getInstance().registerInQueue(queueType, command);
     }
 
     Renderer::getInstance().flush();
+}
+
+void SoldierScene::lateUpdate() {
+    for (int i = 0; i < m_aliveGameEntities.size(); /*i++*/) {
+        LOG_D("CHECKING " << m_aliveGameEntities[i]->getName());
+        if (m_aliveGameEntities[i]->isPendingDeath()) {
+            LOG_D("DEAD " << m_aliveGameEntities[i]->getName());
+            GameEntity* gameEntity = m_aliveGameEntities[i];
+            gameEntity->setPendingDeath(false);
+            gameEntity->setAlive(false);
+            m_deadGameEntities.push_back(gameEntity);
+
+            // fast delete (swap & pop)
+            m_aliveGameEntities[i] = m_aliveGameEntities.back();
+            m_aliveGameEntities.pop_back();
+            // 'i' -> new element from back
+        } else {
+            i++;
+        }
+    }
+    LOG_D("ALL " << m_gameEntities.size());
+    LOG_D("ALIVE " << m_aliveGameEntities.size());
+    LOG_D("DEAD " << m_deadGameEntities.size());
 }
 
 void SoldierScene::end() {
@@ -207,5 +207,7 @@ void SoldierScene::end() {
         gameEntity->end();
     }
 
+    m_deadGameEntities.clear();
+    m_aliveGameEntities.clear();
     m_gameEntities.clear();
 }

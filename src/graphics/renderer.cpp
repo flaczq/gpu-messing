@@ -26,6 +26,11 @@ bool Renderer::init(GLFWwindow* window, Camera* camera) {
         glm::vec3(1.0f)
     };
 
+    // FIXME hardcoded max: 100
+    m_firstQueue.reserve(100);
+    m_stencilQueue.reserve(100);
+    m_outlineQueue.reserve(100);
+
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
 
@@ -67,8 +72,8 @@ void Renderer::beginFrame() {
 
 void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
     switch (queueType) {
-    case RendererQueueType::STANDARD:
-        m_standardQueue.push_back(command);
+    case RendererQueueType::FIRST:
+        m_firstQueue.push_back(command);
         break;
     case RendererQueueType::STENCIL:
         m_stencilQueue.push_back(command);
@@ -81,21 +86,33 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
 
 // execute drawing commands from queues
 void Renderer::flush() {
+    // TODO shader sorting
     glEnable(GL_DEPTH_TEST);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
     glStencilMask(0xFF);
 
-    // TODO shader sorting
-    for (auto& command : m_standardQueue) {
+    //    ┓    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┏┓┏┓┏┓
+    //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
+    //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
+    //                               
+    for (auto& command : m_firstQueue) {
         //glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0x00);
         draw(command);
     }
+    //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
+    //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
+    //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
+    //                            
     for (auto& command : m_stencilQueue) {
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
         draw(command);
     }
+    //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
+    //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
+    //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
+    //                            
     for (auto& command : m_outlineQueue) {
         glDisable(GL_DEPTH_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
@@ -106,16 +123,9 @@ void Renderer::flush() {
         glStencilMask(0xFF);
     }
 
-    m_standardQueue.clear();
+    m_firstQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
-}
-
-void Renderer::endFrame() {
-    // no need to unbind it every time but w/e
-    glBindVertexArray(0);
-
-    glfwSwapBuffers(m_window);
 }
 
 void Renderer::draw(const RendererCommand& command) const {
@@ -136,6 +146,13 @@ void Renderer::draw(const RendererCommand& command) const {
     shader->setVec3fv("lightColor", m_rendererLight.color);
 
     command.model->draw(*shader);
+}
+
+void Renderer::endFrame() {
+    // no need to unbind it every time but w/e
+    glBindVertexArray(0);
+
+    glfwSwapBuffers(m_window);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {

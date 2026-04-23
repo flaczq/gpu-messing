@@ -35,7 +35,6 @@ public:
 		return *cPtr;
 	}
 
-	bool checkStatus() const;
 	void init();
 	void fixedUpdate(float fixedt) const;
 	void update(float alpha) const;
@@ -45,6 +44,7 @@ public:
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
 	RendererQueueType getRendererQueueType() const { return m_rendererQueueType; }
+
 	void setRendererQueueType(RendererQueueType rendererQueueType) { m_rendererQueueType = rendererQueueType; }
 	bool isSolid() const { return m_solid; }
 	void setSolid(bool solid) { m_solid = solid; }
@@ -52,6 +52,9 @@ public:
 	void setAbstract(bool abstract) { m_abstract = abstract; }
 	bool isAlive() const { return m_alive; }
 	void setAlive(bool alive) { m_alive = alive; }
+	bool isPendingDeath() const { return m_pendingDeath; }
+	void setPendingDeath(bool pendingDeath) { m_pendingDeath = pendingDeath; }
+	void destroy() { m_pendingDeath = true; }
 
 private:
 	std::string m_name;
@@ -59,10 +62,11 @@ private:
 
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
-	RendererQueueType m_rendererQueueType = RendererQueueType::STANDARD;
+	RendererQueueType m_rendererQueueType = RendererQueueType::FIRST;
 	// no gravity
 	bool m_solid = false;
 	// "invisible" e.g. light, trigger, ...
 	bool m_abstract = false;
 	bool m_alive = true;
+	bool m_pendingDeath = false;
 };

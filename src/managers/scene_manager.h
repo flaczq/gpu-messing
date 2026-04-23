@@ -17,6 +17,7 @@ public:
 	void saveState() const;
 	void fixedUpdate(float fixedt) const;
 	void update(float alpha) const;
+	void lateUpdate() const;
 	void end() const;
 
 private:

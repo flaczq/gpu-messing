@@ -20,6 +20,7 @@ public:
 	void saveState() override;
 	void fixedUpdate(float fixedt) override;
 	void update(float alpha) override;
+	void lateUpdate() override;
 	void end() override;
 
 	SceneID getID() const override { return SceneID::SOLDIER; }
@@ -30,7 +31,6 @@ private:
 	static constexpr float SOLDIER_ROTATION = glm::radians(-90.0f);
 	static constexpr glm::vec3 SOLDIER_SCALE = glm::vec3(100.0f);
 	static constexpr glm::vec3 LIGHT_POSITION = glm::vec3(3.0f, 0.0f, 3.0f);
-	static constexpr float LIGHT_ROTATION = glm::radians(0.0f);
 	static constexpr glm::vec3 LIGHT_SCALE = glm::vec3(0.2f);
 
 	Camera* m_camera = nullptr;

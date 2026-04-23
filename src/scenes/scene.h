@@ -19,10 +19,13 @@ public:
 	virtual void saveState() = 0;
 	virtual void fixedUpdate(float fixedt) = 0;
 	virtual void update(float alpha) = 0;
+	virtual void lateUpdate() = 0;
 	virtual void end() = 0;
 
 	virtual SceneID getID() const = 0;
 
 protected:
 	std::vector<std::unique_ptr<GameEntity>> m_gameEntities;
+	std::vector<GameEntity*> m_aliveGameEntities;
+	std::vector<GameEntity*> m_deadGameEntities;
 };
