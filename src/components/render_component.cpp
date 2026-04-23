@@ -20,7 +20,7 @@ void RenderComponent::onInit() {
 	m_transform = getOwner()->getTransform();
 }
 
-void RenderComponent::draw(float alpha, RenderContext ctx) {
+/*void RenderComponent::draw(float alpha, const RenderContext& ctx) {
 	// transformation matrix: clip = projectionM * viewM * modelM * local
 	// 1. local * modelM            -> world
 	// 2. world * viewM             -> space (lookAt())
@@ -38,4 +38,4 @@ void RenderComponent::draw(float alpha, RenderContext ctx) {
 	shader->setMat3fv("normalMatrix", normalMatrix);
 
 	m_model->draw(*shader);
-}
+}*/

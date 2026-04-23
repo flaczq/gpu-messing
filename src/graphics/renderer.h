@@ -2,27 +2,33 @@
 
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
+#include <vector>
 
+class Camera;
 class Model;
 class Material;
 
-enum class RenderMode {
+enum class RendererRenderMode {
 	STANDARD = GL_FILL,
 	WIREFRAME = GL_LINE,
 	POINTCLOUD = GL_POINT
+};
+enum class RendererQueueType {
+	STANDARD,
+	STENCIL,
+	OUTLINE
 };
 
 struct RendererLight {
 	glm::vec3 direction;
 	glm::vec3 color;
 };
-
 struct RendererCommand {
 	Model* model;
 	Material* material;
-	glm::mat4 projection;
-	glm::mat4 view;
-	glm::vec3 viewPos;
+	//glm::mat4 projection;
+	//glm::mat4 view;
+	//glm::vec3 viewPos;
 	glm::mat4 modelMatrix;
 	glm::mat3 normalMatrix;
 };
@@ -36,12 +42,11 @@ public:
 	Renderer(const Renderer&) = delete;
 	void operator=(const Renderer&) = delete;
 
-	bool init(GLFWwindow* window);
+	bool init(GLFWwindow* window, Camera* camera);
 	void toggleRenderMode();
 	void beginFrame();
-	void drawStandard(const RendererCommand& command);
-	void drawWithStencilWrite(const RendererCommand& command);
-	void drawStencilOutline(const RendererCommand& command);
+	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
+	void flush();
 	void endFrame();
 
 	RendererLight* getRendererLight() { return &m_rendererLight; }
@@ -52,8 +57,13 @@ private:
 	Renderer();
 
 	GLFWwindow* m_window = nullptr;
-	RenderMode m_renderMode = RenderMode::STANDARD;
+	Camera* m_camera = nullptr;
+	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
 	RendererLight m_rendererLight{};
+
+	std::vector<RendererCommand> m_standardQueue;
+	std::vector<RendererCommand> m_stencilQueue;
+	std::vector<RendererCommand> m_outlineQueue;
 
 	void draw(const RendererCommand& command) const;
 };

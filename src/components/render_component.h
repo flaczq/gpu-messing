@@ -20,7 +20,7 @@ public:
 	RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Material> material);
 
 	void onInit() override;
-	void draw(float alpha, RenderContext ctx);
+	//void draw(float alpha, const RenderContext& ctx);
 
 	Model* getModel() const { return m_model.get(); }
 	Material* getMaterial() const { return m_material.get(); }

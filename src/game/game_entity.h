@@ -5,6 +5,7 @@
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/math_config.hpp"
+#include "../graphics/renderer.h"
 #include <iostream>
 #include <memory>
 #include <string>
@@ -43,6 +44,8 @@ public:
 	const std::string& getName() const { return m_name; }
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
+	RendererQueueType getRendererQueueType() const { return m_rendererQueueType; }
+	void setRendererQueueType(RendererQueueType rendererQueueType) { m_rendererQueueType = rendererQueueType; }
 	bool isSolid() const { return m_solid; }
 	void setSolid(bool solid) { m_solid = solid; }
 	bool isAbstract() const { return m_abstract; }
@@ -56,6 +59,7 @@ private:
 
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
+	RendererQueueType m_rendererQueueType = RendererQueueType::STANDARD;
 	// no gravity
 	bool m_solid = false;
 	// "invisible" e.g. light, trigger, ...

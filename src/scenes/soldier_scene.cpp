@@ -70,8 +70,9 @@ void SoldierScene::init() {
     auto gizmoModel = resourceManager.getModel("gizmo_model");
     auto gizmoMaterial = resourceManager.getMaterial("soldier_material");
     if (gizmoModel && gizmoMaterial) {
-        gizmoMaterial->setStencilRequired(true);
+        //gizmoMaterial->setStencilRequired(true);
         auto gizmoGO = std::make_unique<GameEntity>("gizmo");
+        gizmoGO->setRendererQueueType(RendererQueueType::STENCIL);
         gizmoGO->setSolid(true);
         gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f));
         gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
@@ -81,7 +82,8 @@ void SoldierScene::init() {
     gizmoModel = resourceManager.getModel("gizmo_model");
     gizmoMaterial = resourceManager.getMaterial("gizmo_material");
     if (gizmoModel && gizmoMaterial) {
-        auto gizmoGO = std::make_unique<GameEntity>("giz2mo2");
+        auto gizmoGO = std::make_unique<GameEntity>("outline");
+        gizmoGO->setRendererQueueType(RendererQueueType::OUTLINE);
         gizmoGO->setSolid(true);
         gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), glm::vec3(1.1f));
         gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
@@ -164,87 +166,40 @@ void SoldierScene::fixedUpdate(float fixedt) {
 }
 
 void SoldierScene::update(float alpha) {
-    RendererLight* rendererLight = Renderer::getInstance().getRendererLight();
-    glm::mat4 projection = m_camera->getProjection();
-    glm::mat4 view = m_camera->getViewMatrix();
-    glm::vec3 viewPos = m_camera->getViewPos();
-
     //    ┓    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┏┓┏┓┏┓
     //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
     //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
     //                               
     for (auto& gameEntity : m_gameEntities) {
-        if (!gameEntity->getName().starts_with("giz")) {
-            if (!gameEntity->checkStatus()) {
-                continue;
-            }
-            auto* transform = gameEntity->getTransform();
-            if (!transform->isActive()) {
-                continue;
-            }
-            auto* render = gameEntity->getRender();
-            if (!render->isActive()) {
-                continue;
-            }
-
-            gameEntity->update(alpha);
-
-            auto* model = render->getModel();
-            auto* material = render->getMaterial();
-            glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
-            glm::mat3 normalMatrix = transform->getNormalMatrix(modelMatrix);
-            transform->setDirty(false);
-            RendererCommand command = {
-                model,
-                material,
-                projection,
-                view,
-                viewPos,
-                modelMatrix,
-                normalMatrix
-            };
-            Renderer::getInstance().drawStandard(command);
+        if (!gameEntity->checkStatus()) {
+            continue;
         }
+        auto* transform = gameEntity->getTransform();
+        if (!transform->isActive()) {
+            continue;
+        }
+        auto* render = gameEntity->getRender();
+        if (!render->isActive()) {
+            continue;
+        }
+
+        gameEntity->update(alpha);
+
+        auto* model = render->getModel();
+        auto* material = render->getMaterial();
+        glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
+        glm::mat3 normalMatrix = transform->getNormalMatrix(modelMatrix);
+        transform->setDirty(false);
+        RendererCommand command = {
+            model,
+            material,
+            modelMatrix,
+            normalMatrix
+        };
+        Renderer::getInstance().registerInQueue(gameEntity->getRendererQueueType(), command);
     }
 
-    for (auto& gameEntity : m_gameEntities) {
-        if (gameEntity->getName().starts_with("giz")) {
-            if (!gameEntity->checkStatus()) {
-                continue;
-            }
-            auto* transform = gameEntity->getTransform();
-            if (!transform->isActive()) {
-                continue;
-            }
-            auto* render = gameEntity->getRender();
-            if (!render->isActive()) {
-                continue;
-            }
-
-            gameEntity->update(alpha);
-
-            auto* model = render->getModel();
-            auto* material = render->getMaterial();
-            glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
-            glm::mat3 normalMatrix = transform->getNormalMatrix(modelMatrix);
-            transform->setDirty(false);
-            RendererCommand command = {
-                model,
-                material,
-                projection,
-                view,
-                viewPos,
-                modelMatrix,
-                normalMatrix
-            };
-
-            if (!gameEntity->getName().starts_with("giz2mo2")) {
-                Renderer::getInstance().drawStencilOutline(command);
-            } else {
-                Renderer::getInstance().drawWithStencilWrite(command);
-            }
-        }
-    }
+    Renderer::getInstance().flush();
 }
 
 void SoldierScene::end() {

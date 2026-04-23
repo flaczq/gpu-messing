@@ -4,6 +4,7 @@
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
+#include "../graphics/renderer.h"
 #include "game_entity.h"
 #include <memory>
 #include <string>

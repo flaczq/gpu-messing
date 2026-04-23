@@ -2,12 +2,14 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../cores/back_end.h"
+#include "../game/camera.h"
 #include "../graphics/material.h"
 #include "../graphics/model.h"
 #include "../graphics/shader.h"
 #include "renderer.h"
 #include <iostream>
 #include <string>
+#include <vector>
 
 Renderer& Renderer::getInstance() {
     static Renderer instance;
@@ -16,8 +18,9 @@ Renderer& Renderer::getInstance() {
 
 Renderer::Renderer() = default;
 
-bool Renderer::init(GLFWwindow* window) {
+bool Renderer::init(GLFWwindow* window, Camera* camera) {
     m_window = window;
+    m_camera = camera;
     m_rendererLight = {
         glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
         glm::vec3(1.0f)
@@ -31,14 +34,14 @@ bool Renderer::init(GLFWwindow* window) {
 
 void Renderer::toggleRenderMode() {
     std::string renderModeStr;
-    if (m_renderMode == RenderMode::STANDARD) {
-        m_renderMode = RenderMode::WIREFRAME;
+    if (m_renderMode == RendererRenderMode::STANDARD) {
+        m_renderMode = RendererRenderMode::WIREFRAME;
         renderModeStr = "WIREFRAME";
-    } else if (m_renderMode == RenderMode::WIREFRAME) {
-        m_renderMode = RenderMode::POINTCLOUD;
+    } else if (m_renderMode == RendererRenderMode::WIREFRAME) {
+        m_renderMode = RendererRenderMode::POINTCLOUD;
         renderModeStr = "POINTCLOUD";
     } else {
-        m_renderMode = RenderMode::STANDARD;
+        m_renderMode = RendererRenderMode::STANDARD;
         renderModeStr = "STANDARD";
     }
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
@@ -62,27 +65,50 @@ void Renderer::beginFrame() {
     glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
-void Renderer::drawStandard(const RendererCommand& command) {
-    // TODO shader sorting
-    glStencilMask(0x00);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    draw(command);
+void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
+    switch (queueType) {
+    case RendererQueueType::STANDARD:
+        m_standardQueue.push_back(command);
+        break;
+    case RendererQueueType::STENCIL:
+        m_stencilQueue.push_back(command);
+        break;
+    case RendererQueueType::OUTLINE:
+        m_outlineQueue.push_back(command);
+        break;
+    }
 }
 
-void Renderer::drawWithStencilWrite(const RendererCommand& command) {
-    glStencilMask(0xFF);
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    draw(command);
-}
-
-void Renderer::drawStencilOutline(const RendererCommand& command) {
-    glStencilMask(0x00);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glDisable(GL_DEPTH_TEST);
-    draw(command);
-    glStencilMask(0xFF);
-    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+// execute drawing commands from queues
+void Renderer::flush() {
     glEnable(GL_DEPTH_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glStencilMask(0xFF);
+
+    // TODO shader sorting
+    for (auto& command : m_standardQueue) {
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0x00);
+        draw(command);
+    }
+    for (auto& command : m_stencilQueue) {
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        draw(command);
+    }
+    for (auto& command : m_outlineQueue) {
+        glDisable(GL_DEPTH_TEST);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        draw(command);
+        glEnable(GL_DEPTH_TEST);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glStencilMask(0xFF);
+    }
+
+    m_standardQueue.clear();
+    m_stencilQueue.clear();
+    m_outlineQueue.clear();
 }
 
 void Renderer::endFrame() {
@@ -101,9 +127,9 @@ void Renderer::draw(const RendererCommand& command) const {
     command.material->apply();
 
     auto* shader = command.material->getShader();
-    shader->setMat4fv("projection", command.projection);
-    shader->setMat4fv("view", command.view);
-    shader->setVec3fv("viewPos", command.viewPos);
+    shader->setMat4fv("projection", m_camera->getProjection());
+    shader->setMat4fv("view", m_camera->getViewMatrix());
+    shader->setVec3fv("viewPos", m_camera->getViewPos());
     shader->setMat4fv("model", command.modelMatrix);
     shader->setMat3fv("normalMatrix", command.normalMatrix);
     shader->setVec3fv("lightDir", m_rendererLight.direction);
