@@ -93,8 +93,6 @@
     <None Include="shaders\light.vert" />
     <None Include="shaders\object.frag" />
     <None Include="shaders\object.vert" />
-    <None Include="shaders\gizmo.vert" />
-    <None Include="shaders\gizmo.frag" />
     <None Include="shaders\grid.frag" />
     <None Include="shaders\grid.vert" />
     <None Include="ATTRIBUTIONS.md" />
@@ -103,6 +101,8 @@
     <None Include="shaders\model.vert" />
     <None Include="shaders\lambert.frag" />
     <None Include="shaders\lambert.vert" />
+    <None Include="shaders\gizmo.vert" />
+    <None Include="shaders\gizmo.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">

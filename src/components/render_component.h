@@ -7,13 +7,13 @@
 #include "component.h"
 #include <memory>
 
+class TransformComponent;
+
 struct RenderContext {
 	glm::mat4 projection;
 	glm::mat4 view;
 	glm::vec3 viewPos;
 };
-
-class TransformComponent;
 
 class RenderComponent : public Component {
 public:

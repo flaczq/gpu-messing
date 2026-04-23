@@ -21,6 +21,11 @@ void RenderComponent::onInit() {
 }
 
 void RenderComponent::draw(float alpha, RenderContext ctx) {
+	// transformation matrix: clip = projectionM * viewM * modelM * local
+	// 1. local * modelM            -> world
+	// 2. world * viewM             -> space (lookAt())
+	// 3. space * projectionM       -> clip
+	// 4. clip  * viewportTransform -> screen
 	glm::mat4 modelMatrix = m_transform->getInterpolatedModelMatrix(alpha);
 	glm::mat3 normalMatrix = m_transform->getNormalMatrix(modelMatrix);
 	m_transform->setDirty(false);
