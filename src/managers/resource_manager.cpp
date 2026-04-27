@@ -18,7 +18,8 @@ ResourceManager& ResourceManager::getInstance() {
 
 ResourceManager::ResourceManager() = default;
 
-void ResourceManager::addModel(const std::string& name, std::shared_ptr<Model> model) {
+void ResourceManager::addModel(std::shared_ptr<Model> model) {
+	const std::string& name = model->getName();
 	if (m_models.find(name) != m_models.end()) {
 		LOG("Already added Model: " << name);
 		return;
@@ -34,7 +35,7 @@ void ResourceManager::loadModel(const std::string& name, const std::string& path
 		return;
 	}
 
-	m_models[name] = std::make_shared<Model>(path);
+	m_models[name] = std::make_shared<Model>(name, path);
 	LOG("Loading Model: " << name << " from path: " << path);
 }
 
@@ -45,7 +46,7 @@ void ResourceManager::loadMaterial(const std::string& name, const char* vertPath
 	}
 
 	auto shader = std::make_shared<Shader>(vertPath, fragPath);
-	m_materials[name] = std::make_shared<Material>(shader);
+	m_materials[name] = std::make_shared<Material>(name, shader);
 	LOG("Loading Material: " << name << " from path: " << vertPath << " and " << fragPath);
 }
 

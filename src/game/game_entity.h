@@ -15,7 +15,7 @@
 
 class GameEntity {
 public:
-	GameEntity(const std::string& name = "Entity");
+	GameEntity(const std::string& name);
 
 	template <typename T, typename... TArgs>
 	T& addComponent(TArgs&&... args) {
@@ -57,7 +57,7 @@ public:
 	void destroy() { m_pendingDeath = true; }
 
 private:
-	std::string m_name;
+	std::string m_name{};
 	std::vector<std::unique_ptr<Component>> m_components;
 
 	TransformComponent* m_transform = nullptr;

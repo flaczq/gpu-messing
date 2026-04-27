@@ -7,6 +7,7 @@
 #include "../graphics/model.h"
 #include "../graphics/shader.h"
 #include "renderer.h"
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -86,7 +87,6 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
 
 // execute drawing commands from queues
 void Renderer::flush() {
-    // TODO shader sorting
     glEnable(GL_DEPTH_TEST);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
     glStencilMask(0xFF);
@@ -95,57 +95,91 @@ void Renderer::flush() {
     //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
     //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
     //                               
-    for (auto& command : m_firstQueue) {
-        //glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0x00);
-        draw(command);
-    }
+    //glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0x00);
+    renderSortedQueue(m_firstQueue, "1st render pass");
+
     //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
     //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
     //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
     //                            
-    for (auto& command : m_stencilQueue) {
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-        draw(command);
-    }
+    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+    glStencilMask(0xFF);
+    renderSortedQueue(m_stencilQueue, "stencil pass");
+
     //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
     //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
     //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
     //                            
-    for (auto& command : m_outlineQueue) {
-        glDisable(GL_DEPTH_TEST);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        draw(command);
-        glEnable(GL_DEPTH_TEST);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glStencilMask(0xFF);
-    }
+    glDisable(GL_DEPTH_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilMask(0x00);
+    renderSortedQueue(m_outlineQueue, "outline pass");
+    glEnable(GL_DEPTH_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glStencilMask(0xFF);
 
     m_firstQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
 }
 
-void Renderer::draw(const RendererCommand& command) const {
-    // transformation matrix: clip = projectionM * viewM * modelM * local
-    // 1. local * modelM            -> world
-    // 2. world * viewM             -> space (lookAt())
-    // 3. space * projectionM       -> clip
-    // 4. clip  * viewportTransform -> screen
-    command.material->apply();
 
-    auto* shader = command.material->getShader();
-    shader->setMat4fv("projection", m_camera->getProjection());
-    shader->setMat4fv("view", m_camera->getViewMatrix());
-    shader->setVec3fv("viewPos", m_camera->getViewPos());
-    shader->setMat4fv("model", command.modelMatrix);
-    shader->setMat3fv("normalMatrix", command.normalMatrix);
-    shader->setVec3fv("lightDir", m_rendererLight.direction);
-    shader->setVec3fv("lightColor", m_rendererLight.color);
+void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const {
+    if (queue.empty()) {
+        LOG_D("Empty queue for: " << name << " - nothing to render");
+        return;
+    } else {
+        //LOG_D("--- " << name);
+    }
 
-    command.model->draw(*shader);
+    // sort by material address
+    std::sort(queue.begin(), queue.end(), [](const RendererCommand& cmd1, const RendererCommand& cmd2) {
+        return cmd1.material < cmd2.material;
+    });
+
+    // shader sorting
+    Material* lastMaterial = nullptr;
+    Shader* lastShader = nullptr;
+    for (auto& cmd : queue) {
+        Material* currMaterial = cmd.material;
+        if (currMaterial != lastMaterial) {
+            //const std::string& lastMN = (lastMaterial != nullptr) ? lastMaterial->getName() : "NULL";
+            //LOG_D("Switching material from: " << lastMN << " to: " << currMaterial->getName());
+            Shader* currShader = currMaterial->getShader();
+            if (currShader != lastShader) {
+                //unsigned int lastSI = (lastShader != nullptr) ? lastShader->getID() : 999;
+                //LOG_D("Switching shader from: " << lastSI << " to: " << currShader->getID());
+                currShader->use();
+
+                // draws per-shader (rarely)
+                currShader->setMat4fv("projection", m_camera->getProjection());
+                currShader->setMat4fv("view", m_camera->getViewMatrix());
+                currShader->setVec3fv("viewPos", m_camera->getViewPos());
+                currShader->setVec3fv("lightDir", m_rendererLight.direction);
+                currShader->setVec3fv("lightColor", m_rendererLight.color);
+                //LOG_D("per-shader draws with shader: " << currShader->getID());
+
+                lastShader = currShader;
+            }
+
+            // draws per-material (sometimes)
+            currMaterial->apply();
+            //LOG_D("per-material draws with shader: " << currShader->getID());
+
+            lastMaterial = currMaterial;
+        }
+
+        assert(lastMaterial != nullptr);
+        assert(lastShader != nullptr);
+
+        // draws per-object (always)
+        lastShader->setMat4fv("model", cmd.modelMatrix);
+        lastShader->setMat3fv("normalMatrix", cmd.normalMatrix);
+        //LOG_D("per-object draws with shader: " << lastShader->getID());
+
+        cmd.model->draw(*lastShader);
+    }
 }
 
 void Renderer::endFrame() {

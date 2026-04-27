@@ -16,7 +16,7 @@ public:
 	Mesh(const Mesh&) = delete;
 	// block copy assignment operator
 	Mesh& operator=(const Mesh&) = delete;
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures);
+	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures);
 	~Mesh();
 
 	void draw(Shader &shader);

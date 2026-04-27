@@ -65,5 +65,5 @@ private:
 	std::vector<RendererCommand> m_stencilQueue;
 	std::vector<RendererCommand> m_outlineQueue;
 
-	void draw(const RendererCommand& command) const;
+	void renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const;
 };

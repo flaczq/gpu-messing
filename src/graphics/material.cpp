@@ -5,8 +5,9 @@
 #include <map>
 #include <memory>
 
-Material::Material(std::shared_ptr<Shader> shader)
-	: m_shader(std::move(shader))
+Material::Material(const std::string& name, std::shared_ptr<Shader> shader)
+	: m_name(name),
+	  m_shader(std::move(shader))
 {
 }
 
@@ -15,8 +16,8 @@ void Material::addVec3Uniform(const std::string& name, glm::vec3 vec3Uniform) {
 }
 
 void Material::apply() {
-	m_shader->use();
 	for (auto const& [name, val] : m_vec3Uniforms) {
 		m_shader->setVec3fv(name, val);
+		// TODO: other types
 	}
 }

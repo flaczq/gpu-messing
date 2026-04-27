@@ -31,18 +31,18 @@ void SoldierScene::init() {
     // --- floor
     auto floor = MeshGenerator::createPlane(16.0f, 15.0f);
     auto floorM = std::make_unique<Mesh>(std::move(floor));
-    auto floorMM = std::make_shared<Model>(std::move(floorM));
-    resourceManager.addModel("floor_model", std::move(floorMM));
+    auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
+    resourceManager.addModel(std::move(floorMM));
     // --- gizmo
     auto gizmo = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto gizmoM = std::make_unique<Mesh>(std::move(gizmo));
-    auto gizmoMM = std::make_shared<Model>(std::move(gizmoM));
-    resourceManager.addModel("gizmo_model", std::move(gizmoMM));
+    auto gizmoMM = std::make_shared<Model>("gizmo_model", std::move(gizmoM));
+    resourceManager.addModel(std::move(gizmoMM));
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto lightM = std::make_unique<Mesh>(std::move(light));
-    auto lightMM = std::make_shared<Model>(std::move(lightM));
-    resourceManager.addModel("light_model", std::move(lightMM));
+    auto lightMM = std::make_shared<Model>("light_model", std::move(lightM));
+    resourceManager.addModel(std::move(lightMM));
     // --- soldier
     resourceManager.loadModel("soldier_model", "../assets/models/Soldier.glb");
     // MATERIALS with SHADERS
@@ -149,9 +149,9 @@ void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
 
-        if (aliveGameEntity->getName().starts_with("soldier_15")) {
+        /*if (aliveGameEntity->getName().starts_with("soldier_15")) {
             aliveGameEntity->destroy();
-        }
+        }*/
     }
 }
 
@@ -181,9 +181,9 @@ void SoldierScene::update(float alpha) {
 
 void SoldierScene::lateUpdate() {
     for (int i = 0; i < m_aliveGameEntities.size(); /*i++*/) {
-        LOG_D("CHECKING " << m_aliveGameEntities[i]->getName());
+        //LOG_D("CHECKING " << m_aliveGameEntities[i]->getName());
         if (m_aliveGameEntities[i]->isPendingDeath()) {
-            LOG_D("DEAD " << m_aliveGameEntities[i]->getName());
+            //LOG_D("DEAD " << m_aliveGameEntities[i]->getName());
             GameEntity* gameEntity = m_aliveGameEntities[i];
             gameEntity->setPendingDeath(false);
             gameEntity->setAlive(false);
@@ -197,9 +197,9 @@ void SoldierScene::lateUpdate() {
             i++;
         }
     }
-    LOG_D("ALL " << m_gameEntities.size());
-    LOG_D("ALIVE " << m_aliveGameEntities.size());
-    LOG_D("DEAD " << m_deadGameEntities.size());
+    //LOG_D("ALL " << m_gameEntities.size());
+    //LOG_D("ALIVE " << m_aliveGameEntities.size());
+    //LOG_D("DEAD " << m_deadGameEntities.size());
 }
 
 void SoldierScene::end() {

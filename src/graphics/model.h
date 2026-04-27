@@ -15,15 +15,18 @@ class Mesh;
 
 class Model {
 public:
-	Model(const std::string& path);
-	Model(std::unique_ptr<Mesh> mesh);
+	Model(const std::string& name, const std::string& path);
+	Model(const std::string& name, std::unique_ptr<Mesh> mesh);
 	~Model();
+
+	const std::string& getName() const { return m_name; }
 
 	void draw(Shader& shader);
 
 private:
+	std::string m_name{};
+	std::string m_directory{};
 	std::vector<std::unique_ptr<Mesh>> m_meshes;
-	std::string m_directory;
 
 	void loadModel(const std::string& path);
 	void processNode(aiNode* node, const aiScene* scene);

@@ -13,11 +13,15 @@
 #include <utility>
 #include <vector>
 
-Model::Model(const std::string& path) {
+Model::Model(const std::string& name, const std::string& path)
+	: m_name(name)
+{
 	loadModel(path);
 }
 
-Model::Model(std::unique_ptr<Mesh> mesh) {
+Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh)
+	: m_name(name)
+{
 	m_meshes.push_back(std::move(mesh));
 }
 
@@ -119,7 +123,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 	}
 
-	return std::make_unique<Mesh>(std::move(vertices), std::move(indices), std::move(textures));
+	return std::make_unique<Mesh>(vertices, indices, textures);
 }
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene) const {
