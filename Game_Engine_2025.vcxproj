@@ -44,9 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
-    <None Include="assets\models\gizmo\Gizmo.fbx" />
-    <None Include="assets\models\gizmo\GizmoRaw.blend" />
-    <None Include="assets\models\gizmo\GizmoRaw.blend1" />
+    <None Include="assets\models\Gizmo.fbx" />
     <None Include="assets\models\Soldier.glb" />
     <None Include="ATTRIBUTIONS.md" />
     <None Include="Game_Engine_2025.aps" />
@@ -72,8 +70,6 @@
     <Image Include="assets\clearlyai.jpg" />
     <Image Include="assets\container2.png" />
     <Image Include="assets\container2_specular.png" />
-    <Image Include="assets\models\gizmo\GizmoColoredUV.png" />
-    <Image Include="assets\models\gizmo\GizmoUV.png" />
     <Image Include="assets\potato.jpg" />
     <Image Include="assets\wall.jpg" />
   </ItemGroup>

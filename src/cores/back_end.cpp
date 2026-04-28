@@ -198,6 +198,11 @@ void BackEnd::processGlobalInput() {
     //    ┻┛┗┛┻┛┗┛┗┛
     //              
     #ifdef _DEBUG
+    // HOTLOAD SHADERS
+    if (input.isKeyPressed(GLFW_KEY_L)) {
+        ResourceManager::getInstance().reloadShaders();
+    }
+
     // SCENES
     if (input.isKeyPressed(GLFW_KEY_P)) {
         SceneManager::getInstance().toggleScene();

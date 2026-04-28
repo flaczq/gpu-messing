@@ -24,85 +24,10 @@ Shader& Shader::operator=(Shader&& other) noexcept {
     return *this;
 }
 
-Shader::Shader(const GLchar* vertexPath, const GLchar* fragmentPath) {
-    //    ┏┓•┓ ┏┓  ┓ ┏┓┏┓┳┓•┳┓┏┓
-    //    ┣ ┓┃ ┣   ┃ ┃┃┣┫┃┃┓┃┃┃┓
-    //    ┻ ┗┗┛┗┛  ┗┛┗┛┛┗┻┛┗┛┗┗┛
-    //                          
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-
-	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-    try {
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-        vShaderFile.close();
-        fShaderFile.close();
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    } catch (std::ifstream::failure e) {
-        LOG_E("SHADER::READ_FAILED: " << vertexPath << " AND " << fragmentPath);
-    }
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
-
-    int success;
-    char infoLog[512];
-
-
-    //    ┓┏┏┓┳┓┏┳┓┏┓┏┓┏┓  ┏┓┓┏┏┓┳┓┏┓┳┓
-    //    ┃┃┣ ┣┫ ┃ ┣  ┃┃   ┗┓┣┫┣┫┃┃┣ ┣┫
-    //    ┗┛┗┛┛┗ ┻ ┗┛┗┛┗┛  ┗┛┛┗┛┗┻┛┗┛┛┗
-    //                                 
-    m_vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(m_vertex, 1, &vShaderCode, NULL);
-    glCompileShader(m_vertex);
-    glGetShaderiv(m_vertex, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(m_vertex, 512, NULL, infoLog);
-        LOG_E("SHADER::VERTEX::COMPILATION_FAILED: " << vertexPath);
-        LOG_E(infoLog);
-    };
-
-    //    ┏┓┳┓┏┓┏┓┳┳┓┏┓┳┓┏┳┓  ┏┓┓┏┏┓┳┓┏┓┳┓
-    //    ┣ ┣┫┣┫┃┓┃┃┃┣ ┃┃ ┃   ┗┓┣┫┣┫┃┃┣ ┣┫
-    //    ┻ ┛┗┛┗┗┛┛ ┗┗┛┛┗ ┻   ┗┛┛┗┛┗┻┛┗┛┛┗
-    //                                    
-    m_fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(m_fragment, 1, &fShaderCode, NULL);
-    glCompileShader(m_fragment);
-    glGetShaderiv(m_fragment, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(m_fragment, 512, NULL, infoLog);
-        LOG_E("SHADER::FRAGMENT::COMPILATION_FAILED" << fragmentPath);
-        LOG_E(infoLog);
-    };
-
-    //    ┓ •┳┓┓┏┓•┳┓┏┓
-    //    ┃ ┓┃┃┃┫ ┓┃┃┃┓
-    //    ┗┛┗┛┗┛┗┛┗┛┗┗┛
-    //                 
-    m_ID = glCreateProgram();
-    glAttachShader(m_ID, m_vertex);
-    glAttachShader(m_ID, m_fragment);
-    glLinkProgram(m_ID);
-    glGetProgramiv(m_ID, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(m_ID, 512, NULL, infoLog);
-        LOG_E("SHADER::LINKING_FAILED: " << vertexPath << " AND " << fragmentPath);
-        LOG_E(infoLog);
-    }
-
-    // not used after linking
-    glDeleteShader(m_fragment);
-    glDeleteShader(m_vertex);
+Shader::Shader(const GLchar* vertPath, const GLchar* fragPath) {
+    m_vertexPath = vertPath;
+    m_fragmentPath = fragPath;
+    compile();
 }
 
 Shader::~Shader() {
@@ -140,4 +65,89 @@ void Shader::setMat3fv(const std::string& name, const glm::mat3& value) const {
 
 void Shader::setMat4fv(const std::string& name, const glm::mat4& value) const {
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void Shader::reload() {
+    compile();
+}
+
+void Shader::compile() {
+    //    ┏┓•┓ ┏┓  ┓ ┏┓┏┓┳┓•┳┓┏┓
+    //    ┣ ┓┃ ┣   ┃ ┃┃┣┫┃┃┓┃┃┃┓
+    //    ┻ ┗┗┛┗┛  ┗┛┗┛┛┗┻┛┗┛┗┗┛
+    //                          
+    std::string vertexCode;
+    std::string fragmentCode;
+    std::ifstream vShaderFile;
+    std::ifstream fShaderFile;
+
+    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+    try {
+        vShaderFile.open(m_vertexPath);
+        fShaderFile.open(m_fragmentPath);
+        std::stringstream vShaderStream, fShaderStream;
+        vShaderStream << vShaderFile.rdbuf();
+        fShaderStream << fShaderFile.rdbuf();
+        vShaderFile.close();
+        fShaderFile.close();
+        vertexCode = vShaderStream.str();
+        fragmentCode = fShaderStream.str();
+    } catch (std::ifstream::failure e) {
+        LOG_E("SHADER::READ_FAILED: " << m_vertexPath << " AND " << m_fragmentPath);
+    }
+    const char* vShaderCode = vertexCode.c_str();
+    const char* fShaderCode = fragmentCode.c_str();
+
+    int success;
+    char infoLog[512];
+
+
+    //    ┓┏┏┓┳┓┏┳┓┏┓┏┓┏┓  ┏┓┓┏┏┓┳┓┏┓┳┓
+    //    ┃┃┣ ┣┫ ┃ ┣  ┃┃   ┗┓┣┫┣┫┃┃┣ ┣┫
+    //    ┗┛┗┛┛┗ ┻ ┗┛┗┛┗┛  ┗┛┛┗┛┗┻┛┗┛┛┗
+    //                                 
+    m_vertex = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(m_vertex, 1, &vShaderCode, NULL);
+    glCompileShader(m_vertex);
+    glGetShaderiv(m_vertex, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(m_vertex, 512, NULL, infoLog);
+        LOG_E("SHADER::VERTEX::COMPILATION_FAILED: " << m_vertexPath);
+        LOG_E(infoLog);
+    };
+
+    //    ┏┓┳┓┏┓┏┓┳┳┓┏┓┳┓┏┳┓  ┏┓┓┏┏┓┳┓┏┓┳┓
+    //    ┣ ┣┫┣┫┃┓┃┃┃┣ ┃┃ ┃   ┗┓┣┫┣┫┃┃┣ ┣┫
+    //    ┻ ┛┗┛┗┗┛┛ ┗┗┛┛┗ ┻   ┗┛┛┗┛┗┻┛┗┛┛┗
+    //                                    
+    m_fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(m_fragment, 1, &fShaderCode, NULL);
+    glCompileShader(m_fragment);
+    glGetShaderiv(m_fragment, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(m_fragment, 512, NULL, infoLog);
+        LOG_E("SHADER::FRAGMENT::COMPILATION_FAILED" << m_fragmentPath);
+        LOG_E(infoLog);
+    };
+
+    //    ┓ •┳┓┓┏┓•┳┓┏┓
+    //    ┃ ┓┃┃┃┫ ┓┃┃┃┓
+    //    ┗┛┗┛┗┛┗┛┗┛┗┗┛
+    //                 
+    m_ID = glCreateProgram();
+    glAttachShader(m_ID, m_vertex);
+    glAttachShader(m_ID, m_fragment);
+    glLinkProgram(m_ID);
+    glGetProgramiv(m_ID, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(m_ID, 512, NULL, infoLog);
+        LOG_E("SHADER::LINKING_FAILED: " << m_vertexPath << " AND " << m_fragmentPath);
+        LOG_E(infoLog);
+    }
+
+    // not used after linking
+    glDeleteShader(m_fragment);
+    glDeleteShader(m_vertex);
 }

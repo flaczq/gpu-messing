@@ -10,7 +10,7 @@ public:
 	Shader& operator=(Shader&& other) noexcept;
 	Shader(const Shader&) = delete;
 	Shader& operator=(const Shader&) = delete;
-	Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
+	Shader(const GLchar* vertPath, const GLchar* fragPath);
 	~Shader();
 
 	void use() const;
@@ -21,10 +21,14 @@ public:
 	void setVec4fv(const std::string& name, const glm::vec4& value) const;
 	void setMat3fv(const std::string& name, const glm::mat3& value) const;
 	void setMat4fv(const std::string& name, const glm::mat4& value) const;
+	void reload();
 
 	unsigned int getID() const { return m_ID; }
 
 private:
 	unsigned int m_ID{};
 	unsigned int m_vertex{}, m_fragment{};
+	std::string m_vertexPath{}, m_fragmentPath{};
+
+	void compile();
 };

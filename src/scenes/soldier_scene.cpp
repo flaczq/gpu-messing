@@ -27,35 +27,34 @@ SoldierScene::SoldierScene(Camera* camera)
 }
 
 void SoldierScene::init() {
-    auto& resourceManager = ResourceManager::getInstance();
     // MODELS
     // --- floor
     auto floor = MeshGenerator::createPlane(16.0f, 15.0f);
     auto floorM = std::make_unique<Mesh>(std::move(floor));
     auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
-    resourceManager.addModel(std::move(floorMM));
+    ResourceManager::getInstance().addModel(std::move(floorMM));
     // --- gizmo
     /*auto gizmo = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto gizmoM = std::make_unique<Mesh>(std::move(gizmo));
     auto gizmoMM = std::make_shared<Model>("gizmo_model", std::move(gizmoM));
-    resourceManager.addModel(std::move(gizmoMM));*/
-    resourceManager.loadModel("gizmo_model", "../assets/models/gizmo/Gizmo.fbx");
+    ResourceManager::getInstance().addModel(std::move(gizmoMM));*/
+    ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto lightM = std::make_unique<Mesh>(std::move(light));
     auto lightMM = std::make_shared<Model>("light_model", std::move(lightM));
-    resourceManager.addModel(std::move(lightMM));
+    ResourceManager::getInstance().addModel(std::move(lightMM));
     // --- soldier
-    resourceManager.loadModel("soldier_model", "../assets/models/Soldier.glb");
+    ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     // MATERIALS with SHADERS
-    resourceManager.loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
-    resourceManager.loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
-    resourceManager.loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
-    resourceManager.loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
+    ResourceManager::getInstance().loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
+    ResourceManager::getInstance().loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
+    ResourceManager::getInstance().loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
 
     // FLOOR
-    auto floorModel = resourceManager.getModel("floor_model");
-    auto floorMaterial = resourceManager.getMaterial("floor_material");
+    auto floorModel = ResourceManager::getInstance().getModel("floor_model");
+    auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
         //floorMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
@@ -69,8 +68,8 @@ void SoldierScene::init() {
     }
 
     // GIZMO
-    auto gizmoModel = resourceManager.getModel("gizmo_model");
-    auto gizmoMaterial = resourceManager.getMaterial("gizmo_material");
+    auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
+    auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
     if (gizmoModel && gizmoMaterial) {
         auto gizmoGO = std::make_unique<GameEntity>("gizmo");
         //gizmoGO->setRendererQueueType(RendererQueueType::STENCIL);
@@ -82,8 +81,8 @@ void SoldierScene::init() {
     }
 
     // LIGHT
-    auto lightModel = resourceManager.getModel("light_model");
-    auto lightMaterial = resourceManager.getMaterial("light_material");
+    auto lightModel = ResourceManager::getInstance().getModel("light_model");
+    auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
     if (lightModel && lightMaterial) {
         auto lightGO = std::make_unique<GameEntity>("light");
         lightGO->setAbstract(true);
@@ -95,12 +94,11 @@ void SoldierScene::init() {
     }
 
     // SOLDIER
-    auto soldierModel = resourceManager.getModel("soldier_model");
-    auto soldierMaterial = resourceManager.getMaterial("soldier_material");
+    auto soldierModel = ResourceManager::getInstance().getModel("soldier_model");
+    auto soldierMaterial = ResourceManager::getInstance().getMaterial("soldier_material");
     if (soldierModel && soldierMaterial) {
         // MATERIAL UNIFORMS
         //soldierMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
-
         float spacing = 1.5f;
         for (size_t i{}; i < 49; i++) {
             size_t row = i / 7;

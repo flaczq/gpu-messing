@@ -101,9 +101,7 @@
     <None Include="shaders\lambert.vert" />
     <None Include="shaders\gizmo.vert" />
     <None Include="shaders\gizmo.frag" />
-    <None Include="assets\models\gizmo\Gizmo.fbx" />
-    <None Include="assets\models\gizmo\GizmoRaw.blend" />
-    <None Include="assets\models\gizmo\GizmoRaw.blend1" />
+    <None Include="assets\models\Gizmo.fbx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
@@ -122,12 +120,6 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="assets\container2_specular.png">
-      <Filter>Pliki zasobów</Filter>
-    </Image>
-    <Image Include="assets\models\gizmo\GizmoColoredUV.png">
-      <Filter>Pliki zasobów</Filter>
-    </Image>
-    <Image Include="assets\models\gizmo\GizmoUV.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="army.png">
