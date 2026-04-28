@@ -93,8 +93,6 @@
     <None Include="shaders\light.vert" />
     <None Include="shaders\object.frag" />
     <None Include="shaders\object.vert" />
-    <None Include="shaders\grid.frag" />
-    <None Include="shaders\grid.vert" />
     <None Include="ATTRIBUTIONS.md" />
     <None Include="assets\models\Soldier.glb" />
     <None Include="shaders\model.frag" />
@@ -103,6 +101,9 @@
     <None Include="shaders\lambert.vert" />
     <None Include="shaders\gizmo.vert" />
     <None Include="shaders\gizmo.frag" />
+    <None Include="assets\models\gizmo\Gizmo.fbx" />
+    <None Include="assets\models\gizmo\GizmoRaw.blend" />
+    <None Include="assets\models\gizmo\GizmoRaw.blend1" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
@@ -121,6 +122,18 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="assets\container2_specular.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\models\gizmo\GizmoColoredUV.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\models\gizmo\GizmoUV.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="army.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="army2.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>

@@ -65,10 +65,13 @@ void Renderer::beginFrame() {
     // Z-depth test
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+
     // Stencil test
-    glEnable(GL_STENCIL_TEST);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    if (m_stencilReqd) {
+        glEnable(GL_STENCIL_TEST);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    }
 }
 
 void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
@@ -87,37 +90,43 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
 
 // execute drawing commands from queues
 void Renderer::flush() {
-    glEnable(GL_DEPTH_TEST);
-    glStencilFunc(GL_ALWAYS, 0, 0xFF);
-    glStencilMask(0xFF);
+    if (m_stencilReqd) {
+        glEnable(GL_DEPTH_TEST);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glStencilMask(0xFF);
+    }
 
     //    ┓    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┏┓┏┓┏┓
     //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
     //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
     //                               
-    //glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0x00);
+    if (m_stencilReqd) {
+        //glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0x00);
+    }
     renderSortedQueue(m_firstQueue, "1st render pass");
 
-    //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
-    //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
-    //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
-    //                            
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0xFF);
-    renderSortedQueue(m_stencilQueue, "stencil pass");
+    if (m_stencilReqd) {
+        //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
+        //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
+        //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
+        //                            
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+        renderSortedQueue(m_stencilQueue, "stencil pass");
 
-    //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
-    //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
-    //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
-    //                            
-    glDisable(GL_DEPTH_TEST);
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilMask(0x00);
-    renderSortedQueue(m_outlineQueue, "outline pass");
-    glEnable(GL_DEPTH_TEST);
-    glStencilFunc(GL_ALWAYS, 0, 0xFF);
-    glStencilMask(0xFF);
+        //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
+        //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
+        //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
+        //                            
+        glDisable(GL_DEPTH_TEST);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        renderSortedQueue(m_outlineQueue, "outline pass");
+        glEnable(GL_DEPTH_TEST);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glStencilMask(0xFF);
+    }
 
     m_firstQueue.clear();
     m_stencilQueue.clear();
@@ -127,7 +136,7 @@ void Renderer::flush() {
 
 void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const {
     if (queue.empty()) {
-        LOG_D("Empty queue for: " << name << " - nothing to render");
+        //LOG_D("Empty queue for: " << name << " - nothing to render");
         return;
     } else {
         //LOG_D("--- " << name);

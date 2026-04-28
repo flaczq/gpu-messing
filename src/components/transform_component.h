@@ -21,8 +21,8 @@ private:
 	glm::mat4 m_model{};
 	glm::mat3 m_normal{};
 	glm::vec3 m_position{}, m_prevPosition{};
-	glm::vec3 m_scale{}, m_prevScale{};
 	glm::quat m_rotation{}, m_prevRotation{};
+	glm::vec3 m_scale{}, m_prevScale{};
 	
 	bool m_dirty = true;
 };

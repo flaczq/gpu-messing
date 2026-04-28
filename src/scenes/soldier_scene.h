@@ -27,11 +27,13 @@ public:
 
 private:
 	static constexpr glm::vec3 FLOOR_POSITION = glm::vec3(10.0f, 0.0f, 10.0f);
+	static constexpr float GIZMO_ROTATION = glm::radians(-90.0f);
+	static constexpr glm::vec3 GIZMO_SCALE = glm::vec3(5.0f);
+	static constexpr glm::vec3 LIGHT_POSITION = glm::vec3(3.0f, 0.0f, 3.0f);
+	static constexpr glm::vec3 LIGHT_SCALE = glm::vec3(0.2f);
 	static constexpr glm::vec3 SOLDIER_POSITION = glm::vec3(3.0f, 0.01f, 3.0f);
 	static constexpr float SOLDIER_ROTATION = glm::radians(-90.0f);
 	static constexpr glm::vec3 SOLDIER_SCALE = glm::vec3(100.0f);
-	static constexpr glm::vec3 LIGHT_POSITION = glm::vec3(3.0f, 0.0f, 3.0f);
-	static constexpr glm::vec3 LIGHT_SCALE = glm::vec3(0.2f);
 
 	Camera* m_camera = nullptr;
 };

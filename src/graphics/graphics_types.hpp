@@ -9,6 +9,7 @@ constexpr auto MAX_BONE_INFLUENCE = 4;
 
 struct Vertex {
 	glm::vec3 Position;
+	glm::vec3 Color;
 	glm::vec3 Normal;
 	glm::vec2 TexCoords;
 	glm::vec3 Tangent;

@@ -1,4 +1,5 @@
 #include "../configs/gl_config.hpp"
+#include "../configs/log_config.hpp"
 #include "../managers/resource_manager.h"
 #include "graphics_types.hpp"
 #include "mesh.h"
@@ -71,25 +72,26 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		Vertex vertex{};
 
 		// Position
-		glm::vec3 vector{};
-		vector.x = mesh->mVertices[i].x;
-		vector.y = mesh->mVertices[i].y;
-		vector.z = mesh->mVertices[i].z;
-		vertex.Position = vector;
+		vertex.Position.x = mesh->mVertices[i].x;
+		vertex.Position.y = mesh->mVertices[i].y;
+		vertex.Position.z = mesh->mVertices[i].z;
+
+		// Color (if exist)
+		if (mesh->HasVertexColors(0)) {
+			vertex.Color.x = mesh->mColors[0][i].r;
+			vertex.Color.y = mesh->mColors[0][i].g;
+			vertex.Color.z = mesh->mColors[0][i].b;
+		}
 
 		// Normal
-		vector.x = mesh->mNormals[i].x;
-		vector.y = mesh->mNormals[i].y;
-		vector.z = mesh->mNormals[i].z;
-		vertex.Normal = vector;
+		vertex.Normal.x = mesh->mNormals[i].x;
+		vertex.Normal.y = mesh->mNormals[i].y;
+		vertex.Normal.z = mesh->mNormals[i].z;
 
 		// TexCoords (if exist)
-		if (mesh->mTextureCoords[0] && mesh->GetNumUVChannels() > 0) {
-			auto& texCoords = mesh->mTextureCoords[0];
-			glm::vec2 vec{};
-			vec.x = texCoords[i].x;
-			vec.y = texCoords[i].y;
-			vertex.TexCoords = vec;
+		if (mesh->HasTextureCoords(0) && mesh->GetNumUVChannels() > 0) {
+			vertex.TexCoords.x = mesh->mTextureCoords[0][i].x;
+			vertex.TexCoords.y = mesh->mTextureCoords[0][i].y;
 		}
 
 		// Tangent TODO

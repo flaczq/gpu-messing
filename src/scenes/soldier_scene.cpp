@@ -15,6 +15,7 @@
 #include "../managers/resource_manager.h"
 #include "scene.h"
 #include "soldier_scene.h"
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <utility>
@@ -34,10 +35,11 @@ void SoldierScene::init() {
     auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
     resourceManager.addModel(std::move(floorMM));
     // --- gizmo
-    auto gizmo = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
+    /*auto gizmo = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto gizmoM = std::make_unique<Mesh>(std::move(gizmo));
     auto gizmoMM = std::make_shared<Model>("gizmo_model", std::move(gizmoM));
-    resourceManager.addModel(std::move(gizmoMM));
+    resourceManager.addModel(std::move(gizmoMM));*/
+    resourceManager.loadModel("gizmo_model", "../assets/models/gizmo/Gizmo.fbx");
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto lightM = std::make_unique<Mesh>(std::move(light));
@@ -68,24 +70,12 @@ void SoldierScene::init() {
 
     // GIZMO
     auto gizmoModel = resourceManager.getModel("gizmo_model");
-    auto gizmoMaterial = resourceManager.getMaterial("soldier_material");
+    auto gizmoMaterial = resourceManager.getMaterial("gizmo_material");
     if (gizmoModel && gizmoMaterial) {
-        //gizmoMaterial->setStencilRequired(true);
         auto gizmoGO = std::make_unique<GameEntity>("gizmo");
-        gizmoGO->setRendererQueueType(RendererQueueType::STENCIL);
+        //gizmoGO->setRendererQueueType(RendererQueueType::STENCIL);
         gizmoGO->setSolid(true);
-        gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f));
-        gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
-        gizmoGO->init();
-        m_gameEntities.push_back(std::move(gizmoGO));
-    }
-    gizmoModel = resourceManager.getModel("gizmo_model");
-    gizmoMaterial = resourceManager.getMaterial("gizmo_material");
-    if (gizmoModel && gizmoMaterial) {
-        auto gizmoGO = std::make_unique<GameEntity>("outline");
-        gizmoGO->setRendererQueueType(RendererQueueType::OUTLINE);
-        gizmoGO->setSolid(true);
-        gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), glm::vec3(1.1f));
+        gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), GIZMO_SCALE);
         gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
         gizmoGO->init();
         m_gameEntities.push_back(std::move(gizmoGO));
@@ -129,13 +119,25 @@ void SoldierScene::init() {
     m_aliveGameEntities.reserve(100);
     m_deadGameEntities.reserve(100);
 
+    bool isStencilReqd = false;
+    bool isOutlineReqd = false;
     for (auto& gameEntity : m_gameEntities) {
         if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
             m_aliveGameEntities.push_back(gameEntity.get());
+
+            if (gameEntity->getRendererQueueType() == RendererQueueType::STENCIL) {
+                isStencilReqd = true;
+            }
+            if (gameEntity->getRendererQueueType() == RendererQueueType::OUTLINE) {
+                isOutlineReqd = true;
+            }
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
         }
     }
+
+    // first frame Renderer params
+    Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
 }
 
 void SoldierScene::saveState() {
@@ -156,6 +158,8 @@ void SoldierScene::fixedUpdate(float fixedt) {
 }
 
 void SoldierScene::update(float alpha) {
+    bool isStencilReqd = false;
+    bool isOutlineReqd = false;
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->update(alpha);
 
@@ -174,7 +178,17 @@ void SoldierScene::update(float alpha) {
             normalMatrix
         };
         Renderer::getInstance().registerInQueue(queueType, command);
+
+        if (queueType == RendererQueueType::STENCIL) {
+            isStencilReqd = true;
+        }
+        if (queueType == RendererQueueType::OUTLINE) {
+            isOutlineReqd = true;
+        }
     }
+
+    // next frame Renderer params
+    Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
 
     Renderer::getInstance().flush();
 }

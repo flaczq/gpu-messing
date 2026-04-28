@@ -44,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
+    <None Include="assets\models\gizmo\Gizmo.fbx" />
+    <None Include="assets\models\gizmo\GizmoRaw.blend" />
+    <None Include="assets\models\gizmo\GizmoRaw.blend1" />
     <None Include="assets\models\Soldier.glb" />
     <None Include="ATTRIBUTIONS.md" />
     <None Include="Game_Engine_2025.aps" />
@@ -51,8 +54,6 @@
     <None Include="README.md" />
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
-    <None Include="shaders\grid.frag" />
-    <None Include="shaders\grid.vert" />
     <None Include="shaders\lambert.frag" />
     <None Include="shaders\lambert.vert" />
     <None Include="shaders\light.frag" />
@@ -65,10 +66,14 @@
     <None Include="vcpkg.json" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="army.png" />
+    <Image Include="army2.png" />
     <Image Include="assets\abc.jpg" />
     <Image Include="assets\clearlyai.jpg" />
     <Image Include="assets\container2.png" />
     <Image Include="assets\container2_specular.png" />
+    <Image Include="assets\models\gizmo\GizmoColoredUV.png" />
+    <Image Include="assets\models\gizmo\GizmoUV.png" />
     <Image Include="assets\potato.jpg" />
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
