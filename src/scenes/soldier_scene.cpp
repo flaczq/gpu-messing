@@ -34,10 +34,6 @@ void SoldierScene::init() {
     auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
     ResourceManager::getInstance().addModel(std::move(floorMM));
     // --- gizmo
-    /*auto gizmo = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
-    auto gizmoM = std::make_unique<Mesh>(std::move(gizmo));
-    auto gizmoMM = std::make_shared<Model>("gizmo_model", std::move(gizmoM));
-    ResourceManager::getInstance().addModel(std::move(gizmoMM));*/
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
@@ -46,11 +42,20 @@ void SoldierScene::init() {
     ResourceManager::getInstance().addModel(std::move(lightMM));
     // --- soldier
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
+    // --- blending window
+    ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
+    auto windowTexture = ResourceManager::getInstance().getTexture("window_texture");
+    auto window = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f, windowTexture);
+    auto windowM = std::make_unique<Mesh>(std::move(window));
+    auto windowMM = std::make_shared<Model>("window_model", std::move(windowM));
+    ResourceManager::getInstance().addModel(std::move(windowMM));
+
     // MATERIALS with SHADERS
     ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
     ResourceManager::getInstance().loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
     ResourceManager::getInstance().loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::getInstance().loadMaterial("window_material", "../shaders/window.vert", "../shaders/window.frag");
 
     // FLOOR
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
@@ -111,6 +116,18 @@ void SoldierScene::init() {
             soldierGO->init();
             m_gameEntities.push_back(std::move(soldierGO));
         }
+    }
+
+    // WINDOW
+    auto windowModel = ResourceManager::getInstance().getModel("window_model");
+    auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
+    if (windowModel && windowMaterial) {
+        auto windowGO = std::make_unique<GameEntity>("window");
+        windowGO->setSolid(true);
+        windowGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 3.0f));
+        windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
+        windowGO->init();
+        m_gameEntities.push_back(std::move(windowGO));
     }
 
     // FIXME hardcoded max: 100

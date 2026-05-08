@@ -2,6 +2,7 @@
 
 #include "../graphics/graphics_types.hpp"
 #include "../graphics/material.h"
+#include "../graphics/mesh.h"
 #include "../graphics/model.h"
 #include <assimp/scene.h>
 #include <memory>
@@ -20,10 +21,11 @@ public:
 	void loadModel(const std::string& name, const std::string& path);
 	void loadMaterial(const std::string& name, const char* vertPath, const char* fragPath);
 	// manually load texture from file
-	void loadTexture(const std::string& name, const char* path, const std::string& typeName);
+	void loadTexture(const std::string& name, const char* path, const std::string& typeName = "diffuse");
 
 	std::shared_ptr<Model> getModel(const std::string& name);
 	std::shared_ptr<Material> getMaterial(const std::string& name);
+	std::shared_ptr<Texture> getTexture(const std::string& name);
 	// used by Assimp to load textures from Model
 	std::shared_ptr<Texture> getTexture(const std::string& path, const std::string& type, const aiScene* scene);
 

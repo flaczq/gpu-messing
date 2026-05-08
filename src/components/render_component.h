@@ -8,12 +8,6 @@
 
 class TransformComponent;
 
-struct RenderContext {
-	glm::mat4 projection;
-	glm::mat4 view;
-	glm::vec3 viewPos;
-};
-
 class RenderComponent : public Component {
 public:
 	RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Material> material);

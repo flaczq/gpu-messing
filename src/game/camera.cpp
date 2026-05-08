@@ -38,40 +38,38 @@ void Camera::updateAspect(int width, int height) {
 
 // continuous key clicks -> movement
 void Camera::update(double dt) {
-    auto& input = InputManager::getInstance();
-
-    processMouseScroll(input.getScrollOffset());
-    processMouseMovement(input.getOffsetX(), input.getOffsetY());
+    processMouseScroll(InputManager::getInstance().getScrollOffset());
+    processMouseMovement(InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
 
     // CROUCHING/STANDING
-    if (input.isKeyPressed(GLFW_KEY_C)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
         toggleCameraMode();
     }
 
     // GOD MODE
-    if (input.isKeyPressed(GLFW_KEY_G)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
         toggleGodMode();
     }
 
     std::fill(std::begin(m_currDirections), std::end(m_currDirections), false);
 
     // MOVEMENT
-    if (input.isKeyDown(GLFW_KEY_W)) {
+    if (InputManager::getInstance().isKeyDown(GLFW_KEY_W)) {
         m_currDirections[static_cast<int>(CameraDirection::FORWARD)] = true;
     }
-    if (input.isKeyDown(GLFW_KEY_S)) {
+    if (InputManager::getInstance().isKeyDown(GLFW_KEY_S)) {
         m_currDirections[static_cast<int>(CameraDirection::BACKWARD)] = true;
     }
-    if (input.isKeyDown(GLFW_KEY_A)) {
+    if (InputManager::getInstance().isKeyDown(GLFW_KEY_A)) {
         m_currDirections[static_cast<int>(CameraDirection::LEFT)] = true;
     }
-    if (input.isKeyDown(GLFW_KEY_D)) {
+    if (InputManager::getInstance().isKeyDown(GLFW_KEY_D)) {
         m_currDirections[static_cast<int>(CameraDirection::RIGHT)] = true;
     }
-    if (input.isKeyDown(GLFW_KEY_E)) {
+    if (InputManager::getInstance().isKeyDown(GLFW_KEY_E)) {
         m_currDirections[static_cast<int>(CameraDirection::UP)] = true;
     }
-    if (input.isKeyDown(GLFW_KEY_Q)) {
+    if (InputManager::getInstance().isKeyDown(GLFW_KEY_Q)) {
         m_currDirections[static_cast<int>(CameraDirection::DOWN)] = true;
     }
 

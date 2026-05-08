@@ -50,8 +50,8 @@
     <None Include="Game_Engine_2025.aps" />
     <None Include="LICENSE" />
     <None Include="README.md" />
-    <None Include="shaders\gizmo.frag" />
-    <None Include="shaders\gizmo.vert" />
+    <None Include="shaders\window.frag" />
+    <None Include="shaders\window.vert" />
     <None Include="shaders\lambert.frag" />
     <None Include="shaders\lambert.vert" />
     <None Include="shaders\light.frag" />
@@ -67,6 +67,7 @@
     <Image Include="army.png" />
     <Image Include="army2.png" />
     <Image Include="assets\abc.jpg" />
+    <Image Include="assets\blending_transparent_window.png" />
     <Image Include="assets\clearlyai.jpg" />
     <Image Include="assets\container2.png" />
     <Image Include="assets\container2_specular.png" />

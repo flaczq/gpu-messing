@@ -99,8 +99,8 @@
     <None Include="shaders\model.vert" />
     <None Include="shaders\lambert.frag" />
     <None Include="shaders\lambert.vert" />
-    <None Include="shaders\gizmo.vert" />
-    <None Include="shaders\gizmo.frag" />
+    <None Include="shaders\window.vert" />
+    <None Include="shaders\window.frag" />
     <None Include="assets\models\Gizmo.fbx" />
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +126,9 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="army2.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\blending_transparent_window.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>

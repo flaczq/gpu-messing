@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace MeshGenerator {
-	Mesh createPlane(float width, float depth, float uvTiling) {
+	Mesh createPlane(float width, float depth, std::shared_ptr<Texture> texture, float uvTiling) {
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
@@ -39,13 +39,16 @@ namespace MeshGenerator {
 
 		vertices = { v0, v1, v2, v3 };
 		indices = { 0, 1, 2, 2, 3, 0 };
-		// empty
 		textures = {};
+		// FIXME: more than one texture
+		if (texture) {
+			textures.push_back(texture);
+		}
 
 		return Mesh(vertices, indices, textures);
 	}
 
-	Mesh createCuboid(float width, float height, float depth, float uvTiling) {
+	Mesh createCuboid(float width, float height, float depth, std::shared_ptr<Texture> texture, float uvTiling) {
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
@@ -114,8 +117,11 @@ namespace MeshGenerator {
 			16, 17, 18, 18, 19, 16,
 			20, 21, 22, 22, 23, 20
 		};
-		// empty
 		textures = {};
+		// FIXME: more than one texture
+		if (texture) {
+			textures.push_back(texture);
+		}
 
 		return Mesh(vertices, indices, textures);
 	}

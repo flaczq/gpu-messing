@@ -16,7 +16,7 @@ void Material::addVec3Uniform(const std::string& name, glm::vec3 vec3Uniform) {
 }
 
 void Material::apply() {
-	for (auto const& [name, val] : m_vec3Uniforms) {
+	for (const auto& [name, val] : m_vec3Uniforms) {
 		m_shader->setVec3fv(name, val);
 		// TODO: other types
 	}

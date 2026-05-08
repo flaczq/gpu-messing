@@ -86,6 +86,16 @@ std::shared_ptr<Material> ResourceManager::getMaterial(const std::string& name) 
 	return it->second;
 }
 
+std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& name) {
+	auto it = m_textures.find(name);
+	if (it == m_textures.end()) {
+		LOG_E("RESOURCE_MANAGER::GET_TEXTURE_NULLPTR: " << name);
+		return nullptr;
+	}
+
+	return it->second;
+}
+
 std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {
 	// filename for Assimp
 	size_t lastSlash = path.find_last_of('/');
@@ -121,7 +131,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, co
 }
 
 void ResourceManager::reloadShaders() {
-	for (auto const& [name, material] : m_materials) {
+	for (const auto& [name, material] : m_materials) {
 		material->getShader()->reload();
 	}
 	LOG_D("Hot-loaded shaders...");
