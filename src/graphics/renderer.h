@@ -14,9 +14,10 @@ enum class RendererRenderMode {
 	POINTCLOUD = GL_POINT
 };
 enum class RendererQueueType {
-	FIRST,
+	OPAQUE,
 	STENCIL,
-	OUTLINE
+	OUTLINE,
+	BLENDING
 };
 
 struct RendererLight {
@@ -31,6 +32,7 @@ struct RendererCommand {
 	//glm::vec3 viewPos;
 	glm::mat4 modelMatrix;
 	glm::mat3 normalMatrix;
+	glm::vec3 position;
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -50,6 +52,7 @@ public:
 	void endFrame();
 
 	void setStencilReqd(bool stencilReqd) { m_stencilReqd = stencilReqd; }
+	void setBlendingReqd(bool blendingReqd) { m_blendingReqd = blendingReqd; }
 	RendererLight* getRendererLight() { return &m_rendererLight; }
 	void setLightDir(glm::vec3 lightDir) { m_rendererLight.direction = lightDir; }
 
@@ -62,10 +65,14 @@ private:
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
 	RendererLight m_rendererLight{};
 	bool m_stencilReqd = false;
+	bool m_blendingReqd = false;
 
-	std::vector<RendererCommand> m_firstQueue;
+	std::vector<RendererCommand> m_opaqueQueue;
 	std::vector<RendererCommand> m_stencilQueue;
 	std::vector<RendererCommand> m_outlineQueue;
+	std::vector<RendererCommand> m_blendingQueue;
 
+	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
+	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;
 	void renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const;
 };

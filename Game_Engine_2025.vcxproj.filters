@@ -102,6 +102,8 @@
     <None Include="shaders\window.vert" />
     <None Include="shaders\window.frag" />
     <None Include="assets\models\Gizmo.fbx" />
+    <None Include="shaders\gizmo.frag" />
+    <None Include="shaders\gizmo.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
@@ -129,6 +131,9 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="assets\blending_transparent_window.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\grass.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>

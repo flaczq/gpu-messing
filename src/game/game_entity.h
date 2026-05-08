@@ -62,7 +62,7 @@ private:
 
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
-	RendererQueueType m_rendererQueueType = RendererQueueType::FIRST;
+	RendererQueueType m_rendererQueueType = RendererQueueType::OPAQUE;
 	// no gravity
 	bool m_solid = false;
 	// "invisible" e.g. light, trigger, ...

@@ -9,6 +9,7 @@
 #include "renderer.h"
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -28,9 +29,10 @@ bool Renderer::init(GLFWwindow* window, Camera* camera) {
     };
 
     // FIXME hardcoded max: 100
-    m_firstQueue.reserve(100);
+    m_opaqueQueue.reserve(100);
     m_stencilQueue.reserve(100);
     m_outlineQueue.reserve(100);
+    m_blendingQueue.reserve(100);
 
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
@@ -72,13 +74,25 @@ void Renderer::beginFrame() {
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    } else {
+        glDisable(GL_STENCIL_TEST);
+    }
+
+    // Blending
+    if (m_blendingReqd) {
+        glEnable(GL_BLEND);
+        // src: factor == source color vector, dst: factor == 1 - source color vector
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    } else {
+        glDisable(GL_BLEND);
     }
 }
 
 void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
     switch (queueType) {
-    case RendererQueueType::FIRST:
-        m_firstQueue.push_back(command);
+    case RendererQueueType::OPAQUE:
+        m_opaqueQueue.push_back(command);
         break;
     case RendererQueueType::STENCIL:
         m_stencilQueue.push_back(command);
@@ -86,26 +100,31 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
     case RendererQueueType::OUTLINE:
         m_outlineQueue.push_back(command);
         break;
+    case RendererQueueType::BLENDING:
+        m_blendingQueue.push_back(command);
+        break;
     }
 }
 
 // execute drawing commands from queues
 void Renderer::flush() {
+    // ORDER: opaque -> transparent back-to-front
     if (m_stencilReqd) {
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
         glStencilMask(0xFF);
     }
 
-    //    ┓    ┳┓┏┓┳┓┳┓┏┓┳┓  ┏┓┏┓┏┓┏┓
-    //    ┃┏╋  ┣┫┣ ┃┃┃┃┣ ┣┫  ┃┃┣┫┗┓┗┓
-    //    ┻┛┗  ┛┗┗┛┛┗┻┛┗┛┛┗  ┣┛┛┗┗┛┗┛
-    //                               
+    //    ┏┓┏┓┏┓┏┓┳┳┏┓  ┏┓┏┓┏┓┏┓
+    //    ┃┃┃┃┣┫┃┃┃┃┣   ┃┃┣┫┗┓┗┓
+    //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
+    //                          
     if (m_stencilReqd) {
         //glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0x00);
     }
-    renderSortedQueue(m_firstQueue, "1st render pass");
+    sortQueueByMaterial(m_opaqueQueue);
+    renderSortedQueue(m_opaqueQueue, "opaque pass");
 
     if (m_stencilReqd) {
         //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
@@ -114,6 +133,7 @@ void Renderer::flush() {
         //                            
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
+        sortQueueByMaterial(m_stencilQueue);
         renderSortedQueue(m_stencilQueue, "stencil pass");
 
         //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
@@ -123,17 +143,56 @@ void Renderer::flush() {
         glDisable(GL_DEPTH_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
+        sortQueueByMaterial(m_outlineQueue);
         renderSortedQueue(m_outlineQueue, "outline pass");
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
         glStencilMask(0xFF);
     }
 
-    m_firstQueue.clear();
+    if (m_blendingReqd) {
+        //    ┳┓┓ ┏┓┳┓┳┓•┳┓┏┓  ┏┓┏┓┏┓┏┓
+        //    ┣┫┃ ┣ ┃┃┃┃┓┃┃┃┓  ┃┃┣┫┗┓┗┓
+        //    ┻┛┗┛┗┛┛┗┻┛┗┛┗┗┛  ┣┛┛┗┗┛┗┛
+        //                             
+        sortQueueByDistance(m_blendingQueue);
+        renderSortedQueue(m_blendingQueue, "blending pass");
+    }
+
+    m_opaqueQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
+    m_blendingQueue.clear();
 }
 
+void Renderer::sortQueueByMaterial(std::vector<RendererCommand>& queue) const {
+    if (queue.empty()) {
+        return;
+    }
+
+    // sort by material address
+    std::sort(queue.begin(), queue.end(), [](const RendererCommand& cmd1, const RendererCommand& cmd2) {
+        return cmd1.material < cmd2.material;
+    });
+}
+
+void Renderer::sortQueueByDistance(std::vector<RendererCommand>& queue) const {
+    if (queue.empty()) {
+        return;
+    }
+
+    /*std::map<float, RendererCommand> distanceSorted;
+    for (size_t i{}; i < m_blendingQueue.size(); i++) {
+        float distance = glm::length(m_camera->getViewPos() - m_blendingQueue[i].position);
+        distanceSorted[distance] = m_blendingQueue[i];
+    }*/
+
+    // sort by distance to camera (furthest to closest)
+    auto cameraPos = m_camera->getViewPos();
+    std::sort(queue.begin(), queue.end(), [cameraPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
+        return glm::length(cameraPos - cmd2.position) < glm::length(cameraPos - cmd1.position);
+    });
+}
 
 void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const {
     if (queue.empty()) {
@@ -142,11 +201,6 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
     } else {
         //LOG_D("--- " << name);
     }
-
-    // sort by material address
-    std::sort(queue.begin(), queue.end(), [](const RendererCommand& cmd1, const RendererCommand& cmd2) {
-        return cmd1.material < cmd2.material;
-    });
 
     // shader sorting
     Material* lastMaterial = nullptr;

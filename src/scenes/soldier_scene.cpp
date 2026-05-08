@@ -45,10 +45,17 @@ void SoldierScene::init() {
     // --- blending window
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     auto windowTexture = ResourceManager::getInstance().getTexture("window_texture");
-    auto window = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f, windowTexture);
+    auto window = MeshGenerator::createPlane(2.0f, 2.0f, windowTexture);
     auto windowM = std::make_unique<Mesh>(std::move(window));
     auto windowMM = std::make_shared<Model>("window_model", std::move(windowM));
     ResourceManager::getInstance().addModel(std::move(windowMM));
+    // --- blending grass
+    ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
+    auto grassTexture = ResourceManager::getInstance().getTexture("grass_texture");
+    auto grass = MeshGenerator::createPlane(1.0f, 1.0f, grassTexture);
+    auto grassM = std::make_unique<Mesh>(std::move(grass));
+    auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
+    ResourceManager::getInstance().addModel(std::move(grassMM));
 
     // MATERIALS with SHADERS
     ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
@@ -65,13 +72,13 @@ void SoldierScene::init() {
         //floorMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
 
         auto floorGO = std::make_unique<GameEntity>("floor");
+        //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
         floorGO->setSolid(true);
         floorGO->addComponent<TransformComponent>(FLOOR_POSITION);
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
         floorGO->init();
         m_gameEntities.push_back(std::move(floorGO));
     }
-
     // GIZMO
     auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
     auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
@@ -84,7 +91,6 @@ void SoldierScene::init() {
         gizmoGO->init();
         m_gameEntities.push_back(std::move(gizmoGO));
     }
-
     // LIGHT
     auto lightModel = ResourceManager::getInstance().getModel("light_model");
     auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
@@ -97,7 +103,6 @@ void SoldierScene::init() {
         lightGO->init();
         m_gameEntities.push_back(std::move(lightGO));
     }
-
     // SOLDIER
     auto soldierModel = ResourceManager::getInstance().getModel("soldier_model");
     auto soldierMaterial = ResourceManager::getInstance().getMaterial("soldier_material");
@@ -117,17 +122,39 @@ void SoldierScene::init() {
             m_gameEntities.push_back(std::move(soldierGO));
         }
     }
-
     // WINDOW
     auto windowModel = ResourceManager::getInstance().getModel("window_model");
     auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     if (windowModel && windowMaterial) {
-        auto windowGO = std::make_unique<GameEntity>("window");
-        windowGO->setSolid(true);
-        windowGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 3.0f));
+        auto windowGO = std::make_unique<GameEntity>("window1");
+        windowGO->setRendererQueueType(RendererQueueType::BLENDING);
+        windowGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 3.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
         windowGO->init();
         m_gameEntities.push_back(std::move(windowGO));
+        windowGO = std::make_unique<GameEntity>("window2");
+        windowGO->setRendererQueueType(RendererQueueType::BLENDING);
+        windowGO->addComponent<TransformComponent>(glm::vec3(-3.0f, 1.0f, 4.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
+        windowGO->init();
+        m_gameEntities.push_back(std::move(windowGO));
+    }
+    // GRASS
+    auto grassModel = ResourceManager::getInstance().getModel("grass_model");
+    //auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
+    if (grassModel && windowMaterial) {
+        auto grassGO = std::make_unique<GameEntity>("grass1");
+        grassGO->setRendererQueueType(RendererQueueType::BLENDING);
+        grassGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 5.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        grassGO->addComponent<RenderComponent>(grassModel, windowMaterial);
+        grassGO->init();
+        m_gameEntities.push_back(std::move(grassGO));
+        grassGO = std::make_unique<GameEntity>("grass2");
+        grassGO->setRendererQueueType(RendererQueueType::BLENDING);
+        grassGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        grassGO->addComponent<RenderComponent>(grassModel, windowMaterial);
+        grassGO->init();
+        m_gameEntities.push_back(std::move(grassGO));
     }
 
     // FIXME hardcoded max: 100
@@ -136,6 +163,7 @@ void SoldierScene::init() {
 
     bool isStencilReqd = false;
     bool isOutlineReqd = false;
+    bool isBlendingReqd = false;
     for (auto& gameEntity : m_gameEntities) {
         if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
             m_aliveGameEntities.push_back(gameEntity.get());
@@ -146,6 +174,9 @@ void SoldierScene::init() {
             if (gameEntity->getRendererQueueType() == RendererQueueType::OUTLINE) {
                 isOutlineReqd = true;
             }
+            if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
+                isBlendingReqd = true;
+            }
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
         }
@@ -153,6 +184,7 @@ void SoldierScene::init() {
 
     // first frame Renderer params
     Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
+    Renderer::getInstance().setBlendingReqd(isBlendingReqd);
 }
 
 void SoldierScene::saveState() {
@@ -175,6 +207,7 @@ void SoldierScene::fixedUpdate(float fixedt) {
 void SoldierScene::update(float alpha) {
     bool isStencilReqd = false;
     bool isOutlineReqd = false;
+    bool isBlendingReqd = false;
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->update(alpha);
 
@@ -184,13 +217,15 @@ void SoldierScene::update(float alpha) {
         auto* material = render->getMaterial();
         glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
         glm::mat3 normalMatrix = transform->getNormalMatrix(modelMatrix);
+        glm::vec3 position = transform->getPosition();
         transform->setDirty(false);
         RendererQueueType queueType = aliveGameEntity->getRendererQueueType();
         RendererCommand command = {
             model,
             material,
             modelMatrix,
-            normalMatrix
+            normalMatrix,
+            position
         };
         Renderer::getInstance().registerInQueue(queueType, command);
 
@@ -200,10 +235,14 @@ void SoldierScene::update(float alpha) {
         if (queueType == RendererQueueType::OUTLINE) {
             isOutlineReqd = true;
         }
+        if (queueType == RendererQueueType::BLENDING) {
+            isBlendingReqd = true;
+        }
     }
 
     // next frame Renderer params
     Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
+    Renderer::getInstance().setBlendingReqd(isBlendingReqd);
 
     Renderer::getInstance().flush();
 }

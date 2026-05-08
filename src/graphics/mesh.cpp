@@ -89,6 +89,9 @@ void Mesh::draw(Shader &shader) {
 
     // state reset
     glActiveTexture(GL_TEXTURE0);
+    if (m_textures.empty()) {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
 
     //    ┳┓┳┓┏┓┓ ┏•┳┓┏┓
     //    ┃┃┣┫┣┫┃┃┃┓┃┃┃┓
