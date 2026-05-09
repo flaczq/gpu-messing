@@ -18,7 +18,7 @@ InputManager::InputManager()
     std::fill(std::begin(m_prevKeys), std::end(m_prevKeys), false);
 }
 
-void InputManager::update() {
+void InputManager::copyKeys() {
     memcpy(m_prevKeys, m_currKeys, sizeof(m_currKeys));
 }
 

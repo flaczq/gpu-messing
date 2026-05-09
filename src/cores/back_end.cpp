@@ -134,27 +134,30 @@ void BackEnd::run() {
         m_lastTime = currentTime;
         m_accumulator += dt;
 
-        // copy keys from last frame
-        InputManager::getInstance().update();
+        InputManager::getInstance().copyKeys();
         // events to call InputManager
         glfwPollEvents();
+
+        processGlobalInput();
+        m_camera->processInput();
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
             //m_physicsWorld->saveState();
             //m_physicsWorld->fixedUpdate(static_cast<float>(FIXED_DT));
             SceneManager::getInstance().saveState();
+            m_camera->saveState();
             SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));
+            // actual movement
+            m_camera->fixedUpdate(static_cast<float>(FIXED_DT));
             m_accumulator -= FIXED_DT;
         }
 
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
 
-        // game logic: physics, movement, ai, collisions
-        processGlobalInput();
-        m_camera->update(dt);
-        m_camera->lateUpdate(dt);
+        // projection, view -> lookAt()
+        m_camera->update(alpha);
 
         // renderrring at last
         Renderer::getInstance().beginFrame();
@@ -186,10 +189,8 @@ void BackEnd::run() {
 }
 
 void BackEnd::processGlobalInput() {
-    auto& input = InputManager::getInstance();
-
     // EXIT
-    if (input.isKeyPressed(GLFW_KEY_ESCAPE)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_ESCAPE)) {
         glfwSetWindowShouldClose(m_window, true);
     }
 
@@ -199,22 +200,19 @@ void BackEnd::processGlobalInput() {
     //              
     #ifdef _DEBUG
     // HOTLOAD SHADERS
-    if (input.isKeyPressed(GLFW_KEY_L)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_L)) {
         ResourceManager::getInstance().reloadShaders();
     }
-
     // SCENES
-    if (input.isKeyPressed(GLFW_KEY_P)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_P)) {
         SceneManager::getInstance().toggleScene();
     }
-
     // RENDER MODE
-    if (input.isKeyPressed(GLFW_KEY_O)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_O)) {
         Renderer::getInstance().toggleRenderMode();
     }
-
     // INFO: POSITION, CAMERA
-    if (input.isKeyPressed(GLFW_KEY_I)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {
         displayPosition();
         displayCameraAngles();
     }

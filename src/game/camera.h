@@ -23,9 +23,11 @@ public:
     Camera(unsigned int screenWidth, unsigned int screenHeight);
 
     bool init();
+    void saveState();
+    void processInput();
+    void fixedUpdate(float fixedt);
+    void update(float alpha);
     void updateAspect(int width, int height);
-    void update(double dt);
-    void lateUpdate(double dt);
     void toggleCameraMode();
     void toggleGodMode();
 
@@ -46,6 +48,7 @@ private:
 
     glm::mat4 m_view{};
     glm::vec3 m_viewPos{};
+    glm::vec3 m_preViewPos{};
     glm::mat4 m_projection{};
     glm::vec3 m_front{};
     glm::vec3 m_up{};
@@ -62,7 +65,6 @@ private:
     bool m_godMode = false;
     CameraMode m_cameraMode = CameraMode::STANDING;
 
-    void processKeyboard(CameraDirection direction, double dt);
     void processMouseScroll(float yoffset);
     void processMouseMovement(float xoffest, float yoffset, GLboolean constrainPitch = true);
     void updateCameraVectors();

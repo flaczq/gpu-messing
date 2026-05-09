@@ -13,7 +13,7 @@ public:
     InputManager(const InputManager&) = delete;
     void operator=(const InputManager&) = delete;
 
-    void update();
+    void copyKeys();
     void processMouseMovement(double xpos, double ypos);
     void processMouseScroll(double yoffset);
     void setKeyState(int key, bool pressed);

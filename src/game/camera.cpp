@@ -12,6 +12,7 @@
 Camera::Camera(unsigned int screenWidth, unsigned int screenHeight)
     : m_view(0.0f),
       m_viewPos(6.0f, 1.75f, 6.0f),
+      m_preViewPos(6.0f, 1.75f, 6.0f),
       m_front(0.0f, 0.0f, -1.0f),
       m_up(0.0f, 1.0f, 0.0f),
       m_right(1.0f, 0.0f, 0.0f),
@@ -22,22 +23,21 @@ Camera::Camera(unsigned int screenWidth, unsigned int screenHeight)
       m_aspect((float)screenWidth / (float)screenHeight)
 {
     std::fill(std::begin(m_currDirections), std::end(m_currDirections), false);
-
-    updateCameraVectors();
-    updateProjection();
 }
 
 bool Camera::init() {
+    updateCameraVectors();
+    updateProjection();
+
     return true;
 }
 
-void Camera::updateAspect(int width, int height) {
-    m_aspect = ((float)width / (float)height);
-    m_projectionDirty = true;
-}
+void Camera::saveState() {
+    m_preViewPos = m_viewPos;
+};
 
 // continuous key clicks -> movement
-void Camera::update(double dt) {
+void Camera::processInput() {
     processMouseScroll(InputManager::getInstance().getScrollOffset());
     processMouseMovement(InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
 
@@ -45,7 +45,6 @@ void Camera::update(double dt) {
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
         toggleCameraMode();
     }
-
     // GOD MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
         toggleGodMode();
@@ -73,44 +72,66 @@ void Camera::update(double dt) {
         m_currDirections[static_cast<int>(CameraDirection::DOWN)] = true;
     }
 
-    // no need for interpolation (camera works every frame)
     updateCameraVectors();
 };
 
-void Camera::lateUpdate(double dt) {
+void Camera::fixedUpdate(float fixedt) {
+    glm::vec3 oldPos = m_viewPos;
+    float velocity = MOVEMENT_SPEED * fixedt;
+
     if (m_currDirections[static_cast<int>(CameraDirection::FORWARD)]) {
-        processKeyboard(CameraDirection::FORWARD, dt);
+        m_viewPos += m_front * velocity;
     }
     if (m_currDirections[static_cast<int>(CameraDirection::BACKWARD)]) {
-        processKeyboard(CameraDirection::BACKWARD, dt);
+        m_viewPos -= m_front * velocity;
     }
     if (m_currDirections[static_cast<int>(CameraDirection::LEFT)]) {
-        processKeyboard(CameraDirection::LEFT, dt);
+        m_viewPos -= m_right * velocity;
     }
     if (m_currDirections[static_cast<int>(CameraDirection::RIGHT)]) {
-        processKeyboard(CameraDirection::RIGHT, dt);
+        m_viewPos += m_right * velocity;
     }
-    if (m_currDirections[static_cast<int>(CameraDirection::UP)]) {
-        processKeyboard(CameraDirection::UP, dt);
-    }
-    if (m_currDirections[static_cast<int>(CameraDirection::DOWN)]) {
-        processKeyboard(CameraDirection::DOWN, dt);
-    }
-
-    if (m_projectionDirty) {
-        updateProjection();
-    }
-    if (m_godModeChanged || m_cameraModeChanged) {
+    // GOD MODE ACTIVATED
+    if (m_godMode) {
+        if (m_currDirections[static_cast<int>(CameraDirection::UP)]) {
+            m_viewPos += m_up * velocity;
+        }
+        if (m_currDirections[static_cast<int>(CameraDirection::DOWN)]) {
+            m_viewPos -= m_up * velocity;
+        }
+    } else {
         m_viewPos.y = getCameraModeHeight();
     }
 
-    // camera position, where you looking at, up vector
-    m_view = glm::lookAt(m_viewPos, m_viewPos + m_front, m_up);
+    if (m_godModeChanged || m_cameraModeChanged) {
+        //m_viewPos.y = getCameraModeHeight();
 
-    m_projectionDirty = false;
-    m_godModeChanged = false;
-    m_cameraModeChanged = false;
+        m_godModeChanged = false;
+        m_cameraModeChanged = false;
+    }
+
+    //TODO: collision
+    //if (collision == true) {
+    //    m_viewPos = oldPos;
+    //}
 };
+
+void Camera::update(float alpha) {
+    if (m_projectionDirty) {
+        updateProjection();
+
+        m_projectionDirty = false;
+    }
+
+    glm::vec3 interPosition = glm::mix(m_preViewPos, m_viewPos, alpha);
+    // camera position, where you looking at, up vector
+    m_view = glm::lookAt(interPosition, interPosition + m_front, m_up);
+};
+
+void Camera::updateAspect(int width, int height) {
+    m_aspect = ((float)width / (float)height);
+    m_projectionDirty = true;
+}
 
 void Camera::toggleCameraMode() {
     std::string cameraModeStr;
@@ -129,34 +150,6 @@ void Camera::toggleGodMode() {
     m_godMode = !m_godMode;
     m_godModeChanged = true;
     LOG_D("Changed god mode to: " << std::boolalpha << m_godMode);
-}
-
-void Camera::processKeyboard(CameraDirection direction, double dt) {
-    float velocity = MOVEMENT_SPEED * static_cast<float>(dt);
-    if (direction == CameraDirection::FORWARD) {
-        m_viewPos += m_front * velocity;
-    }
-    if (direction == CameraDirection::BACKWARD) {
-        m_viewPos -= m_front * velocity;
-    }
-    if (direction == CameraDirection::LEFT) {
-        m_viewPos -= m_right * velocity;
-    }
-    if (direction == CameraDirection::RIGHT) {
-        m_viewPos += m_right * velocity;
-    }
-
-    // GOD MODE ACTIVATED
-    if (m_godMode) {
-        if (direction == CameraDirection::UP) {
-            m_viewPos += m_up * velocity;
-        }
-        if (direction == CameraDirection::DOWN) {
-            m_viewPos -= m_up * velocity;
-        }
-    } else {
-        m_viewPos.y = getCameraModeHeight();
-    }
 }
 
 void Camera::processMouseScroll(float yoffset) {

@@ -42,6 +42,11 @@ void SoldierScene::init() {
     ResourceManager::getInstance().addModel(std::move(lightMM));
     // --- soldier
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
+    // --- stencil boxes
+    auto stencilBox = MeshGenerator::createCuboid(3.0f, 3.0f, 3.0f);
+    auto stencilBoxM = std::make_unique<Mesh>(std::move(stencilBox));
+    auto stencilBoxMM = std::make_shared<Model>("stencil_box_model", std::move(stencilBoxM));
+    ResourceManager::getInstance().addModel(std::move(stencilBoxMM));
     // --- blending window
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     auto windowTexture = ResourceManager::getInstance().getTexture("window_texture");
@@ -84,7 +89,6 @@ void SoldierScene::init() {
     auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
     if (gizmoModel && gizmoMaterial) {
         auto gizmoGO = std::make_unique<GameEntity>("gizmo");
-        //gizmoGO->setRendererQueueType(RendererQueueType::STENCIL);
         gizmoGO->setSolid(true);
         gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), GIZMO_SCALE);
         gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
@@ -122,6 +126,26 @@ void SoldierScene::init() {
             m_gameEntities.push_back(std::move(soldierGO));
         }
     }
+    // STENCIL BOXES
+    /*auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
+    auto stencilBox1Material = ResourceManager::getInstance().getMaterial("window_material");
+    auto stencilBox2Material = ResourceManager::getInstance().getMaterial("light_material");
+    if (stencilBoxModel && stencilBox1Material && stencilBox2Material) {
+        auto stencilBoxGO = std::make_unique<GameEntity>("stencil_box1");
+        stencilBoxGO->setRendererQueueType(RendererQueueType::STENCIL);
+        stencilBoxGO->setSolid(true);
+        stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f));
+        stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox1Material);
+        stencilBoxGO->init();
+        m_gameEntities.push_back(std::move(stencilBoxGO));
+        stencilBoxGO = std::make_unique<GameEntity>("stencil_box2");
+        stencilBoxGO->setRendererQueueType(RendererQueueType::OUTLINE);
+        stencilBoxGO->setSolid(true);
+        stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f), glm::quat(), glm::vec3(1.1f));
+        stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox2Material);
+        stencilBoxGO->init();
+        m_gameEntities.push_back(std::move(stencilBoxGO));
+    }*/
     // WINDOW
     auto windowModel = ResourceManager::getInstance().getModel("window_model");
     auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");

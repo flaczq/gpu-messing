@@ -62,31 +62,31 @@ void Renderer::beginFrame() {
     glViewport(0, 0, width, height);
 
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    // better to clear all buffers
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    GLbitfield clearBits = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+    if (m_stencilReqd) {
+        clearBits |= GL_STENCIL_BUFFER_BIT;
+    }
+    glClear(clearBits);
 
     // Z-depth test
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
     // Stencil test
-    if (m_stencilReqd) {
+    /*if (m_stencilReqd) {
         glEnable(GL_STENCIL_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-    } else {
-        glDisable(GL_STENCIL_TEST);
-    }
+        glStencilMask(0x00);
+    }*/
 
     // Blending
-    if (m_blendingReqd) {
+    /*if (m_blendingReqd) {
         glEnable(GL_BLEND);
         // src: factor == source color vector, dst: factor == 1 - source color vector
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-    } else {
-        glDisable(GL_BLEND);
-    }
+    }*/
 }
 
 void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
@@ -107,22 +107,12 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
 }
 
 // execute drawing commands from queues
+// ORDER: opaque -> transparent back-to-front
 void Renderer::flush() {
-    // ORDER: opaque -> transparent back-to-front
-    if (m_stencilReqd) {
-        glEnable(GL_DEPTH_TEST);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glStencilMask(0xFF);
-    }
-
     //    ┏┓┏┓┏┓┏┓┳┳┏┓  ┏┓┏┓┏┓┏┓
     //    ┃┃┃┃┣┫┃┃┃┃┣   ┃┃┣┫┗┓┗┓
     //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
     //                          
-    if (m_stencilReqd) {
-        //glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0x00);
-    }
     sortQueueByMaterial(m_opaqueQueue);
     renderSortedQueue(m_opaqueQueue, "opaque pass");
 
@@ -131,8 +121,11 @@ void Renderer::flush() {
         //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
         //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
         //                            
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
+        // ---
         sortQueueByMaterial(m_stencilQueue);
         renderSortedQueue(m_stencilQueue, "stencil pass");
 
@@ -143,11 +136,14 @@ void Renderer::flush() {
         glDisable(GL_DEPTH_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
+        // ---
         sortQueueByMaterial(m_outlineQueue);
         renderSortedQueue(m_outlineQueue, "outline pass");
+        // ---
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
         glStencilMask(0xFF);
+        glDisable(GL_STENCIL_TEST);
     }
 
     if (m_blendingReqd) {
@@ -155,8 +151,15 @@ void Renderer::flush() {
         //    ┣┫┃ ┣ ┃┃┃┃┓┃┃┃┓  ┃┃┣┫┗┓┗┓
         //    ┻┛┗┛┗┛┛┗┻┛┗┛┗┗┛  ┣┛┛┗┗┛┗┛
         //                             
+        glEnable(GL_BLEND);
+        // src: factor == source color vector, dst: factor == 1 - source color vector
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+        // ---
         sortQueueByDistance(m_blendingQueue);
         renderSortedQueue(m_blendingQueue, "blending pass");
+        // ---
+        glDisable(GL_BLEND);
     }
 
     m_opaqueQueue.clear();
@@ -249,6 +252,10 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
 void Renderer::endFrame() {
     // no need to unbind it every time but w/e
     glBindVertexArray(0);
+
+    /*glDisable(GL_DEPTH_TEST);
+    glDisable(GL_STENCIL_TEST);
+    glDisable(GL_BLEND);*/
 
     glfwSwapBuffers(m_window);
 }
