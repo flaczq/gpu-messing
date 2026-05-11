@@ -26,8 +26,8 @@ Camera::Camera(unsigned int screenWidth, unsigned int screenHeight)
 }
 
 bool Camera::init() {
-    updateCameraVectors();
-    updateProjection();
+    updateVectors();
+    updateProjection(true);
 
     return true;
 }
@@ -71,8 +71,6 @@ void Camera::processInput() {
     if (InputManager::getInstance().isKeyDown(GLFW_KEY_Q)) {
         m_currDirections[static_cast<int>(CameraDirection::DOWN)] = true;
     }
-
-    updateCameraVectors();
 };
 
 void Camera::fixedUpdate(float fixedt) {
@@ -116,22 +114,35 @@ void Camera::fixedUpdate(float fixedt) {
     //}
 };
 
-void Camera::update(float alpha) {
-    if (m_projectionDirty) {
-        updateProjection();
+void Camera::updateVectors() {
+    glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
+    front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    front.y = sin(glm::radians(m_pitch));
+    front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+    m_front = glm::normalize(front);
+    m_right = glm::normalize(glm::cross(m_front, WORLD_UP));
+    m_up = glm::normalize(glm::cross(m_right, m_front));
+};
 
-        m_projectionDirty = false;
-    }
-
+void Camera::updateView(float alpha) {
     glm::vec3 interPosition = glm::mix(m_preViewPos, m_viewPos, alpha);
     // camera position, where you looking at, up vector
     m_view = glm::lookAt(interPosition, interPosition + m_front, m_up);
 };
 
+void Camera::updateProjection(bool force) {
+    if (m_projectionDirty || force) {
+        m_projection = glm::mat4(1.0f);
+        m_projection = glm::perspective(glm::radians(m_fov), m_aspect, NEAR_PLANE, FAR_PLANE);
+
+        m_projectionDirty = false;
+    }
+};
+
 void Camera::updateAspect(int width, int height) {
     m_aspect = ((float)width / (float)height);
     m_projectionDirty = true;
-}
+};
 
 void Camera::toggleCameraMode() {
     std::string cameraModeStr;
@@ -150,7 +161,7 @@ void Camera::toggleGodMode() {
     m_godMode = !m_godMode;
     m_godModeChanged = true;
     LOG_D("Changed god mode to: " << std::boolalpha << m_godMode);
-}
+};
 
 void Camera::processMouseScroll(float yoffset) {
     if (yoffset != 0.0f) {
@@ -176,26 +187,11 @@ void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constr
             m_pitch = 90.0f;
         }
     }
-}
-
-void Camera::updateCameraVectors() {
-    glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
-    front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    front.y = sin(glm::radians(m_pitch));
-    front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    m_front = glm::normalize(front);
-    m_right = glm::normalize(glm::cross(m_front, WORLD_UP));
-    m_up = glm::normalize(glm::cross(m_right, m_front));
-}
-
-void Camera::updateProjection() {
-    m_projection = glm::mat4(1.0f);
-    m_projection = glm::perspective(glm::radians(m_fov), m_aspect, NEAR_PLANE, FAR_PLANE);
-}
+};
 
 float Camera::getCameraModeHeight() const {
     if (m_cameraMode == CameraMode::STANDING) {
         return 1.75f;
     }
     return 0.85f;
-}
+};

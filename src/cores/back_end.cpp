@@ -140,6 +140,7 @@ void BackEnd::run() {
 
         processGlobalInput();
         m_camera->processInput();
+        m_camera->updateVectors();
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
@@ -156,8 +157,9 @@ void BackEnd::run() {
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
 
-        // projection, view -> lookAt()
-        m_camera->update(alpha);
+        // lookAt()
+        m_camera->updateView(alpha);
+        m_camera->updateProjection();
 
         // renderrring at last
         Renderer::getInstance().beginFrame();

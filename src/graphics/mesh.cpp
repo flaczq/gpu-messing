@@ -90,6 +90,7 @@ void Mesh::draw(Shader &shader) {
     // state reset
     glActiveTexture(GL_TEXTURE0);
     if (m_textures.empty()) {
+        // reset binded texture to prevent using one from earlier entity
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 

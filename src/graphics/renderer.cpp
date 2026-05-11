@@ -62,11 +62,7 @@ void Renderer::beginFrame() {
     glViewport(0, 0, width, height);
 
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    GLbitfield clearBits = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
-    if (m_stencilReqd) {
-        clearBits |= GL_STENCIL_BUFFER_BIT;
-    }
-    glClear(clearBits);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
     // Z-depth test
     glEnable(GL_DEPTH_TEST);
@@ -116,11 +112,11 @@ void Renderer::flush() {
     sortQueueByMaterial(m_opaqueQueue);
     renderSortedQueue(m_opaqueQueue, "opaque pass");
 
-    if (m_stencilReqd) {
-        //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
-        //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
-        //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
-        //                            
+    //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
+    //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
+    //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
+    //                            
+    if (!m_stencilQueue.empty()) {
         glEnable(GL_STENCIL_TEST);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -128,11 +124,13 @@ void Renderer::flush() {
         // ---
         sortQueueByMaterial(m_stencilQueue);
         renderSortedQueue(m_stencilQueue, "stencil pass");
+    }
 
-        //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
-        //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
-        //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
-        //                            
+    //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
+    //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
+    //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
+    //                            
+    if (!m_outlineQueue.empty()) {
         glDisable(GL_DEPTH_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
@@ -146,11 +144,11 @@ void Renderer::flush() {
         glDisable(GL_STENCIL_TEST);
     }
 
-    if (m_blendingReqd) {
-        //    ┳┓┓ ┏┓┳┓┳┓•┳┓┏┓  ┏┓┏┓┏┓┏┓
-        //    ┣┫┃ ┣ ┃┃┃┃┓┃┃┃┓  ┃┃┣┫┗┓┗┓
-        //    ┻┛┗┛┗┛┛┗┻┛┗┛┗┗┛  ┣┛┛┗┗┛┗┛
-        //                             
+    //    ┳┓┓ ┏┓┳┓┳┓•┳┓┏┓  ┏┓┏┓┏┓┏┓
+    //    ┣┫┃ ┣ ┃┃┃┃┓┃┃┃┓  ┃┃┣┫┗┓┗┓
+    //    ┻┛┗┛┗┛┛┗┻┛┗┛┗┗┛  ┣┛┛┗┗┛┗┛
+    //                             
+    if (!m_blendingQueue.empty()) {
         glEnable(GL_BLEND);
         // src: factor == source color vector, dst: factor == 1 - source color vector
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -197,6 +195,7 @@ void Renderer::sortQueueByDistance(std::vector<RendererCommand>& queue) const {
     });
 }
 
+// TODO: use UBO
 void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const {
     if (queue.empty()) {
         //LOG_D("Empty queue for: " << name << " - nothing to render");
@@ -240,10 +239,10 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
         assert(lastMaterial != nullptr);
         assert(lastShader != nullptr);
 
-        // draws per-object (always)
+        // draws per-entity (always)
         lastShader->setMat4fv("model", cmd.modelMatrix);
         lastShader->setMat3fv("normalMatrix", cmd.normalMatrix);
-        //LOG_D("per-object draws with shader: " << lastShader->getID());
+        //LOG_D("per-entity draws with shader: " << lastShader->getID());
 
         cmd.model->draw(*lastShader);
     }
@@ -253,9 +252,9 @@ void Renderer::endFrame() {
     // no need to unbind it every time but w/e
     glBindVertexArray(0);
 
-    /*glDisable(GL_DEPTH_TEST);
-    glDisable(GL_STENCIL_TEST);
-    glDisable(GL_BLEND);*/
+    //glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_STENCIL_TEST);
+    //glDisable(GL_BLEND);
 
     glfwSwapBuffers(m_window);
 }

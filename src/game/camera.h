@@ -26,7 +26,9 @@ public:
     void saveState();
     void processInput();
     void fixedUpdate(float fixedt);
-    void update(float alpha);
+    void updateVectors();
+    void updateView(float alpha);
+    void updateProjection(bool force = false);
     void updateAspect(int width, int height);
     void toggleCameraMode();
     void toggleGodMode();
@@ -67,7 +69,5 @@ private:
 
     void processMouseScroll(float yoffset);
     void processMouseMovement(float xoffest, float yoffset, GLboolean constrainPitch = true);
-    void updateCameraVectors();
-    void updateProjection();
     float getCameraModeHeight() const;
 };

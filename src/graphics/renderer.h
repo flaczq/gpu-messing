@@ -51,8 +51,8 @@ public:
 	void flush();
 	void endFrame();
 
-	void setStencilReqd(bool stencilReqd) { m_stencilReqd = stencilReqd; }
-	void setBlendingReqd(bool blendingReqd) { m_blendingReqd = blendingReqd; }
+	//void setStencilReqd(bool stencilReqd) { m_stencilReqd = stencilReqd; }
+	//void setBlendingReqd(bool blendingReqd) { m_blendingReqd = blendingReqd; }
 	RendererLight* getRendererLight() { return &m_rendererLight; }
 	void setLightDir(glm::vec3 lightDir) { m_rendererLight.direction = lightDir; }
 
@@ -64,8 +64,8 @@ private:
 	Camera* m_camera = nullptr;
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
 	RendererLight m_rendererLight{};
-	bool m_stencilReqd = false;
-	bool m_blendingReqd = false;
+	//bool m_stencilReqd = false;
+	//bool m_blendingReqd = false;
 
 	std::vector<RendererCommand> m_opaqueQueue;
 	std::vector<RendererCommand> m_stencilQueue;

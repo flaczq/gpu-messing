@@ -13,6 +13,7 @@ RenderComponent::RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<M
 {
 }
 
+// not reqd
 void RenderComponent::onInit() {
 	m_transform = getOwner()->getTransform();
 }

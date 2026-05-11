@@ -27,47 +27,51 @@ SoldierScene::SoldierScene(Camera* camera)
 }
 
 void SoldierScene::init() {
-    // MODELS
-    // --- floor
-    auto floor = MeshGenerator::createPlane(16.0f, 15.0f);
-    auto floorM = std::make_unique<Mesh>(std::move(floor));
-    auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
-    ResourceManager::getInstance().addModel(std::move(floorMM));
-    // --- gizmo
-    ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
-    // --- light
-    auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
-    auto lightM = std::make_unique<Mesh>(std::move(light));
-    auto lightMM = std::make_shared<Model>("light_model", std::move(lightM));
-    ResourceManager::getInstance().addModel(std::move(lightMM));
-    // --- soldier
-    ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
-    // --- stencil boxes
-    auto stencilBox = MeshGenerator::createCuboid(3.0f, 3.0f, 3.0f);
-    auto stencilBoxM = std::make_unique<Mesh>(std::move(stencilBox));
-    auto stencilBoxMM = std::make_shared<Model>("stencil_box_model", std::move(stencilBoxM));
-    ResourceManager::getInstance().addModel(std::move(stencilBoxMM));
-    // --- blending window
+    //    ┓ ┏┓┏┓┳┓  ┳┓┏┓┏┳┓┏┓
+    //    ┃ ┃┃┣┫┃┃  ┃┃┣┫ ┃ ┣┫
+    //    ┗┛┗┛┛┗┻┛  ┻┛┛┗ ┻ ┛┗
+    //                       
+    // TEXTURES
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
-    auto windowTexture = ResourceManager::getInstance().getTexture("window_texture");
-    auto window = MeshGenerator::createPlane(2.0f, 2.0f, windowTexture);
-    auto windowM = std::make_unique<Mesh>(std::move(window));
-    auto windowMM = std::make_shared<Model>("window_model", std::move(windowM));
-    ResourceManager::getInstance().addModel(std::move(windowMM));
-    // --- blending grass
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
-    auto grassTexture = ResourceManager::getInstance().getTexture("grass_texture");
-    auto grass = MeshGenerator::createPlane(1.0f, 1.0f, grassTexture);
-    auto grassM = std::make_unique<Mesh>(std::move(grass));
-    auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
-    ResourceManager::getInstance().addModel(std::move(grassMM));
-
+    // MODELS
+    ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
+    ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     // MATERIALS with SHADERS
     ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
     ResourceManager::getInstance().loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
     ResourceManager::getInstance().loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadMaterial("window_material", "../shaders/window.vert", "../shaders/window.frag");
+
+    // MODELS
+    // --- floor
+    auto floor = MeshGenerator::createPlane(16.0f, 15.0f);
+    auto floorM = std::make_unique<Mesh>(std::move(floor));
+    auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
+    ResourceManager::getInstance().addModel(std::move(floorMM));
+    // --- light
+    auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
+    auto lightM = std::make_unique<Mesh>(std::move(light));
+    auto lightMM = std::make_shared<Model>("light_model", std::move(lightM));
+    ResourceManager::getInstance().addModel(std::move(lightMM));
+    // --- stencil boxes
+    auto stencilBox = MeshGenerator::createCuboid(3.0f, 3.0f, 3.0f);
+    auto stencilBoxM = std::make_unique<Mesh>(std::move(stencilBox));
+    auto stencilBoxMM = std::make_shared<Model>("stencil_box_model", std::move(stencilBoxM));
+    ResourceManager::getInstance().addModel(std::move(stencilBoxMM));
+    // --- blending window
+    auto windowTexture = ResourceManager::getInstance().getTexture("window_texture");
+    auto window = MeshGenerator::createPlane(2.0f, 2.0f, windowTexture);
+    auto windowM = std::make_unique<Mesh>(std::move(window));
+    auto windowMM = std::make_shared<Model>("window_model", std::move(windowM));
+    ResourceManager::getInstance().addModel(std::move(windowMM));
+    // --- blending grass
+    auto grassTexture = ResourceManager::getInstance().getTexture("grass_texture");
+    auto grass = MeshGenerator::createPlane(1.0f, 1.0f, grassTexture);
+    auto grassM = std::make_unique<Mesh>(std::move(grass));
+    auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
+    ResourceManager::getInstance().addModel(std::move(grassMM));
 
     // FLOOR
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
@@ -192,23 +196,24 @@ void SoldierScene::init() {
         if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
             m_aliveGameEntities.push_back(gameEntity.get());
 
-            if (gameEntity->getRendererQueueType() == RendererQueueType::STENCIL) {
-                isStencilReqd = true;
-            }
-            if (gameEntity->getRendererQueueType() == RendererQueueType::OUTLINE) {
-                isOutlineReqd = true;
-            }
-            if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
-                isBlendingReqd = true;
-            }
+            //if (gameEntity->getRendererQueueType() == RendererQueueType::STENCIL) {
+            //    isStencilReqd = true;
+            //}
+            //if (gameEntity->getRendererQueueType() == RendererQueueType::OUTLINE) {
+            //    isOutlineReqd = true;
+            //}
+            //if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
+            //    isBlendingReqd = true;
+            //}
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
         }
     }
 
     // first frame Renderer params
-    Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
-    Renderer::getInstance().setBlendingReqd(isBlendingReqd);
+    // reqd if i need it at the very start of a frame before update()
+    //Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
+    //Renderer::getInstance().setBlendingReqd(isBlendingReqd);
 }
 
 void SoldierScene::saveState() {
@@ -228,6 +233,7 @@ void SoldierScene::fixedUpdate(float fixedt) {
     }
 }
 
+// renderrring
 void SoldierScene::update(float alpha) {
     bool isStencilReqd = false;
     bool isOutlineReqd = false;
@@ -253,20 +259,21 @@ void SoldierScene::update(float alpha) {
         };
         Renderer::getInstance().registerInQueue(queueType, command);
 
-        if (queueType == RendererQueueType::STENCIL) {
-            isStencilReqd = true;
-        }
-        if (queueType == RendererQueueType::OUTLINE) {
-            isOutlineReqd = true;
-        }
-        if (queueType == RendererQueueType::BLENDING) {
-            isBlendingReqd = true;
-        }
+        //if (queueType == RendererQueueType::STENCIL) {
+        //    isStencilReqd = true;
+        //}
+        //if (queueType == RendererQueueType::OUTLINE) {
+        //    isOutlineReqd = true;
+        //}
+        //if (queueType == RendererQueueType::BLENDING) {
+        //    isBlendingReqd = true;
+        //}
     }
 
-    // next frame Renderer params
-    Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
-    Renderer::getInstance().setBlendingReqd(isBlendingReqd);
+    // next frame Renderer param
+    // not reqd because i can check if queue is empty()
+    //Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
+    //Renderer::getInstance().setBlendingReqd(isBlendingReqd);
 
     Renderer::getInstance().flush();
 }
