@@ -46,11 +46,14 @@ public:
 
 	bool init(GLFWwindow* window, Camera* camera);
 	void toggleRenderMode();
-	void beginFrame();
+	void beginFrame(unsigned int screenWidth, unsigned int screenHeight);
 	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
 	void flush();
 	void endFrame();
+	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
+	void endFrameMinimap();
 
+	void setCamera(Camera* camera) { m_camera = camera; }
 	//void setStencilReqd(bool stencilReqd) { m_stencilReqd = stencilReqd; }
 	//void setBlendingReqd(bool blendingReqd) { m_blendingReqd = blendingReqd; }
 	RendererLight* getRendererLight() { return &m_rendererLight; }

@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-Camera::Camera(unsigned int screenWidth, unsigned int screenHeight)
+Camera::Camera(unsigned int width, unsigned int height)
     : m_view(0.0f),
       m_viewPos(6.0f, 1.75f, 6.0f),
       m_preViewPos(6.0f, 1.75f, 6.0f),
@@ -20,7 +20,7 @@ Camera::Camera(unsigned int screenWidth, unsigned int screenHeight)
       m_yaw(-135.0f),
       m_pitch(-11.5f),
       m_fov(45.0f),
-      m_aspect((float)screenWidth / (float)screenHeight)
+      m_aspect((float)width / (float)height)
 {
     std::fill(std::begin(m_currDirections), std::end(m_currDirections), false);
 }
@@ -34,7 +34,7 @@ bool Camera::init() {
 
 void Camera::saveState() {
     m_preViewPos = m_viewPos;
-};
+}
 
 // continuous key clicks -> movement
 void Camera::processInput() {
@@ -71,7 +71,7 @@ void Camera::processInput() {
     if (InputManager::getInstance().isKeyDown(GLFW_KEY_Q)) {
         m_currDirections[static_cast<int>(CameraDirection::DOWN)] = true;
     }
-};
+}
 
 void Camera::fixedUpdate(float fixedt) {
     glm::vec3 oldPos = m_viewPos;
@@ -92,10 +92,10 @@ void Camera::fixedUpdate(float fixedt) {
     // GOD MODE ACTIVATED
     if (m_godMode) {
         if (m_currDirections[static_cast<int>(CameraDirection::UP)]) {
-            m_viewPos += m_up * velocity;
+            m_viewPos += WORLD_UP * velocity;
         }
         if (m_currDirections[static_cast<int>(CameraDirection::DOWN)]) {
-            m_viewPos -= m_up * velocity;
+            m_viewPos -= WORLD_UP * velocity;
         }
     } else {
         m_viewPos.y = getCameraModeHeight();
@@ -112,7 +112,7 @@ void Camera::fixedUpdate(float fixedt) {
     //if (collision == true) {
     //    m_viewPos = oldPos;
     //}
-};
+}
 
 void Camera::updateVectors() {
     glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -122,13 +122,13 @@ void Camera::updateVectors() {
     m_front = glm::normalize(front);
     m_right = glm::normalize(glm::cross(m_front, WORLD_UP));
     m_up = glm::normalize(glm::cross(m_right, m_front));
-};
+}
 
 void Camera::updateView(float alpha) {
     glm::vec3 interPosition = glm::mix(m_preViewPos, m_viewPos, alpha);
     // camera position, where you looking at, up vector
     m_view = glm::lookAt(interPosition, interPosition + m_front, m_up);
-};
+}
 
 void Camera::updateProjection(bool force) {
     if (m_projectionDirty || force) {
@@ -137,12 +137,12 @@ void Camera::updateProjection(bool force) {
 
         m_projectionDirty = false;
     }
-};
+}
 
 void Camera::updateAspect(int width, int height) {
     m_aspect = ((float)width / (float)height);
     m_projectionDirty = true;
-};
+}
 
 void Camera::toggleCameraMode() {
     std::string cameraModeStr;
@@ -155,43 +155,43 @@ void Camera::toggleCameraMode() {
     }
     m_cameraModeChanged = true;
     LOG_D("Changed camera mode to: " << cameraModeStr);
-};
+}
 
 void Camera::toggleGodMode() {
     m_godMode = !m_godMode;
     m_godModeChanged = true;
     LOG_D("Changed god mode to: " << std::boolalpha << m_godMode);
-};
+}
 
 void Camera::processMouseScroll(float yoffset) {
     if (yoffset != 0.0f) {
         m_projectionDirty = true;
         m_fov -= yoffset;
-        if (m_fov < 1.0f) {
-            m_fov = 1.0f;
+        if (m_fov < MIN_FOV) {
+            m_fov = MIN_FOV;
         }
-        if (m_fov > 90.0f) {
-            m_fov = 90.0f;
+        if (m_fov > MAX_FOV) {
+            m_fov = MAX_FOV;
         }
     }
-};
+}
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
     m_yaw += xoffset * MOUSE_SENSITIVITY;
     m_pitch += yoffset * MOUSE_SENSITIVITY;
     if (constrainPitch) {
-        if (m_pitch < -90.0f) {
-            m_pitch = -90.0f;
+        if (m_pitch < MIN_PITCH) {
+            m_pitch = MIN_PITCH;
         }
-        if (m_pitch > 90.0f) {
-            m_pitch = 90.0f;
+        if (m_pitch > MAX_PITCH) {
+            m_pitch = MAX_PITCH;
         }
     }
-};
+}
 
 float Camera::getCameraModeHeight() const {
     if (m_cameraMode == CameraMode::STANDING) {
         return 1.75f;
     }
     return 0.85f;
-};
+}

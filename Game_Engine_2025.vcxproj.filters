@@ -225,4 +225,7 @@
       <Filter>Pliki zasobów</Filter>
     </ResourceCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
+  </ItemGroup>
 </Project>

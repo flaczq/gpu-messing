@@ -56,13 +56,8 @@ void Renderer::toggleRenderMode() {
     LOG_D("Changed RenderMode to: " << renderModeStr);
 }
 
-void Renderer::beginFrame() {
-    int width, height;
-    glfwGetFramebufferSize(m_window, &width, &height);
-    glViewport(0, 0, width, height);
-
-    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+void Renderer::beginFrame(unsigned int screenWidth, unsigned int screenHeight) {
+    glViewport(0, 0, screenWidth, screenHeight);
 
     // Z-depth test
     glEnable(GL_DEPTH_TEST);
@@ -83,6 +78,9 @@ void Renderer::beginFrame() {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
     }*/
+
+    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
@@ -257,6 +255,23 @@ void Renderer::endFrame() {
     //glDisable(GL_BLEND);
 
     glfwSwapBuffers(m_window);
+}
+
+void Renderer::beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight) {
+    unsigned int minimapX = minimapWidth * 3;
+    unsigned int minimapY = minimapHeight * 3;
+    // screen - minimap
+    glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
+
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(minimapX, minimapY, minimapWidth, minimapHeight);
+
+    glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Renderer::endFrameMinimap() {
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {

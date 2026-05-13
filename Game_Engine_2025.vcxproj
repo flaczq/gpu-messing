@@ -109,6 +109,9 @@
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="TODO.txt" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

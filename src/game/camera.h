@@ -20,7 +20,7 @@ enum class CameraMode {
 
 class Camera {
 public:
-    Camera(unsigned int screenWidth, unsigned int screenHeight);
+    Camera(unsigned int width, unsigned int height);
 
     bool init();
     void saveState();
@@ -35,7 +35,12 @@ public:
 
     glm::mat4 getViewMatrix() const { return m_view; }
     glm::vec3 getViewPos() const { return m_viewPos; }
+    void setViewPos(glm::vec3 viewPos) { m_viewPos = viewPos; m_preViewPos = viewPos; }
     glm::mat4 getProjection() const { return m_projection; }
+    float getYaw() const { return m_yaw; }
+    void setYaw(float yaw) { m_yaw = yaw; }
+    float getPitch() const { return m_pitch; }
+    void setPitch(float pitch) { m_pitch = pitch; }
     float getFov() const { return m_fov; }
     float getAspect() const { return m_aspect; }
     float getNearPlane() const { return NEAR_PLANE; }
@@ -47,6 +52,10 @@ private:
     static constexpr float MOUSE_SENSITIVITY = 0.1f;
     static constexpr float NEAR_PLANE = 0.1f;
     static constexpr float FAR_PLANE = 100.0f;
+    static constexpr float MIN_PITCH = -75.0f;
+    static constexpr float MAX_PITCH = 75.0f;
+    static constexpr float MIN_FOV = 1.0f;
+    static constexpr float MAX_FOV = 90.0f;
 
     glm::mat4 m_view{};
     glm::vec3 m_viewPos{};

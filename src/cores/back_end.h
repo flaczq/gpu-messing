@@ -24,9 +24,11 @@ public:
 
 private:
     unsigned int m_screenWidth{}, m_screenHeight{};
+    unsigned int m_minimapWidth{}, m_minimapHeight{};
 
     GLFWwindow* m_window = nullptr;
     std::unique_ptr<Camera> m_camera;
+    std::unique_ptr<Camera> m_minimapCamera;
     std::unique_ptr<PhysicsWorld> m_physicsWorld;
 
     // textures
@@ -44,6 +46,5 @@ private:
 
     void processGlobalInput();
     void showFps(GLFWwindow* window, double currentTime);
-    void displayPosition();
-    void displayCameraAngles();
+    void displayCameraData();
 };

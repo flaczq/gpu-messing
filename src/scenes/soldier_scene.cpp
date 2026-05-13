@@ -235,9 +235,9 @@ void SoldierScene::fixedUpdate(float fixedt) {
 
 // renderrring
 void SoldierScene::update(float alpha) {
-    bool isStencilReqd = false;
-    bool isOutlineReqd = false;
-    bool isBlendingReqd = false;
+    //bool isStencilReqd = false;
+    //bool isOutlineReqd = false;
+    //bool isBlendingReqd = false;
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->update(alpha);
 

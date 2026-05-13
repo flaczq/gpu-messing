@@ -17,7 +17,9 @@
 
 BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int height)
     : m_screenWidth(width),
-      m_screenHeight(height)
+      m_screenHeight(height),
+      m_minimapWidth(width / 4),
+      m_minimapHeight(height / 4)
 {
     if (graphicsAPI == GraphicsAPI::OPEN_GL) {
         LOG("*** OpenGL for Windows");
@@ -86,6 +88,12 @@ bool BackEnd::init() {
     //           
     m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
     m_camera->init();
+    // top-view minimap
+    m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
+    m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+    m_minimapCamera->setYaw(-90.0f);
+    m_minimapCamera->setPitch(-70.0f);
+    m_minimapCamera->init();
     SceneManager::getInstance().init(m_camera.get());
     Renderer::getInstance().init(m_window, m_camera.get());
     //m_physicsWorld = std::make_unique<PhysicsWorld>();
@@ -141,6 +149,8 @@ void BackEnd::run() {
         processGlobalInput();
         m_camera->processInput();
         m_camera->updateVectors();
+        //m_minimapCamera->processInput();
+        //m_minimapCamera->updateVectors();
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
@@ -151,6 +161,8 @@ void BackEnd::run() {
             SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));
             // actual movement
             m_camera->fixedUpdate(static_cast<float>(FIXED_DT));
+            //m_minimapCamera->saveState();
+            //m_minimapCamera->fixedUpdate(static_cast<float>(FIXED_DT));
             m_accumulator -= FIXED_DT;
         }
 
@@ -160,10 +172,19 @@ void BackEnd::run() {
         // lookAt()
         m_camera->updateView(alpha);
         m_camera->updateProjection();
+        m_minimapCamera->updateView(alpha);
+        //m_minimapCamera->updateProjection();
 
         // renderrring at last
-        Renderer::getInstance().beginFrame();
+        // --- main camera
+        Renderer::getInstance().beginFrame(m_screenWidth, m_screenHeight);
         SceneManager::getInstance().update(alpha);
+        // --- minimap camera
+        Renderer::getInstance().setCamera(m_minimapCamera.get());
+        Renderer::getInstance().beginFrameMinimap(m_minimapWidth, m_minimapHeight);
+        SceneManager::getInstance().update(alpha);
+        Renderer::getInstance().endFrameMinimap();
+        Renderer::getInstance().setCamera(m_camera.get());
         Renderer::getInstance().endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);
@@ -215,8 +236,7 @@ void BackEnd::processGlobalInput() {
     }
     // INFO: POSITION, CAMERA
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {
-        displayPosition();
-        displayCameraAngles();
+        displayCameraData();
     }
     #endif
 }
@@ -234,37 +254,13 @@ void BackEnd::showFps(GLFWwindow* window, double currentTime) {
     }
 }
 
-void BackEnd::displayPosition() {
-    glm::mat4 view = m_camera->getViewMatrix();
-    glm::mat4 inverseView = glm::inverse(view);
-    glm::vec3 pos = glm::vec3(inverseView[3]);
-
+void BackEnd::displayCameraData() {
+    glm::vec3 cameraPos = m_camera->getViewPos();
     std::cout << std::fixed << std::setprecision(2);
-    LOG_D("Position: "
-        << "X: " << std::showpos << pos.x << "   "
-        << "Y: " << std::showpos << pos.y << "   "
-        << "Z: " << std::showpos << pos.z);
-}
-
-void BackEnd::displayCameraAngles() {
-    glm::mat4 view = m_camera->getViewMatrix();
-    glm::vec3 scale;
-    glm::quat orientation;
-    glm::vec3 translation;
-    glm::vec3 skew;
-    glm::vec4 perspective;
-
-    if (glm::decompose(view, scale, orientation, translation, skew, perspective)) {
-        glm::vec3 euler = glm::eulerAngles(orientation);
-
-        float pitch = glm::degrees(euler.x);
-        float yaw = glm::degrees(euler.y);
-        float roll = glm::degrees(euler.z);
-
-        std::cout << std::fixed << std::setprecision(2);
-        LOG_D("Camera: "
-            << "Pitch: " << std::showpos << pitch << " deg   "
-            << "Yaw: " << std::showpos << yaw << " deg   "
-            << "Roll: " << std::showpos << roll << " deg");
-    }
+    LOG_D("Camera: "
+        << "X: " << std::showpos << cameraPos.x << "   "
+        << "Y: " << std::showpos << cameraPos.y << "   "
+        << "Z: " << std::showpos << cameraPos.z << "   "
+        << "YAW: " << m_camera->getYaw() << "   "
+        << "PITCH: " << m_camera->getPitch());
 }
