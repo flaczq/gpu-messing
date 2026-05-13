@@ -60,7 +60,7 @@ Mesh::~Mesh() {
     glDeleteBuffers(1, &m_EBO);
 }
 
-void Mesh::draw(Shader &shader) {
+void Mesh::draw(Shader& shader) {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
     unsigned int normalNr = 1;
@@ -93,6 +93,11 @@ void Mesh::draw(Shader &shader) {
         // reset binded texture to prevent using one from earlier entity
         glBindTexture(GL_TEXTURE_2D, 0);
     }
+
+    // TODO
+    //if (m_diffuseColor != glm::vec3(0.0f)) {
+    //  shader.setVec3fv("material.diffuseColor", m_diffuseColor);
+    //}
 
     //    ┳┓┳┓┏┓┓ ┏•┳┓┏┓
     //    ┃┃┣┫┣┫┃┃┃┓┃┃┃┓

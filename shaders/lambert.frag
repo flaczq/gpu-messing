@@ -1,5 +1,10 @@
 #version 330 core
 
+struct Material {
+	sampler2D diffuse;
+    vec3 diffuseColor;
+};
+
 out vec4 FragColor;
 
 in vec3 FragPos;
@@ -8,11 +13,17 @@ in vec2 TexCoords;
 
 uniform vec3 lightDir;
 uniform vec3 lightColor;
+uniform Material material;
 
 void main() {
 	vec3 norm = normalize(Normal);
     
-    vec4 texColor = vec4(0.3f, 0.8f, 0.3f, 1.0f); 
+    vec4 texColor;
+    if (material.diffuseColor != vec3(0.0f)) {
+        texColor = vec4(material.diffuseColor, 1.0f);
+    } else {
+        texColor = texture(material.diffuse, TexCoords);
+    }
     
     float ambientStrength = 0.2f;
     vec3 ambient = ambientStrength * lightColor;

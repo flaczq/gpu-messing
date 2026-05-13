@@ -45,6 +45,7 @@
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="assets\models\Gizmo.fbx" />
+    <None Include="assets\models\RiggedFpsArms.fbx" />
     <None Include="assets\models\Soldier.glb" />
     <None Include="ATTRIBUTIONS.md" />
     <None Include="Game_Engine_2025.aps" />

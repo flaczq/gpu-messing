@@ -104,6 +104,7 @@
     <None Include="assets\models\Gizmo.fbx" />
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
+    <None Include="assets\models\RiggedFpsArms.fbx" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">

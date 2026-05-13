@@ -37,10 +37,12 @@ void SoldierScene::init() {
     // MODELS
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
+    ResourceManager::getInstance().loadModel("arms_model", "../assets/models/RiggedFpsArms.fbx");
     // MATERIALS with SHADERS
-    ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
-    ResourceManager::getInstance().loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
+    ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/light.vert", "../shaders/light.frag");
     ResourceManager::getInstance().loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
+    ResourceManager::getInstance().loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
+    ResourceManager::getInstance().loadMaterial("arms_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadMaterial("window_material", "../shaders/window.vert", "../shaders/window.frag");
 
@@ -78,7 +80,7 @@ void SoldierScene::init() {
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
-        //floorMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
+        floorMaterial->addVec3Uniform("matColor", glm::vec3(0.3f, 0.8f, 0.3f));
 
         auto floorGO = std::make_unique<GameEntity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
@@ -87,6 +89,20 @@ void SoldierScene::init() {
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
         floorGO->init();
         m_gameEntities.push_back(std::move(floorGO));
+    }
+    // LIGHT
+    auto lightModel = ResourceManager::getInstance().getModel("light_model");
+    auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
+    if (lightModel && lightMaterial) {
+        lightMaterial->addVec3Uniform("matColor", glm::vec3(1.0f));
+
+        auto lightGO = std::make_unique<GameEntity>("light");
+        //lightGO->setAbstract(true);
+        lightGO->addComponent<TransformComponent>(LIGHT_POSITION, glm::quat(), LIGHT_SCALE);
+        lightGO->addComponent<RenderComponent>(lightModel, lightMaterial);
+        lightGO->addComponent<DirLightMovementComponent>();
+        lightGO->init();
+        m_gameEntities.push_back(std::move(lightGO));
     }
     // GIZMO
     auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
@@ -99,17 +115,17 @@ void SoldierScene::init() {
         gizmoGO->init();
         m_gameEntities.push_back(std::move(gizmoGO));
     }
-    // LIGHT
-    auto lightModel = ResourceManager::getInstance().getModel("light_model");
-    auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
-    if (lightModel && lightMaterial) {
-        auto lightGO = std::make_unique<GameEntity>("light");
-        lightGO->setAbstract(true);
-        lightGO->addComponent<TransformComponent>(LIGHT_POSITION, glm::quat(), LIGHT_SCALE);
-        lightGO->addComponent<RenderComponent>(lightModel, lightMaterial);
-        lightGO->addComponent<DirLightMovementComponent>();
-        lightGO->init();
-        m_gameEntities.push_back(std::move(lightGO));
+    // FPS ARMS
+    auto armsModel = ResourceManager::getInstance().getModel("arms_model");
+    auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
+    if (armsModel && armsMaterial) {
+        //armsMaterial->addVec3Uniform("material.diffuseColor", glm::vec3(0.9f, 0.8f, 0.3f));
+
+        auto armsGO = std::make_unique<GameEntity>("arms");
+        armsGO->addComponent<TransformComponent>(glm::vec3(0.0f));
+        armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
+        armsGO->init();
+        m_gameEntities.push_back(std::move(armsGO));
     }
     // SOLDIER
     auto soldierModel = ResourceManager::getInstance().getModel("soldier_model");
@@ -189,9 +205,9 @@ void SoldierScene::init() {
     m_aliveGameEntities.reserve(100);
     m_deadGameEntities.reserve(100);
 
-    bool isStencilReqd = false;
-    bool isOutlineReqd = false;
-    bool isBlendingReqd = false;
+    //bool isStencilReqd = false;
+    //bool isOutlineReqd = false;
+    //bool isBlendingReqd = false;
     for (auto& gameEntity : m_gameEntities) {
         if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
             m_aliveGameEntities.push_back(gameEntity.get());
@@ -243,6 +259,10 @@ void SoldierScene::update(float alpha) {
 
         auto* transform = aliveGameEntity->getTransform();
         auto* render = aliveGameEntity->getRender();
+        if (!render) {
+            return;
+        }
+
         auto* model = render->getModel();
         auto* material = render->getMaterial();
         glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);

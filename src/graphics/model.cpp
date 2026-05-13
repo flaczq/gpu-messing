@@ -66,6 +66,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<std::shared_ptr<Texture>> textures;
+	bool hasVertexColor = false;
 
 	// vertices
 	for (size_t i{}; i < mesh->mNumVertices; i++) {
@@ -81,6 +82,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 			vertex.Color.x = mesh->mColors[0][i].r;
 			vertex.Color.y = mesh->mColors[0][i].g;
 			vertex.Color.z = mesh->mColors[0][i].b;
+			hasVertexColor = true;
 		}
 
 		// Normal
@@ -113,7 +115,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		}
 	}
 
-	// textures (if exist)
+	// material textures/colors (if exist)
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		// diffuse maps
@@ -123,6 +125,16 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// specular maps
 		auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", scene);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
+
+		// no textures and no vertex colors
+		if (textures.empty() && !hasVertexColor) {
+			// diffuse color
+			aiColor4D diff(1.0f, 1.0f, 1.0f, 1.0f);
+			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, diff)) {
+				auto diffuseColor = glm::vec3(diff.r, diff.g, diff.b);
+				// TODO... save in Mesh and later setVec3 with this color into Shader
+			}
+		}
 	}
 
 	return std::make_unique<Mesh>(vertices, indices, textures);

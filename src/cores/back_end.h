@@ -30,6 +30,7 @@ private:
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<Camera> m_minimapCamera;
     std::unique_ptr<PhysicsWorld> m_physicsWorld;
+    bool m_minimap = true;
 
     // textures
     //unsigned int diffuseMapTP, specularMapTP;

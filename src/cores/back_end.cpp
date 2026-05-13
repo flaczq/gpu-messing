@@ -89,20 +89,17 @@ bool BackEnd::init() {
     m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
     m_camera->init();
     // top-view minimap
-    m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
-    m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-    m_minimapCamera->setYaw(-90.0f);
-    m_minimapCamera->setPitch(-70.0f);
-    m_minimapCamera->init();
+    if (m_minimap) {
+        m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
+        m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+        m_minimapCamera->setYaw(-90.0f);
+        m_minimapCamera->setPitch(-70.0f);
+        m_minimapCamera->init();
+    }
     SceneManager::getInstance().init(m_camera.get());
     Renderer::getInstance().init(m_window, m_camera.get());
     //m_physicsWorld = std::make_unique<PhysicsWorld>();
     //m_physicsWorld->init();
-
-    //    ┳┓┏┓┏┓┏┓┳┳┳┓┏┓┏┓┏┓
-    //    ┣┫┣ ┗┓┃┃┃┃┣┫┃ ┣ ┗┓
-    //    ┛┗┗┛┗┛┗┛┗┛┛┗┗┛┗┛┗┛
-    //                      
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -149,8 +146,10 @@ void BackEnd::run() {
         processGlobalInput();
         m_camera->processInput();
         m_camera->updateVectors();
-        //m_minimapCamera->processInput();
-        //m_minimapCamera->updateVectors();
+        if (m_minimap) {
+            //m_minimapCamera->processInput();
+            //m_minimapCamera->updateVectors();
+        }
 
         // 1 per 60 frames
         while (m_accumulator >= FIXED_DT) {
@@ -161,8 +160,10 @@ void BackEnd::run() {
             SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));
             // actual movement
             m_camera->fixedUpdate(static_cast<float>(FIXED_DT));
-            //m_minimapCamera->saveState();
-            //m_minimapCamera->fixedUpdate(static_cast<float>(FIXED_DT));
+            if (m_minimap) {
+                //m_minimapCamera->saveState();
+                //m_minimapCamera->fixedUpdate(static_cast<float>(FIXED_DT));
+            }
             m_accumulator -= FIXED_DT;
         }
 
@@ -172,19 +173,23 @@ void BackEnd::run() {
         // lookAt()
         m_camera->updateView(alpha);
         m_camera->updateProjection();
-        m_minimapCamera->updateView(alpha);
-        //m_minimapCamera->updateProjection();
+        if (m_minimap) {
+            m_minimapCamera->updateView(alpha);
+            //m_minimapCamera->updateProjection();
+        }
 
         // renderrring at last
         // --- main camera
         Renderer::getInstance().beginFrame(m_screenWidth, m_screenHeight);
         SceneManager::getInstance().update(alpha);
         // --- minimap camera
-        Renderer::getInstance().setCamera(m_minimapCamera.get());
-        Renderer::getInstance().beginFrameMinimap(m_minimapWidth, m_minimapHeight);
-        SceneManager::getInstance().update(alpha);
-        Renderer::getInstance().endFrameMinimap();
-        Renderer::getInstance().setCamera(m_camera.get());
+        if (m_minimap) {
+            Renderer::getInstance().setCamera(m_minimapCamera.get());
+            Renderer::getInstance().beginFrameMinimap(m_minimapWidth, m_minimapHeight);
+            SceneManager::getInstance().update(alpha);
+            Renderer::getInstance().endFrameMinimap();
+            Renderer::getInstance().setCamera(m_camera.get());
+        }
         Renderer::getInstance().endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);

@@ -11,13 +11,20 @@ Material::Material(const std::string& name, std::shared_ptr<Shader> shader)
 {
 }
 
-void Material::addVec3Uniform(const std::string& name, glm::vec3 vec3Uniform) {
-	m_vec3Uniforms.insert_or_assign(name, vec3Uniform);
+void Material::addVec3Uniform(const std::string& name, glm::vec3 uniform) {
+	m_vec3Uniforms.insert_or_assign(name, uniform);
+}
+
+void Material::addBoolUniform(const std::string& name, bool uniform) {
+	m_boolUniforms.insert_or_assign(name, uniform);
 }
 
 void Material::apply() {
 	for (const auto& [name, val] : m_vec3Uniforms) {
 		m_shader->setVec3fv(name, val);
-		// TODO: other types
 	}
+	for (const auto& [name, val] : m_boolUniforms) {
+		m_shader->setBool(name, val);
+	}
+	// TODO: other types
 }
