@@ -67,6 +67,8 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	std::vector<unsigned int> indices;
 	std::vector<std::shared_ptr<Texture>> textures;
 	bool hasVertexColor = false;
+	bool hasDiffuseColor = false;
+	glm::vec3 diffuseColor = glm::vec3(1.0f);
 
 	// vertices
 	for (size_t i{}; i < mesh->mNumVertices; i++) {
@@ -128,16 +130,15 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 		// no textures and no vertex colors
 		if (textures.empty() && !hasVertexColor) {
-			// diffuse color
-			aiColor4D diff(1.0f, 1.0f, 1.0f, 1.0f);
-			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, diff)) {
-				auto diffuseColor = glm::vec3(diff.r, diff.g, diff.b);
-				// TODO... save in Mesh and later setVec3 with this color into Shader
+			aiColor4D diffCol(1.0f);
+			if (AI_SUCCESS == material->Get(AI_MATKEY_COLOR_DIFFUSE, diffCol)) {
+				diffuseColor = glm::vec3(diffCol.r, diffCol.g, diffCol.b);
+				hasDiffuseColor = true;
 			}
 		}
 	}
 
-	return std::make_unique<Mesh>(vertices, indices, textures);
+	return std::make_unique<Mesh>(vertices, indices, textures, hasDiffuseColor, diffuseColor);
 }
 
 std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene) const {

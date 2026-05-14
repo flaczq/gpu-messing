@@ -45,7 +45,7 @@ namespace MeshGenerator {
 			textures.push_back(texture);
 		}
 
-		return Mesh(vertices, indices, textures);
+		return Mesh(vertices, indices, textures, true, glm::vec3(1.0f, 0.0f, 0.5f));
 	}
 
 	Mesh createCuboid(float width, float height, float depth, std::shared_ptr<Texture> texture, float uvTiling) {

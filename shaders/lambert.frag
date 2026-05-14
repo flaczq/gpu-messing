@@ -2,6 +2,7 @@
 
 struct Material {
 	sampler2D diffuse;
+    bool hasDiffuseColor;
     vec3 diffuseColor;
 };
 
@@ -19,7 +20,7 @@ void main() {
 	vec3 norm = normalize(Normal);
     
     vec4 texColor;
-    if (material.diffuseColor != vec3(0.0f)) {
+    if (material.hasDiffuseColor) {
         texColor = vec4(material.diffuseColor, 1.0f);
     } else {
         texColor = texture(material.diffuse, TexCoords);

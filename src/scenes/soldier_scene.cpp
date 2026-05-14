@@ -119,8 +119,6 @@ void SoldierScene::init() {
     auto armsModel = ResourceManager::getInstance().getModel("arms_model");
     auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
     if (armsModel && armsMaterial) {
-        //armsMaterial->addVec3Uniform("material.diffuseColor", glm::vec3(0.9f, 0.8f, 0.3f));
-
         auto armsGO = std::make_unique<GameEntity>("arms");
         armsGO->addComponent<TransformComponent>(glm::vec3(0.0f));
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);

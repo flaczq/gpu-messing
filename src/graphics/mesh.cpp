@@ -14,7 +14,9 @@ Mesh::Mesh(Mesh&& other) noexcept
       m_EBO(other.m_EBO),
       m_vertices(std::move(other.m_vertices)),
       m_indices(std::move(other.m_indices)),
-      m_textures(std::move(other.m_textures))
+      m_textures(std::move(other.m_textures)),
+      m_hasDiffuseColor(other.m_hasDiffuseColor),
+      m_diffuseColor(other.m_diffuseColor)
 {
     // reset IDs to not deconstruct them
     other.m_VAO = 0;
@@ -37,6 +39,8 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
         m_vertices = std::move(other.m_vertices);
         m_indices = std::move(other.m_indices);
         m_textures = std::move(other.m_textures);
+        m_hasDiffuseColor = other.m_hasDiffuseColor;
+        m_diffuseColor = other.m_diffuseColor;
 
         other.m_VAO = 0;
         other.m_VBO = 0;
@@ -47,8 +51,20 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures)
     : m_vertices(std::move(vertices)),
+    m_indices(std::move(indices)),
+    m_textures(std::move(textures)),
+    m_hasDiffuseColor(false),
+    m_diffuseColor(glm::vec3(1.0f))
+{
+    setupMesh();
+}
+
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor)
+    : m_vertices(std::move(vertices)),
       m_indices(std::move(indices)),
-      m_textures(std::move(textures))
+      m_textures(std::move(textures)),
+      m_hasDiffuseColor(hasDiffuseColor),
+      m_diffuseColor(diffuseColor)
 {
 	setupMesh();
 }
@@ -94,10 +110,10 @@ void Mesh::draw(Shader& shader) {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    // TODO
-    //if (m_diffuseColor != glm::vec3(0.0f)) {
-    //  shader.setVec3fv("material.diffuseColor", m_diffuseColor);
-    //}
+    if (m_hasDiffuseColor) {
+        shader.setBool("material.hasDiffuseColor", true);
+        shader.setVec3fv("material.diffuseColor", m_diffuseColor);
+    }
 
     //    ┳┓┳┓┏┓┓ ┏•┳┓┏┓
     //    ┃┃┣┫┣┫┃┃┃┓┃┃┃┓

@@ -17,6 +17,7 @@ public:
 	// block copy assignment operator
 	Mesh& operator=(const Mesh&) = delete;
 	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures);
+	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor);
 	~Mesh();
 
 	void draw(Shader &shader);
@@ -27,6 +28,8 @@ private:
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;
 	std::vector<std::shared_ptr<Texture>> m_textures;
+	bool m_hasDiffuseColor;
+	glm::vec3 m_diffuseColor;
 
 	void setupMesh();
 };
