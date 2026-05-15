@@ -41,3 +41,10 @@ void GameEntity::end() {
 		c->onEnd();
 	}
 }
+
+glm::mat4 GameEntity::getInterpolatedModelMatrix(float alpha) const {
+	if (m_transformFps) {
+		return m_transformFps->getInterpolatedModelMatrix(alpha);
+	}
+	return m_transform->getInterpolatedModelMatrix(alpha);
+}

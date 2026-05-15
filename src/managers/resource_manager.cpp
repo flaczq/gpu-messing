@@ -39,15 +39,24 @@ void ResourceManager::loadModel(const std::string& name, const std::string& path
 	LOG("Loading Model: " << name << " from path: " << path);
 }
 
-void ResourceManager::loadMaterial(const std::string& name, const char* vertPath, const char* fragPath) {
+void ResourceManager::loadShader(const std::string& name, const char* vertPath, const char* fragPath) {
+	if (m_shaders.find(name) != m_shaders.end()) {
+		LOG("Already loaded shader: " << name);
+		return;
+	}
+
+	m_shaders[name] = std::make_shared<Shader>(vertPath, fragPath);
+	LOG("Loading Shader: " << name << " (ID: " << m_shaders[name]->getID() << ") from path: " << vertPath << " and " << fragPath);
+}
+
+void ResourceManager::loadMaterial(const std::string& name, std::shared_ptr<Shader> shader) {
 	if (m_materials.find(name) != m_materials.end()) {
 		LOG("Already loaded Material: " << name);
 		return;
 	}
 
-	auto shader = std::make_shared<Shader>(vertPath, fragPath);
 	m_materials[name] = std::make_shared<Material>(name, shader);
-	LOG("Loading Material: " << name << " from path: " << vertPath << " and " << fragPath);
+	LOG("Loading Material: " << name << " with shader ID: " << shader->getID());
 }
 
 void ResourceManager::loadTexture(const std::string& name, const char* path, const std::string& typeName) {
@@ -70,6 +79,16 @@ std::shared_ptr<Model> ResourceManager::getModel(const std::string& name) {
 	auto it = m_models.find(name);
 	if (it == m_models.end()) {
 		LOG_E("RESOURCE_MANAGER::GET_MODEL_NULLPTR: " << name);
+		return nullptr;
+	}
+
+	return it->second;
+}
+
+std::shared_ptr<Shader> ResourceManager::getShader(const std::string& name) {
+	auto it = m_shaders.find(name);
+	if (it == m_shaders.end()) {
+		LOG_E("RESOURCE_MANAGER::GET_SHADER_NULLPTR: " << name);
 		return nullptr;
 	}
 

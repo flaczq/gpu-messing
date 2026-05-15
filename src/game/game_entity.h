@@ -2,8 +2,10 @@
 
 #include "../components/component.h"
 #include "../components/components_types.hpp"
+#include "../components/transform_fps_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
+#include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../graphics/renderer.h"
 #include <iostream>
@@ -25,7 +27,9 @@ public:
 		//unsigned int id = ComponentCounter<T>::getTypeID();
 		//m_componentsMap[id] = c;
 
-		if constexpr (std::is_base_of_v<TransformComponent, T>) {
+		if constexpr (std::is_base_of_v<TransformFpsComponent, T>) {
+			m_transformFps = static_cast<TransformFpsComponent*>(cPtr);
+		} else if constexpr (std::is_base_of_v<TransformComponent, T>) {
 			m_transform = static_cast<TransformComponent*>(cPtr);
 		} else if constexpr (std::is_base_of_v<RenderComponent, T>) {
 			m_render = static_cast<RenderComponent*>(cPtr);
@@ -39,6 +43,8 @@ public:
 	void fixedUpdate(float fixedt) const;
 	void update(float alpha) const;
 	void end();
+
+	glm::mat4 getInterpolatedModelMatrix(float alpha) const;
 
 	const std::string& getName() const { return m_name; }
 	TransformComponent* getTransform() { return m_transform; }
@@ -60,6 +66,7 @@ private:
 	std::string m_name{};
 	std::vector<std::unique_ptr<Component>> m_components;
 
+	TransformFpsComponent* m_transformFps = nullptr;
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
 	RendererQueueType m_rendererQueueType = RendererQueueType::OPAQUE;

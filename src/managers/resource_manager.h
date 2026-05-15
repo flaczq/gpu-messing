@@ -19,11 +19,13 @@ public:
 	// add model with mesh from MeshGenerator
 	void addModel(std::shared_ptr<Model> model);
 	void loadModel(const std::string& name, const std::string& path);
-	void loadMaterial(const std::string& name, const char* vertPath, const char* fragPath);
+	void loadShader(const std::string& name, const char* vertPath, const char* fragPath);
+	void loadMaterial(const std::string& name, std::shared_ptr<Shader> shader);
 	// manually load texture from file
 	void loadTexture(const std::string& name, const char* path, const std::string& typeName = "diffuse");
 
 	std::shared_ptr<Model> getModel(const std::string& name);
+	std::shared_ptr<Shader> getShader(const std::string& name);
 	std::shared_ptr<Material> getMaterial(const std::string& name);
 	std::shared_ptr<Texture> getTexture(const std::string& name);
 	// used by Assimp to load textures from Model
@@ -37,6 +39,7 @@ private:
 	ResourceManager();
 
 	std::unordered_map<std::string, std::shared_ptr<Model>> m_models;
+	std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
 	std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
 	std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
 

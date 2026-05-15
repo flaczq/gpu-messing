@@ -9,7 +9,7 @@ public:
 
 	void saveState();
 	glm::mat4 getInterpolatedModelMatrix(float alpha);
-	glm::mat4 getNormalMatrix(glm::mat4 modelMatrix);
+	glm::mat4 getNormalMatrix();
 
 	void setDirty(bool dirty) { m_dirty = dirty; }
 	void setRotation(glm::quat rotation) { m_rotation = rotation; m_dirty = true; }

@@ -1,6 +1,7 @@
 #include "../components/dir_light_movement_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
+#include "../components/transform_fps_component.h"
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
@@ -38,13 +39,24 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     ResourceManager::getInstance().loadModel("arms_model", "../assets/models/RiggedFpsArms.fbx");
-    // MATERIALS with SHADERS
-    ResourceManager::getInstance().loadMaterial("floor_material", "../shaders/light.vert", "../shaders/light.frag");
-    ResourceManager::getInstance().loadMaterial("light_material", "../shaders/light.vert", "../shaders/light.frag");
-    ResourceManager::getInstance().loadMaterial("gizmo_material", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
-    ResourceManager::getInstance().loadMaterial("arms_material", "../shaders/lambert.vert", "../shaders/lambert.frag");
-    ResourceManager::getInstance().loadMaterial("soldier_material", "../shaders/model.vert", "../shaders/model.frag");
-    ResourceManager::getInstance().loadMaterial("window_material", "../shaders/window.vert", "../shaders/window.frag");
+    // SHADERS
+    ResourceManager::getInstance().loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
+    ResourceManager::getInstance().loadShader("gizmo_shader", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
+    ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
+    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
+    auto lightShader = ResourceManager::getInstance().getShader("light_shader");
+    auto gizmoShader = ResourceManager::getInstance().getShader("gizmo_shader");
+    auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
+    auto modelShader = ResourceManager::getInstance().getShader("model_shader");
+    auto windowShader = ResourceManager::getInstance().getShader("window_shader");
+    // MATERIALS
+    ResourceManager::getInstance().loadMaterial("floor_material", lightShader);
+    ResourceManager::getInstance().loadMaterial("light_material", lightShader);
+    ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
+    ResourceManager::getInstance().loadMaterial("arms_material", lambertShader);
+    ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
+    ResourceManager::getInstance().loadMaterial("window_material", windowShader);
 
     // MODELS
     // --- floor
@@ -120,8 +132,9 @@ void SoldierScene::init() {
     auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
     if (armsModel && armsMaterial) {
         auto armsGO = std::make_unique<GameEntity>("arms");
-        armsGO->addComponent<TransformComponent>(glm::vec3(0.0f));
+        armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
+        armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
@@ -232,18 +245,13 @@ void SoldierScene::init() {
 
 void SoldierScene::saveState() {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
-        auto* transform = aliveGameEntity->getTransform();
-        transform->saveState();
+        aliveGameEntity->getTransform()->saveState();
     }
 }
 
 void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
-
-        /*if (aliveGameEntity->getName().starts_with("soldier_15")) {
-            aliveGameEntity->destroy();
-        }*/
     }
 }
 
@@ -263,8 +271,8 @@ void SoldierScene::update(float alpha) {
 
         auto* model = render->getModel();
         auto* material = render->getMaterial();
-        glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
-        glm::mat3 normalMatrix = transform->getNormalMatrix(modelMatrix);
+        glm::mat4 modelMatrix = aliveGameEntity->getInterpolatedModelMatrix(alpha);
+        glm::mat3 normalMatrix = transform->getNormalMatrix();
         glm::vec3 position = transform->getPosition();
         transform->setDirty(false);
         RendererQueueType queueType = aliveGameEntity->getRendererQueueType();

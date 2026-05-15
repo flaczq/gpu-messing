@@ -36,9 +36,9 @@ glm::mat4 TransformComponent::getInterpolatedModelMatrix(float alpha) {
 	return m_model;
 }
 
-glm::mat4 TransformComponent::getNormalMatrix(glm::mat4 modelMatrix) {
+glm::mat4 TransformComponent::getNormalMatrix() {
 	if (m_dirty) {
-		m_normal = glm::transpose(glm::inverse(glm::mat3(modelMatrix)));
+		m_normal = glm::transpose(glm::inverse(glm::mat3(m_model)));
 		//m_dirty = false;
 	}
 	return m_normal;

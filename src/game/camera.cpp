@@ -177,7 +177,9 @@ void Camera::processMouseScroll(float yoffset) {
 }
 
 void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
+    // left-right
     m_yaw += xoffset * MOUSE_SENSITIVITY;
+    // up-down
     m_pitch += yoffset * MOUSE_SENSITIVITY;
     if (constrainPitch) {
         if (m_pitch < MIN_PITCH) {
