@@ -10,7 +10,7 @@ TransformFpsComponent::TransformFpsComponent(Camera* camera)
 }
 
 void TransformFpsComponent::saveState() {
-    //TransformComponent::saveState();
+    TransformComponent::saveState();
     m_prevSway = m_sway;
 }
 
