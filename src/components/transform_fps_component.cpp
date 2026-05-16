@@ -16,8 +16,7 @@ void TransformFpsComponent::saveState() {
 
 void TransformFpsComponent::onFixedUpdate(float fixedt) {
     m_sway += fixedt * 2.0f;
-    m_position = glm::vec3(m_model[3]);
-    m_dirty = true;
+    setPosition(glm::vec3(m_model[3]));
 }
 
 glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {

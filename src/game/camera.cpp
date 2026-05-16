@@ -19,7 +19,9 @@ Camera::Camera(unsigned int width, unsigned int height)
       // looking at (0,0,0)
       m_yaw(-135.0f),
       m_pitch(-11.5f),
-      m_fov(45.0f),
+      m_fov(FOV),
+      m_nearPlane(NEAR_PLANE),
+      m_farPlane(FAR_PLANE),
       m_aspect((float)width / (float)height)
 {
     std::fill(std::begin(m_currDirections), std::end(m_currDirections), false);
@@ -133,10 +135,18 @@ void Camera::updateView(float alpha) {
 void Camera::updateProjection(bool force) {
     if (m_projectionDirty || force) {
         m_projection = glm::mat4(1.0f);
-        m_projection = glm::perspective(glm::radians(m_fov), m_aspect, NEAR_PLANE, FAR_PLANE);
+        m_projection = glm::perspective(glm::radians(m_fov), m_aspect, m_nearPlane, m_farPlane);
 
         m_projectionDirty = false;
     }
+}
+
+void Camera::restoreDefaultProjection() {
+    m_fov = FOV;
+    m_nearPlane = NEAR_PLANE;
+    m_farPlane = FAR_PLANE;
+    m_projectionDirty = true;
+    updateProjection(true);
 }
 
 void Camera::updateAspect(int width, int height) {

@@ -29,6 +29,7 @@ public:
     void updateVectors();
     void updateView(float alpha);
     void updateProjection(bool force = false);
+    void restoreDefaultProjection();
     void updateAspect(int width, int height);
     void toggleCameraMode();
     void toggleGodMode();
@@ -45,15 +46,18 @@ public:
     float getPitch() const { return m_pitch; }
     void setPitch(float pitch) { m_pitch = pitch; }
     float getFov() const { return m_fov; }
-    void setFov(float fov) { m_fov = fov; }
+    void setFov(float fov) { m_fov = fov; m_projectionDirty = true; }
     float getAspect() const { return m_aspect; }
-    float getNearPlane() const { return NEAR_PLANE; }
-    float getFarPlane() const { return FAR_PLANE; }
+    float getNearPlane() const { return m_nearPlane; }
+    void setNearPlane(float near_plane) { m_nearPlane = near_plane; m_projectionDirty = true; }
+    float getFarPlane() const { return m_farPlane; }
+    void setFarPlane(float far_plane) { m_farPlane = far_plane; m_projectionDirty = true; }
 
 private:
     static constexpr glm::vec3 WORLD_UP = glm::vec3(0.0f, 1.0f, 0.0f);
     static constexpr float MOVEMENT_SPEED = 5.0f;
     static constexpr float MOUSE_SENSITIVITY = 0.1f;
+    static constexpr float FOV = 60.0f;
     static constexpr float NEAR_PLANE = 0.1f;
     static constexpr float FAR_PLANE = 100.0f;
     static constexpr float MIN_PITCH = -75.0f;
@@ -71,6 +75,8 @@ private:
     float m_yaw{};
     float m_pitch{};
     float m_fov{};
+    float m_nearPlane{};
+    float m_farPlane{};
     float m_aspect{};
     bool m_currDirections[6] = { false };
 

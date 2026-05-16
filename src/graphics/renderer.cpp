@@ -169,14 +169,17 @@ void Renderer::flush() {
     //                                   
     if (!m_topLayerQueue.empty()) {
         // always last
-        // TODO maybe different FOV and planes..?
+        // different fov and planes for top layer
         glClear(GL_DEPTH_BUFFER_BIT);
-        //m_camera->setFov(30.0f);
-        //m_camera->updateProjection(true);
-        sortQueueByDistance(m_topLayerQueue);
+        m_camera->setFov(45.0f);
+        m_camera->setNearPlane(0.01f);
+        m_camera->setFarPlane(10.0f);
+        m_camera->updateProjection(true);
+        // ---
+        sortQueueByMaterial(m_topLayerQueue);
         renderSortedQueue(m_topLayerQueue, "top layer pass");
-        //m_camera->setFov(45.0f);
-        //m_camera->updateProjection(true);
+        // ---
+        m_camera->restoreDefaultProjection();
     }
 
     m_opaqueQueue.clear();
