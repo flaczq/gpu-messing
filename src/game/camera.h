@@ -35,13 +35,17 @@ public:
 
     glm::mat4 getViewMatrix() const { return m_view; }
     glm::vec3 getViewPos() const { return m_viewPos; }
-    void setViewPos(glm::vec3 viewPos) { m_viewPos = viewPos; m_preViewPos = viewPos; }
+    void setViewPos(glm::vec3 viewPos) { m_viewPos = viewPos; }
+    glm::vec3 getPreViewPos() const { return m_preViewPos; }
+    void setPreViewPos(glm::vec3 preViewPos) { m_preViewPos = preViewPos; }
     glm::mat4 getProjection() const { return m_projection; }
+    void setProjection(glm::mat4 projection) { m_projection = projection; }
     float getYaw() const { return m_yaw; }
     void setYaw(float yaw) { m_yaw = yaw; }
     float getPitch() const { return m_pitch; }
     void setPitch(float pitch) { m_pitch = pitch; }
     float getFov() const { return m_fov; }
+    void setFov(float fov) { m_fov = fov; }
     float getAspect() const { return m_aspect; }
     float getNearPlane() const { return NEAR_PLANE; }
     float getFarPlane() const { return FAR_PLANE; }

@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -23,7 +24,7 @@ Renderer::Renderer() = default;
 bool Renderer::init(GLFWwindow* window, Camera* camera) {
     m_window = window;
     m_camera = camera;
-    m_rendererLight = {
+    m_light = {
         glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
         glm::vec3(1.0f)
     };
@@ -33,6 +34,7 @@ bool Renderer::init(GLFWwindow* window, Camera* camera) {
     m_stencilQueue.reserve(100);
     m_outlineQueue.reserve(100);
     m_blendingQueue.reserve(100);
+    m_topLayerQueue.reserve(100);
 
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
@@ -97,6 +99,9 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
     case RendererQueueType::BLENDING:
         m_blendingQueue.push_back(command);
         break;
+    case RendererQueueType::TOP_LAYER:
+        m_topLayerQueue.push_back(command);
+        break;
     }
 }
 
@@ -106,7 +111,7 @@ void Renderer::flush() {
     //    ┏┓┏┓┏┓┏┓┳┳┏┓  ┏┓┏┓┏┓┏┓
     //    ┃┃┃┃┣┫┃┃┃┃┣   ┃┃┣┫┗┓┗┓
     //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
-    //                          
+    //                                       
     sortQueueByMaterial(m_opaqueQueue);
     renderSortedQueue(m_opaqueQueue, "opaque pass");
 
@@ -158,10 +163,27 @@ void Renderer::flush() {
         glDisable(GL_BLEND);
     }
 
+    //    ┏┳┓┏┓┏┓  ┓ ┏┓┓┏┏┓┳┓  ┏┓┏┓┏┓┏┓
+    //     ┃ ┃┃┃┃  ┃ ┣┫┗┫┣ ┣┫  ┃┃┣┫┗┓┗┓
+    //     ┻ ┗┛┣┛  ┗┛┛┗┗┛┗┛┛┗  ┣┛┛┗┗┛┗┛
+    //                                   
+    if (!m_topLayerQueue.empty()) {
+        // always last
+        // TODO maybe different FOV and planes..?
+        glClear(GL_DEPTH_BUFFER_BIT);
+        //m_camera->setFov(30.0f);
+        //m_camera->updateProjection(true);
+        sortQueueByDistance(m_topLayerQueue);
+        renderSortedQueue(m_topLayerQueue, "top layer pass");
+        //m_camera->setFov(45.0f);
+        //m_camera->updateProjection(true);
+    }
+
     m_opaqueQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
     m_blendingQueue.clear();
+    m_topLayerQueue.clear();
 }
 
 void Renderer::sortQueueByMaterial(std::vector<RendererCommand>& queue) const {
@@ -220,8 +242,8 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
                 currShader->setMat4fv("projection", m_camera->getProjection());
                 currShader->setMat4fv("view", m_camera->getViewMatrix());
                 currShader->setVec3fv("viewPos", m_camera->getViewPos());
-                currShader->setVec3fv("lightDir", m_rendererLight.direction);
-                currShader->setVec3fv("lightColor", m_rendererLight.color);
+                currShader->setVec3fv("lightDir", m_light.direction);
+                currShader->setVec3fv("lightColor", m_light.color);
                 //LOG_D("per-shader draws with shader: " << currShader->getID());
 
                 lastShader = currShader;

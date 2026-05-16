@@ -17,7 +17,8 @@ enum class RendererQueueType {
 	OPAQUE,
 	STENCIL,
 	OUTLINE,
-	BLENDING
+	BLENDING,
+	TOP_LAYER
 };
 
 struct RendererLight {
@@ -56,8 +57,8 @@ public:
 	void setCamera(Camera* camera) { m_camera = camera; }
 	//void setStencilReqd(bool stencilReqd) { m_stencilReqd = stencilReqd; }
 	//void setBlendingReqd(bool blendingReqd) { m_blendingReqd = blendingReqd; }
-	RendererLight* getRendererLight() { return &m_rendererLight; }
-	void setLightDir(glm::vec3 lightDir) { m_rendererLight.direction = lightDir; }
+	RendererLight* getRendererLight() { return &m_light; }
+	void setLightDir(glm::vec3 lightDir) { m_light.direction = lightDir; }
 
 private:
 	// hidden constructor
@@ -66,7 +67,7 @@ private:
 	GLFWwindow* m_window = nullptr;
 	Camera* m_camera = nullptr;
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
-	RendererLight m_rendererLight{};
+	RendererLight m_light{};
 	//bool m_stencilReqd = false;
 	//bool m_blendingReqd = false;
 
@@ -74,6 +75,7 @@ private:
 	std::vector<RendererCommand> m_stencilQueue;
 	std::vector<RendererCommand> m_outlineQueue;
 	std::vector<RendererCommand> m_blendingQueue;
+	std::vector<RendererCommand> m_topLayerQueue;
 
 	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
 	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;

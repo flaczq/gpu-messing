@@ -92,6 +92,7 @@ bool BackEnd::init() {
     if (m_minimap) {
         m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
         m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+        m_minimapCamera->setPreViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
         m_minimapCamera->setYaw(-90.0f);
         m_minimapCamera->setPitch(-70.0f);
         m_minimapCamera->init();

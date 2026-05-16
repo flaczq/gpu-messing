@@ -132,6 +132,7 @@ void SoldierScene::init() {
     auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
     if (armsModel && armsMaterial) {
         auto armsGO = std::make_unique<GameEntity>("arms");
+        armsGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);

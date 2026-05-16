@@ -45,7 +45,6 @@ public:
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
 	RendererQueueType getRendererQueueType() const { return m_rendererQueueType; }
-
 	void setRendererQueueType(RendererQueueType rendererQueueType) { m_rendererQueueType = rendererQueueType; }
 	bool isSolid() const { return m_solid; }
 	void setSolid(bool solid) { m_solid = solid; }

@@ -7,15 +7,15 @@ class TransformComponent : public Component {
 public:
 	TransformComponent(glm::vec3 position, glm::quat rotation = glm::quat(), glm::vec3 scale = glm::vec3(1.0f));
 
-	void saveState();
+	virtual void saveState();
 	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
 	glm::mat4 getNormalMatrix();
 
-	void setDirty(bool dirty) { m_dirty = dirty; }
-	void setRotation(glm::quat rotation) { m_rotation = rotation; m_dirty = true; }
-	void setScale(glm::vec3 scale) { m_scale = scale; m_dirty = true; }
 	glm::vec3 getPosition() const { return m_position; }
 	void setPosition(glm::vec3 position) { m_position = position; m_dirty = true; }
+	void setRotation(glm::quat rotation) { m_rotation = rotation; m_dirty = true; }
+	void setScale(glm::vec3 scale) { m_scale = scale; m_dirty = true; }
+	void setDirty(bool dirty) { m_dirty = dirty; }
 
 protected:
 	glm::mat4 m_model{};
