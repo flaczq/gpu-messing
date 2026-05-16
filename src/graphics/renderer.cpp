@@ -65,21 +65,10 @@ void Renderer::beginFrame(unsigned int screenWidth, unsigned int screenHeight) {
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
-    // Stencil test
-    /*if (m_stencilReqd) {
-        glEnable(GL_STENCIL_TEST);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilMask(0x00);
-    }*/
-
-    // Blending
-    /*if (m_blendingReqd) {
-        glEnable(GL_BLEND);
-        // src: factor == source color vector, dst: factor == 1 - source color vector
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-    }*/
+    // face culling
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
+    //glFrontFace(GL_CCW);
 
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

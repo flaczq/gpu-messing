@@ -20,6 +20,11 @@ namespace MeshGenerator {
 		v2.Position = {  halfWidth, 0.0f,  halfDepth };
 		v3.Position = { -halfWidth, 0.0f,  halfDepth };
 
+		/*v0.Color = glm::vec3(1.0f, 0.5f, 0.0f);
+		v1.Color = glm::vec3(1.0f, 0.0f, 0.0f);
+		v2.Color = glm::vec3(1.0f, 0.5f, 0.0f);
+		v3.Color = glm::vec3(1.0f, 0.0f, 0.0f);*/
+
 		v0.TexCoords = { 0.0f,     uvTiling };
 		v1.TexCoords = { uvTiling, uvTiling };
 		v2.TexCoords = { uvTiling, 0.0f     };
