@@ -8,7 +8,7 @@ public:
 	TransformComponent(glm::vec3 position, glm::quat rotation = glm::quat(), glm::vec3 scale = glm::vec3(1.0f));
 
 	void saveState();
-	glm::mat4 getInterpolatedModelMatrix(float alpha);
+	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
 	glm::mat4 getNormalMatrix();
 
 	void setDirty(bool dirty) { m_dirty = dirty; }
@@ -17,7 +17,7 @@ public:
 	glm::vec3 getPosition() const { return m_position; }
 	void setPosition(glm::vec3 position) { m_position = position; m_dirty = true; }
 
-private:
+protected:
 	glm::mat4 m_model{};
 	glm::mat3 m_normal{};
 	glm::vec3 m_position{}, m_prevPosition{};

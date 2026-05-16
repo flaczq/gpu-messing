@@ -1,20 +1,16 @@
 #pragma once
 
 #include "../configs/math_config.hpp"
-#include "component.h"
+#include "transform_component.h"
 
 class Camera;
-class TransformComponent;
 
-class TransformFpsComponent : public Component {
+class TransformFpsComponent : public TransformComponent {
 public:
 	TransformFpsComponent(Camera* camera);
 
-	void onInit() override;
-
-	glm::mat4 getInterpolatedModelMatrix(float alpha);
+	glm::mat4 getInterpolatedModelMatrix(float alpha) override;
 
 private:
 	Camera* m_camera = nullptr;
-	TransformComponent* m_transform = nullptr;
 };

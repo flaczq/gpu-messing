@@ -132,9 +132,9 @@ void SoldierScene::init() {
     auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
     if (armsModel && armsMaterial) {
         auto armsGO = std::make_unique<GameEntity>("arms");
-        armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
-        armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
+        //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
+        armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
@@ -271,7 +271,7 @@ void SoldierScene::update(float alpha) {
 
         auto* model = render->getModel();
         auto* material = render->getMaterial();
-        glm::mat4 modelMatrix = aliveGameEntity->getInterpolatedModelMatrix(alpha);
+        glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
         glm::mat3 normalMatrix = transform->getNormalMatrix();
         glm::vec3 position = transform->getPosition();
         transform->setDirty(false);
