@@ -1,3 +1,4 @@
+#include "../components/ai_component.h"
 #include "../components/dir_light_movement_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
@@ -154,6 +155,9 @@ void SoldierScene::init() {
             auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
             soldierGO->addComponent<TransformComponent>(sPos, sRotQ, SOLDIER_SCALE);
             soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
+            if (i == 30) {
+                soldierGO->addComponent<AIComponent>();
+            }
             soldierGO->init();
             m_gameEntities.push_back(std::move(soldierGO));
         }

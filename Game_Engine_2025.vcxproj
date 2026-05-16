@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\components\ai_component.cpp" />
     <ClCompile Include="src\components\transform_fps_component.cpp" />
     <ClCompile Include="src\components\dir_light_movement_component.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
@@ -80,6 +81,7 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\components\ai_component.h" />
     <ClInclude Include="src\components\transform_fps_component.h" />
     <ClInclude Include="src\components\dir_light_movement_component.h" />
     <ClInclude Include="src\graphics\material.h" />
