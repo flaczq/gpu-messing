@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../components/component.h"
-#include "../components/components_types.hpp"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"
@@ -14,19 +13,23 @@
 #include <utility>
 #include <vector>
 
+enum class GroupID {
+	DEFAULT,
+	SOLDIERS
+};
+
 class GameEntity {
 public:
-	GameEntity(const std::string& name);
+	GameEntity(const std::string& name, GroupID groupID = GroupID::DEFAULT);
 
 	template <typename T, typename... TArgs>
 	T& addComponent(TArgs&&... args) {
 		auto c = std::make_unique<T>(std::forward<TArgs>(args)...);
 		T* cPtr = c.get();
 		cPtr->m_owner = this;
-		//unsigned int id = ComponentCounter<T>::getTypeID();
-		//m_componentsMap[id] = c;
 
 		if constexpr (std::is_base_of_v<TransformComponent, T>) {
+			// TransformFpsComponent
 			m_transform = static_cast<TransformComponent*>(cPtr);
 		} else if constexpr (std::is_base_of_v<RenderComponent, T>) {
 			m_render = static_cast<RenderComponent*>(cPtr);
@@ -42,6 +45,7 @@ public:
 	void end();
 
 	const std::string& getName() const { return m_name; }
+	GroupID getGroupID() const { return m_groupID; }
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
 	RendererQueueType getRendererQueueType() const { return m_rendererQueueType; }
@@ -58,6 +62,7 @@ public:
 
 private:
 	std::string m_name{};
+	GroupID m_groupID{};
 	std::vector<std::unique_ptr<Component>> m_components;
 
 	TransformComponent* m_transform = nullptr;

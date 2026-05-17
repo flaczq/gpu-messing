@@ -208,9 +208,6 @@
     <ClInclude Include="src\components\component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\components_types.hpp">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="src\components\transform_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>

@@ -152,7 +152,7 @@ void SoldierScene::init() {
             size_t col = i % 7;
             glm::vec3 sPos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
             glm::quat sRotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
-            auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i));
+            auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i), GroupID::SOLDIERS);
             soldierGO->addComponent<TransformComponent>(sPos, sRotQ, SOLDIER_SCALE);
             soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
             if (i == 30) {
@@ -257,6 +257,10 @@ void SoldierScene::saveState() {
 void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
+
+        /*if (aliveGameEntity->getGroupID() == GroupID::SOLDIERS) {
+            aliveGameEntity->getTransform()->setScale(glm::vec3(1.1f));
+        }*/
     }
 }
 

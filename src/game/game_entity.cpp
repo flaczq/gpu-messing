@@ -1,5 +1,4 @@
 #include "../components/component.h"
-#include "../components/components_types.hpp"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"
@@ -12,10 +11,17 @@
 #include <utility>
 #include <vector>
 
-GameEntity::GameEntity(const std::string& name)
-	: m_name(name)
+GameEntity::GameEntity(const std::string& name, GroupID groupID)
+	: m_name(name),
+	  m_groupID(groupID)
 {
-	LOG_D("GameEntity: " << name << " created!");
+	std::string groupIDStr;
+	if (groupID == GroupID::DEFAULT) {
+		groupIDStr = "DEFAULT";
+	} else if (groupID == GroupID::SOLDIERS) {
+		groupIDStr = "SOLDIERS";
+	}
+	LOG_D("GameEntity: " << name << " with groupID: " << groupIDStr << " created!");
 }
 
 void GameEntity::init() {

@@ -88,7 +88,6 @@
     <ClInclude Include="src\graphics\mesh_generator.h" />
     <ClInclude Include="src\components\render_component.h" />
     <ClInclude Include="src\components\component.h" />
-    <ClInclude Include="src\components\components_types.hpp" />
     <ClInclude Include="src\game\game_entity.h" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\game\physics_world.h" />
