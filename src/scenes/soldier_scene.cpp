@@ -277,6 +277,7 @@ void SoldierScene::update(float alpha) {
 
         auto* transform = aliveGameEntity->getTransform();
         auto* render = aliveGameEntity->getRender();
+        // no need to register in renderer if no render component is available
         if (!render) {
             return;
         }
