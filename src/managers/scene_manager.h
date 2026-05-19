@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../game/game_entity.h"
 #include <memory>
 
 class Camera;
@@ -15,7 +14,6 @@ public:
 
 	bool init(Camera* camera);
 	void toggleScene();
-	std::vector<GameEntity*> getCurrentSceneGameEntities();
 	void saveState() const;
 	void fixedUpdate(float fixedt) const;
 	void update(float alpha) const;

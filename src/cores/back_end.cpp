@@ -97,9 +97,10 @@ bool BackEnd::init() {
         m_minimapCamera->setPitch(-70.0f);
         m_minimapCamera->init();
     }
+    // nothing else matters... but order
     SceneManager::getInstance().init(m_camera.get());
-    Renderer::getInstance().init(m_window, m_camera.get());
     PhysicsWorld::getInstance().init();
+    Renderer::getInstance().init(m_window, m_camera.get());
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -151,10 +152,10 @@ void BackEnd::run() {
             //m_minimapCamera->updateVectors();
         }
 
-        // physics, collisions (1 per 60 frames)
+        // logic (once per 60 frames): physics, collisions
         while (m_accumulator >= FIXED_DT) {
-            PhysicsWorld::getInstance().step();
             SceneManager::getInstance().saveState();
+            PhysicsWorld::getInstance().step(static_cast<float>(FIXED_DT));
             m_camera->saveState();
             SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));
             // actual movement

@@ -16,8 +16,9 @@ public:
 	void operator=(const PhysicsWorld&) = delete;
 
 	bool init();
+	void saveState();
 	void registerInQueue(const PhysicsCommand& command);
-	void step();
+	void step(float fixedt) const;
 
 private:
 	// hidden constructor

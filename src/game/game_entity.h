@@ -68,9 +68,9 @@ private:
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
 	RendererQueueType m_rendererQueueType = RendererQueueType::OPAQUE;
-	// no gravity
+	// no collisions e.g. grass, ...
 	bool m_solid = false;
-	// "invisible" e.g. light, trigger, ...
+	// unaffected by physics e.g. light, trigger, ...
 	bool m_abstract = false;
 	bool m_alive = true;
 	bool m_pendingDeath = false;

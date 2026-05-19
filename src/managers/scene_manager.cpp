@@ -1,6 +1,5 @@
 #include "../configs/log_config.hpp"
 #include "../game/camera.h"
-#include "../game/game_entity.h"
 #include "../graphics/renderer.h"
 #include "../scenes/scene.h"
 #include "../scenes/soldier_scene.h"
@@ -54,13 +53,6 @@ void SceneManager::toggleScene() {
 	m_currentScene = std::move(nextScene);
 	m_currentScene->init();
 	LOG_D("Changed CurrentScene to: " << sceneIDStr);
-}
-
-std::vector<GameEntity*> SceneManager::getCurrentSceneGameEntities() {
-	if (m_currentScene) {
-		return m_currentScene->getGameEntites();
-	}
-	return {};
 }
 
 void SceneManager::saveState() const {
