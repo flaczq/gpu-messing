@@ -221,6 +221,9 @@ void SoldierScene::init() {
     m_aliveGameEntities.reserve(100);
     m_deadGameEntities.reserve(100);
 
+    // FIXME
+    //register m_gameEntities in physics
+
     //bool isStencilReqd = false;
     //bool isOutlineReqd = false;
     //bool isBlendingReqd = false;

@@ -6,6 +6,7 @@
 #include "../graphics/material.h"
 #include "../graphics/model.h"
 #include "../graphics/shader.h"
+#include "../utils/enum_utils.hpp"
 #include "renderer.h"
 #include <algorithm>
 #include <iostream>
@@ -43,19 +44,9 @@ bool Renderer::init(GLFWwindow* window, Camera* camera) {
 }
 
 void Renderer::toggleRenderMode() {
-    std::string renderModeStr;
-    if (m_renderMode == RendererRenderMode::STANDARD) {
-        m_renderMode = RendererRenderMode::WIREFRAME;
-        renderModeStr = "WIREFRAME";
-    } else if (m_renderMode == RendererRenderMode::WIREFRAME) {
-        m_renderMode = RendererRenderMode::POINTCLOUD;
-        renderModeStr = "POINTCLOUD";
-    } else {
-        m_renderMode = RendererRenderMode::STANDARD;
-        renderModeStr = "STANDARD";
-    }
+    m_renderMode = Utils::getEnumNext(m_renderMode);
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-    LOG_D("Changed RenderMode to: " << renderModeStr);
+    LOG_D("Changed RenderMode to: " << Utils::getEnumName(m_renderMode));
 }
 
 void Renderer::beginFrame(unsigned int screenWidth, unsigned int screenHeight) {

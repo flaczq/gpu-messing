@@ -1,19 +1,16 @@
 #include "../configs/log_config.hpp"
+#include "../game/game_entity.h"
+#include "../graphics/renderer.h"
+#include "../managers/scene_manager.h"
 #include "physics_world.h"
+#include <vector>
 
 PhysicsWorld::PhysicsWorld() {
+	m_gameEntities = SceneManager::getInstance().getCurrentSceneGameEntities();
 }
 
 void PhysicsWorld::init() {
-}
-
-void PhysicsWorld::fixedUpdate(float fixedt) const {
-	if (m_active) {
-		//LOG("Physics working: " << fixedt);
-	} else {
-		//LOG_D("Physics is disabled");
+	for (auto& a : m_gameEntities) {
+		LOG_D(a->getName());
 	}
-}
-
-void PhysicsWorld::saveState() {
 }

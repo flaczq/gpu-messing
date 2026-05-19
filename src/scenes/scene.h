@@ -23,6 +23,7 @@ public:
 	virtual void end() = 0;
 
 	virtual SceneID getID() const = 0;
+	std::vector<GameEntity*> getGameEntites() const { return m_aliveGameEntities; }
 
 protected:
 	std::vector<std::unique_ptr<GameEntity>> m_gameEntities;

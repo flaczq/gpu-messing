@@ -99,8 +99,8 @@ bool BackEnd::init() {
     }
     SceneManager::getInstance().init(m_camera.get());
     Renderer::getInstance().init(m_window, m_camera.get());
-    //m_physicsWorld = std::make_unique<PhysicsWorld>();
-    //m_physicsWorld->init();
+    m_physicsWorld = std::make_unique<PhysicsWorld>();
+    m_physicsWorld->init();
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓

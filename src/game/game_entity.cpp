@@ -4,6 +4,7 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../graphics/renderer.h"
+#include "../utils/enum_utils.hpp"
 #include "game_entity.h"
 #include <memory>
 #include <string>
@@ -15,13 +16,7 @@ GameEntity::GameEntity(const std::string& name, GroupID groupID)
 	: m_name(name),
 	  m_groupID(groupID)
 {
-	std::string groupIDStr;
-	if (groupID == GroupID::DEFAULT) {
-		groupIDStr = "DEFAULT";
-	} else if (groupID == GroupID::SOLDIERS) {
-		groupIDStr = "SOLDIERS";
-	}
-	LOG_D("GameEntity: " << name << " with groupID: " << groupIDStr << " created!");
+	LOG_D("GameEntity: " << name << " with groupID: " << Utils::getEnumName(groupID) << " created!");
 }
 
 void GameEntity::init() {

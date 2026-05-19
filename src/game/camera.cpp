@@ -3,6 +3,7 @@
 #include "../configs/math_config.hpp"
 #include "../cores/back_end.h"
 #include "../managers/input_manager.h"
+#include "../utils/enum_utils.hpp"
 #include "camera.h"
 #include <ios>
 #include <iostream>
@@ -155,16 +156,9 @@ void Camera::updateAspect(int width, int height) {
 }
 
 void Camera::toggleCameraMode() {
-    std::string cameraModeStr;
-    if (m_cameraMode == CameraMode::STANDING) {
-        m_cameraMode = CameraMode::CROUCHING;
-        cameraModeStr = "CROUCHING";
-    } else {
-        m_cameraMode = CameraMode::STANDING;
-        cameraModeStr = "STANDING";
-    }
     m_cameraModeChanged = true;
-    LOG_D("Changed camera mode to: " << cameraModeStr);
+    m_cameraMode = Utils::getEnumNext(m_cameraMode);
+    LOG_D("Changed camera mode to: " << Utils::getEnumName(m_cameraMode));
 }
 
 void Camera::toggleGodMode() {
