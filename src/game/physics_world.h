@@ -2,14 +2,26 @@
 
 #include <vector>
 
-class GameEntity;
+class TransformComponent;
+
+struct PhysicsCommand {
+	TransformComponent* transform;
+};
 
 class PhysicsWorld {
 public:
-	PhysicsWorld();
+	// Meyer's Singleton
+	static PhysicsWorld& getInstance();
+	PhysicsWorld(const PhysicsWorld&) = delete;
+	void operator=(const PhysicsWorld&) = delete;
 
-	void init();
+	bool init();
+	void registerInQueue(const PhysicsCommand& command);
+	void step();
 
 private:
-	std::vector<GameEntity*> m_gameEntities;
+	// hidden constructor
+	PhysicsWorld();
+
+	std::vector<PhysicsCommand> m_physicsQueue;
 };

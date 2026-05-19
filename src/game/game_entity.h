@@ -38,16 +38,6 @@ public:
 		m_components.push_back(std::move(c));
 		return *cPtr;
 	}
-	template <typename T>
-	bool getComponent() {
-		for (auto* c : m_components) {
-			T* result = dynamic_cast<T*>(c);
-			if (result) {
-				return result;
-			}
-		}
-		return nullptr;
-	}
 
 	void init();
 	void fixedUpdate(float fixedt) const;

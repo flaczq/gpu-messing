@@ -99,8 +99,7 @@ bool BackEnd::init() {
     }
     SceneManager::getInstance().init(m_camera.get());
     Renderer::getInstance().init(m_window, m_camera.get());
-    m_physicsWorld = std::make_unique<PhysicsWorld>();
-    m_physicsWorld->init();
+    PhysicsWorld::getInstance().init();
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -152,10 +151,9 @@ void BackEnd::run() {
             //m_minimapCamera->updateVectors();
         }
 
-        // 1 per 60 frames
+        // physics, collisions (1 per 60 frames)
         while (m_accumulator >= FIXED_DT) {
-            //m_physicsWorld->saveState();
-            //m_physicsWorld->fixedUpdate(static_cast<float>(FIXED_DT));
+            PhysicsWorld::getInstance().step();
             SceneManager::getInstance().saveState();
             m_camera->saveState();
             SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));

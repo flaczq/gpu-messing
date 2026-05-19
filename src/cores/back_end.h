@@ -3,7 +3,6 @@
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/camera.h"
-#include "../game/physics_world.h"
 #include "../managers/scene_manager.h"
 #include <memory>
 
@@ -20,7 +19,6 @@ public:
     void run();
 
     Camera* getCamera() const { return m_camera.get(); }
-    PhysicsWorld* getPhysicsWorld() const { return m_physicsWorld.get(); }
 
 private:
     unsigned int m_screenWidth{}, m_screenHeight{};
@@ -29,7 +27,6 @@ private:
     GLFWwindow* m_window = nullptr;
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<Camera> m_minimapCamera;
-    std::unique_ptr<PhysicsWorld> m_physicsWorld;
     bool m_minimap = true;
 
     // textures
@@ -40,7 +37,7 @@ private:
     unsigned int m_fpsNr = 0u;
     float m_fpsLastFrame = 0.0f;
 
-    // physics
+    // time
     double m_lastTime = 0.0;
     double m_accumulator = 0.0;
     static constexpr double FIXED_DT = 1.0 / 60.0;

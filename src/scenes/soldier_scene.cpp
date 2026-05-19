@@ -8,6 +8,7 @@
 #include "../configs/math_config.hpp"
 #include "../game/camera.h"
 #include "../game/game_entity.h"
+#include "../game/physics_world.h"
 #include "../graphics/graphics_types.hpp"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
@@ -221,9 +222,6 @@ void SoldierScene::init() {
     m_aliveGameEntities.reserve(100);
     m_deadGameEntities.reserve(100);
 
-    // FIXME
-    //register m_gameEntities in physics
-
     //bool isStencilReqd = false;
     //bool isOutlineReqd = false;
     //bool isBlendingReqd = false;
@@ -240,6 +238,11 @@ void SoldierScene::init() {
             //if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
             //    isBlendingReqd = true;
             //}
+
+            PhysicsCommand command = {
+                gameEntity->getTransform()
+            };
+            PhysicsWorld::getInstance().registerInQueue(command);
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
         }
