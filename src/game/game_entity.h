@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../components/component.h"
+#include "../components/physics_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"
@@ -33,6 +34,8 @@ public:
 			m_transform = static_cast<TransformComponent*>(cPtr);
 		} else if constexpr (std::is_base_of_v<RenderComponent, T>) {
 			m_render = static_cast<RenderComponent*>(cPtr);
+		} else if constexpr (std::is_base_of_v<PhysicsComponent, T>) {
+			m_physics = static_cast<PhysicsComponent*>(cPtr);
 		}
 
 		m_components.push_back(std::move(c));
@@ -48,6 +51,7 @@ public:
 	GroupID getGroupID() const { return m_groupID; }
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
+	PhysicsComponent* getPhysics() { return m_physics; }
 	RendererQueueType getRendererQueueType() const { return m_rendererQueueType; }
 	void setRendererQueueType(RendererQueueType rendererQueueType) { m_rendererQueueType = rendererQueueType; }
 	bool isSolid() const { return m_solid; }
@@ -67,6 +71,7 @@ private:
 
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
+	PhysicsComponent* m_physics = nullptr;
 	RendererQueueType m_rendererQueueType = RendererQueueType::OPAQUE;
 	// no collisions e.g. grass, ...
 	bool m_solid = false;

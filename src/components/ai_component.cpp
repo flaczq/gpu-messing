@@ -2,6 +2,7 @@
 #include "../game/game_entity.h"
 #include "ai_component.h"
 #include "component.h"
+#include "transform_component.h"
 
 void AIComponent::onInit() {
     m_transform = getOwner()->getTransform();

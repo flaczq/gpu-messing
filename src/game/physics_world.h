@@ -4,7 +4,13 @@
 
 class TransformComponent;
 
+enum class PhysicsCommandType {
+	ADD,
+	REMOVE
+};
+
 struct PhysicsCommand {
+	PhysicsCommandType commandType;
 	TransformComponent* transform;
 };
 
@@ -14,10 +20,11 @@ public:
 	static PhysicsWorld& getInstance();
 	PhysicsWorld(const PhysicsWorld&) = delete;
 	void operator=(const PhysicsWorld&) = delete;
+	~PhysicsWorld();
 
 	bool init();
-	void saveState();
 	void registerInQueue(const PhysicsCommand& command);
+	void flush();
 	void step(float fixedt) const;
 
 private:
@@ -25,4 +32,5 @@ private:
 	PhysicsWorld();
 
 	std::vector<PhysicsCommand> m_physicsQueue;
+	std::vector<TransformComponent*> m_activePhysics;
 };

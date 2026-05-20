@@ -1,5 +1,6 @@
 #include "../components/ai_component.h"
 #include "../components/dir_light_movement_component.h"
+#include "../components/physics_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../components/transform_fps_component.h"
@@ -97,8 +98,10 @@ void SoldierScene::init() {
         floorMaterial->addVec3Uniform("matColor", glm::vec3(0.3f, 0.8f, 0.3f));
         auto floorGO = std::make_unique<GameEntity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
+        floorGO->setSolid(true);
         floorGO->addComponent<TransformComponent>(FLOOR_POSITION);
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
+        floorGO->addComponent<PhysicsComponent>();
         floorGO->init();
         m_gameEntities.push_back(std::move(floorGO));
     }
@@ -139,6 +142,7 @@ void SoldierScene::init() {
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
+        armsGO->addComponent<PhysicsComponent>();
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
@@ -157,6 +161,7 @@ void SoldierScene::init() {
             auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i), GroupID::SOLDIERS);
             soldierGO->addComponent<TransformComponent>(sPos, sRotQ, SOLDIER_SCALE);
             soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
+            soldierGO->addComponent<PhysicsComponent>();
             if (i == 30) {
                 soldierGO->addComponent<AIComponent>();
             }
@@ -241,13 +246,6 @@ void SoldierScene::init() {
             //if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
             //    isBlendingReqd = true;
             //}
-
-            if (!gameEntity->isAbstract() && !gameEntity->isSolid()) {
-                PhysicsCommand command = {
-                    gameEntity->getTransform()
-                };
-                PhysicsWorld::getInstance().registerInQueue(command);
-            }
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
         }
@@ -269,9 +267,24 @@ void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
 
-        /*if (aliveGameEntity->getGroupID() == GroupID::SOLDIERS) {
-            aliveGameEntity->getTransform()->setScale(glm::vec3(1.1f));
-        }*/
+        if (!aliveGameEntity->isAbstract() && !aliveGameEntity->isSolid()) {
+            PhysicsCommandType commandType = PhysicsCommandType::ADD;
+            PhysicsCommand physicsCmd = {
+                commandType,
+                aliveGameEntity->getTransform()
+            };
+            PhysicsWorld::getInstance().registerInQueue(physicsCmd);
+        }
+    }
+    for (auto& deadGameEntity : m_deadGameEntities) {
+        if (!deadGameEntity->isAbstract() && !deadGameEntity->isSolid()) {
+            PhysicsCommandType commandType = PhysicsCommandType::REMOVE;
+            PhysicsCommand physicsCmd = {
+                commandType,
+                deadGameEntity->getTransform()
+            };
+            PhysicsWorld::getInstance().registerInQueue(physicsCmd);
+        }
     }
 }
 
@@ -297,14 +310,14 @@ void SoldierScene::update(float alpha) {
         glm::vec3 position = transform->getPosition();
         transform->setDirty(false);
         RendererQueueType queueType = aliveGameEntity->getRendererQueueType();
-        RendererCommand command = {
+        RendererCommand rendererCmd = {
             model,
             material,
             modelMatrix,
             normalMatrix,
             position
         };
-        Renderer::getInstance().registerInQueue(queueType, command);
+        Renderer::getInstance().registerInQueue(queueType, rendererCmd);
 
         //if (queueType == RendererQueueType::STENCIL) {
         //    isStencilReqd = true;
@@ -321,8 +334,6 @@ void SoldierScene::update(float alpha) {
     // not reqd because i can check if queue is empty()
     //Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
     //Renderer::getInstance().setBlendingReqd(isBlendingReqd);
-
-    Renderer::getInstance().flush();
 }
 
 void SoldierScene::lateUpdate() {

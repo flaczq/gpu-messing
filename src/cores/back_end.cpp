@@ -154,16 +154,22 @@ void BackEnd::run() {
 
         // logic (once per 60 frames): physics, collisions
         while (m_accumulator >= FIXED_DT) {
+            float fixedt = static_cast<float>(FIXED_DT);
             SceneManager::getInstance().saveState();
-            PhysicsWorld::getInstance().step(static_cast<float>(FIXED_DT));
             m_camera->saveState();
-            SceneManager::getInstance().fixedUpdate(static_cast<float>(FIXED_DT));
-            // actual movement
-            m_camera->fixedUpdate(static_cast<float>(FIXED_DT));
+
+            // setting velocity to move; PhysicsWorld -> registerInQueue()
+            SceneManager::getInstance().fixedUpdate(fixedt);
+            m_camera->fixedUpdate(fixedt);
             if (m_minimap) {
                 //m_minimapCamera->saveState();
-                //m_minimapCamera->fixedUpdate(static_cast<float>(FIXED_DT));
+                //m_minimapCamera->fixedUpdate(fixedt);
             }
+
+            // execute physics commands from queue
+            PhysicsWorld::getInstance().flush();
+            // actual movement with collision
+            PhysicsWorld::getInstance().step(fixedt);
             m_accumulator -= FIXED_DT;
         }
 
@@ -181,12 +187,16 @@ void BackEnd::run() {
         // renderrring at last
         // --- main camera
         Renderer::getInstance().beginFrame(m_screenWidth, m_screenHeight);
+        // Renderer -> registerInQueue()
         SceneManager::getInstance().update(alpha);
+        // execute drawing commands from queues
+        Renderer::getInstance().flush();
         // --- minimap camera
         if (m_minimap) {
             Renderer::getInstance().setCamera(m_minimapCamera.get());
             Renderer::getInstance().beginFrameMinimap(m_minimapWidth, m_minimapHeight);
             SceneManager::getInstance().update(alpha);
+            Renderer::getInstance().flush();
             Renderer::getInstance().endFrameMinimap();
             Renderer::getInstance().setCamera(m_camera.get());
         }

@@ -85,7 +85,6 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
     }
 }
 
-// execute drawing commands from queues
 // ORDER: opaque -> transparent back-to-front
 void Renderer::flush() {
     //    ┏┓┏┓┏┓┏┓┳┳┏┓  ┏┓┏┓┏┓┏┓
