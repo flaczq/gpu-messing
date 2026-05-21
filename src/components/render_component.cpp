@@ -13,7 +13,22 @@ RenderComponent::RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<M
 {
 }
 
-// not reqd
 void RenderComponent::onInit() {
 	m_transform = getOwner()->getTransform();
+}
+
+void RenderComponent::onUpdate(float alpha) const {
+    glm::mat4 modelMatrix = m_transform->getInterpolatedModelMatrix(alpha);
+    glm::mat3 normalMatrix = m_transform->getNormalMatrix();
+    glm::vec3 position = m_transform->getPosition();
+    m_transform->setDirty(false);
+    RendererQueueType queueType = getOwner()->getRendererQueueType();
+    RendererCommand command = {
+        m_model.get(),
+        m_material.get(),
+        modelMatrix,
+        normalMatrix,
+        position
+    };
+    Renderer::getInstance().registerInQueue(queueType, command);
 }

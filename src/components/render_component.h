@@ -13,6 +13,7 @@ public:
 	RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Material> material);
 
 	void onInit() override;
+	void onUpdate(float alpha) const override;
 
 	Model* getModel() const { return m_model.get(); }
 	Material* getMaterial() const { return m_material.get(); }

@@ -158,7 +158,8 @@ void BackEnd::run() {
             SceneManager::getInstance().saveState();
             m_camera->saveState();
 
-            // setting velocity to move; PhysicsWorld -> registerInQueue()
+            // setting velocity to move
+            // PhysicsWorld -> registerInQueue()
             SceneManager::getInstance().fixedUpdate(fixedt);
             m_camera->fixedUpdate(fixedt);
             if (m_minimap) {

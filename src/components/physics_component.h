@@ -6,6 +6,8 @@ class TransformComponent;
 
 class PhysicsComponent : public Component {
 public:
+	PhysicsComponent();
+
 	void onInit() override;
 	void onFixedUpdate(float fixedt) override;
 

@@ -266,25 +266,6 @@ void SoldierScene::saveState() {
 void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
-
-        if (!aliveGameEntity->isAbstract() && !aliveGameEntity->isSolid()) {
-            PhysicsCommandType commandType = PhysicsCommandType::ADD;
-            PhysicsCommand physicsCmd = {
-                commandType,
-                aliveGameEntity->getTransform()
-            };
-            PhysicsWorld::getInstance().registerInQueue(physicsCmd);
-        }
-    }
-    for (auto& deadGameEntity : m_deadGameEntities) {
-        if (!deadGameEntity->isAbstract() && !deadGameEntity->isSolid()) {
-            PhysicsCommandType commandType = PhysicsCommandType::REMOVE;
-            PhysicsCommand physicsCmd = {
-                commandType,
-                deadGameEntity->getTransform()
-            };
-            PhysicsWorld::getInstance().registerInQueue(physicsCmd);
-        }
     }
 }
 
@@ -295,29 +276,6 @@ void SoldierScene::update(float alpha) {
     //bool isBlendingReqd = false;
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->update(alpha);
-
-        auto* transform = aliveGameEntity->getTransform();
-        auto* render = aliveGameEntity->getRender();
-        // no need to register in renderer if no render component is available
-        if (!render) {
-            return;
-        }
-
-        auto* model = render->getModel();
-        auto* material = render->getMaterial();
-        glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
-        glm::mat3 normalMatrix = transform->getNormalMatrix();
-        glm::vec3 position = transform->getPosition();
-        transform->setDirty(false);
-        RendererQueueType queueType = aliveGameEntity->getRendererQueueType();
-        RendererCommand rendererCmd = {
-            model,
-            material,
-            modelMatrix,
-            normalMatrix,
-            position
-        };
-        Renderer::getInstance().registerInQueue(queueType, rendererCmd);
 
         //if (queueType == RendererQueueType::STENCIL) {
         //    isStencilReqd = true;
