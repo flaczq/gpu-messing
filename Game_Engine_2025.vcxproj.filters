@@ -96,10 +96,10 @@
     <None Include="README.md" />
     <None Include="vcpkg.json" />
     <None Include="vcpkg-configuration.json" />
-    <None Include="shaders\light.frag" />
+    <None Include="shaders\simple.frag" />
     <None Include="LICENSE" />
     <None Include="Game_Engine_2025.aps" />
-    <None Include="shaders\light.vert" />
+    <None Include="shaders\simple.vert" />
     <None Include="shaders\object.frag" />
     <None Include="shaders\object.vert" />
     <None Include="ATTRIBUTIONS.md" />

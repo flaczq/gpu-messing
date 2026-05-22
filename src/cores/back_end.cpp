@@ -243,12 +243,16 @@ void BackEnd::processGlobalInput() {
         ResourceManager::getInstance().reloadShaders();
     }
     // SCENES
-    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_P)) {
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_K)) {
         SceneManager::getInstance().toggleScene();
     }
     // RENDER MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_O)) {
         Renderer::getInstance().toggleRenderMode();
+    }
+    // RENDER DEBUG MODE
+    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_P)) {
+        Renderer::getInstance().toggleRenderDebugMode();
     }
     // INFO: POSITION, CAMERA
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {

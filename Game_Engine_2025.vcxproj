@@ -60,8 +60,8 @@
     <None Include="shaders\window.vert" />
     <None Include="shaders\lambert.frag" />
     <None Include="shaders\lambert.vert" />
-    <None Include="shaders\light.frag" />
-    <None Include="shaders\light.vert" />
+    <None Include="shaders\simple.frag" />
+    <None Include="shaders\simple.vert" />
     <None Include="shaders\model.frag" />
     <None Include="shaders\model.vert" />
     <None Include="shaders\object.frag" />

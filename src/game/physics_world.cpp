@@ -2,9 +2,11 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/game_entity.h"
+#include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
 #include "physics_world.h"
 #include <algorithm>
+#include <string>
 #include <vector>
 
 PhysicsWorld& PhysicsWorld::getInstance() {
@@ -15,11 +17,11 @@ PhysicsWorld& PhysicsWorld::getInstance() {
 PhysicsWorld::PhysicsWorld() = default;
 
 PhysicsWorld::~PhysicsWorld() {
-	for (auto* ap : m_activePhysics) {
-		delete ap;
-	}
+	//for (auto& physicsBody : m_physicsBodies) {
+	//	delete &physicsBody;
+	//}
 
-	m_activePhysics.clear();
+	m_physicsBodies.clear();
 }
 
 bool PhysicsWorld::init() {
@@ -34,18 +36,24 @@ void PhysicsWorld::registerInQueue(const PhysicsCommand& command) {
 
 void PhysicsWorld::flush() {
 	for (auto& cmd : m_physicsQueue) {
-		auto it = std::find(m_activePhysics.begin(), m_activePhysics.end(), cmd.transform);
+		auto it = m_physicsBodies.end();// std::find(m_physicsBodies.begin(), m_physicsBodies.end(), cmd.name);
 		if (cmd.commandType == PhysicsCommandType::ADD) {
-			if (it == m_activePhysics.end()) {
+			if (it == m_physicsBodies.end()) {
 				// does not exist -> add
-				m_activePhysics.push_back(cmd.transform);
+				PhysicsBody physicsBody = {
+					cmd.name,
+					cmd.transform->getPosition(),
+					glm::vec3(1.0f),
+					glm::vec3(0.0f, 1.0f, 0.0f) // GREEN
+				};
+				m_physicsBodies.push_back(physicsBody);
 			}
 		} else if (cmd.commandType == PhysicsCommandType::REMOVE) {
-			if (it != m_activePhysics.end()) {
-				// does exist -> remove
-				delete *it;
-				m_activePhysics.erase(it);
-			}
+			//if (it != m_physicsBodies.end()) {
+			//	// does exist -> remove
+			//	//delete &it;
+			//	m_physicsBodies.erase(it);
+			//}
 		}
 	}
 
@@ -53,8 +61,23 @@ void PhysicsWorld::flush() {
 }
 
 void PhysicsWorld::step(float fixedt) const {
-	for (auto* t : m_activePhysics) {
-		LOG_D("ACTIVE PHYSICS: " << t->getOwner()->getName());
+	for (auto& physicsBody : m_physicsBodies) {
+		//LOG_D("ACTIVE PHYSICS: " << t->getOwner()->getName());
+		bool collision = false;
+		glm::vec3 color;
+		if (collision) {
+			// RED
+			color = glm::vec3(1.0f, 0.0f, 0.0f);
+		} else {
+			// GREEN
+			color = glm::vec3(0.0f, 1.0f, 0.0f);
+		}
+		RendererCommandDebug command = {
+			physicsBody.position,
+			physicsBody.size,
+			physicsBody.color
+		};
+		Renderer::getInstance().registerInDebugQueue(command);
 	}
 	// 1. move entities by set velocity
 	// 2. check for collisions

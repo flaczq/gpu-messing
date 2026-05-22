@@ -11,6 +11,10 @@ PhysicsComponent::PhysicsComponent() {
 void PhysicsComponent::onInit() {
     // create bb
     m_transform = getOwner()->getTransform();
+
+    //FIXME
+    aabb.min = glm::vec3(1.0f);
+    aabb.max = glm::vec3(3.0f);
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
@@ -21,6 +25,7 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
         commandType = PhysicsCommandType::REMOVE;
     }
     PhysicsCommand command = {
+        getOwner()->getName(),
         commandType,
         m_transform
     };

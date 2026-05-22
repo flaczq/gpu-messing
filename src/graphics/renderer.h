@@ -13,6 +13,10 @@ enum class RendererRenderMode {
 	WIREFRAME = GL_LINE,
 	POINTCLOUD = GL_POINT
 };
+enum class RendererRenderDebugMode {
+	NONE,
+	AABB
+};
 enum class RendererQueueType {
 	OPAQUE,
 	STENCIL,
@@ -35,6 +39,11 @@ struct RendererCommand {
 	glm::mat3 normalMatrix;
 	glm::vec3 position;
 };
+struct RendererCommandDebug {
+	glm::vec3 position;
+	glm::vec3 size;
+	glm::vec3 color;
+};
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -47,8 +56,10 @@ public:
 
 	bool init(GLFWwindow* window, Camera* camera);
 	void toggleRenderMode();
+	void toggleRenderDebugMode();
 	void beginFrame(unsigned int screenWidth, unsigned int screenHeight);
 	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
+	void registerInDebugQueue(const RendererCommandDebug& command);
 	void flush();
 	void endFrame();
 	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
@@ -67,6 +78,7 @@ private:
 	GLFWwindow* m_window = nullptr;
 	Camera* m_camera = nullptr;
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
+	RendererRenderDebugMode m_renderDebugMode = RendererRenderDebugMode::NONE;
 	RendererLight m_light{};
 	//bool m_stencilReqd = false;
 	//bool m_blendingReqd = false;
@@ -76,8 +88,12 @@ private:
 	std::vector<RendererCommand> m_outlineQueue;
 	std::vector<RendererCommand> m_blendingQueue;
 	std::vector<RendererCommand> m_topLayerQueue;
+	std::vector<RendererCommandDebug> m_debugQueue;
+
+	unsigned int VAO{}, VBO{};
 
 	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
 	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;
 	void renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const;
+	void renderDebugQueue(std::vector<RendererCommandDebug>& queue);
 };

@@ -43,19 +43,20 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     ResourceManager::getInstance().loadModel("arms_model", "../assets/models/RiggedFpsArms.fbx");
     // SHADERS
-    ResourceManager::getInstance().loadShader("light_shader", "../shaders/light.vert", "../shaders/light.frag");
+    ResourceManager::getInstance().loadShader("simple_shader", "../shaders/simple.vert", "../shaders/simple.frag");
     ResourceManager::getInstance().loadShader("gizmo_shader", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
     ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
-    auto lightShader = ResourceManager::getInstance().getShader("light_shader");
+
+    auto simpleShader = ResourceManager::getInstance().getShader("simple_shader");
     auto gizmoShader = ResourceManager::getInstance().getShader("gizmo_shader");
     auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
     auto modelShader = ResourceManager::getInstance().getShader("model_shader");
     auto windowShader = ResourceManager::getInstance().getShader("window_shader");
     // MATERIALS
-    ResourceManager::getInstance().loadMaterial("floor_material", lightShader);
-    ResourceManager::getInstance().loadMaterial("light_material", lightShader);
+    ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
+    ResourceManager::getInstance().loadMaterial("light_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
     ResourceManager::getInstance().loadMaterial("arms_material", lambertShader);
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);

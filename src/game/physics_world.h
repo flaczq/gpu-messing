@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../configs/math_config.hpp"
+#include <string>
 #include <vector>
 
 class TransformComponent;
@@ -10,8 +12,15 @@ enum class PhysicsCommandType {
 };
 
 struct PhysicsCommand {
+	const std::string& name;
 	PhysicsCommandType commandType;
 	TransformComponent* transform;
+};
+struct PhysicsBody {
+	const std::string& name;
+	glm::vec3 position;
+	glm::vec3 size;
+	glm::vec3 color;
 };
 
 class PhysicsWorld {
@@ -32,5 +41,5 @@ private:
 	PhysicsWorld();
 
 	std::vector<PhysicsCommand> m_physicsQueue;
-	std::vector<TransformComponent*> m_activePhysics;
+	std::vector<PhysicsBody> m_physicsBodies;
 };

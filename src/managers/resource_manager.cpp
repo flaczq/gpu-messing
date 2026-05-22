@@ -150,8 +150,8 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, co
 }
 
 void ResourceManager::reloadShaders() {
-	for (const auto& [name, material] : m_materials) {
-		material->getShader()->reload();
+	for (const auto& [name, shader] : m_shaders) {
+		shader->reload();
 	}
 	LOG_D("Hot-loaded shaders...");
 }

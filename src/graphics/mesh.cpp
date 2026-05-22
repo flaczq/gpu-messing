@@ -51,10 +51,10 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures)
     : m_vertices(std::move(vertices)),
-    m_indices(std::move(indices)),
-    m_textures(std::move(textures)),
-    m_hasDiffuseColor(false),
-    m_diffuseColor(glm::vec3(1.0f))
+      m_indices(std::move(indices)),
+      m_textures(std::move(textures)),
+      m_hasDiffuseColor(false),
+      m_diffuseColor(glm::vec3(1.0f))
 {
     setupMesh();
 }
