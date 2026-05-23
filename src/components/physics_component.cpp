@@ -25,7 +25,6 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
         commandType = PhysicsCommandType::REMOVE;
     }
     PhysicsCommand command = {
-        getOwner()->getName(),
         commandType,
         m_transform
     };

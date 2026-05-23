@@ -39,7 +39,7 @@ struct RendererCommand {
 	glm::mat3 normalMatrix;
 	glm::vec3 position;
 };
-struct RendererCommandDebug {
+struct RendererImmediateCommand {
 	glm::vec3 position;
 	glm::vec3 size;
 	glm::vec3 color;
@@ -58,12 +58,12 @@ public:
 	void toggleRenderMode();
 	void toggleRenderDebugMode();
 	void beginFrame(unsigned int screenWidth, unsigned int screenHeight);
-	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
-	void registerInDebugQueue(const RendererCommandDebug& command);
-	void flush();
-	void endFrame();
 	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
+	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
+	void flush();
+	void renderImmediate();
 	void endFrameMinimap();
+	void endFrame();
 
 	void setCamera(Camera* camera) { m_camera = camera; }
 	//void setStencilReqd(bool stencilReqd) { m_stencilReqd = stencilReqd; }
@@ -88,12 +88,10 @@ private:
 	std::vector<RendererCommand> m_outlineQueue;
 	std::vector<RendererCommand> m_blendingQueue;
 	std::vector<RendererCommand> m_topLayerQueue;
-	std::vector<RendererCommandDebug> m_debugQueue;
 
 	unsigned int VAO{}, VBO{};
 
 	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
 	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;
 	void renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const;
-	void renderDebugQueue(std::vector<RendererCommandDebug>& queue);
 };

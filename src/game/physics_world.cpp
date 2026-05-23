@@ -6,7 +6,6 @@
 #include "../managers/scene_manager.h"
 #include "physics_world.h"
 #include <algorithm>
-#include <string>
 #include <vector>
 
 PhysicsWorld& PhysicsWorld::getInstance() {
@@ -17,9 +16,9 @@ PhysicsWorld& PhysicsWorld::getInstance() {
 PhysicsWorld::PhysicsWorld() = default;
 
 PhysicsWorld::~PhysicsWorld() {
-	//for (auto& physicsBody : m_physicsBodies) {
-	//	delete &physicsBody;
-	//}
+	for (auto* physicsBody : m_physicsBodies) {
+		delete physicsBody;
+	}
 
 	m_physicsBodies.clear();
 }
@@ -36,24 +35,18 @@ void PhysicsWorld::registerInQueue(const PhysicsCommand& command) {
 
 void PhysicsWorld::flush() {
 	for (auto& cmd : m_physicsQueue) {
-		auto it = m_physicsBodies.end();// std::find(m_physicsBodies.begin(), m_physicsBodies.end(), cmd.name);
+		auto it = std::find(m_physicsBodies.begin(), m_physicsBodies.end(), cmd.transform);
 		if (cmd.commandType == PhysicsCommandType::ADD) {
 			if (it == m_physicsBodies.end()) {
 				// does not exist -> add
-				PhysicsBody physicsBody = {
-					cmd.name,
-					cmd.transform->getPosition(),
-					glm::vec3(1.0f),
-					glm::vec3(0.0f, 1.0f, 0.0f) // GREEN
-				};
-				m_physicsBodies.push_back(physicsBody);
+				m_physicsBodies.push_back(cmd.transform);
 			}
 		} else if (cmd.commandType == PhysicsCommandType::REMOVE) {
-			//if (it != m_physicsBodies.end()) {
-			//	// does exist -> remove
-			//	//delete &it;
-			//	m_physicsBodies.erase(it);
-			//}
+			if (it != m_physicsBodies.end()) {
+				// does exist -> remove
+				delete *it;
+				m_physicsBodies.erase(it);
+			}
 		}
 	}
 
@@ -72,14 +65,22 @@ void PhysicsWorld::step(float fixedt) const {
 			// GREEN
 			color = glm::vec3(0.0f, 1.0f, 0.0f);
 		}
-		RendererCommandDebug command = {
-			physicsBody.position,
-			physicsBody.size,
-			physicsBody.color
-		};
-		Renderer::getInstance().registerInDebugQueue(command);
 	}
 	// 1. move entities by set velocity
 	// 2. check for collisions
 	// 3. if colliding move back to previous position
+}
+
+
+std::vector<RendererImmediateCommand> PhysicsWorld::getAABBImmediate() {
+	std::vector<RendererImmediateCommand> commands;
+	for (auto& physicsBody : m_physicsBodies) {
+		RendererImmediateCommand command = {
+			physicsBody->getPosition(),
+			glm::vec3(1.0f),
+			glm::vec3(0.0f, 1.0f, 0.0f)
+		};
+		commands.push_back(command);
+	}
+	return commands;
 }

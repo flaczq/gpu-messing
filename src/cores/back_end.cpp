@@ -192,6 +192,8 @@ void BackEnd::run() {
         SceneManager::getInstance().update(alpha);
         // execute drawing commands from queues
         Renderer::getInstance().flush();
+        // probably for debug only
+        Renderer::getInstance().renderImmediate();
         // --- minimap camera
         if (m_minimap) {
             Renderer::getInstance().setCamera(m_minimapCamera.get());

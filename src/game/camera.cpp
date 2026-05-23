@@ -77,9 +77,7 @@ void Camera::processInput() {
 }
 
 void Camera::fixedUpdate(float fixedt) {
-    glm::vec3 oldPos = m_viewPos;
     float velocity = MOVEMENT_SPEED * fixedt;
-
     if (m_currDirections[static_cast<int>(CameraDirection::FORWARD)]) {
         m_viewPos += m_front * velocity;
     }
@@ -106,15 +104,9 @@ void Camera::fixedUpdate(float fixedt) {
 
     if (m_godModeChanged || m_cameraModeChanged) {
         //m_viewPos.y = getCameraModeHeight();
-
         m_godModeChanged = false;
         m_cameraModeChanged = false;
     }
-
-    //TODO: collision
-    //if (collision == true) {
-    //    m_viewPos = oldPos;
-    //}
 }
 
 void Camera::updateVectors() {

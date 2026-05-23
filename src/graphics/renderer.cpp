@@ -1,8 +1,10 @@
+#include "../components/transform_component.h"
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../cores/back_end.h"
 #include "../game/camera.h"
+#include "../game/physics_world.h"
 #include "../graphics/material.h"
 #include "../graphics/model.h"
 #include "../graphics/shader.h"
@@ -71,6 +73,19 @@ void Renderer::beginFrame(unsigned int screenWidth, unsigned int screenHeight) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
+void Renderer::beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight) {
+    unsigned int minimapX = minimapWidth * 3;
+    unsigned int minimapY = minimapHeight * 3;
+    // screen - minimap
+    glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
+
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(minimapX, minimapY, minimapWidth, minimapHeight);
+
+    glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
 void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
     switch (queueType) {
     case RendererQueueType::OPAQUE:
@@ -88,16 +103,6 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
     case RendererQueueType::TOP_LAYER:
         m_topLayerQueue.push_back(command);
         break;
-    }
-}
-
-void Renderer::registerInDebugQueue(const RendererCommandDebug& command) {
-    if (m_renderDebugMode == RendererRenderDebugMode::NONE) {
-        return;
-    }
-
-    if (m_debugQueue.size() < 52) {
-        m_debugQueue.push_back(command);
     }
 }
 
@@ -177,20 +182,78 @@ void Renderer::flush() {
         m_camera->restoreDefaultProjection();
     }
 
-    //    ┳┓┏┓┳┓┳┳┏┓  ┏┓┏┓┏┓┏┓
-    //    ┃┃┣ ┣┫┃┃┃┓  ┃┃┣┫┗┓┗┓
-    //    ┻┛┗┛┻┛┗┛┗┛  ┣┛┛┗┗┛┗┛
-    //                        
-    if (!m_debugQueue.empty()) {
-        renderDebugQueue(m_debugQueue);
-    }
-
     m_opaqueQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
     m_blendingQueue.clear();
     m_topLayerQueue.clear();
-    //m_debugQueue.clear();
+}
+
+void Renderer::renderImmediate() {
+    std::vector<RendererImmediateCommand> queue;
+    switch (m_renderDebugMode) {
+    case RendererRenderDebugMode::NONE:
+        return;
+    case RendererRenderDebugMode::AABB:
+        queue = PhysicsWorld::getInstance().getAABBImmediate();
+        break;
+    }
+
+    static unsigned int once = 0;
+    if (once == 0) {
+        // FIXME: move inside init() in PhysicsWorld maybe..?
+        once = 1;
+        // USE MESH GENERATOR
+        float cubeVertices[] = {
+            // Przód
+            -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
+             0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+             0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
+            -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
+            // Tył
+            -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
+             0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
+            // Łączniki
+            -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
+             0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
+             0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
+            -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
+        };
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glBindVertexArray(VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
+        glEnableVertexAttribArray(0);
+        glBindVertexArray(0);
+    }
+
+    glDisable(GL_DEPTH_TEST);
+    auto shader = ResourceManager::getInstance().getShader("simple_shader");
+    shader->use();
+
+    glBindVertexArray(VAO);
+    for (auto& cmd : queue) {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, cmd.position);
+        model = glm::scale(model, cmd.size);
+        shader->setMat4fv("projection", m_camera->getProjection());
+        shader->setMat4fv("view", m_camera->getViewMatrix());
+        shader->setMat4fv("model", model);
+        shader->setVec3fv("matColor", cmd.color);
+
+        glDrawArrays(GL_LINES, 0, 24);
+    }
+    glBindVertexArray(0);
+
+    glEnable(GL_DEPTH_TEST);
+}
+
+void Renderer::endFrameMinimap() {
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void Renderer::endFrame() {
@@ -202,23 +265,6 @@ void Renderer::endFrame() {
     //glDisable(GL_BLEND);
 
     glfwSwapBuffers(m_window);
-}
-
-void Renderer::beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight) {
-    unsigned int minimapX = minimapWidth * 3;
-    unsigned int minimapY = minimapHeight * 3;
-    // screen - minimap
-    glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
-
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(minimapX, minimapY, minimapWidth, minimapHeight);
-
-    glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void Renderer::endFrameMinimap() {
-    glDisable(GL_SCISSOR_TEST);
 }
 
 void Renderer::sortQueueByMaterial(std::vector<RendererCommand>& queue) const {
@@ -301,64 +347,6 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
 
         cmd.model->draw(*lastShader);
     }
-}
-
-
-void Renderer::renderDebugQueue(std::vector<RendererCommandDebug>& queue) {
-    if (m_renderDebugMode == RendererRenderDebugMode::NONE) {
-        return;
-    }
-
-    static unsigned int once = 0;
-    if (once == 0) {
-        once = 1;
-        // USE MESH GENERATOR
-        float cubeVertices[] = {
-            // Przód
-            -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
-             0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
-             0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
-            -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
-            // Tył
-            -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
-             0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
-            // Łączniki
-            -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
-             0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
-             0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
-            -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
-        };
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
-        glEnableVertexAttribArray(0);
-        glBindVertexArray(0);
-    }
-
-    glDisable(GL_DEPTH_TEST);
-    auto shader = ResourceManager::getInstance().getShader("simple_shader");
-    shader->use();
-
-    glBindVertexArray(VAO);
-    for (auto& cmd : queue) {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cmd.position);
-        model = glm::scale(model, cmd.size);
-        shader->setMat4fv("projection", m_camera->getProjection());
-        shader->setMat4fv("view", m_camera->getViewMatrix());
-        shader->setMat4fv("model", model);
-        shader->setVec3fv("matColor", cmd.color);
-
-        glDrawArrays(GL_LINES, 0, 24);
-    }
-    glBindVertexArray(0);
-
-    glEnable(GL_DEPTH_TEST);
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {

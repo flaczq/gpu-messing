@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../configs/math_config.hpp"
-#include <string>
+#include "../graphics/renderer.h"
 #include <vector>
 
 class TransformComponent;
@@ -12,15 +12,8 @@ enum class PhysicsCommandType {
 };
 
 struct PhysicsCommand {
-	const std::string& name;
 	PhysicsCommandType commandType;
 	TransformComponent* transform;
-};
-struct PhysicsBody {
-	const std::string& name;
-	glm::vec3 position;
-	glm::vec3 size;
-	glm::vec3 color;
 };
 
 class PhysicsWorld {
@@ -35,11 +28,12 @@ public:
 	void registerInQueue(const PhysicsCommand& command);
 	void flush();
 	void step(float fixedt) const;
+	std::vector<RendererImmediateCommand> getAABBImmediate();
 
 private:
 	// hidden constructor
 	PhysicsWorld();
 
 	std::vector<PhysicsCommand> m_physicsQueue;
-	std::vector<PhysicsBody> m_physicsBodies;
+	std::vector<TransformComponent*> m_physicsBodies;
 };
