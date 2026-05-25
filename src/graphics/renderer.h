@@ -89,8 +89,6 @@ private:
 	std::vector<RendererCommand> m_blendingQueue;
 	std::vector<RendererCommand> m_topLayerQueue;
 
-	unsigned int VAO{}, VBO{};
-
 	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
 	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;
 	void renderSortedQueue(std::vector<RendererCommand>& queue, const std::string& name) const;
