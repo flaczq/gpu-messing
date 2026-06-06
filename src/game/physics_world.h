@@ -1,7 +1,9 @@
 #pragma once
 
 #include "../configs/math_config.hpp"
+#include "../graphics/mesh.h"
 #include "../graphics/renderer.h"
+#include <memory>
 #include <vector>
 
 class TransformComponent;
@@ -30,7 +32,6 @@ public:
 	void step(float fixedt) const;
 
 	std::vector<RendererImmediateCommand> getAABBCommand();
-	unsigned int getAABBVAO() const { return m_AABBVAO; }
 
 private:
 	// hidden constructor
@@ -38,6 +39,7 @@ private:
 
 	std::vector<PhysicsCommand> m_physicsQueue;
 	std::vector<TransformComponent*> m_physicsBodies;
+	std::unique_ptr<Mesh> m_boundingBox;
 
 	unsigned int m_AABBVAO{}, m_AABBVBO{};
 };

@@ -7,6 +7,7 @@
 class Camera;
 class Model;
 class Material;
+class Mesh;
 
 enum class RendererRenderMode {
 	STANDARD = GL_FILL,
@@ -40,6 +41,7 @@ struct RendererCommand {
 	glm::vec3 position;
 };
 struct RendererImmediateCommand {
+	Mesh* mesh;
 	glm::vec3 position;
 	glm::vec3 size;
 	glm::vec3 color;

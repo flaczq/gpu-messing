@@ -6,6 +6,7 @@
 #include "../game/camera.h"
 #include "../game/physics_world.h"
 #include "../graphics/material.h"
+#include "../graphics/mesh.h"
 #include "../graphics/model.h"
 #include "../graphics/shader.h"
 #include "../managers/resource_manager.h"
@@ -190,13 +191,11 @@ void Renderer::flush() {
 }
 
 void Renderer::renderImmediate() {
-    unsigned int VAO;
     std::vector<RendererImmediateCommand> queue;
     switch (m_renderDebugMode) {
     case RendererRenderDebugMode::NONE:
         return;
     case RendererRenderDebugMode::AABB:
-        VAO = PhysicsWorld::getInstance().getAABBVAO();
         queue = PhysicsWorld::getInstance().getAABBCommand();
         break;
     }
@@ -206,7 +205,6 @@ void Renderer::renderImmediate() {
     shader->use();
     shader->setMat4fv("projection", m_camera->getProjection());
     shader->setMat4fv("view", m_camera->getViewMatrix());
-    glBindVertexArray(VAO);
     for (auto& cmd : queue) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cmd.position);
@@ -214,9 +212,8 @@ void Renderer::renderImmediate() {
         shader->setMat4fv("model", model);
         shader->setVec3fv("matColor", cmd.color);
 
-        glDrawArrays(GL_LINES, 0, 24);
+        cmd.mesh->draw(*shader);
     }
-    glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
 }
 
