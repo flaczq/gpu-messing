@@ -2,14 +2,10 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/game_entity.h"
-#include "../graphics/mesh.h"
-#include "../graphics/mesh_generator.h"
 #include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
 #include "physics_world.h"
 #include <algorithm>
-#include <memory>
-#include <utility>
 #include <vector>
 
 PhysicsWorld& PhysicsWorld::getInstance() {
@@ -26,18 +22,16 @@ PhysicsWorld::~PhysicsWorld() {
 
 	m_physicsBodies.clear();
 
-	//glDeleteVertexArrays(1, &m_AABBVAO);
-	//glDeleteBuffers(1, &m_AABBVBO);
+	glDeleteVertexArrays(1, &m_AABBVAO);
+	glDeleteBuffers(1, &m_AABBVBO);
 }
 
 bool PhysicsWorld::init() {
 	// FIXME hardcoded max: 100
 	m_physicsQueue.reserve(100);
 
-	auto boundingBox = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f);
-	m_boundingBox = std::make_unique<Mesh>(std::move(boundingBox));
-	m_boundingBox->setDrawMode(GL_LINES);
-	/*float aabbVertices[] = {
+	// hardcoded AABB
+	float AABBVertices[] = {
 		// front
 		-0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
 		 0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
@@ -58,10 +52,10 @@ bool PhysicsWorld::init() {
 	glGenBuffers(1, &m_AABBVBO);
 	glBindVertexArray(m_AABBVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_AABBVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(aabbVertices), aabbVertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(AABBVertices), AABBVertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
 	glEnableVertexAttribArray(0);
-	glBindVertexArray(0);*/
+	glBindVertexArray(0);
 
 	return true;
 }
@@ -113,9 +107,10 @@ std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 	std::vector<RendererImmediateCommand> commands;
 	for (auto& physicsBody : m_physicsBodies) {
 		RendererImmediateCommand command = {
-			m_boundingBox.get(),
+			m_AABBVAO,
 			physicsBody->getPosition(),
-			glm::vec3(1.0f),
+			//glm::vec3(1.0f),
+			physicsBody->getOwner()->getPhysics()->getAABB().max - physicsBody->getOwner()->getPhysics()->getAABB().min,
 			glm::vec3(1.0f, 0.0f, 1.0f)
 		};
 		commands.push_back(command);

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../configs/math_config.hpp"
 #include "graphics_types.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
@@ -20,6 +21,8 @@ public:
 	~Model();
 
 	const std::string& getName() const { return m_name; }
+	glm::vec3 getAABBMin() const { return m_AABBMin; }
+	glm::vec3 getAABBMax() const { return m_AABBMax; }
 
 	void draw(Shader& shader);
 
@@ -27,6 +30,8 @@ private:
 	std::string m_name{};
 	std::string m_directory{};
 	std::vector<std::unique_ptr<Mesh>> m_meshes;
+	glm::vec3 m_AABBMin{};
+	glm::vec3 m_AABBMax{};
 
 	void loadModel(const std::string& path);
 	void processNode(aiNode* node, const aiScene* scene);

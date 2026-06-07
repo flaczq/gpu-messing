@@ -1,13 +1,16 @@
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
+#include "../configs/math_config.hpp"
 #include "../managers/resource_manager.h"
 #include "graphics_types.hpp"
 #include "mesh.h"
 #include "model.h"
+#include <algorithm>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <memory>
 #include <string>
@@ -15,7 +18,9 @@
 #include <vector>
 
 Model::Model(const std::string& name, const std::string& path)
-	: m_name(name)
+	: m_name(name),
+	  m_AABBMin(std::numeric_limits<float>::max()),
+	  m_AABBMax(std::numeric_limits<float>::lowest())
 {
 	loadModel(path);
 }
@@ -23,6 +28,7 @@ Model::Model(const std::string& name, const std::string& path)
 Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh)
 	: m_name(name)
 {
+	// TODO set AABB min/max
 	m_meshes.push_back(std::move(mesh));
 }
 
@@ -36,8 +42,12 @@ void Model::draw(Shader& shader) {
 
 void Model::loadModel(const std::string& path) {
 	Assimp::Importer importer{};
-	// convert all primitives into triangles | flip texture Y axis | generate smooth normals (if missing) | calculate tangents
-	const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace);
+	const aiScene * scene = importer.ReadFile(path,
+		aiProcess_Triangulate      | // convert all primitives into triangles
+		aiProcess_FlipUVs          | // flip texture Y axis
+		aiProcess_GenSmoothNormals | // generate smooth normals (if missing)
+		aiProcess_CalcTangentSpace | // calculate tangents
+		aiProcess_GenBoundingBoxes); // generate bounding boxes
 	if (!scene || !scene->mRootNode || (scene->mFlags && AI_SCENE_FLAGS_INCOMPLETE)) {
 		std::cerr << "ERROR::MODEL::ASSIMP_IMPORT_FAILED: " << path << std::endl;
 		return;
@@ -54,6 +64,11 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		std::unique_ptr<Mesh> newMesh = processMesh(mesh, scene);
 		m_meshes.push_back(std::move(newMesh));
+
+		glm::vec3 meshMin(mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z);
+		glm::vec3 meshMax(mesh->mAABB.mMax.x, mesh->mAABB.mMax.y, mesh->mAABB.mMax.z);
+		m_AABBMin = glm::min(m_AABBMin, meshMin);
+		m_AABBMax = glm::max(m_AABBMax, meshMax);
 	}
 
 	// recursive: process all nodes' children

@@ -21,11 +21,9 @@ public:
 	~Mesh();
 
 	void draw(Shader &shader);
-	void setDrawMode(GLenum drawMode) { m_drawMode = drawMode; }
 
 private:
 	unsigned int m_VAO{}, m_VBO{}, m_EBO{};
-	GLenum m_drawMode = GL_TRIANGLES;
 
 	std::vector<Vertex> m_vertices;
 	std::vector<unsigned int> m_indices;

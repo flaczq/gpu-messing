@@ -121,7 +121,7 @@ void Mesh::draw(Shader& shader) {
     //                  
     glBindVertexArray(m_VAO);
     // what to render, number of elements, type, offset
-    glDrawElements(m_drawMode, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
 
     // unbind <=> clean up
     glBindVertexArray(0);

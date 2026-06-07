@@ -192,15 +192,21 @@ void Renderer::flush() {
 
 void Renderer::renderImmediate() {
     std::vector<RendererImmediateCommand> queue;
+    unsigned int VAO;
     switch (m_renderDebugMode) {
     case RendererRenderDebugMode::NONE:
         return;
     case RendererRenderDebugMode::AABB:
         queue = PhysicsWorld::getInstance().getAABBCommand();
+        // same for all
+        VAO = queue[0].VAO;
         break;
     }
 
+    assert(!queue.empty());
     glDisable(GL_DEPTH_TEST);
+    glBindVertexArray(VAO);
+
     auto shader = ResourceManager::getInstance().getShader("simple_shader");
     shader->use();
     shader->setMat4fv("projection", m_camera->getProjection());
@@ -208,12 +214,13 @@ void Renderer::renderImmediate() {
     for (auto& cmd : queue) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cmd.position);
-        model = glm::scale(model, cmd.size);
+        model = glm::scale(model, cmd.size * 100.0f);
         shader->setMat4fv("model", model);
         shader->setVec3fv("matColor", cmd.color);
-
-        cmd.mesh->draw(*shader);
+        glDrawArrays(GL_LINES, 0, 24);
     }
+
+    glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
 }
 

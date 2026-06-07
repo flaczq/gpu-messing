@@ -4,6 +4,7 @@
 #include "component.h"
 
 class TransformComponent;
+class RenderComponent;
 
 struct AABB {
 	void update(const glm::vec3& position, float width, float height, float depth) {
@@ -22,7 +23,10 @@ public:
 	void onInit() override;
 	void onFixedUpdate(float fixedt) override;
 
+	AABB getAABB() const { return m_AABB; }
+
 private:
 	TransformComponent* m_transform = nullptr;
-	AABB aabb{};
+	RenderComponent* m_render = nullptr;
+	AABB m_AABB{};
 };

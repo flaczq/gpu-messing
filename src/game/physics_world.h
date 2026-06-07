@@ -1,9 +1,7 @@
 #pragma once
 
 #include "../configs/math_config.hpp"
-#include "../graphics/mesh.h"
 #include "../graphics/renderer.h"
-#include <memory>
 #include <vector>
 
 class TransformComponent;
@@ -39,7 +37,6 @@ private:
 
 	std::vector<PhysicsCommand> m_physicsQueue;
 	std::vector<TransformComponent*> m_physicsBodies;
-	std::unique_ptr<Mesh> m_boundingBox;
 
 	unsigned int m_AABBVAO{}, m_AABBVBO{};
 };
