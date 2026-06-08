@@ -75,6 +75,7 @@ private:
     float m_yaw{};
     float m_pitch{};
     float m_fov{};
+    float m_currFov{};
     float m_nearPlane{};
     float m_farPlane{};
     float m_aspect{};

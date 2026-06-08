@@ -42,7 +42,10 @@ struct RendererCommand {
 struct RendererImmediateCommand {
 	unsigned int VAO;
 	glm::vec3 position;
+	glm::quat rotation;
+	glm::vec3 scale;
 	glm::vec3 size;
+	glm::vec3 center;
 	glm::vec3 color;
 };
 

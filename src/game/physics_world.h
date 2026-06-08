@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../components/physics_component.h"
 #include "../configs/math_config.hpp"
 #include "../graphics/renderer.h"
 #include <vector>
@@ -11,9 +12,13 @@ enum class PhysicsCommandType {
 	REMOVE
 };
 
+struct PhysicsBody {
+	TransformComponent* transform;
+	AABB AABB;
+};
 struct PhysicsCommand {
 	PhysicsCommandType commandType;
-	TransformComponent* transform;
+	PhysicsBody physicsBody;
 };
 
 class PhysicsWorld {
@@ -36,7 +41,7 @@ private:
 	PhysicsWorld();
 
 	std::vector<PhysicsCommand> m_physicsQueue;
-	std::vector<TransformComponent*> m_physicsBodies;
+	std::vector<PhysicsBody> m_physicsBodies;
 
-	unsigned int m_AABBVAO{}, m_AABBVBO{};
+	unsigned int m_VAOAABB{}, m_VBOAABB{};
 };

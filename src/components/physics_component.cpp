@@ -4,19 +4,15 @@
 #include "../game/physics_world.h"
 #include "component.h"
 #include "physics_component.h"
-#include "render_component.h"
 #include "transform_component.h"
 
-PhysicsComponent::PhysicsComponent() {
+PhysicsComponent::PhysicsComponent(glm::vec3 AABBmin, glm::vec3 AABBmax)
+    : m_AABB(AABBmin, AABBmax)
+{
 }
 
 void PhysicsComponent::onInit() {
-    // create bounding box
     m_transform = getOwner()->getTransform();
-    m_render = getOwner()->getRender();
-
-    m_AABB.min = m_render->getModel()->getAABBMin();
-    m_AABB.max = m_render->getModel()->getAABBMax();
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
@@ -28,7 +24,8 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
     }
     PhysicsCommand command = {
         commandType,
-        m_transform
+        m_transform,
+        m_AABB
     };
     PhysicsWorld::getInstance().registerInQueue(command);
 }

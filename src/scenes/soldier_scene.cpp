@@ -64,9 +64,10 @@ void SoldierScene::init() {
 
     // MODELS
     // --- floor
-    auto floor = MeshGenerator::createPlane(16.0f, 15.0f);
+    glm::vec3 floorSize = glm::vec3(16.0f, 0.0f, 15.0f);
+    auto floor = MeshGenerator::createPlane(floorSize.x, floorSize.z);
     auto floorM = std::make_unique<Mesh>(std::move(floor));
-    auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM));
+    auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM), -floorSize * 0.5f, floorSize * 0.5f);
     ResourceManager::getInstance().addModel(std::move(floorMM));
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
@@ -102,7 +103,7 @@ void SoldierScene::init() {
         floorGO->setSolid(true);
         floorGO->addComponent<TransformComponent>(FLOOR_POSITION);
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
-        floorGO->addComponent<PhysicsComponent>();
+        floorGO->addComponent<PhysicsComponent>(floorModel->getAABBMin(), floorModel->getAABBMax());
         floorGO->init();
         m_gameEntities.push_back(std::move(floorGO));
     }
@@ -143,7 +144,7 @@ void SoldierScene::init() {
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
-        armsGO->addComponent<PhysicsComponent>();
+        armsGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f));
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
@@ -162,7 +163,7 @@ void SoldierScene::init() {
             auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i), GroupID::SOLDIERS);
             soldierGO->addComponent<TransformComponent>(sPos, sRotQ, SOLDIER_SCALE);
             soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
-            soldierGO->addComponent<PhysicsComponent>();
+            soldierGO->addComponent<PhysicsComponent>(soldierModel->getAABBMin(), soldierModel->getAABBMax());
             if (i == 30) {
                 soldierGO->addComponent<AIComponent>();
             }

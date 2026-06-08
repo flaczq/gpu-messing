@@ -11,9 +11,12 @@ public:
 	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
 	glm::mat4 getNormalMatrix();
 
+	glm::mat4 getModel() const { return m_model; }
 	glm::vec3 getPosition() const { return m_position; }
 	void setPosition(glm::vec3 position) { m_position = position; m_dirty = true; }
+	glm::quat getRotation() const { return m_rotation; }
 	void setRotation(glm::quat rotation) { m_rotation = rotation; m_dirty = true; }
+	glm::vec3 getScale() const { return m_scale; }
 	void setScale(glm::vec3 scale) { m_scale = scale; m_dirty = true; }
 	void setDirty(bool dirty) { m_dirty = dirty; }
 

@@ -10,8 +10,8 @@ namespace MeshGenerator {
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
 
-		float halfWidth = width / 2.0f;
-		float halfDepth = depth / 2.0f;
+		float halfWidth = width * 0.5f;
+		float halfDepth = depth * 0.5f;
 
 		Vertex v0{}, v1{}, v2{}, v3{};
 
@@ -58,9 +58,9 @@ namespace MeshGenerator {
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
 
-		float halfWidth  = width  / 2.0f;
-		float halfHeight = height / 2.0f;
-		float halfDepth  = depth  / 2.0f;
+		float halfWidth  = width  * 0.5f;
+		float halfHeight = height * 0.5f;
+		float halfDepth  = depth  * 0.5f;
 
 		Vertex d0{}, d1{}, d2{}, d3{}, //down
 			   u0{}, u1{}, u2{}, u3{}, //up

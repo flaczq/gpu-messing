@@ -25,10 +25,11 @@ Model::Model(const std::string& name, const std::string& path)
 	loadModel(path);
 }
 
-Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh)
-	: m_name(name)
+Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABBMin, glm::vec3 AABBMax)
+	: m_name(name),
+	  m_AABBMin(AABBMin),
+	  m_AABBMax(AABBMax)
 {
-	// TODO set AABB min/max
 	m_meshes.push_back(std::move(mesh));
 }
 

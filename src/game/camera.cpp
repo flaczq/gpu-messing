@@ -21,6 +21,7 @@ Camera::Camera(unsigned int width, unsigned int height)
       m_yaw(-135.0f),
       m_pitch(-11.5f),
       m_fov(FOV),
+      m_currFov(FOV),
       m_nearPlane(NEAR_PLANE),
       m_farPlane(FAR_PLANE),
       m_aspect((float)width / (float)height)
@@ -135,7 +136,7 @@ void Camera::updateProjection(bool force) {
 }
 
 void Camera::restoreDefaultProjection() {
-    m_fov = FOV;
+    m_fov = m_currFov;
     m_nearPlane = NEAR_PLANE;
     m_farPlane = FAR_PLANE;
     m_projectionDirty = true;
@@ -169,6 +170,7 @@ void Camera::processMouseScroll(float yoffset) {
         if (m_fov > MAX_FOV) {
             m_fov = MAX_FOV;
         }
+        m_currFov = m_fov;
     }
 }
 

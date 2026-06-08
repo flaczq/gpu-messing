@@ -17,7 +17,7 @@ class Mesh;
 class Model {
 public:
 	Model(const std::string& name, const std::string& path);
-	Model(const std::string& name, std::unique_ptr<Mesh> mesh);
+	Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABBMin = glm::vec3(0.0f), glm::vec3 AABBMax = glm::vec3(0.0f));
 	~Model();
 
 	const std::string& getName() const { return m_name; }

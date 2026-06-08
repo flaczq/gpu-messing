@@ -214,7 +214,10 @@ void Renderer::renderImmediate() {
     for (auto& cmd : queue) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cmd.position);
-        model = glm::scale(model, cmd.size * 100.0f);
+        model *= glm::mat4_cast(cmd.rotation);
+        // center fix
+        model = glm::translate(model, cmd.center * cmd.scale);
+        model = glm::scale(model, cmd.size * cmd.scale);
         shader->setMat4fv("model", model);
         shader->setVec3fv("matColor", cmd.color);
         glDrawArrays(GL_LINES, 0, 24);
