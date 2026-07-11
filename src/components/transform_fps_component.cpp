@@ -1,3 +1,4 @@
+#include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/camera.h"
 #include "transform_component.h"
@@ -34,13 +35,13 @@ glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
     // scale fix
     m_model = glm::scale(m_model, glm::vec3(0.2f));
     // local offset
-    glm::vec3 offset = glm::vec3(10.0f, 0.0f, 2.0f) + glm::vec3(swayX, 0.0f, swayZ);
+    glm::vec3 offset = SWAY_OFFSET + glm::vec3(swayX, 0.0f, swayZ);
     m_model = glm::translate(m_model, offset);
     return m_model;
 }
 
 glm::vec3 TransformFpsComponent::getPosition() const {
     glm::mat4 model = m_model;
-    model = glm::translate(model, -glm::vec3(10.0f, 0.0f, 2.0f));
+    model = glm::translate(model, -SWAY_OFFSET);
     return model[3];
 }

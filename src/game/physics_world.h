@@ -18,9 +18,9 @@ struct PhysicsBody {
 	AABB AABB;
 };
 struct PhysicsCommand {
-	std::string name;
+	const std::string& name;
 	PhysicsCommandType commandType;
-	const PhysicsBody* physicsBody;
+	PhysicsBody physicsBody;
 };
 
 class PhysicsWorld {

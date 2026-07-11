@@ -5,6 +5,7 @@
 #include "../game/game_entity.h"
 #include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
+#include "../utils/math_utils.hpp"
 #include "physics_world.h"
 #include <algorithm>
 #include <unordered_map>
@@ -75,7 +76,7 @@ void PhysicsWorld::flush() {
 		if (cmd.commandType == PhysicsCommandType::ADD) {
 			if (it == m_physicsBodies.end()) {
 				// does not exist -> add
-				m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody->transform, cmd.physicsBody->AABB);
+				m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody.transform, cmd.physicsBody.AABB);
 			}
 		} else if (cmd.commandType == PhysicsCommandType::REMOVE) {
 			if (it != m_physicsBodies.end()) {
@@ -102,7 +103,9 @@ void PhysicsWorld::step(float fixedt) const {
 			// FIXME local -> world
 			if (physicsBody.second.AABB.isInCollisionWithOther(targetPhysicsBody.second.AABB)) {
 				collision = true;
-				LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
+				if (physicsBody.first == "arms") {
+					//LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
+				}
 				break;
 			}
 		}
@@ -118,7 +121,6 @@ void PhysicsWorld::step(float fixedt) const {
 	// 2. check for collisions
 	// 3. if colliding move back to previous position
 }
-
 
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 	std::vector<RendererImmediateCommand> commands;

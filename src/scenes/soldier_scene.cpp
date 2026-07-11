@@ -17,6 +17,7 @@
 #include "../graphics/model.h"
 #include "../graphics/renderer.h"
 #include "../managers/resource_manager.h"
+#include "../utils/math_utils.hpp"
 #include "scene.h"
 #include "soldier_scene.h"
 #include <algorithm>
@@ -144,7 +145,7 @@ void SoldierScene::init() {
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
-        armsGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f));
+        armsGO->addComponent<PhysicsComponent>(armsModel->getAABBMin(), armsModel->getAABBMax());
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
@@ -250,6 +251,11 @@ void SoldierScene::init() {
             //}
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
+        }
+
+        if (gameEntity->getPhysics()) {
+            LOG_D(gameEntity->getName() << " MIN: " << Utils::getVec3Values(gameEntity->getPhysics()->getAABB().min)
+                                        << " MAX: " << Utils::getVec3Values(gameEntity->getPhysics()->getAABB().max));
         }
     }
 

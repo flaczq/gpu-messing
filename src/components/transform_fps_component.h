@@ -15,6 +15,8 @@ public:
 	glm::vec3 getPosition() const override;
 
 private:
+	static constexpr glm::vec3 SWAY_OFFSET = glm::vec3(10.0f, 0.0f, 2.0f);
+
 	Camera* m_camera = nullptr;
 
 	float m_sway{};

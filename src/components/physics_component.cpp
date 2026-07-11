@@ -13,6 +13,8 @@ PhysicsComponent::PhysicsComponent(glm::vec3 AABBmin, glm::vec3 AABBmax)
 
 void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
+
+    m_AABB.update(m_transform->getScale(), m_transform->getPosition());
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
@@ -29,7 +31,7 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
     PhysicsCommand command = {
         m_transform->getOwner()->getName(),
         commandType,
-        &body
+        body
     };
     PhysicsWorld::getInstance().registerInQueue(command);
 }
