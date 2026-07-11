@@ -12,7 +12,7 @@ public:
 	glm::mat4 getNormalMatrix();
 
 	glm::mat4 getModel() const { return m_model; }
-	glm::vec3 getPosition() const { return m_position; }
+	virtual glm::vec3 getPosition() const { return m_position; }
 	void setPosition(glm::vec3 position) { m_position = position; m_dirty = true; }
 	glm::quat getRotation() const { return m_rotation; }
 	void setRotation(glm::quat rotation) { m_rotation = rotation; m_dirty = true; }

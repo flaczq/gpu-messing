@@ -3,6 +3,7 @@
 #include "../components/physics_component.h"
 #include "../configs/math_config.hpp"
 #include "../graphics/renderer.h"
+#include <unordered_map>
 #include <vector>
 
 class TransformComponent;
@@ -13,12 +14,13 @@ enum class PhysicsCommandType {
 };
 
 struct PhysicsBody {
-	TransformComponent* transform;
+	const TransformComponent* transform;
 	AABB AABB;
 };
 struct PhysicsCommand {
+	std::string name;
 	PhysicsCommandType commandType;
-	PhysicsBody physicsBody;
+	const PhysicsBody* physicsBody;
 };
 
 class PhysicsWorld {
@@ -41,7 +43,7 @@ private:
 	PhysicsWorld();
 
 	std::vector<PhysicsCommand> m_physicsQueue;
-	std::vector<PhysicsBody> m_physicsBodies;
+	std::unordered_map<std::string, PhysicsBody> m_physicsBodies;
 
 	unsigned int m_VAOAABB{}, m_VBOAABB{};
 };

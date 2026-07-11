@@ -22,10 +22,14 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
     } else {
         commandType = PhysicsCommandType::REMOVE;
     }
-    PhysicsCommand command = {
-        commandType,
+    PhysicsBody body = {
         m_transform,
         m_AABB
+    };
+    PhysicsCommand command = {
+        m_transform->getOwner()->getName(),
+        commandType,
+        &body
     };
     PhysicsWorld::getInstance().registerInQueue(command);
 }

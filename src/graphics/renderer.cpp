@@ -192,7 +192,7 @@ void Renderer::flush() {
 
 void Renderer::renderImmediate() {
     std::vector<RendererImmediateCommand> queue;
-    unsigned int VAO;
+    unsigned int VAO{};
     switch (m_renderDebugMode) {
     case RendererRenderDebugMode::NONE:
         return;

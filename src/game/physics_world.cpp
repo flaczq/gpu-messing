@@ -7,6 +7,7 @@
 #include "../managers/scene_manager.h"
 #include "physics_world.h"
 #include <algorithm>
+#include <unordered_map>
 #include <vector>
 
 PhysicsWorld& PhysicsWorld::getInstance() {
@@ -18,7 +19,7 @@ PhysicsWorld::PhysicsWorld() = default;
 
 PhysicsWorld::~PhysicsWorld() {
 	for (auto& physicsBody : m_physicsBodies) {
-		delete physicsBody.transform;
+		delete physicsBody.second.transform;
 	}
 
 	m_physicsBodies.clear();
@@ -66,28 +67,24 @@ void PhysicsWorld::registerInQueue(const PhysicsCommand& command) {
 }
 
 void PhysicsWorld::flush() {
-	m_physicsBodies.clear();
+	//m_physicsBodies.clear();
+
+	// add/remove
 	for (auto& cmd : m_physicsQueue) {
-		/*auto it = std::find(m_physicsBodies.begin(), m_physicsBodies.end(), cmd.transform);
+		auto it = m_physicsBodies.find(cmd.name);
 		if (cmd.commandType == PhysicsCommandType::ADD) {
 			if (it == m_physicsBodies.end()) {
 				// does not exist -> add
-				m_physicsBodies.push_back({
-					cmd.transform,
-					cmd.AABB
-				});
+				m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody->transform, cmd.physicsBody->AABB);
 			}
 		} else if (cmd.commandType == PhysicsCommandType::REMOVE) {
 			if (it != m_physicsBodies.end()) {
 				// does exist -> remove
-				delete it->transform;
+				delete it->second.transform;
 				m_physicsBodies.erase(it);
 			}
-		}*/
-		m_physicsBodies.push_back({
-			cmd.physicsBody.transform,
-			cmd.physicsBody.AABB
-		});
+		}
+		//m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody->transform, cmd.physicsBody->AABB);
 	}
 
 	m_physicsQueue.clear();
@@ -98,6 +95,17 @@ void PhysicsWorld::step(float fixedt) const {
 		//LOG_D("ACTIVE PHYSICS: " << t->getOwner()->getName());
 		bool collision = false;
 		glm::vec3 color;
+		for (auto& targetPhysicsBody : m_physicsBodies) {
+			if (physicsBody.first == targetPhysicsBody.first) {
+				continue;
+			}
+			// FIXME local -> world
+			if (physicsBody.second.AABB.isInCollisionWithOther(targetPhysicsBody.second.AABB)) {
+				collision = true;
+				LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
+				break;
+			}
+		}
 		if (collision) {
 			// RED
 			color = glm::vec3(1.0f, 0.0f, 0.0f);
@@ -115,13 +123,14 @@ void PhysicsWorld::step(float fixedt) const {
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 	std::vector<RendererImmediateCommand> commands;
 	for (auto& physicsBody : m_physicsBodies) {
+		glm::vec3 pos = physicsBody.second.transform->getPosition();
 		RendererImmediateCommand command = {
 			m_VAOAABB,
-			physicsBody.transform->getPosition(),
-			physicsBody.transform->getRotation(),
-			physicsBody.transform->getScale(),
-			physicsBody.AABB.getSize(),
-			physicsBody.AABB.getCenter(),
+			pos,
+			physicsBody.second.transform->getRotation(),
+			physicsBody.second.transform->getScale(),
+			physicsBody.second.AABB.getSize(),
+			physicsBody.second.AABB.getCenter(),
 			glm::vec3(1.0f, 0.0f, 1.0f)
 		};
 		commands.push_back(command);

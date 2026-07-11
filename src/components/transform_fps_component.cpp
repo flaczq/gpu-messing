@@ -38,3 +38,9 @@ glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
     m_model = glm::translate(m_model, offset);
     return m_model;
 }
+
+glm::vec3 TransformFpsComponent::getPosition() const {
+    glm::mat4 model = m_model;
+    model = glm::translate(model, -glm::vec3(10.0f, 0.0f, 2.0f));
+    return model[3];
+}
