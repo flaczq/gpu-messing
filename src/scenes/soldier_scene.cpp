@@ -274,6 +274,11 @@ void SoldierScene::saveState() {
 void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
+
+        if (aliveGameEntity->getName() == "soldier_30") {
+            LOG_D(aliveGameEntity->getName() << " MIN: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMin)
+                << " MAX: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMax));
+        }
     }
 }
 

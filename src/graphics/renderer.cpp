@@ -11,6 +11,7 @@
 #include "../graphics/shader.h"
 #include "../managers/resource_manager.h"
 #include "../utils/enum_utils.hpp"
+#include "../utils/math_utils.hpp"
 #include "renderer.h"
 #include <algorithm>
 #include <iostream>
@@ -216,8 +217,9 @@ void Renderer::renderImmediate() {
         model = glm::translate(model, cmd.position);
         model *= glm::mat4_cast(cmd.rotation);
         // center fix
-        //model = glm::translate(model, cmd.center * cmd.scale);
-        model = glm::scale(model, cmd.size * cmd.scale);
+        //model = glm::translate(model, cmd.center);
+        // AABB box is 1x1x1 so let's scale it by size
+        model = glm::scale(model, cmd.size);
         shader->setMat4fv("model", model);
         shader->setVec3fv("matColor", cmd.color);
         glDrawArrays(GL_LINES, 0, 24);

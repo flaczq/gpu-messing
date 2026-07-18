@@ -7,14 +7,14 @@
 #include "transform_component.h"
 
 PhysicsComponent::PhysicsComponent(glm::vec3 AABBmin, glm::vec3 AABBmax)
-    : m_AABB(AABBmin, AABBmax)
+    : m_AABB(AABBmin, AABBmax, AABBmin, AABBmax)
 {
 }
 
 void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
 
-    m_AABB.update(m_transform->getScale(), m_transform->getPosition());
+    m_AABB.updateGlobal(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
@@ -24,6 +24,8 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
     } else {
         commandType = PhysicsCommandType::REMOVE;
     }
+
+    m_AABB.updateGlobal(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
     PhysicsBody body = {
         m_transform,
         m_AABB

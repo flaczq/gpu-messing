@@ -15,4 +15,5 @@ void AIComponent::onFixedUpdate(float fixedt) {
     float z = cos(tt);
     glm::vec3 newPos = glm::normalize(glm::vec3(x, 0.0f, z));
     m_transform->setPosition(newPos);
+    m_transform->setRotation(newPos);
 }

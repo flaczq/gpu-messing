@@ -33,7 +33,7 @@ bool PhysicsWorld::init() {
 	// FIXME hardcoded max: 100
 	m_physicsQueue.reserve(100);
 
-	// hardcoded AABB
+	// hardcoded AABB 1x1x1 (with 0.0 in the middle)
 	float verticesAABB[] = {
 		// front
 		-0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
@@ -100,11 +100,10 @@ void PhysicsWorld::step(float fixedt) const {
 			if (physicsBody.first == targetPhysicsBody.first) {
 				continue;
 			}
-			// FIXME local -> world
 			if (physicsBody.second.AABB.isInCollisionWithOther(targetPhysicsBody.second.AABB)) {
 				collision = true;
 				if (physicsBody.first == "arms") {
-					//LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
+					LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
 				}
 				break;
 			}
@@ -125,10 +124,9 @@ void PhysicsWorld::step(float fixedt) const {
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 	std::vector<RendererImmediateCommand> commands;
 	for (auto& physicsBody : m_physicsBodies) {
-		glm::vec3 pos = physicsBody.second.transform->getPosition();
 		RendererImmediateCommand command = {
 			m_VAOAABB,
-			pos,
+			physicsBody.second.transform->getPosition(),
 			physicsBody.second.transform->getRotation(),
 			physicsBody.second.transform->getScale(),
 			physicsBody.second.AABB.getSize(),
