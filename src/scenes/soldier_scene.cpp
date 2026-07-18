@@ -252,11 +252,6 @@ void SoldierScene::init() {
         } else {
             m_deadGameEntities.push_back(gameEntity.get());
         }
-
-        if (gameEntity->getPhysics()) {
-            LOG_D(gameEntity->getName() << " MIN: " << Utils::getVec3Values(gameEntity->getPhysics()->getAABB().min)
-                                        << " MAX: " << Utils::getVec3Values(gameEntity->getPhysics()->getAABB().max));
-        }
     }
 
     // first frame Renderer params
@@ -275,10 +270,10 @@ void SoldierScene::fixedUpdate(float fixedt) {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
         aliveGameEntity->fixedUpdate(fixedt);
 
-        if (aliveGameEntity->getName() == "soldier_30") {
-            LOG_D(aliveGameEntity->getName() << " MIN: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMin)
-                << " MAX: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMax));
-        }
+        //if (aliveGameEntity->getPhysics()) {
+        //    LOG_D(aliveGameEntity->getName() << " MIN: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMin)
+        //                                     << " MAX: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMax));
+        //}
     }
 }
 

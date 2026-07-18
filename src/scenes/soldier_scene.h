@@ -31,7 +31,7 @@ private:
 	static constexpr glm::vec3 LIGHT_POSITION = glm::vec3(3.0f, 0.0f, 3.0f);
 	static constexpr glm::vec3 LIGHT_SCALE = glm::vec3(0.2f);
 	static constexpr glm::vec3 SOLDIER_POSITION = glm::vec3(3.0f, 0.01f, 3.0f);
-	static constexpr float SOLDIER_ROTATION = glm::radians(0.0f);
+	static constexpr float SOLDIER_ROTATION = glm::radians(-90.0f);
 	static constexpr glm::vec3 SOLDIER_SCALE = glm::vec3(100.0f);
 
 	Camera* m_camera = nullptr;

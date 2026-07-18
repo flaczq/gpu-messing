@@ -16,11 +16,10 @@ public:
 	Mesh(const Mesh&) = delete;
 	// block copy assignment operator
 	Mesh& operator=(const Mesh&) = delete;
-	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures);
-	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor);
+	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor = false, glm::vec3 diffuseColor = glm::vec3(1.0f));
 	~Mesh();
 
-	void draw(Shader &shader);
+	void draw(const Shader &shader);
 
 private:
 	unsigned int m_VAO{}, m_VBO{}, m_EBO{};

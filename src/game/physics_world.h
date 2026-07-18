@@ -15,7 +15,7 @@ enum class PhysicsCommandType {
 
 struct PhysicsBody {
 	const TransformComponent* transform;
-	AABB AABB;
+	const AABB* AABB;
 };
 struct PhysicsCommand {
 	const std::string& name;

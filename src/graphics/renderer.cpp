@@ -214,11 +214,7 @@ void Renderer::renderImmediate() {
     shader->setMat4fv("view", m_camera->getViewMatrix());
     for (auto& cmd : queue) {
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cmd.position);
-        model *= glm::mat4_cast(cmd.rotation);
-        // center fix
-        //model = glm::translate(model, cmd.center);
-        // AABB box is 1x1x1 so let's scale it by size
+        model = glm::translate(model, cmd.center);
         model = glm::scale(model, cmd.size);
         shader->setMat4fv("model", model);
         shader->setVec3fv("matColor", cmd.color);

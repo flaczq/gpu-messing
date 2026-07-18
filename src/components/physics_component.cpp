@@ -14,7 +14,7 @@ PhysicsComponent::PhysicsComponent(glm::vec3 AABBmin, glm::vec3 AABBmax)
 void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
 
-    m_AABB.updateGlobal(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
+    //m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
@@ -25,10 +25,10 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
         commandType = PhysicsCommandType::REMOVE;
     }
 
-    m_AABB.updateGlobal(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
+    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
     PhysicsBody body = {
         m_transform,
-        m_AABB
+        &m_AABB
     };
     PhysicsCommand command = {
         m_transform->getOwner()->getName(),

@@ -17,14 +17,14 @@ class Mesh;
 class Model {
 public:
 	Model(const std::string& name, const std::string& path);
-	Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABBMin = glm::vec3(0.0f), glm::vec3 AABBMax = glm::vec3(0.0f));
+	Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABBMin = glm::vec3(-0.5f), glm::vec3 AABBMax = glm::vec3(0.5f));
 	~Model();
 
 	const std::string& getName() const { return m_name; }
 	glm::vec3 getAABBMin() const { return m_AABBMin; }
 	glm::vec3 getAABBMax() const { return m_AABBMax; }
 
-	void draw(Shader& shader);
+	void draw(const Shader& shader);
 
 private:
 	std::string m_name{};
@@ -34,7 +34,7 @@ private:
 	glm::vec3 m_AABBMax{};
 
 	void loadModel(const std::string& path);
-	void processNode(aiNode* node, const aiScene* scene);
-	std::unique_ptr<Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
-	std::vector<std::shared_ptr<Texture>> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene) const;
+	void processNode(const aiNode* node, const aiScene* scene);
+	std::unique_ptr<Mesh> processMesh(const aiMesh* mesh, const aiScene* scene);
+	std::vector<std::shared_ptr<Texture>> loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const;
 };

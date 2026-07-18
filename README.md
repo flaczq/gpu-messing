@@ -8,4 +8,4 @@
 🖌️ [for those who come after](ATTRIBUTIONS.md)
 
 ## What it can do for now
-![army2](army2.png)
+![army3](army3.png)

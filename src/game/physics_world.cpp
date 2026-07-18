@@ -100,7 +100,7 @@ void PhysicsWorld::step(float fixedt) const {
 			if (physicsBody.first == targetPhysicsBody.first) {
 				continue;
 			}
-			if (physicsBody.second.AABB.isInCollisionWithOther(targetPhysicsBody.second.AABB)) {
+			if (physicsBody.second.AABB->isInCollisionWithOther(*targetPhysicsBody.second.AABB)) {
 				collision = true;
 				if (physicsBody.first == "arms") {
 					LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
@@ -129,8 +129,8 @@ std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 			physicsBody.second.transform->getPosition(),
 			physicsBody.second.transform->getRotation(),
 			physicsBody.second.transform->getScale(),
-			physicsBody.second.AABB.getSize(),
-			physicsBody.second.AABB.getCenter(),
+			physicsBody.second.AABB->getSize(),
+			physicsBody.second.AABB->getCenter(),
 			glm::vec3(1.0f, 0.0f, 1.0f)
 		};
 		commands.push_back(command);

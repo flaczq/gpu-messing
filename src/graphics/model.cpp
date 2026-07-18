@@ -35,7 +35,7 @@ Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABB
 
 Model::~Model() = default;
 
-void Model::draw(Shader& shader) {
+void Model::draw(const Shader& shader) {
 	for (size_t i{}; i < m_meshes.size(); i++) {
 		m_meshes[i]->draw(shader);
 	}
@@ -59,7 +59,7 @@ void Model::loadModel(const std::string& path) {
 	processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(aiNode* node, const aiScene* scene) {
+void Model::processNode(const aiNode* node, const aiScene* scene) {
 	// process all mesh nodes (if exist)
 	for (size_t i{}; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
@@ -78,7 +78,7 @@ void Model::processNode(aiNode* node, const aiScene* scene) {
 	}
 }
 
-std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
+std::unique_ptr<Mesh> Model::processMesh(const aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<std::shared_ptr<Texture>> textures;
@@ -157,7 +157,7 @@ std::unique_ptr<Mesh> Model::processMesh(aiMesh* mesh, const aiScene* scene) {
 	return std::make_unique<Mesh>(vertices, indices, textures, hasDiffuseColor, diffuseColor);
 }
 
-std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName, const aiScene* scene) const {
+std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const {
 	std::vector<std::shared_ptr<Texture>> textures;
 
 	for (size_t i{}; i < mat->GetTextureCount(type); i++) {

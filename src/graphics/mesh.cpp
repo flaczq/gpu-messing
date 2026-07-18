@@ -49,16 +49,6 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures)
-    : m_vertices(std::move(vertices)),
-      m_indices(std::move(indices)),
-      m_textures(std::move(textures)),
-      m_hasDiffuseColor(false),
-      m_diffuseColor(glm::vec3(1.0f))
-{
-    setupMesh();
-}
-
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor)
     : m_vertices(std::move(vertices)),
       m_indices(std::move(indices)),
@@ -76,7 +66,7 @@ Mesh::~Mesh() {
     glDeleteBuffers(1, &m_EBO);
 }
 
-void Mesh::draw(Shader& shader) {
+void Mesh::draw(const Shader& shader) {
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
     unsigned int normalNr = 1;
