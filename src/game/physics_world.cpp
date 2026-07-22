@@ -94,6 +94,9 @@ void PhysicsWorld::flush() {
 void PhysicsWorld::step(float fixedt) const {
 	for (auto& physicsBody : m_physicsBodies) {
 		//LOG_D("ACTIVE PHYSICS: " << t->getOwner()->getName());
+		if (physicsBody.first != "arms") {
+			continue;
+		}
 		bool collision = false;
 		glm::vec3 color;
 		for (auto& targetPhysicsBody : m_physicsBodies) {
@@ -102,9 +105,7 @@ void PhysicsWorld::step(float fixedt) const {
 			}
 			if (physicsBody.second.AABB->isInCollisionWithOther(*targetPhysicsBody.second.AABB)) {
 				collision = true;
-				if (physicsBody.first == "arms") {
-					LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
-				}
+				//LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
 				break;
 			}
 		}

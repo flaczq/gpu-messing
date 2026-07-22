@@ -17,7 +17,7 @@ void TransformFpsComponent::saveState() {
 
 void TransformFpsComponent::onFixedUpdate(float fixedt) {
     m_sway += fixedt * 2.0f;
-    setPosition(glm::vec3(m_model[3]));
+    //setPosition(glm::vec3(m_model[3]));
 }
 
 glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
@@ -40,8 +40,13 @@ glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
     return m_model;
 }
 
+glm::mat4 TransformFpsComponent::getNormalMatrix() {
+    m_normal = glm::transpose(glm::inverse(glm::mat3(m_model)));
+    return m_normal;
+}
+
 glm::vec3 TransformFpsComponent::getPosition() const {
-    glm::mat4 model = m_model;
-    model = glm::translate(model, -SWAY_OFFSET);
-    return model[3];
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(m_model, -SWAY_OFFSET);
+    return glm::vec3(model[3]);
 }

@@ -12,6 +12,7 @@ public:
 	void saveState() override;
 	void onFixedUpdate(float fixedt) override;
 	glm::mat4 getInterpolatedModelMatrix(float alpha) override;
+	glm::mat4 getNormalMatrix() override;
 	glm::vec3 getPosition() const override;
 
 private:

@@ -9,7 +9,7 @@ public:
 
 	virtual void saveState();
 	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
-	glm::mat4 getNormalMatrix();
+	virtual glm::mat4 getNormalMatrix();
 
 	glm::mat4 getModel() const { return m_model; }
 	virtual glm::vec3 getPosition() const { return m_position; }
