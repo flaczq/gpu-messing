@@ -8,5 +8,6 @@
 namespace MeshGenerator {
 	Mesh createPlane(float width, float depth, std::shared_ptr<Texture> texture = nullptr, float uvTiling = 1.0f);
 	Mesh createCuboid(float width, float depth, float height, std::shared_ptr<Texture> texture = nullptr, float uvTiling = 1.0f);
+	Mesh createGrid(float size, float step);
 	std::vector<Mesh> createRoom(float width, float height, float depth, float uvTiling = 1.0f);
 };

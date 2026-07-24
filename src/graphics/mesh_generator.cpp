@@ -50,7 +50,7 @@ namespace MeshGenerator {
 			textures.push_back(texture);
 		}
 
-		return Mesh(vertices, indices, textures, true, glm::vec3(1.0f, 0.0f, 0.5f));
+		return Mesh(vertices, indices, textures);
 	}
 
 	Mesh createCuboid(float width, float height, float depth, std::shared_ptr<Texture> texture, float uvTiling) {
@@ -129,6 +129,43 @@ namespace MeshGenerator {
 		}
 
 		return Mesh(vertices, indices, textures);
+	}
+
+	Mesh createGrid(float size, float step) {
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<std::shared_ptr<Texture>> textures;
+
+		float half = size * 0.5f;
+
+		auto addLine = [&](glm::vec3 p1, glm::vec3 p2) {
+			Vertex v1{}, v2{};
+			v1.Position = p1;
+			v2.Position = p2;
+			vertices.push_back(v1);
+			vertices.push_back(v2);
+			unsigned int idx = static_cast<unsigned int>(vertices.size()) - 2;
+			indices.push_back(idx);
+			indices.push_back(idx + 1);
+		};
+
+		for (float x = -half; x <= half; x += step) {
+			for (float y = -half; y <= half; y += step) {
+				addLine(glm::vec3(x, y, -half), glm::vec3(x, y, half));
+			}
+		}
+		for (float x = -half; x <= half; x += step) {
+			for (float z = -half; z <= half; z += step) {
+				addLine(glm::vec3(x, -half, z), glm::vec3(x, half, z));
+			}
+		}
+		for (float y = -half; y <= half; y += step) {
+			for (float z = -half; z <= half; z += step) {
+				addLine(glm::vec3(-half, y, z), glm::vec3(half, y, z));
+			}
+		}
+
+		return Mesh(vertices, indices, textures, true, glm::vec3(1.0f, 0.0f, 0.5f), GL_LINES);
 	}
 
 	std::vector<Mesh> createRoom(float width, float height, float depth, float uvTiling) {

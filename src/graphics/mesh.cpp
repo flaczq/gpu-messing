@@ -16,7 +16,8 @@ Mesh::Mesh(Mesh&& other) noexcept
       m_indices(std::move(other.m_indices)),
       m_textures(std::move(other.m_textures)),
       m_hasDiffuseColor(other.m_hasDiffuseColor),
-      m_diffuseColor(other.m_diffuseColor)
+      m_diffuseColor(other.m_diffuseColor),
+      m_drawType(other.m_drawType)
 {
     // reset IDs to not deconstruct them
     other.m_VAO = 0;
@@ -41,6 +42,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
         m_textures = std::move(other.m_textures);
         m_hasDiffuseColor = other.m_hasDiffuseColor;
         m_diffuseColor = other.m_diffuseColor;
+        m_drawType = other.m_drawType;
 
         other.m_VAO = 0;
         other.m_VBO = 0;
@@ -49,12 +51,13 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor)
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor, GLenum drawType)
     : m_vertices(std::move(vertices)),
       m_indices(std::move(indices)),
       m_textures(std::move(textures)),
       m_hasDiffuseColor(hasDiffuseColor),
-      m_diffuseColor(diffuseColor)
+      m_diffuseColor(diffuseColor),
+      m_drawType(drawType)
 {
 	setupMesh();
 }
@@ -111,7 +114,7 @@ void Mesh::draw(const Shader& shader) {
     //                  
     glBindVertexArray(m_VAO);
     // what to render, number of elements, type, offset
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
+    glDrawElements(m_drawType, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
 
     // unbind <=> clean up
     glBindVertexArray(0);

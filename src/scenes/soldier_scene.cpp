@@ -58,6 +58,7 @@ void SoldierScene::init() {
     // MATERIALS
     ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("light_material", simpleShader);
+    ResourceManager::getInstance().loadMaterial("grid_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
     ResourceManager::getInstance().loadMaterial("arms_material", lambertShader);
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
@@ -75,6 +76,13 @@ void SoldierScene::init() {
     auto lightM = std::make_unique<Mesh>(std::move(light));
     auto lightMM = std::make_shared<Model>("light_model", std::move(lightM));
     ResourceManager::getInstance().addModel(std::move(lightMM));
+    // --- grid
+    float gridSize = 18.0f;
+    float gridStep = 1.0f;
+    auto grid = MeshGenerator::createGrid(gridSize, gridStep);
+    auto gridM = std::make_unique<Mesh>(std::move(grid));
+    auto gridMM = std::make_shared<Model>("grid_model", std::move(gridM));
+    ResourceManager::getInstance().addModel(std::move(gridMM));
     // --- stencil boxes
     auto stencilBox = MeshGenerator::createCuboid(3.0f, 3.0f, 3.0f);
     auto stencilBoxM = std::make_unique<Mesh>(std::move(stencilBox));
@@ -122,6 +130,19 @@ void SoldierScene::init() {
         lightGO->init();
         m_gameEntities.push_back(std::move(lightGO));
     }
+    // GRID
+    auto gridModel = ResourceManager::getInstance().getModel("grid_model");
+    auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
+    if (gridModel && gridMaterial) {
+        gridMaterial->addVec3Uniform("matColor", glm::vec3(0.7f, 0.3f, 0.1f));
+        auto gridGO = std::make_unique<GameEntity>("grid");
+        gridGO->setSolid(true);
+        gridGO->setAbstract(true);
+        gridGO->addComponent<TransformComponent>(glm::vec3(gridSize / 2.0f));
+        gridGO->addComponent<RenderComponent>(gridModel, gridMaterial);
+        gridGO->init();
+        m_gameEntities.push_back(std::move(gridGO));
+    }
     // GIZMO
     auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
     auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
@@ -145,8 +166,8 @@ void SoldierScene::init() {
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
-        //armsGO->addComponent<PhysicsComponent>(glm::vec3(-0.5f), glm::vec3(0.5f));
-        armsGO->addComponent<PhysicsComponent>(armsModel->getAABBMin(), armsModel->getAABBMax());
+        armsGO->addComponent<PhysicsComponent>(-FPS_ARMS_AABB, FPS_ARMS_AABB);
+        //armsGO->addComponent<PhysicsComponent>(armsModel->getAABBMin(), armsModel->getAABBMax());
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
