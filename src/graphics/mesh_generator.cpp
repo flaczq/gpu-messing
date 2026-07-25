@@ -149,18 +149,30 @@ namespace MeshGenerator {
 			indices.push_back(idx + 1);
 		};
 
-		for (float x = -half; x <= half; x += step) {
+		// perpendicular to X-axis
+		for (float x : {-half, half}) {
 			for (float y = -half; y <= half; y += step) {
 				addLine(glm::vec3(x, y, -half), glm::vec3(x, y, half));
 			}
-		}
-		for (float x = -half; x <= half; x += step) {
 			for (float z = -half; z <= half; z += step) {
 				addLine(glm::vec3(x, -half, z), glm::vec3(x, half, z));
 			}
 		}
-		for (float y = -half; y <= half; y += step) {
+		// perpendicular to Y-axis
+		for (float y : {-half, half}) {
+			for (float x = -half; x <= half; x += step) {
+				addLine(glm::vec3(x, y, -half), glm::vec3(x, y, half));
+			}
 			for (float z = -half; z <= half; z += step) {
+				addLine(glm::vec3(-half, y, z), glm::vec3(half, y, z));
+			}
+		}
+		// perpendicular to Z-axis
+		for (float z : {-half, half}) {
+			for (float x = -half; x <= half; x += step) {
+				addLine(glm::vec3(x, -half, z), glm::vec3(x, half, z));
+			}
+			for (float y = -half; y <= half; y += step) {
 				addLine(glm::vec3(-half, y, z), glm::vec3(half, y, z));
 			}
 		}
