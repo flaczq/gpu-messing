@@ -7,6 +7,10 @@ in vec3 FragPos;
 uniform vec3 matColor;
 
 void main() {
-    //vec3 color = (FragPos / 3.0f) + 0.5f;
-    FragColor = vec4(matColor, 1.0f);
+    vec3 color = (FragPos / 3.0) + 0.1;
+    if (matColor != vec3(0.0)) {
+        FragColor = vec4(matColor, 1.0);
+    } else {
+        FragColor = vec4(color, 1.0);
+    }
 }

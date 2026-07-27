@@ -43,7 +43,8 @@ namespace MeshGenerator {
 		}*/
 
 		vertices = { v0, v1, v2, v3 };
-		indices = { 0, 1, 2, 2, 3, 0 };
+		// CCW
+		indices = { 0, 2, 1, 0, 3, 2 }; // CW: { 0, 1, 2, 2, 3, 0 }
 		textures = {};
 		// FIXME: more than one texture
 		if (texture) {
@@ -62,12 +63,12 @@ namespace MeshGenerator {
 		float halfHeight = height * 0.5f;
 		float halfDepth  = depth  * 0.5f;
 
-		Vertex d0{}, d1{}, d2{}, d3{}, //down
-			   u0{}, u1{}, u2{}, u3{}, //up
-			   b0{}, b1{}, b2{}, b3{}, //back
-			   f0{}, f1{}, f2{}, f3{}, //front
-			   l0{}, l1{}, l2{}, l3{}, //left
-			   r0{}, r1{}, r2{}, r3{}; //right
+		Vertex d0{}, d1{}, d2{}, d3{}, // down  (0-3)
+			   u0{}, u1{}, u2{}, u3{}, // up    (4-7)
+			   b0{}, b1{}, b2{}, b3{}, // back  (8-11)
+			   f0{}, f1{}, f2{}, f3{}, // front (12-15)
+			   l0{}, l1{}, l2{}, l3{}, // left  (16-19)
+			   r0{}, r1{}, r2{}, r3{}; // right (20-23)
 
 		d0.Position = { -halfWidth, -halfHeight, -halfDepth };
 		d1.Position = {  halfWidth, -halfHeight, -halfDepth };
@@ -94,10 +95,18 @@ namespace MeshGenerator {
 		r2.Position = {  halfWidth,  halfHeight, -halfDepth };
 		r3.Position = {  halfWidth,  halfHeight,  halfDepth };
 
-		d0.TexCoords = u0.TexCoords = b0.TexCoords = f0.TexCoords = l0.TexCoords = r0.TexCoords = { 0.0f,             0.0f              };
-		d1.TexCoords = u1.TexCoords = b1.TexCoords = f1.TexCoords = l1.TexCoords = r1.TexCoords = { width * uvTiling, 0.0f              };
-		d2.TexCoords = u2.TexCoords = b2.TexCoords = f2.TexCoords = l2.TexCoords = r2.TexCoords = { width * uvTiling, height * uvTiling };
-		d3.TexCoords = u3.TexCoords = b3.TexCoords = f3.TexCoords = l3.TexCoords = r3.TexCoords = { 0.0f,             height * uvTiling };
+		d0.TexCoords = u0.TexCoords = { 0.0f,               0.0f };
+		d1.TexCoords = u1.TexCoords = { width * uvTiling,   0.0f };
+		d2.TexCoords = u2.TexCoords = { width * uvTiling,   depth * uvTiling };
+		d3.TexCoords = u3.TexCoords = { 0.0f,               depth * uvTiling };
+		b0.TexCoords = f0.TexCoords = { 0.0f,               0.0f };
+		b1.TexCoords = f1.TexCoords = { width * uvTiling,   0.0f };
+		b2.TexCoords = f2.TexCoords = { width * uvTiling,   height * uvTiling };
+		b3.TexCoords = f3.TexCoords = { 0.0f,               height * uvTiling };
+		l0.TexCoords = r0.TexCoords = { 0.0f,               0.0f };
+		l1.TexCoords = r1.TexCoords = { depth * uvTiling,   0.0f };
+		l2.TexCoords = r2.TexCoords = { depth * uvTiling,   height * uvTiling };
+		l3.TexCoords = r3.TexCoords = { 0.0f,               height * uvTiling };
 
 		d0.Normal = d1.Normal = d2.Normal = d3.Normal = {  0.0f, -1.0f,  0.0f };
 		u0.Normal = u1.Normal = u2.Normal = u3.Normal = {  0.0f,  1.0f,  0.0f };
@@ -114,16 +123,17 @@ namespace MeshGenerator {
 			l0, l1, l2, l3,
 			r0, r1, r2, r3
 		};
+
 		indices = {
-			0,   1,  2,  2,  3,  0,
-			4,   5,  6,  6,  7,  4,
-			8,   9, 10, 10, 11,  8,
-			12, 13, 14, 14, 15, 12,
-			16, 17, 18, 18, 19, 16,
-			20, 21, 22, 22, 23, 20
+			0,   2,  1,  0,  3,  2,
+			4,   6,  5,  4,  7,  6,
+			8,  10,  9,  8, 11, 10,
+			12, 14, 13, 12, 15, 14,
+			16, 18, 17, 16, 19, 18,
+			20, 22, 21, 20, 23, 22
 		};
+
 		textures = {};
-		// FIXME: more than one texture
 		if (texture) {
 			textures.push_back(texture);
 		}

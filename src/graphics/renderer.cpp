@@ -67,9 +67,9 @@ void Renderer::beginFrame(unsigned int screenWidth, unsigned int screenHeight) {
     glDepthFunc(GL_LESS);
 
     // face culling
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_BACK);
-    //glFrontFace(GL_CCW);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -154,6 +154,7 @@ void Renderer::flush() {
     //    ┻┛┗┛┗┛┛┗┻┛┗┛┗┗┛  ┣┛┛┗┗┛┗┛
     //                             
     if (!m_blendingQueue.empty()) {
+        glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         // src: factor == source color vector, dst: factor == 1 - source color vector
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -162,6 +163,7 @@ void Renderer::flush() {
         sortQueueByDistance(m_blendingQueue);
         renderSortedQueue(m_blendingQueue, "blending pass");
         // ---
+        glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
     }
 
@@ -171,8 +173,8 @@ void Renderer::flush() {
     //                                   
     if (!m_topLayerQueue.empty()) {
         // always last
-        // different fov and planes for top layer
         glClear(GL_DEPTH_BUFFER_BIT);
+        // different fov and planes for top layer
         m_camera->setFov(45.0f);
         m_camera->setNearPlane(0.01f);
         m_camera->setFarPlane(10.0f);

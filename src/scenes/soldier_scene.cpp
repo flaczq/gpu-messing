@@ -38,6 +38,7 @@ void SoldierScene::init() {
     // TEXTURES
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
+    ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
     // MODELS
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
     ResourceManager::getInstance().loadModel("arms_model", "../assets/models/RiggedFpsArms.fbx");
@@ -67,7 +68,7 @@ void SoldierScene::init() {
 
     // MODELS
     // --- floor
-    glm::vec3 floorSize = glm::vec3(16.0f, 0.0f, 15.0f);
+    glm::vec3 floorSize = glm::vec3(14.0f, 0.0f, 14.0f);
     auto floor = MeshGenerator::createPlane(floorSize.x, floorSize.z);
     auto floorM = std::make_unique<Mesh>(std::move(floor));
     auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM), -floorSize * 0.5f, floorSize * 0.5f);
@@ -111,7 +112,7 @@ void SoldierScene::init() {
         auto floorGO = std::make_unique<GameEntity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
         floorGO->setSolid(true);
-        floorGO->addComponent<TransformComponent>(FLOOR_POSITION);
+        floorGO->addComponent<TransformComponent>(glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
         floorGO->addComponent<PhysicsComponent>(floorModel->getAABBMin(), floorModel->getAABBMax());
         floorGO->init();
@@ -135,7 +136,8 @@ void SoldierScene::init() {
     auto gridModel = ResourceManager::getInstance().getModel("grid_model");
     auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
     if (gridModel && gridMaterial) {
-        gridMaterial->addVec3Uniform("matColor", glm::vec3(0.7f, 0.3f, 0.1f));
+        // reset to black
+        gridMaterial->addVec3Uniform("matColor", glm::vec3(0.0f));
         auto gridGO = std::make_unique<GameEntity>("grid");
         gridGO->setSolid(true);
         gridGO->setAbstract(true);
@@ -145,17 +147,17 @@ void SoldierScene::init() {
         m_gameEntities.push_back(std::move(gridGO));
     }
     // GIZMO
-    auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
-    auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
-    if (gizmoModel && gizmoMaterial) {
-        auto gizmoGO = std::make_unique<GameEntity>("gizmo");
-        gizmoGO->setSolid(true);
-        gizmoGO->setAbstract(true);
-        gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), GIZMO_SCALE);
-        gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
-        gizmoGO->init();
-        m_gameEntities.push_back(std::move(gizmoGO));
-    }
+    //auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
+    //auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
+    //if (gizmoModel && gizmoMaterial) {
+    //    auto gizmoGO = std::make_unique<GameEntity>("gizmo");
+    //    gizmoGO->setSolid(true);
+    //    gizmoGO->setAbstract(true);
+    //    gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), GIZMO_SCALE);
+    //    gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
+    //    gizmoGO->init();
+    //    m_gameEntities.push_back(std::move(gizmoGO));
+    //}
     // FPS ARMS
     auto armsModel = ResourceManager::getInstance().getModel("arms_model");
     auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
