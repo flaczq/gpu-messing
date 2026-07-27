@@ -7,20 +7,20 @@
 
 enum class SceneID {
 	SOLDIER,
-	LIGHTS_ROOM,
-	FPS_GAME
+	RTX
+	//FPS_GAME
 };
 
 class Scene {
 public:
 	virtual ~Scene();
 
-	virtual void init() = 0;
-	virtual void saveState() = 0;
-	virtual void fixedUpdate(float fixedt) = 0;
-	virtual void update(float alpha) = 0;
-	virtual void lateUpdate() = 0;
-	virtual void end() = 0;
+	virtual void init();
+	virtual void saveState();
+	virtual void fixedUpdate(float fixedt);
+	virtual void update(float alpha);
+	virtual void lateUpdate();
+	virtual void end();
 
 	virtual SceneID getID() const = 0;
 	std::vector<GameEntity*> getGameEntites() const { return m_aliveGameEntities; }

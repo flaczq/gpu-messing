@@ -165,10 +165,10 @@ std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(const aiMateri
 		// load texture into str
 		mat->GetTexture(type, static_cast<unsigned int>(i), &str);
 		std::string pathOrMem = str.C_Str();
-		// unique key for ResourceManager
+		// unique key (with model name) for ResourceManager
 		std::string fullPath = m_directory + '/' + pathOrMem;
 
-		auto texture = ResourceManager::getInstance().getTexture(fullPath, typeName, scene);
+		auto texture = ResourceManager::getInstance().getTexture(m_name, fullPath, typeName, scene);
 		if (texture) {
 			textures.push_back(texture);
 		}

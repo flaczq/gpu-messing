@@ -29,7 +29,7 @@ public:
 	std::shared_ptr<Material> getMaterial(const std::string& name);
 	std::shared_ptr<Texture> getTexture(const std::string& name);
 	// used by Assimp to load textures from Model
-	std::shared_ptr<Texture> getTexture(const std::string& path, const std::string& type, const aiScene* scene);
+	std::shared_ptr<Texture> getTexture(const std::string& modelName, const std::string& path, const std::string& type, const aiScene* scene);
 
 	void reloadShaders();
 	void end();

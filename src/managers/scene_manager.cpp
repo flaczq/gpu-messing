@@ -1,8 +1,10 @@
 #include "../configs/log_config.hpp"
 #include "../game/camera.h"
 #include "../graphics/renderer.h"
+#include "../scenes/rtx_scene.h"
 #include "../scenes/scene.h"
 #include "../scenes/soldier_scene.h"
+#include "../utils/enum_utils.hpp"
 #include "scene_manager.h"
 #include <iostream>
 #include <memory>
@@ -27,32 +29,30 @@ bool SceneManager::init(Camera* camera) {
 }
 
 void SceneManager::toggleScene() {
-	std::unique_ptr<Scene> nextScene;
-	std::string sceneIDStr;
+	SceneID nextSceneID;
 
 	if (m_currentScene) {
+		nextSceneID = Utils::getEnumNext(m_currentScene->getID());
 		m_currentScene->end();
-
-		if (m_currentScene->getID() == SceneID::SOLDIER) {
-			// FIXME TODO
-			nextScene = std::make_unique<SoldierScene>(m_camera);
-			sceneIDStr = "LIGHTS_ROOM";
-		} else if (m_currentScene->getID() == SceneID::LIGHTS_ROOM) {
-			// FIXME TODO
-			nextScene = std::make_unique<SoldierScene>(m_camera);
-			sceneIDStr = "FPS_GAME";
-		} else {
-			nextScene = std::make_unique<SoldierScene>(m_camera);
-			sceneIDStr = "SOLDIER";
-		}
 	} else {
-		nextScene = std::make_unique<SoldierScene>(m_camera);
-		sceneIDStr = "SOLDIER";
+		nextSceneID = Utils::getEnumFirst(SceneID::SOLDIER);
 	}
 
-	m_currentScene = std::move(nextScene);
+	// TODO: LOADING
+	LOG_D("Changed CurrentScene to: " << Utils::getEnumName(nextSceneID));
+	switch (nextSceneID) {
+	case SceneID::SOLDIER:
+		m_currentScene = std::make_unique<SoldierScene>(m_camera);
+		break;
+	case SceneID::RTX:
+		m_currentScene = std::make_unique<RtxScene>(m_camera);
+		break;
+		//case SceneID::FPS_GAME:
+		//	nextScene = std::make_unique<FpsGameScene>(m_camera);
+		//	break;
+	}
+
 	m_currentScene->init();
-	LOG_D("Changed CurrentScene to: " << sceneIDStr);
 }
 
 void SceneManager::saveState() const {

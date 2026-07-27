@@ -199,12 +199,12 @@ void Renderer::renderImmediate() {
         return;
     case RendererRenderDebugMode::AABB:
         queue = PhysicsWorld::getInstance().getAABBCommand();
+        assert(!queue.empty());
         // same for all
         VAO = queue[0].VAO;
         break;
     }
 
-    assert(!queue.empty());
     glDisable(GL_DEPTH_TEST);
     glBindVertexArray(VAO);
 

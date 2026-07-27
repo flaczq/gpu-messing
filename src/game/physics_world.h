@@ -35,6 +35,7 @@ public:
 	void registerInQueue(const PhysicsCommand& command);
 	void flush();
 	void step(float fixedt) const;
+	void end();
 
 	std::vector<RendererImmediateCommand> getAABBCommand();
 

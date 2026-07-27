@@ -4,7 +4,6 @@
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../components/transform_fps_component.h"
-#include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/camera.h"
@@ -41,8 +40,9 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
     // MODELS
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
-    ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     ResourceManager::getInstance().loadModel("arms_model", "../assets/models/RiggedFpsArms.fbx");
+    ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
+    ResourceManager::getInstance().loadModel("tank_model", "../assets/models/ShermanTank.glb");
     // SHADERS
     ResourceManager::getInstance().loadShader("simple_shader", "../shaders/simple.vert", "../shaders/simple.frag");
     ResourceManager::getInstance().loadShader("gizmo_shader", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
@@ -62,6 +62,7 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
     ResourceManager::getInstance().loadMaterial("arms_material", lambertShader);
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
+    ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
 
     // MODELS
@@ -194,6 +195,18 @@ void SoldierScene::init() {
             m_gameEntities.push_back(std::move(soldierGO));
         }
     }
+    // SHERMAN TANK
+    auto tankModel = ResourceManager::getInstance().getModel("tank_model");
+    auto tankMaterial = ResourceManager::getInstance().getMaterial("tank_material");
+    if (tankModel && tankMaterial) {
+        glm::quat tRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        auto tankGO = std::make_unique<GameEntity>("tank");
+        tankGO->addComponent<TransformComponent>(glm::vec3(15.0f, 0.01f, 8.0f), tRotQ, glm::vec3(5.0f));
+        tankGO->addComponent<RenderComponent>(tankModel, tankMaterial);
+        tankGO->addComponent<PhysicsComponent>(tankModel->getAABBMin(), tankModel->getAABBMax());
+        tankGO->init();
+        m_gameEntities.push_back(std::move(tankGO));
+    }
     // STENCIL BOXES
     /*auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
     auto stencilBox1Material = ResourceManager::getInstance().getMaterial("window_material");
@@ -251,108 +264,25 @@ void SoldierScene::init() {
         m_gameEntities.push_back(std::move(grassGO));
     }
 
-    // FIXME hardcoded max: 100
-    m_aliveGameEntities.reserve(100);
-    m_deadGameEntities.reserve(100);
-
-    //bool isStencilReqd = false;
-    //bool isOutlineReqd = false;
-    //bool isBlendingReqd = false;
-    for (auto& gameEntity : m_gameEntities) {
-        if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
-            m_aliveGameEntities.push_back(gameEntity.get());
-
-            //if (gameEntity->getRendererQueueType() == RendererQueueType::STENCIL) {
-            //    isStencilReqd = true;
-            //}
-            //if (gameEntity->getRendererQueueType() == RendererQueueType::OUTLINE) {
-            //    isOutlineReqd = true;
-            //}
-            //if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
-            //    isBlendingReqd = true;
-            //}
-        } else {
-            m_deadGameEntities.push_back(gameEntity.get());
-        }
-    }
-
-    // first frame Renderer params
-    // reqd if i need it at the very start of a frame before update()
-    //Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
-    //Renderer::getInstance().setBlendingReqd(isBlendingReqd);
+    Scene::init();
 }
 
 void SoldierScene::saveState() {
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        aliveGameEntity->getTransform()->saveState();
-    }
+    Scene::saveState();
 }
 
 void SoldierScene::fixedUpdate(float fixedt) {
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        aliveGameEntity->fixedUpdate(fixedt);
-
-        //if (aliveGameEntity->getPhysics()) {
-        //    LOG_D(aliveGameEntity->getName() << " MIN: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMin)
-        //                                     << " MAX: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMax));
-        //}
-    }
+    Scene::fixedUpdate(fixedt);
 }
 
-// renderrring
 void SoldierScene::update(float alpha) {
-    //bool isStencilReqd = false;
-    //bool isOutlineReqd = false;
-    //bool isBlendingReqd = false;
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        aliveGameEntity->update(alpha);
-
-        //if (queueType == RendererQueueType::STENCIL) {
-        //    isStencilReqd = true;
-        //}
-        //if (queueType == RendererQueueType::OUTLINE) {
-        //    isOutlineReqd = true;
-        //}
-        //if (queueType == RendererQueueType::BLENDING) {
-        //    isBlendingReqd = true;
-        //}
-    }
-
-    // next frame Renderer param
-    // not reqd because i can check if queue is empty()
-    //Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
-    //Renderer::getInstance().setBlendingReqd(isBlendingReqd);
+    Scene::update(alpha);
 }
 
 void SoldierScene::lateUpdate() {
-    for (int i = 0; i < m_aliveGameEntities.size(); /*i++*/) {
-        //LOG_D("CHECKING " << m_aliveGameEntities[i]->getName());
-        if (m_aliveGameEntities[i]->isPendingDeath()) {
-            //LOG_D("DEAD " << m_aliveGameEntities[i]->getName());
-            GameEntity* gameEntity = m_aliveGameEntities[i];
-            gameEntity->setPendingDeath(false);
-            gameEntity->setAlive(false);
-            m_deadGameEntities.push_back(gameEntity);
-
-            // fast delete (swap & pop)
-            m_aliveGameEntities[i] = m_aliveGameEntities.back();
-            m_aliveGameEntities.pop_back();
-            // 'i' -> new element from back
-        } else {
-            i++;
-        }
-    }
-    //LOG_D("ALL " << m_gameEntities.size());
-    //LOG_D("ALIVE " << m_aliveGameEntities.size());
-    //LOG_D("DEAD " << m_deadGameEntities.size());
+    Scene::lateUpdate();
 }
 
 void SoldierScene::end() {
-    for (auto& gameEntity : m_gameEntities) {
-        gameEntity->end();
-    }
-
-    m_deadGameEntities.clear();
-    m_aliveGameEntities.clear();
-    m_gameEntities.clear();
+    Scene::end();
 }

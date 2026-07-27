@@ -19,11 +19,7 @@ PhysicsWorld& PhysicsWorld::getInstance() {
 PhysicsWorld::PhysicsWorld() = default;
 
 PhysicsWorld::~PhysicsWorld() {
-	for (auto& physicsBody : m_physicsBodies) {
-		delete physicsBody.second.transform;
-	}
-
-	m_physicsBodies.clear();
+	end();
 
 	glDeleteVertexArrays(1, &m_VAOAABB);
 	glDeleteBuffers(1, &m_VBOAABB);
@@ -33,7 +29,7 @@ bool PhysicsWorld::init() {
 	// FIXME hardcoded max: 100
 	m_physicsQueue.reserve(100);
 
-	// hardcoded AABB 1x1x1 (with 0.0 in the middle)
+	// hardcoded AABB 1x1x1 (with the middle at 0.0)
 	float verticesAABB[] = {
 		// front
 		-0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
@@ -120,6 +116,15 @@ void PhysicsWorld::step(float fixedt) const {
 	// 1. move entities by set velocity
 	// 2. check for collisions
 	// 3. if colliding move back to previous position
+}
+
+void PhysicsWorld::end() {
+	// do NOT do this - it's taken care of elsewhere
+	//for (auto& physicsBody : m_physicsBodies) {
+	//	delete physicsBody.second.transform;
+	//}
+
+	m_physicsBodies.clear();
 }
 
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {

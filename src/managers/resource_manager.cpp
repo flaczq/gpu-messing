@@ -115,15 +115,16 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& name) {
 	return it->second;
 }
 
-std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, const std::string& type, const aiScene* scene) {
+std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelName, const std::string& path, const std::string& type, const aiScene* scene) {
 	// filename for Assimp
 	size_t lastSlash = path.find_last_of('/');
 	std::string name = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
+	std::string uniqueName = name + "_" + modelName;
 	
-	auto it = m_textures.find(name);
+	auto it = m_textures.find(uniqueName);
 	// just load if texture is cached
 	if (it != m_textures.end()) {
-		LOG_D("Using cache for Texture: " << path);
+		LOG_D("Using cache for Texture: " << uniqueName);
 		return it->second;
 	}
 
@@ -145,8 +146,8 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& path, co
 	}
 
 
-	m_textures[name] = std::move(texture);
-	return m_textures[name];
+	m_textures[uniqueName] = std::move(texture);
+	return m_textures[uniqueName];
 }
 
 void ResourceManager::reloadShaders() {

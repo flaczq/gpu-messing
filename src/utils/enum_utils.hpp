@@ -9,6 +9,12 @@
 
 namespace Utils {
     template <typename T>
+    constexpr T getEnumFirst(T current) {
+        auto values = magic_enum::enum_values<T>();
+        return values[0];
+    }
+
+    template <typename T>
     constexpr T getEnumNext(T current) {
         auto values = magic_enum::enum_values<T>();
         auto index = magic_enum::enum_index(current).value_or(0);
