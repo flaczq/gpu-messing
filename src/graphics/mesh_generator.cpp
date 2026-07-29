@@ -74,39 +74,39 @@ namespace MeshGenerator {
 		d1.Position = {  halfWidth, -halfHeight, -halfDepth };
 		d2.Position = {  halfWidth, -halfHeight,  halfDepth };
 		d3.Position = { -halfWidth, -halfHeight,  halfDepth };
-		u0.Position = { -halfWidth,  halfHeight, -halfDepth };
-		u1.Position = {  halfWidth,  halfHeight, -halfDepth };
-		u2.Position = {  halfWidth,  halfHeight,  halfDepth };
-		u3.Position = { -halfWidth,  halfHeight,  halfDepth };
-		b0.Position = { -halfWidth, -halfHeight, -halfDepth };
-		b1.Position = {  halfWidth, -halfHeight, -halfDepth };
-		b2.Position = {  halfWidth,  halfHeight, -halfDepth };
-		b3.Position = { -halfWidth,  halfHeight, -halfDepth };
+		u0.Position = { -halfWidth,  halfHeight,  halfDepth };
+		u1.Position = {  halfWidth,  halfHeight,  halfDepth };
+		u2.Position = {  halfWidth,  halfHeight, -halfDepth };
+		u3.Position = { -halfWidth,  halfHeight, -halfDepth };
+		b0.Position = {  halfWidth, -halfHeight, -halfDepth };
+		b1.Position = { -halfWidth, -halfHeight, -halfDepth };
+		b2.Position = { -halfWidth,  halfHeight, -halfDepth };
+		b3.Position = {  halfWidth,  halfHeight, -halfDepth };
 		f0.Position = { -halfWidth, -halfHeight,  halfDepth };
 		f1.Position = {  halfWidth, -halfHeight,  halfDepth };
 		f2.Position = {  halfWidth,  halfHeight,  halfDepth };
 		f3.Position = { -halfWidth,  halfHeight,  halfDepth };
-		l0.Position = { -halfWidth, -halfHeight,  halfDepth };
-		l1.Position = { -halfWidth, -halfHeight, -halfDepth };
-		l2.Position = { -halfWidth,  halfHeight, -halfDepth };
-		l3.Position = { -halfWidth,  halfHeight,  halfDepth };
+		l0.Position = { -halfWidth, -halfHeight, -halfDepth };
+		l1.Position = { -halfWidth, -halfHeight,  halfDepth };
+		l2.Position = { -halfWidth,  halfHeight,  halfDepth };
+		l3.Position = { -halfWidth,  halfHeight, -halfDepth };
 		r0.Position = {  halfWidth, -halfHeight,  halfDepth };
 		r1.Position = {  halfWidth, -halfHeight, -halfDepth };
 		r2.Position = {  halfWidth,  halfHeight, -halfDepth };
 		r3.Position = {  halfWidth,  halfHeight,  halfDepth };
 
-		d0.TexCoords = u0.TexCoords = { 0.0f,               0.0f };
-		d1.TexCoords = u1.TexCoords = { width * uvTiling,   0.0f };
-		d2.TexCoords = u2.TexCoords = { width * uvTiling,   depth * uvTiling };
-		d3.TexCoords = u3.TexCoords = { 0.0f,               depth * uvTiling };
-		b0.TexCoords = f0.TexCoords = { 0.0f,               0.0f };
-		b1.TexCoords = f1.TexCoords = { width * uvTiling,   0.0f };
-		b2.TexCoords = f2.TexCoords = { width * uvTiling,   height * uvTiling };
-		b3.TexCoords = f3.TexCoords = { 0.0f,               height * uvTiling };
-		l0.TexCoords = r0.TexCoords = { 0.0f,               0.0f };
-		l1.TexCoords = r1.TexCoords = { depth * uvTiling,   0.0f };
-		l2.TexCoords = r2.TexCoords = { depth * uvTiling,   height * uvTiling };
-		l3.TexCoords = r3.TexCoords = { 0.0f,               height * uvTiling };
+		d0.TexCoords = u0.TexCoords = { 0.0f,             0.0f };
+		d1.TexCoords = u1.TexCoords = { width * uvTiling, 0.0f };
+		d2.TexCoords = u2.TexCoords = { width * uvTiling, depth * uvTiling };
+		d3.TexCoords = u3.TexCoords = { 0.0f,             depth * uvTiling };
+		b0.TexCoords = f0.TexCoords = { 0.0f,             0.0f };
+		b1.TexCoords = f1.TexCoords = { width * uvTiling, 0.0f };
+		b2.TexCoords = f2.TexCoords = { width * uvTiling, height * uvTiling };
+		b3.TexCoords = f3.TexCoords = { 0.0f,             height * uvTiling };
+		l0.TexCoords = r0.TexCoords = { 0.0f,             0.0f };
+		l1.TexCoords = r1.TexCoords = { depth * uvTiling, 0.0f };
+		l2.TexCoords = r2.TexCoords = { depth * uvTiling, height * uvTiling };
+		l3.TexCoords = r3.TexCoords = { 0.0f,             height * uvTiling };
 
 		d0.Normal = d1.Normal = d2.Normal = d3.Normal = {  0.0f, -1.0f,  0.0f };
 		u0.Normal = u1.Normal = u2.Normal = u3.Normal = {  0.0f,  1.0f,  0.0f };
@@ -124,13 +124,14 @@ namespace MeshGenerator {
 			r0, r1, r2, r3
 		};
 
+		// CCW for every wall [0, 1, 2] and [0, 2, 3]
 		indices = {
-			0,   2,  1,  0,  3,  2,
-			4,   6,  5,  4,  7,  6,
-			8,  10,  9,  8, 11, 10,
-			12, 14, 13, 12, 15, 14,
-			16, 18, 17, 16, 19, 18,
-			20, 22, 21, 20, 23, 22
+			0,  1,  2,  0,  2,  3,
+			4,  5,  6,  4,  6,  7,
+			8,  9, 10,  8, 10, 11,
+		   12, 13, 14, 12, 14, 15,
+		   16, 17, 18, 16, 18, 19,
+		   20, 21, 22, 20, 22, 23
 		};
 
 		textures = {};

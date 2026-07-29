@@ -108,7 +108,7 @@ void SoldierScene::init() {
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
-        floorMaterial->addVec3Uniform("matColor", glm::vec3(0.3f, 0.8f, 0.3f));
+        floorMaterial->addVec3Uniform("matColor", glm::vec3(0.15f, 0.55f, 0.15f)); // dark green
         auto floorGO = std::make_unique<GameEntity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
         floorGO->setSolid(true);
@@ -126,7 +126,7 @@ void SoldierScene::init() {
         auto lightGO = std::make_unique<GameEntity>("light");
         lightGO->setSolid(true);
         lightGO->setAbstract(true);
-        lightGO->addComponent<TransformComponent>(LIGHT_POSITION, glm::quat(), LIGHT_SCALE);
+        lightGO->addComponent<TransformComponent>(glm::vec3(3.0f, 0.0f, 3.0f), glm::quat(), glm::vec3(0.2f));
         lightGO->addComponent<RenderComponent>(lightModel, lightMaterial);
         lightGO->addComponent<DirLightMovementComponent>();
         lightGO->init();

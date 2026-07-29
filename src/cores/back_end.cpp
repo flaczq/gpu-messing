@@ -285,4 +285,7 @@ void BackEnd::displayCameraData() {
         << "Z: " << std::showpos << cameraPos.z << "   "
         << "YAW: " << m_camera->getYaw() << "   "
         << "PITCH: " << m_camera->getPitch());
+    LOG("(" << std::showpos << cameraPos.x << "f, "
+            << std::showpos << cameraPos.y << "f, "
+            << std::showpos << cameraPos.z << "f)");
 }

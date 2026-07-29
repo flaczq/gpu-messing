@@ -137,7 +137,7 @@ std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 			physicsBody.second.transform->getScale(),
 			physicsBody.second.AABB->getSize(),
 			physicsBody.second.AABB->getCenter(),
-			glm::vec3(0.0f, 0.5f, 0.5f)
+			glm::vec3(0.3f, 0.8f, 0.3f) // light green
 		};
 		commands.push_back(command);
 	}
