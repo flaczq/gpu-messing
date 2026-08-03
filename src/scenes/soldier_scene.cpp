@@ -153,7 +153,7 @@ void SoldierScene::init() {
     //    auto gizmoGO = std::make_unique<GameEntity>("gizmo");
     //    gizmoGO->setSolid(true);
     //    gizmoGO->setAbstract(true);
-    //    gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), GIZMO_SCALE);
+    //    gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), glm::vec3(7.5f));
     //    gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
     //    gizmoGO->init();
     //    m_gameEntities.push_back(std::move(gizmoGO));
@@ -169,8 +169,8 @@ void SoldierScene::init() {
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
-        armsGO->addComponent<PhysicsComponent>(-FPS_ARMS_AABB, FPS_ARMS_AABB);
-        //armsGO->addComponent<PhysicsComponent>(armsModel->getAABBMin(), armsModel->getAABBMax());
+        //armsModel->getAABBMin(), armsModel->getAABBMax()
+        armsGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f));
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }
@@ -184,10 +184,10 @@ void SoldierScene::init() {
         for (size_t i{}; i < 49; i++) {
             size_t row = i / 7;
             size_t col = i % 7;
-            glm::vec3 sPos = SOLDIER_POSITION + glm::vec3(col * spacing, 0.0f, row * spacing);
-            glm::quat sRotQ = glm::angleAxis(SOLDIER_ROTATION, glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::vec3 sPos = glm::vec3(3.0f, 0.01f, 3.0f) + glm::vec3(col * spacing, 0.0f, row * spacing);
+            glm::quat sRotQ = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i), GroupID::SOLDIERS);
-            soldierGO->addComponent<TransformComponent>(sPos, sRotQ, SOLDIER_SCALE);
+            soldierGO->addComponent<TransformComponent>(sPos, sRotQ, glm::vec3(100.0f));
             soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
             soldierGO->addComponent<PhysicsComponent>(soldierModel->getAABBMin(), soldierModel->getAABBMax());
             if (i == 30) {

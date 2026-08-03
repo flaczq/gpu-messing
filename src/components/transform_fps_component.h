@@ -22,4 +22,5 @@ private:
 
 	float m_sway{};
 	float m_prevSway{};
+	glm::mat4 m_modelNoSway{};
 };

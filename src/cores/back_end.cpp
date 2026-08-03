@@ -279,13 +279,14 @@ void BackEnd::showFps(GLFWwindow* window, double currentTime) {
 void BackEnd::displayCameraData() {
     glm::vec3 cameraPos = m_camera->getViewPos();
     std::cout << std::fixed << std::setprecision(2);
-    LOG_D("Camera: "
+    LOG("Camera: "
         << "X: " << std::showpos << cameraPos.x << "   "
         << "Y: " << std::showpos << cameraPos.y << "   "
         << "Z: " << std::showpos << cameraPos.z << "   "
         << "YAW: " << m_camera->getYaw() << "   "
         << "PITCH: " << m_camera->getPitch());
-    LOG("(" << std::showpos << cameraPos.x << "f, "
-            << std::showpos << cameraPos.y << "f, "
-            << std::showpos << cameraPos.z << "f)");
+    LOG_D("("
+        << std::showpos << cameraPos.x << "f, "
+        << std::showpos << cameraPos.y << "f, "
+        << std::showpos << cameraPos.z << "f)");
 }

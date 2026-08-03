@@ -26,11 +26,5 @@ public:
 	SceneID getID() const override { return SceneID::SOLDIER; }
 
 private:
-	static constexpr glm::vec3 FPS_ARMS_AABB = glm::vec3(0.2f);
-	static constexpr glm::vec3 GIZMO_SCALE = glm::vec3(7.5f);
-	static constexpr glm::vec3 SOLDIER_POSITION = glm::vec3(3.0f, 0.01f, 3.0f);
-	static constexpr float SOLDIER_ROTATION = glm::radians(-90.0f);
-	static constexpr glm::vec3 SOLDIER_SCALE = glm::vec3(100.0f);
-
 	Camera* m_camera = nullptr;
 };

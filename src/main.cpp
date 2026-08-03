@@ -18,7 +18,6 @@ int main() {
     std::ios_base::sync_with_stdio(false);
 
     auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
-
     if (!backEnd->init()) {
         return -1;
     }

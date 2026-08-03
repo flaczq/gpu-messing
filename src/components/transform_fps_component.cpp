@@ -34,6 +34,7 @@ glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
     m_model = glm::rotate(m_model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     // scale fix
     m_model = glm::scale(m_model, glm::vec3(0.2f));
+    m_modelNoSway = m_model;
     // local offset
     glm::vec3 offset = SWAY_OFFSET + glm::vec3(swayX, 0.0f, swayZ);
     m_model = glm::translate(m_model, offset);
@@ -45,8 +46,10 @@ glm::mat4 TransformFpsComponent::getNormalMatrix() {
     return m_normal;
 }
 
+// FIXME maybe not required..?
 glm::vec3 TransformFpsComponent::getPosition() const {
     glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(m_model, -SWAY_OFFSET);
+    model = glm::translate(m_modelNoSway, glm::vec3(0.0f));
+    //model = glm::translate(model, glm::vec3(5.0f, 0.0f, 0.0f));
     return glm::vec3(model[3]);
 }
