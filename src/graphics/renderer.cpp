@@ -219,6 +219,7 @@ void Renderer::renderImmediate() {
         model = glm::translate(model, cmd.center);
         model = glm::scale(model, cmd.size);
         shader->setMat4fv("model", model);
+        shader->setBool("hasMatColor", true);
         shader->setVec3fv("matColor", cmd.color);
         glDrawArrays(GL_LINES, 0, 24);
     }

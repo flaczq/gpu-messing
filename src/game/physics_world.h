@@ -15,7 +15,7 @@ enum class PhysicsCommandType {
 
 struct PhysicsBody {
 	const TransformComponent* transform;
-	const AABB* AABB;
+	AABB* AABB;
 };
 struct PhysicsCommand {
 	const std::string& name;
@@ -34,7 +34,7 @@ public:
 	bool init();
 	void registerInQueue(const PhysicsCommand& command);
 	void flush();
-	void step(float fixedt) const;
+	void step(float fixedt);
 	void end();
 
 	std::vector<RendererImmediateCommand> getAABBCommand();
@@ -45,6 +45,7 @@ private:
 
 	std::vector<PhysicsCommand> m_physicsQueue;
 	std::unordered_map<std::string, PhysicsBody> m_physicsBodies;
+	std::vector<std::string> m_collidedBodies;
 
 	unsigned int m_VAOAABB{}, m_VBOAABB{};
 };

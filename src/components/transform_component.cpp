@@ -4,7 +4,7 @@
 #include "component.h"
 #include "transform_component.h"
 
-TransformComponent::TransformComponent(glm::vec3 position, glm::quat rotation, glm::vec3 scale)
+TransformComponent::TransformComponent(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale)
 	: m_position(position),
 	  m_prevPosition(position),
 	  m_rotation(rotation),

@@ -2,12 +2,13 @@
 #include "../configs/math_config.hpp"
 #include "../game/game_entity.h"
 #include "../game/physics_world.h"
+#include "../utils/colors_constants.hpp"
 #include "../utils/math_utils.hpp"
 #include "component.h"
 #include "physics_component.h"
 #include "transform_component.h"
 
-PhysicsComponent::PhysicsComponent(glm::vec3 AABBmin, glm::vec3 AABBmax)
+PhysicsComponent::PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax)
     : m_AABB(AABBmin, AABBmax, AABBmin, AABBmax)
 {
 }

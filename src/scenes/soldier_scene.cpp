@@ -16,6 +16,7 @@
 #include "../graphics/model.h"
 #include "../graphics/renderer.h"
 #include "../managers/resource_manager.h"
+#include "../utils/colors_constants.hpp"
 #include "../utils/math_utils.hpp"
 #include "scene.h"
 #include "soldier_scene.h"
@@ -108,7 +109,8 @@ void SoldierScene::init() {
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
-        floorMaterial->addVec3Uniform("matColor", glm::vec3(0.15f, 0.55f, 0.15f)); // dark green
+        floorMaterial->addBoolUniform("hasMatColor", true);
+        floorMaterial->addVec3Uniform("matColor", Constants::Colors::NATGREEN);
         auto floorGO = std::make_unique<GameEntity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
         floorGO->setSolid(true);
@@ -122,7 +124,8 @@ void SoldierScene::init() {
     auto lightModel = ResourceManager::getInstance().getModel("light_model");
     auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
     if (lightModel && lightMaterial) {
-        lightMaterial->addVec3Uniform("matColor", glm::vec3(1.0f));
+        lightMaterial->addBoolUniform("hasMatColor", true);
+        lightMaterial->addVec3Uniform("matColor", Constants::Colors::WHITE);
         auto lightGO = std::make_unique<GameEntity>("light");
         lightGO->setSolid(true);
         lightGO->setAbstract(true);
@@ -136,8 +139,7 @@ void SoldierScene::init() {
     auto gridModel = ResourceManager::getInstance().getModel("grid_model");
     auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
     if (gridModel && gridMaterial) {
-        // reset to black
-        gridMaterial->addVec3Uniform("matColor", glm::vec3(0.0f));
+        gridMaterial->addBoolUniform("hasMatColor", false);
         auto gridGO = std::make_unique<GameEntity>("grid");
         gridGO->setSolid(true);
         gridGO->setAbstract(true);
@@ -197,7 +199,7 @@ void SoldierScene::init() {
         }
     }
     // SHERMAN TANK
-    auto tankModel = ResourceManager::getInstance().getModel("tank_model");
+    /*auto tankModel = ResourceManager::getInstance().getModel("tank_model");
     auto tankMaterial = ResourceManager::getInstance().getMaterial("tank_material");
     if (tankModel && tankMaterial) {
         glm::quat tRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -207,7 +209,7 @@ void SoldierScene::init() {
         tankGO->addComponent<PhysicsComponent>(tankModel->getAABBMin(), tankModel->getAABBMax());
         tankGO->init();
         m_gameEntities.push_back(std::move(tankGO));
-    }
+    }*/
     // STENCIL BOXES
     /*auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
     auto stencilBox1Material = ResourceManager::getInstance().getMaterial("window_material");

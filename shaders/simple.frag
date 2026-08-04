@@ -4,14 +4,15 @@ out vec4 FragColor;
 
 in vec3 FragPos;
 
+uniform bool hasMatColor;
 uniform vec3 matColor;
 
 void main() {
-    vec3 color = (FragPos / 3.0) + 0.1;
-    // render custom color instead of black
-    if (matColor != vec3(0.0)) {
+    // render custom color
+    if (hasMatColor) {
         FragColor = vec4(matColor, 1.0);
     } else {
+        vec3 color = (FragPos / 3.0) + 0.1;
         FragColor = vec4(color, 1.0);
     }
 }

@@ -5,6 +5,7 @@
 #include "../game/game_entity.h"
 #include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
+#include "../utils/colors_constants.hpp"
 #include "../utils/math_utils.hpp"
 #include "physics_world.h"
 #include <algorithm>
@@ -87,35 +88,51 @@ void PhysicsWorld::flush() {
 	m_physicsQueue.clear();
 }
 
-void PhysicsWorld::step(float fixedt) const {
-	for (auto& physicsBody : m_physicsBodies) {
-		//LOG_D("ACTIVE PHYSICS: " << t->getOwner()->getName());
-		if (physicsBody.first != "arms") {
-			continue;
-		}
-		bool collision = false;
-		glm::vec3 color;
-		for (auto& targetPhysicsBody : m_physicsBodies) {
-			if (physicsBody.first == targetPhysicsBody.first) {
-				continue;
-			}
-			if (physicsBody.second.AABB->isInCollisionWithOther(*targetPhysicsBody.second.AABB)) {
-				collision = true;
-				//LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
-				break;
-			}
-		}
-		if (collision) {
-			// RED
-			color = glm::vec3(1.0f, 0.0f, 0.0f);
-		} else {
-			// GREEN
-			color = glm::vec3(0.0f, 1.0f, 0.0f);
-		}
-	}
+void PhysicsWorld::step(float fixedt) {
 	// 1. move entities by set velocity
 	// 2. check for collisions
 	// 3. if colliding move back to previous position
+	for (auto& physicsBody : m_physicsBodies) {
+		auto it = std::find(m_collidedBodies.begin(), m_collidedBodies.end(), physicsBody.first);
+		if (it != m_collidedBodies.end()) {
+			// already collided
+			continue;
+		}
+
+		physicsBody.second.AABB->setColor(Constants::Colors::GREEN);
+		// TEST only fps arms
+		if (physicsBody.first != "arms") {
+			continue;
+		}
+
+		bool collision = false;
+		for (auto& targetPhysicsBody : m_physicsBodies) {
+			targetPhysicsBody.second.AABB->setColor(Constants::Colors::GREEN);
+			// break here to set colors at the end of the loop
+			if (collision) {
+				break;
+			}
+			// itself
+			if (physicsBody.first == targetPhysicsBody.first) {
+				continue;
+			}
+
+			if (physicsBody.second.AABB->isInCollisionWithOther(*targetPhysicsBody.second.AABB)) {
+				LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
+				m_collidedBodies.push_back(physicsBody.first);
+				m_collidedBodies.push_back(targetPhysicsBody.first);
+				collision = true;
+				//break;
+			}
+
+			// do NOT break before setting colors
+			glm::vec3 color = collision ? Constants::Colors::RED : Constants::Colors::GREEN;
+			physicsBody.second.AABB->setColor(color);
+			targetPhysicsBody.second.AABB->setColor(color);
+		}
+	}
+
+	m_collidedBodies.clear();
 }
 
 void PhysicsWorld::end() {
@@ -125,6 +142,7 @@ void PhysicsWorld::end() {
 	//}
 
 	m_physicsBodies.clear();
+	m_collidedBodies.clear();
 }
 
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
@@ -137,7 +155,7 @@ std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 			physicsBody.second.transform->getScale(),
 			physicsBody.second.AABB->getSize(),
 			physicsBody.second.AABB->getCenter(),
-			glm::vec3(0.3f, 0.8f, 0.3f) // light green
+			physicsBody.second.AABB->getColor()
 		};
 		commands.push_back(command);
 	}

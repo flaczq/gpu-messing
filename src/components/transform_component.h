@@ -5,7 +5,7 @@
 
 class TransformComponent : public Component {
 public:
-	TransformComponent(glm::vec3 position, glm::quat rotation = glm::quat(), glm::vec3 scale = glm::vec3(1.0f));
+	TransformComponent(const glm::vec3& position, const glm::quat& rotation = glm::quat(), const glm::vec3& scale = glm::vec3(1.0f));
 
 	virtual void saveState();
 	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
