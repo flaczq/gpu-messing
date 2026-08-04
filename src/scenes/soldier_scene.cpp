@@ -169,8 +169,7 @@ void SoldierScene::init() {
         //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
         armsGO->addComponent<TransformFpsComponent>(m_camera);
         armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
-        //armsModel->getAABBMin(), armsModel->getAABBMax()
-        armsGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f));
+        armsGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f)); //armsModel->getAABBMin(), armsModel->getAABBMax()
         armsGO->init();
         m_gameEntities.push_back(std::move(armsGO));
     }

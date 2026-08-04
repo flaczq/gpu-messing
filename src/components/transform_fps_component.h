@@ -13,6 +13,7 @@ public:
 	void onFixedUpdate(float fixedt) override;
 	glm::mat4 getInterpolatedModelMatrix(float alpha) override;
 	glm::mat4 getNormalMatrix() override;
+	glm::mat4 getModel() const override;
 	glm::vec3 getPosition() const override;
 
 private:

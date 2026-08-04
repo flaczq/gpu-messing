@@ -12,8 +12,8 @@
 
 Camera::Camera(unsigned int width, unsigned int height)
     : m_view(0.0f),
-      m_viewPos(6.0f, 1.75f, 6.0f),
-      m_preViewPos(6.0f, 1.75f, 6.0f),
+      m_viewPos(6.0f, STANDING_HEIGHT, 6.0f),
+      m_preViewPos(6.0f, STANDING_HEIGHT, 6.0f),
       m_front(0.0f, 0.0f, -1.0f),
       m_up(0.0f, 1.0f, 0.0f),
       m_right(1.0f, 0.0f, 0.0f),
@@ -191,7 +191,7 @@ void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constr
 
 float Camera::getCameraModeHeight() const {
     if (m_cameraMode == CameraMode::STANDING) {
-        return 1.75f;
+        return STANDING_HEIGHT;
     }
-    return 0.85f;
+    return CROUCHING_HEIGHT;
 }

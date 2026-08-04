@@ -15,7 +15,7 @@ PhysicsComponent::PhysicsComponent(glm::vec3 AABBmin, glm::vec3 AABBmax)
 void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
 
-    m_AABB.updateWorld(m_transform->getModel());
+    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
@@ -32,7 +32,7 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
     //          "worldMin: " << Utils::getVec3Values(m_AABB.worldMin) << "\n" <<
     //          "worldMax: " << Utils::getVec3Values(m_AABB.worldMax) << "\n");
     //}
-    m_AABB.updateWorld(m_transform->getModel());
+    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
     PhysicsBody body = {
         m_transform,
         &m_AABB

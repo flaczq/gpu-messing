@@ -11,7 +11,7 @@ public:
 	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
 	virtual glm::mat4 getNormalMatrix();
 
-	glm::mat4 getModel() const { return m_model; }
+	virtual glm::mat4 getModel() const { return m_model; }
 	virtual glm::vec3 getPosition() const { return m_position; }
 	void setPosition(glm::vec3 position) { m_position = position; m_dirty = true; }
 	glm::quat getRotation() const { return m_rotation; }
