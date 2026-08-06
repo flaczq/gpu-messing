@@ -21,20 +21,14 @@ void PhysicsComponent::onInit() {
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
+    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
+
     PhysicsCommandType commandType;
     if (getOwner()->isAlive() && !getOwner()->isPendingDeath()) {
         commandType = PhysicsCommandType::ADD;
     } else {
         commandType = PhysicsCommandType::REMOVE;
     }
-
-    //if (m_transform->getOwner()->getName() == "arms") {
-    //    LOG_D("localMin: " << Utils::getVec3Values(m_AABB.localMin) << "\n" <<
-    //          "localMax: " << Utils::getVec3Values(m_AABB.localMax) << "\n" <<
-    //          "worldMin: " << Utils::getVec3Values(m_AABB.worldMin) << "\n" <<
-    //          "worldMax: " << Utils::getVec3Values(m_AABB.worldMax) << "\n");
-    //}
-    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
     PhysicsBody body = {
         m_transform,
         &m_AABB

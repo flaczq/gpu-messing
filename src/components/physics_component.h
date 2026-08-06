@@ -11,12 +11,12 @@ class TransformComponent;
 struct AABB {
 	glm::vec3 m_localMin, m_localMax;
 	glm::vec3 m_worldMin, m_worldMax;
-	glm::vec3 m_color;
 	bool m_colliding;
+	glm::vec3 m_color;
 
 	void init() {
-		m_color = Constants::Colors::BLACK;
 		m_colliding = false;
+		m_color = Constants::Colors::BLACK;
 	}
 	// world position, rotation and scale
 	void updateWorld(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {

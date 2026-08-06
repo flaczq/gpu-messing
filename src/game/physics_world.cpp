@@ -93,6 +93,11 @@ void PhysicsWorld::step(float fixedt) {
 	// 2. check for collisions
 	// 3. if colliding move back to previous position
 	for (auto& [name, physicsBody] : m_physicsBodies) {
+		physicsBody.AABB->setColliding(false);
+		physicsBody.AABB->setColor(Constants::Colors::GREEN);
+	}
+
+	for (auto& [name, physicsBody] : m_physicsBodies) {
 		if (physicsBody.AABB->isColliding()) {
 			continue;
 		}
@@ -105,23 +110,20 @@ void PhysicsWorld::step(float fixedt) {
 			if (targetPhysicsBody.AABB->isColliding()) {
 				continue;
 			}
-			if (name == targetName) {
+			// addresses compare
+			if (&physicsBody == &targetPhysicsBody) {
 				// itself
 				continue;
 			}
 			if (physicsBody.AABB->isCollidingWithOther(*targetPhysicsBody.AABB)) {
 				physicsBody.AABB->setColliding(true);
+				physicsBody.AABB->setColor(Constants::Colors::RED);
 				targetPhysicsBody.AABB->setColliding(true);
+				targetPhysicsBody.AABB->setColor(Constants::Colors::RED);
 				LOG_D(name << " <-> " << targetName);
 				break;
 			}
 		}
-	}
-
-	for (auto& [name, physicsBody] : m_physicsBodies) {
-		glm::vec3 color = physicsBody.AABB->isColliding() ? Constants::Colors::RED : Constants::Colors::GREEN;
-		physicsBody.AABB->setColor(color);
-		physicsBody.AABB->setColliding(false);
 	}
 }
 
@@ -132,7 +134,6 @@ void PhysicsWorld::end() {
 	//}
 
 	m_physicsBodies.clear();
-	//m_collidingBodies.clear();
 }
 
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
