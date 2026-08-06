@@ -45,7 +45,6 @@ private:
 
 	std::vector<PhysicsCommand> m_physicsQueue;
 	std::unordered_map<std::string, PhysicsBody> m_physicsBodies;
-	std::vector<std::string> m_collidedBodies;
 
 	unsigned int m_VAOAABB{}, m_VBOAABB{};
 };

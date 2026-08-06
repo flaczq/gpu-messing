@@ -73,6 +73,7 @@ void SoldierScene::init() {
     auto floor = MeshGenerator::createPlane(floorSize.x, floorSize.z);
     auto floorM = std::make_unique<Mesh>(std::move(floor));
     auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM), -floorSize * 0.5f, floorSize * 0.5f);
+    // TODO maybe wrap into sigle method call
     ResourceManager::getInstance().addModel(std::move(floorMM));
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);

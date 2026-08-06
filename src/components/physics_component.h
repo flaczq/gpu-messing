@@ -12,7 +12,12 @@ struct AABB {
 	glm::vec3 m_localMin, m_localMax;
 	glm::vec3 m_worldMin, m_worldMax;
 	glm::vec3 m_color;
+	bool m_colliding;
 
+	void init() {
+		m_color = Constants::Colors::BLACK;
+		m_colliding = false;
+	}
 	// world position, rotation and scale
 	void updateWorld(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
 		glm::mat4 model = glm::mat4(1.0f);
@@ -42,8 +47,10 @@ struct AABB {
 	glm::vec3 getCenter() const { return (m_worldMin + m_worldMax) * 0.5f; };
 	glm::vec3 getColor() const { return m_color; };
 	void setColor(const glm::vec3& color) { m_color = color; };
+	bool isColliding() const { return m_colliding; };
+	void setColliding(const bool colliding) { m_colliding = colliding; };
 
-	bool isInCollisionWithOther(const AABB& other) const {
+	bool isCollidingWithOther(const AABB& other) const {
 		//LOG_D(Utils::getVec3Values(m_worldMin));
 		//LOG_D(Utils::getVec3Values(m_worldMax));
 		bool collX = (m_worldMin.x <= other.m_worldMax.x) && (m_worldMax.x >= other.m_worldMin.x);

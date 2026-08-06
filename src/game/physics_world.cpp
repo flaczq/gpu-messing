@@ -92,47 +92,37 @@ void PhysicsWorld::step(float fixedt) {
 	// 1. move entities by set velocity
 	// 2. check for collisions
 	// 3. if colliding move back to previous position
-	for (auto& physicsBody : m_physicsBodies) {
-		auto it = std::find(m_collidedBodies.begin(), m_collidedBodies.end(), physicsBody.first);
-		if (it != m_collidedBodies.end()) {
-			// already collided
+	for (auto& [name, physicsBody] : m_physicsBodies) {
+		if (physicsBody.AABB->isColliding()) {
 			continue;
 		}
-
-		physicsBody.second.AABB->setColor(Constants::Colors::GREEN);
 		// TEST only fps arms
-		if (physicsBody.first != "arms") {
+		if (name != "arms") {
 			continue;
 		}
 
-		bool collision = false;
-		for (auto& targetPhysicsBody : m_physicsBodies) {
-			targetPhysicsBody.second.AABB->setColor(Constants::Colors::GREEN);
-			// break here to set colors at the end of the loop
-			if (collision) {
-				break;
-			}
-			// itself
-			if (physicsBody.first == targetPhysicsBody.first) {
+		for (auto& [targetName, targetPhysicsBody] : m_physicsBodies) {
+			if (targetPhysicsBody.AABB->isColliding()) {
 				continue;
 			}
-
-			if (physicsBody.second.AABB->isInCollisionWithOther(*targetPhysicsBody.second.AABB)) {
-				LOG_D(physicsBody.first << " <-> " << targetPhysicsBody.first);
-				m_collidedBodies.push_back(physicsBody.first);
-				m_collidedBodies.push_back(targetPhysicsBody.first);
-				collision = true;
-				//break;
+			if (name == targetName) {
+				// itself
+				continue;
 			}
-
-			// do NOT break before setting colors
-			glm::vec3 color = collision ? Constants::Colors::RED : Constants::Colors::GREEN;
-			physicsBody.second.AABB->setColor(color);
-			targetPhysicsBody.second.AABB->setColor(color);
+			if (physicsBody.AABB->isCollidingWithOther(*targetPhysicsBody.AABB)) {
+				physicsBody.AABB->setColliding(true);
+				targetPhysicsBody.AABB->setColliding(true);
+				LOG_D(name << " <-> " << targetName);
+				break;
+			}
 		}
 	}
 
-	m_collidedBodies.clear();
+	for (auto& [name, physicsBody] : m_physicsBodies) {
+		glm::vec3 color = physicsBody.AABB->isColliding() ? Constants::Colors::RED : Constants::Colors::GREEN;
+		physicsBody.AABB->setColor(color);
+		physicsBody.AABB->setColliding(false);
+	}
 }
 
 void PhysicsWorld::end() {
@@ -142,7 +132,7 @@ void PhysicsWorld::end() {
 	//}
 
 	m_physicsBodies.clear();
-	m_collidedBodies.clear();
+	//m_collidingBodies.clear();
 }
 
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {

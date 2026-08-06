@@ -16,6 +16,7 @@ PhysicsComponent::PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AA
 void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
 
+    m_AABB.init();
     m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 }
 
