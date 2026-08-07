@@ -61,6 +61,12 @@ void SceneManager::saveState() const {
 	}
 }
 
+void SceneManager::processInput() {
+	if (m_currentScene) {
+		m_currentScene->processInput();
+	}
+}
+
 void SceneManager::fixedUpdate(float fixedt) const {
 	if (m_currentScene) {
 		m_currentScene->fixedUpdate(fixedt);

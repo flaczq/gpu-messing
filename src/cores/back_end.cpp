@@ -151,6 +151,7 @@ void BackEnd::run() {
             //m_minimapCamera->processInput();
             //m_minimapCamera->updateVectors();
         }
+        SceneManager::getInstance().processInput();
 
         // logic (once per 60 frames): physics, collisions
         while (m_accumulator >= FIXED_DT) {

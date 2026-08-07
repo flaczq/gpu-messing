@@ -148,18 +148,6 @@ void Camera::updateAspect(int width, int height) {
     m_projectionDirty = true;
 }
 
-void Camera::toggleCameraMode() {
-    m_cameraModeChanged = true;
-    m_cameraMode = Utils::getEnumNext(m_cameraMode);
-    LOG_D("Changed camera mode to: " << Utils::getEnumName(m_cameraMode));
-}
-
-void Camera::toggleGodMode() {
-    m_godMode = !m_godMode;
-    m_godModeChanged = true;
-    LOG_D("Changed god mode to: " << std::boolalpha << m_godMode);
-}
-
 void Camera::processMouseScroll(float yoffset) {
     if (yoffset != 0.0f) {
         m_projectionDirty = true;

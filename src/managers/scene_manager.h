@@ -15,6 +15,7 @@ public:
 	bool init(Camera* camera);
 	void toggleScene();
 	void saveState() const;
+	void processInput();
 	void fixedUpdate(float fixedt) const;
 	void update(float alpha) const;
 	void lateUpdate() const;

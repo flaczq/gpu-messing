@@ -42,7 +42,17 @@ void Scene::init() {
 
 void Scene::saveState() {
     for (auto& aliveGameEntity : m_aliveGameEntities) {
-        aliveGameEntity->getTransform()->saveState();
+        if (aliveGameEntity->getTransform()) {
+            aliveGameEntity->getTransform()->saveState();
+        }
+    }
+}
+
+void Scene::processInput() {
+    for (auto& aliveGameEntity : m_aliveGameEntities) {
+        if (aliveGameEntity->getPlayer()) {
+            aliveGameEntity->getPlayer()->processInput();
+        }
     }
 }
 

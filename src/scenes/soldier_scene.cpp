@@ -1,6 +1,7 @@
 #include "../components/ai_component.h"
 #include "../components/dir_light_movement_component.h"
 #include "../components/physics_component.h"
+#include "../components/player_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../components/transform_fps_component.h"
@@ -42,7 +43,7 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
     // MODELS
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
-    ResourceManager::getInstance().loadModel("arms_model", "../assets/models/RiggedFpsArms.fbx");
+    ResourceManager::getInstance().loadModel("player_model", "../assets/models/RiggedFpsArms.fbx");
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     ResourceManager::getInstance().loadModel("tank_model", "../assets/models/ShermanTank.glb");
     // SHADERS
@@ -62,7 +63,7 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadMaterial("light_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("grid_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
-    ResourceManager::getInstance().loadMaterial("arms_material", lambertShader);
+    ResourceManager::getInstance().loadMaterial("player_material", lambertShader);
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
     ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
@@ -161,20 +162,21 @@ void SoldierScene::init() {
     //    gizmoGO->init();
     //    m_gameEntities.push_back(std::move(gizmoGO));
     //}
-    // FPS ARMS
-    auto armsModel = ResourceManager::getInstance().getModel("arms_model");
-    auto armsMaterial = ResourceManager::getInstance().getMaterial("arms_material");
-    if (armsModel && armsMaterial) {
-        auto armsGO = std::make_unique<GameEntity>("arms");
-        armsGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
-        armsGO->setSolid(true);
-        armsGO->setAbstract(true);
-        //armsGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
-        armsGO->addComponent<TransformFpsComponent>(m_camera);
-        armsGO->addComponent<RenderComponent>(armsModel, armsMaterial);
-        armsGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f)); //armsModel->getAABBMin(), armsModel->getAABBMax()
-        armsGO->init();
-        m_gameEntities.push_back(std::move(armsGO));
+    // PLAYER -> FPS ARMS
+    auto playerModel = ResourceManager::getInstance().getModel("player_model");
+    auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
+    if (playerModel && playerMaterial) {
+        auto playerGO = std::make_unique<GameEntity>("player");
+        playerGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
+        playerGO->setSolid(true);
+        playerGO->setAbstract(true);
+        //playerGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
+        playerGO->addComponent<TransformFpsComponent>(m_camera);
+        playerGO->addComponent<RenderComponent>(playerModel, playerMaterial);
+        playerGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f)); //playerModel->getAABBMin(), playerModel->getAABBMax()
+        playerGO->addComponent<PlayerComponent>(m_camera);
+        playerGO->init();
+        m_gameEntities.push_back(std::move(playerGO));
     }
     // SOLDIER
     auto soldierModel = ResourceManager::getInstance().getModel("soldier_model");

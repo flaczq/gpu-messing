@@ -1,5 +1,6 @@
 #include "../components/component.h"
 #include "../components/physics_component.h"
+#include "../components/player_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"

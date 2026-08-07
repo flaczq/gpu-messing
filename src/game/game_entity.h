@@ -2,6 +2,7 @@
 
 #include "../components/component.h"
 #include "../components/physics_component.h"
+#include "../components/player_component.h"
 #include "../components/render_component.h"
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"
@@ -36,6 +37,8 @@ public:
 			m_render = static_cast<RenderComponent*>(cPtr);
 		} else if constexpr (std::is_base_of_v<PhysicsComponent, T>) {
 			m_physics = static_cast<PhysicsComponent*>(cPtr);
+		} else if constexpr (std::is_base_of_v<PlayerComponent, T>) {
+			m_player = static_cast<PlayerComponent*>(cPtr);
 		}
 
 		m_components.push_back(std::move(c));
@@ -52,6 +55,7 @@ public:
 	TransformComponent* getTransform() { return m_transform; }
 	RenderComponent* getRender() { return m_render; }
 	PhysicsComponent* getPhysics() { return m_physics; }
+	PlayerComponent* getPlayer() { return m_player; }
 	RendererQueueType getRendererQueueType() const { return m_rendererQueueType; }
 	void setRendererQueueType(RendererQueueType rendererQueueType) { m_rendererQueueType = rendererQueueType; }
 	bool isSolid() const { return m_solid; }
@@ -72,6 +76,7 @@ private:
 	TransformComponent* m_transform = nullptr;
 	RenderComponent* m_render = nullptr;
 	PhysicsComponent* m_physics = nullptr;
+	PlayerComponent* m_player = nullptr;
 	RendererQueueType m_rendererQueueType = RendererQueueType::OPAQUE;
 	// no collisions e.g. grass, ...
 	bool m_solid = false;

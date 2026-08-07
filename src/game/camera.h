@@ -13,11 +13,6 @@ enum class CameraDirection {
     DOWN
 };
 
-enum class CameraMode {
-    STANDING,
-    CROUCHING
-};
-
 class Camera {
 public:
     Camera(unsigned int width, unsigned int height);
@@ -31,8 +26,6 @@ public:
     void updateProjection(bool force = false);
     void restoreDefaultProjection();
     void updateAspect(int width, int height);
-    void toggleCameraMode();
-    void toggleGodMode();
 
     glm::mat4 getViewMatrix() const { return m_view; }
     glm::vec3 getViewPos() const { return m_viewPos; }
@@ -82,12 +75,7 @@ private:
     float m_farPlane{};
     float m_aspect{};
     bool m_currDirections[6] = { false };
-
     bool m_projectionDirty = false;
-    bool m_godModeChanged = false;
-    bool m_cameraModeChanged = false;
-    bool m_godMode = false;
-    CameraMode m_cameraMode = CameraMode::STANDING;
 
     void processMouseScroll(float yoffset);
     void processMouseMovement(float xoffest, float yoffset, GLboolean constrainPitch = true);

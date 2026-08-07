@@ -89,9 +89,6 @@ void PhysicsWorld::flush() {
 }
 
 void PhysicsWorld::step(float fixedt) {
-	// 1. move entities by set velocity
-	// 2. check for collisions
-	// 3. if colliding move back to previous position
 	for (auto& [name, physicsBody] : m_physicsBodies) {
 		physicsBody.AABB->setColliding(false);
 		physicsBody.AABB->setColor(Constants::Colors::GREEN);
@@ -101,8 +98,8 @@ void PhysicsWorld::step(float fixedt) {
 		if (physicsBody.AABB->isColliding()) {
 			continue;
 		}
-		// TEST only fps arms
-		if (name != "arms") {
+		// only TEST player
+		if (name != "player") {
 			continue;
 		}
 
@@ -110,7 +107,7 @@ void PhysicsWorld::step(float fixedt) {
 			if (targetPhysicsBody.AABB->isColliding()) {
 				continue;
 			}
-			// addresses compare
+			// compare addresses
 			if (&physicsBody == &targetPhysicsBody) {
 				// itself
 				continue;

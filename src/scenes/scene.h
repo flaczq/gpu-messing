@@ -17,6 +17,7 @@ public:
 
 	virtual void init();
 	virtual void saveState();
+	virtual void processInput();
 	virtual void fixedUpdate(float fixedt);
 	virtual void update(float alpha);
 	virtual void lateUpdate();
