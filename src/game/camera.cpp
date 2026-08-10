@@ -1,7 +1,9 @@
+#include "../components/transform_component.h"
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../cores/back_end.h"
+#include "../game/game_entity.h"
 #include "../managers/input_manager.h"
 #include "../utils/enum_utils.hpp"
 #include "camera.h"
@@ -12,118 +14,40 @@
 
 Camera::Camera(unsigned int width, unsigned int height)
     : m_view(0.0f),
-      m_viewPos(6.0f, STANDING_HEIGHT, 6.0f),
-      m_preViewPos(6.0f, STANDING_HEIGHT, 6.0f),
-      m_front(0.0f, 0.0f, -1.0f),
-      m_up(0.0f, 1.0f, 0.0f),
-      m_right(1.0f, 0.0f, 0.0f),
-      // looking at (0,0,0)
-      m_yaw(-135.0f),
-      m_pitch(-11.5f),
       m_fov(FOV),
-      m_currFov(FOV),
+      m_lastFov(FOV),
       m_nearPlane(NEAR_PLANE),
       m_farPlane(FAR_PLANE),
       m_aspect((float)width / (float)height)
 {
-    std::fill(std::begin(m_currDirections), std::end(m_currDirections), false);
 }
 
 bool Camera::init() {
-    updateVectors();
     updateProjection(true);
 
     return true;
 }
 
-void Camera::saveState() {
-    m_preViewPos = m_viewPos;
-}
-
-// continuous key clicks -> movement
 void Camera::processInput() {
     processMouseScroll(InputManager::getInstance().getScrollOffset());
     processMouseMovement(InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
-
-    // CROUCHING/STANDING
-    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
-        toggleCameraMode();
-    }
-    // GOD MODE
-    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
-        toggleGodMode();
-    }
-
-    std::fill(std::begin(m_currDirections), std::end(m_currDirections), false);
-
-    // MOVEMENT
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_W)) {
-        m_currDirections[static_cast<int>(CameraDirection::FORWARD)] = true;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_S)) {
-        m_currDirections[static_cast<int>(CameraDirection::BACKWARD)] = true;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_A)) {
-        m_currDirections[static_cast<int>(CameraDirection::LEFT)] = true;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_D)) {
-        m_currDirections[static_cast<int>(CameraDirection::RIGHT)] = true;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_E)) {
-        m_currDirections[static_cast<int>(CameraDirection::UP)] = true;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_Q)) {
-        m_currDirections[static_cast<int>(CameraDirection::DOWN)] = true;
-    }
 }
 
-void Camera::fixedUpdate(float fixedt) {
-    float velocity = MOVEMENT_SPEED * fixedt;
-    if (m_currDirections[static_cast<int>(CameraDirection::FORWARD)]) {
-        m_viewPos += m_front * velocity;
-    }
-    if (m_currDirections[static_cast<int>(CameraDirection::BACKWARD)]) {
-        m_viewPos -= m_front * velocity;
-    }
-    if (m_currDirections[static_cast<int>(CameraDirection::LEFT)]) {
-        m_viewPos -= m_right * velocity;
-    }
-    if (m_currDirections[static_cast<int>(CameraDirection::RIGHT)]) {
-        m_viewPos += m_right * velocity;
-    }
-    // GOD MODE ACTIVATED
-    if (m_godMode) {
-        if (m_currDirections[static_cast<int>(CameraDirection::UP)]) {
-            m_viewPos += WORLD_UP * velocity;
-        }
-        if (m_currDirections[static_cast<int>(CameraDirection::DOWN)]) {
-            m_viewPos -= WORLD_UP * velocity;
-        }
-    } else {
-        m_viewPos.y = getCameraModeHeight();
-    }
+void Camera::follow(TransformComponent* transform) {
+    m_followedTransform = transform;
+    LOG_D("Camera is following: " << transform->getOwner()->getName());
 
-    if (m_godModeChanged || m_cameraModeChanged) {
-        //m_viewPos.y = getCameraModeHeight();
-        m_godModeChanged = false;
-        m_cameraModeChanged = false;
-    }
-}
-
-void Camera::updateVectors() {
-    glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
-    front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    front.y = sin(glm::radians(m_pitch));
-    front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
-    m_front = glm::normalize(front);
-    m_right = glm::normalize(glm::cross(m_front, WORLD_UP));
-    m_up = glm::normalize(glm::cross(m_right, m_front));
+    updateProjection(true);
 }
 
 void Camera::updateView(float alpha) {
-    glm::vec3 interPosition = glm::mix(m_preViewPos, m_viewPos, alpha);
-    // camera position, where you looking at, up vector
-    m_view = glm::lookAt(interPosition, interPosition + m_front, m_up);
+    if (m_followedTransform) {
+        glm::vec3 interPosition = m_followedTransform->getInterpolatedPosition(alpha);
+        // FIXME standing/crouching
+        interPosition.y = STANDING_OFFSET;
+        // followed position, where you looking at, up vector
+        m_view = glm::lookAt(interPosition, interPosition + m_followedTransform->getFront(), m_followedTransform->getUp());
+    }
 }
 
 void Camera::updateProjection(bool force) {
@@ -136,7 +60,7 @@ void Camera::updateProjection(bool force) {
 }
 
 void Camera::restoreDefaultProjection() {
-    m_fov = m_currFov;
+    m_fov = m_lastFov;
     m_nearPlane = NEAR_PLANE;
     m_farPlane = FAR_PLANE;
     m_projectionDirty = true;
@@ -158,28 +82,19 @@ void Camera::processMouseScroll(float yoffset) {
         if (m_fov > MAX_FOV) {
             m_fov = MAX_FOV;
         }
-        m_currFov = m_fov;
+        m_lastFov = m_fov;
     }
 }
 
-void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch) {
-    // left-right
-    m_yaw += xoffset * MOUSE_SENSITIVITY;
-    // up-down
-    m_pitch += yoffset * MOUSE_SENSITIVITY;
-    if (constrainPitch) {
-        if (m_pitch < MIN_PITCH) {
-            m_pitch = MIN_PITCH;
-        }
-        if (m_pitch > MAX_PITCH) {
-            m_pitch = MAX_PITCH;
-        }
-    }
-}
+void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean clampPitch) {
+    if (m_followedTransform) {
+        // left-right
+        m_followedTransform->addYaw(xoffset * MOUSE_SENSITIVITY);
 
-float Camera::getCameraModeHeight() const {
-    if (m_cameraMode == CameraMode::STANDING) {
-        return STANDING_HEIGHT;
+        // up-down
+        m_followedTransform->addPitch(yoffset * MOUSE_SENSITIVITY);
+        if (clampPitch) {
+            m_followedTransform->setPitch(glm::clamp(m_followedTransform->getPitch(), MIN_PITCH, MAX_PITCH));
+        }
     }
-    return CROUCHING_HEIGHT;
 }

@@ -25,8 +25,8 @@ glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
     float interSway = glm::mix(m_prevSway, m_sway, alpha);
     float swayX = cos(interSway * 0.5f) * 0.3f;
     float swayZ = sin(interSway * 1.0f) * 0.2f;
-    glm::vec3 interPosition = glm::mix(m_camera->getPreViewPos(), m_camera->getViewPos(), alpha);
-    glm::mat3 viewRotation = glm::mat3(m_camera->getViewMatrix());
+    glm::vec3 interPosition = getInterpolatedPosition(alpha);
+    glm::mat3 viewRotation = glm::mat3(m_rotation);
     m_model = glm::translate(glm::mat4(1.0f), interPosition);
     m_modelNoSway = m_model;
     m_model *= glm::mat4(glm::transpose(viewRotation));

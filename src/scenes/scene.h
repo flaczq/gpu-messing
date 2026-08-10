@@ -16,8 +16,8 @@ public:
 	virtual ~Scene();
 
 	virtual void init();
-	virtual void saveState();
 	virtual void processInput();
+	virtual void saveState();
 	virtual void fixedUpdate(float fixedt);
 	virtual void update(float alpha);
 	virtual void lateUpdate();

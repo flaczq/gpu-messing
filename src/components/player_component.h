@@ -3,13 +3,13 @@
 #include "../configs/math_config.hpp"
 #include "component.h"
 
-class Camera;
-class TransformComponent;
-
 enum class VerticalMode {
 	STANDING,
 	CROUCHING
 };
+
+class Camera;
+class TransformComponent;
 
 class PlayerComponent : public Component {
 public:
@@ -21,17 +21,18 @@ public:
 
 	void toggleVerticalMode();
 	void toggleGodMode();
+	bool isCrouching() const;
 
 private:
-	TransformComponent* m_transform = nullptr;
+	static constexpr float MOVEMENT_SPEED = 5.0f;
+
 	Camera* m_camera = nullptr;
-
+	TransformComponent* m_transform = nullptr;
+	
 	int m_health{};
-	glm::vec3 m_position{}, m_prevPosition{};
-	glm::quat m_rotation{}, m_prevRotation{};
-	glm::vec3 m_scale{}, m_prevScale{};
+	VerticalMode m_verticalMode{};
 
-	VerticalMode m_verticalMode = VerticalMode::STANDING;
+	glm::vec3 m_moveDir = glm::vec3(0.0f);
 	bool m_verticalModeChanged = false;
 	bool m_godMode = false;
 	bool m_godModeChanged = false;

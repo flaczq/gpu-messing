@@ -13,6 +13,9 @@ TransformComponent::TransformComponent(const glm::vec3& position, const glm::qua
 	  m_prevScale(scale),
 	  m_model(glm::mat4(1.0f)),
 	  m_normal(glm::mat3(1.0f)),
+	  // looking at (0,0,0)
+	  m_yaw(-135.0f),
+	  m_pitch(-11.5f),
 	  m_dirty(true)
 {
 }
@@ -21,6 +24,10 @@ void TransformComponent::saveState() {
 	m_prevPosition = m_position;
 	m_prevRotation = m_rotation;
 	m_prevScale = m_scale;
+}
+
+glm::vec3 TransformComponent::getInterpolatedPosition(float alpha) const {
+	return glm::mix(m_prevPosition, m_position, alpha);
 }
 
 glm::mat4 TransformComponent::getInterpolatedModelMatrix(float alpha) {
@@ -42,4 +49,29 @@ glm::mat4 TransformComponent::getNormalMatrix() {
 		//m_dirty = false;
 	}
 	return m_normal;
+}
+
+glm::vec3 TransformComponent::getFront() const {
+	glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
+	front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+	front.y = sin(glm::radians(m_pitch));
+	front.z = sin(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
+	return glm::normalize(front);
+}
+
+glm::vec3 TransformComponent::getFlatFront() const {
+	glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
+	front.x = cos(glm::radians(m_yaw));
+	front.y = 0.0f;
+	front.z = sin(glm::radians(m_yaw));
+	return glm::normalize(front);
+}
+
+
+glm::vec3 TransformComponent::getRight() const {
+	return glm::normalize(glm::cross(getFront(), WORLD_UP));
+}
+
+glm::vec3 TransformComponent::getUp() const {
+	return glm::normalize(glm::cross(getRight(), getFront()));
 }

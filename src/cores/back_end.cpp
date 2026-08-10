@@ -91,10 +91,11 @@ bool BackEnd::init() {
     // top-view minimap
     if (m_minimap) {
         m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
-        m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-        m_minimapCamera->setPreViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-        m_minimapCamera->setYaw(-90.0f);
-        m_minimapCamera->setPitch(-70.0f);
+        //m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+        //m_minimapCamera->setPreViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+        //m_minimapCamera->setYaw(-90.0f);
+        //m_minimapCamera->setPitch(-70.0f);
+        // FIXME: follow empty transform
         m_minimapCamera->init();
     }
     // nothing else matters... but order
@@ -146,10 +147,8 @@ void BackEnd::run() {
 
         processGlobalInput();
         m_camera->processInput();
-        m_camera->updateVectors();
         if (m_minimap) {
             //m_minimapCamera->processInput();
-            //m_minimapCamera->updateVectors();
         }
         SceneManager::getInstance().processInput();
 
@@ -157,16 +156,10 @@ void BackEnd::run() {
         while (m_accumulator >= FIXED_DT) {
             float fixedt = static_cast<float>(FIXED_DT);
             SceneManager::getInstance().saveState();
-            m_camera->saveState();
 
             // setting velocity to move
             // PhysicsWorld -> registerInQueue()
             SceneManager::getInstance().fixedUpdate(fixedt);
-            m_camera->fixedUpdate(fixedt);
-            if (m_minimap) {
-                //m_minimapCamera->saveState();
-                //m_minimapCamera->fixedUpdate(fixedt);
-            }
 
             // execute physics commands from queue
             PhysicsWorld::getInstance().flush();
@@ -177,7 +170,6 @@ void BackEnd::run() {
 
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
-
         // lookAt()
         m_camera->updateView(alpha);
         m_camera->updateProjection();
@@ -278,16 +270,16 @@ void BackEnd::showFps(GLFWwindow* window, double currentTime) {
 }
 
 void BackEnd::displayCameraData() {
-    glm::vec3 cameraPos = m_camera->getViewPos();
+    glm::vec3 cameraPos = m_camera->getFollowedTransform()->getPosition();
     std::cout << std::fixed << std::setprecision(2);
     LOG("Camera: "
         << "X: " << std::showpos << cameraPos.x << "   "
         << "Y: " << std::showpos << cameraPos.y << "   "
-        << "Z: " << std::showpos << cameraPos.z << "   "
-        << "YAW: " << m_camera->getYaw() << "   "
-        << "PITCH: " << m_camera->getPitch());
+        << "Z: " << std::showpos << cameraPos.z);// << "   "
+        //<< "YAW: " << m_camera->getYaw() << "   "
+        //<< "PITCH: " << m_camera->getPitch());
     LOG_D("("
-        << std::showpos << cameraPos.x << "f, "
-        << std::showpos << cameraPos.y << "f, "
-        << std::showpos << cameraPos.z << "f)");
+        << cameraPos.x << "f, "
+        << cameraPos.y << "f, "
+        << cameraPos.z << "f)");
 }

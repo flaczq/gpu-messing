@@ -21,7 +21,6 @@ private:
 
 	Camera* m_camera = nullptr;
 
-	float m_sway{};
-	float m_prevSway{};
+	float m_sway{}, m_prevSway{};
 	glm::mat4 m_modelNoSway{};
 };

@@ -20,15 +20,15 @@ void RenderComponent::onInit() {
 void RenderComponent::onUpdate(float alpha) const {
     glm::mat4 modelMatrix = m_transform->getInterpolatedModelMatrix(alpha);
     glm::mat3 normalMatrix = m_transform->getNormalMatrix();
-    glm::vec3 position = m_transform->getPosition();
-    m_transform->setDirty(false);
+    glm::vec3 interPosition = m_transform->getInterpolatedPosition(alpha);
+    m_transform->setDirty(true);
     RendererQueueType queueType = getOwner()->getRendererQueueType();
     RendererCommand command = {
         m_model.get(),
         m_material.get(),
         modelMatrix,
         normalMatrix,
-        position
+        interPosition
     };
     Renderer::getInstance().registerInQueue(queueType, command);
 }

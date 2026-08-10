@@ -55,15 +55,15 @@ void SceneManager::toggleScene() {
 	m_currentScene->init();
 }
 
-void SceneManager::saveState() const {
-	if (m_currentScene) {
-		m_currentScene->saveState();
-	}
-}
-
 void SceneManager::processInput() {
 	if (m_currentScene) {
 		m_currentScene->processInput();
+	}
+}
+
+void SceneManager::saveState() const {
+	if (m_currentScene) {
+		m_currentScene->saveState();
 	}
 }
 

@@ -266,10 +266,13 @@ void Renderer::sortQueueByDistance(std::vector<RendererCommand>& queue) const {
     }*/
 
     // sort by distance to camera (furthest to closest)
-    auto cameraPos = m_camera->getViewPos();
-    std::sort(queue.begin(), queue.end(), [cameraPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
-        return glm::length(cameraPos - cmd2.position) < glm::length(cameraPos - cmd1.position);
-    });
+    TransformComponent* transform = m_camera->getFollowedTransform();
+    if (transform) {
+        auto cameraPos = transform->getPosition();
+        std::sort(queue.begin(), queue.end(), [cameraPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
+            return glm::length(cameraPos - cmd2.position) < glm::length(cameraPos - cmd1.position);
+        });
+    }
 }
 
 // TODO: use UBO
@@ -298,7 +301,7 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
                 // draws per-shader (rarely)
                 currShader->setMat4fv("projection", m_camera->getProjection());
                 currShader->setMat4fv("view", m_camera->getViewMatrix());
-                currShader->setVec3fv("viewPos", m_camera->getViewPos());
+                currShader->setVec3fv("viewPos", cmd.position);
                 currShader->setVec3fv("lightDir", m_light.direction);
                 currShader->setVec3fv("lightColor", m_light.color);
                 //LOG_D("per-shader draws with shader: " << currShader->getID());
