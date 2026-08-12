@@ -20,6 +20,7 @@ void TransformFpsComponent::onFixedUpdate(float fixedt) {
     //setPosition(glm::vec3(m_model[3]));
 }
 
+// FIXME maybe don't need this..? only sway
 glm::mat4 TransformFpsComponent::getInterpolatedModelMatrix(float alpha) {
     // make me sway
     float interSway = glm::mix(m_prevSway, m_sway, alpha);

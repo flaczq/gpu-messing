@@ -4,6 +4,7 @@
 #include "../game/game_entity.h"
 #include "../managers/input_manager.h"
 #include "../utils/enum_utils.hpp"
+#include "../utils/math_constants.hpp"
 #include "player_component.h"
 #include "transform_component.h"
 #include <string>
@@ -55,8 +56,6 @@ void PlayerComponent::processInput() {
         if (InputManager::getInstance().isKeyDown(GLFW_KEY_E)) {
             moveDir.y += 1.0f;
         }
-    } else {
-        moveDir.y = 0.0f;
     }
     // normalize diagonal movement
     m_moveDir = glm::length(moveDir) > 0.0f ? glm::normalize(moveDir) : glm::vec3(0.0f);
@@ -65,21 +64,23 @@ void PlayerComponent::processInput() {
 void PlayerComponent::onFixedUpdate(float fixedt) {
     if (glm::length(m_moveDir) > 0.0f) {
         glm::vec3 flatFront = m_transform->getFlatFront();
-        glm::vec3 up = m_transform->getUp();
         glm::vec3 right = m_transform->getRight();
         glm::vec3 direction = // front-back
-                              (flatFront * m_moveDir.z) +
+                              flatFront * m_moveDir.z +
                               // left-right
-                              (right * m_moveDir.x) +
+                              right * m_moveDir.x +
                               // up-down
-                              (glm::vec3(0.0f, 1.0f, 0.0f) * m_moveDir.y);
+                              Constants::Math::WORLD_UP * m_moveDir.y;
         float velocity = MOVEMENT_SPEED * fixedt;
         m_transform->addPosition(direction * velocity);
     }
 
+    if (!m_godMode) {
+        glm::vec3 position = m_transform->getPosition();
+        position.y = 0.0f;
+        m_transform->setPosition(position);
+    }
     if (m_godModeChanged || m_verticalModeChanged) {
-        //currPosition.y = 0.0f;
-        //m_transform->setPosition(currPosition);
         m_godModeChanged = false;
         m_verticalModeChanged = false;
     }

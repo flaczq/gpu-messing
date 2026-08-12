@@ -267,12 +267,10 @@ void Renderer::sortQueueByDistance(std::vector<RendererCommand>& queue) const {
 
     // sort by distance to camera (furthest to closest)
     TransformComponent* transform = m_camera->getFollowedTransform();
-    if (transform) {
-        auto cameraPos = transform->getPosition();
-        std::sort(queue.begin(), queue.end(), [cameraPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
-            return glm::length(cameraPos - cmd2.position) < glm::length(cameraPos - cmd1.position);
-        });
-    }
+    glm::vec3 cameraPos = transform ? transform->getPosition() : glm::vec3(0.0f);
+    std::sort(queue.begin(), queue.end(), [cameraPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
+        return glm::length(cameraPos - cmd2.position) < glm::length(cameraPos - cmd1.position);
+    });
 }
 
 // TODO: use UBO

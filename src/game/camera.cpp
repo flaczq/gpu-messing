@@ -44,7 +44,7 @@ void Camera::updateView(float alpha) {
     if (m_followedTransform) {
         glm::vec3 interPosition = m_followedTransform->getInterpolatedPosition(alpha);
         // FIXME standing/crouching
-        interPosition.y = STANDING_OFFSET;
+        interPosition.y += STANDING_OFFSET;
         // followed position, where you looking at, up vector
         m_view = glm::lookAt(interPosition, interPosition + m_followedTransform->getFront(), m_followedTransform->getUp());
     }

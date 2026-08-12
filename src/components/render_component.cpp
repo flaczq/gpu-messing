@@ -21,7 +21,7 @@ void RenderComponent::onUpdate(float alpha) const {
     glm::mat4 modelMatrix = m_transform->getInterpolatedModelMatrix(alpha);
     glm::mat3 normalMatrix = m_transform->getNormalMatrix();
     glm::vec3 interPosition = m_transform->getInterpolatedPosition(alpha);
-    m_transform->setDirty(true);
+    //m_transform->setDirty(false);
     RendererQueueType queueType = getOwner()->getRendererQueueType();
     RendererCommand command = {
         m_model.get(),

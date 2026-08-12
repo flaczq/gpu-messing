@@ -1,6 +1,7 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/game_entity.h"
+#include "../utils/math_constants.hpp"
 #include "component.h"
 #include "transform_component.h"
 
@@ -26,10 +27,6 @@ void TransformComponent::saveState() {
 	m_prevScale = m_scale;
 }
 
-glm::vec3 TransformComponent::getInterpolatedPosition(float alpha) const {
-	return glm::mix(m_prevPosition, m_position, alpha);
-}
-
 glm::mat4 TransformComponent::getInterpolatedModelMatrix(float alpha) {
 	if (m_dirty) {
 		glm::vec3 interPosition = glm::mix(m_prevPosition, m_position, alpha);
@@ -51,6 +48,10 @@ glm::mat4 TransformComponent::getNormalMatrix() {
 	return m_normal;
 }
 
+glm::vec3 TransformComponent::getInterpolatedPosition(float alpha) const {
+	return glm::mix(m_prevPosition, m_position, alpha);
+}
+
 glm::vec3 TransformComponent::getFront() const {
 	glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
 	front.x = cos(glm::radians(m_yaw)) * cos(glm::radians(m_pitch));
@@ -60,16 +61,16 @@ glm::vec3 TransformComponent::getFront() const {
 }
 
 glm::vec3 TransformComponent::getFlatFront() const {
-	glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
-	front.x = cos(glm::radians(m_yaw));
-	front.y = 0.0f;
-	front.z = sin(glm::radians(m_yaw));
-	return glm::normalize(front);
+	glm::vec3 flatFront = glm::vec3(0.0f, 0.0f, 0.0f);
+	flatFront.x = cos(glm::radians(m_yaw));
+	flatFront.y = 0.0f;
+	flatFront.z = sin(glm::radians(m_yaw));
+	return glm::normalize(flatFront);
 }
 
 
 glm::vec3 TransformComponent::getRight() const {
-	return glm::normalize(glm::cross(getFront(), WORLD_UP));
+	return glm::normalize(glm::cross(getFront(), Constants::Math::WORLD_UP));
 }
 
 glm::vec3 TransformComponent::getUp() const {

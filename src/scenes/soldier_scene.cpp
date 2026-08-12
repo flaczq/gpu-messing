@@ -166,14 +166,17 @@ void SoldierScene::init() {
     auto playerModel = ResourceManager::getInstance().getModel("player_model");
     auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
     if (playerModel && playerMaterial) {
+        glm::quat pRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        //pRotQ *= glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        //pRotQ *= glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         auto playerGO = std::make_unique<GameEntity>("player");
         playerGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
         playerGO->setSolid(true);
         playerGO->setAbstract(true);
-        //playerGO->addComponent<TransformComponent>(glm::vec3(10.0f), glm::quat(), FPS_ARMS_SCALE);
-        playerGO->addComponent<TransformFpsComponent>(m_camera);
+        playerGO->addComponent<TransformComponent>(glm::vec3(1.0f, 0.0f, 1.0f), pRotQ, glm::vec3(0.2f));
+        //playerGO->addComponent<TransformFpsComponent>(m_camera);
         playerGO->addComponent<RenderComponent>(playerModel, playerMaterial);
-        playerGO->addComponent<PhysicsComponent>(-glm::vec3(0.2f), glm::vec3(0.2f)); //playerModel->getAABBMin(), playerModel->getAABBMax()
+        playerGO->addComponent<PhysicsComponent>(-glm::vec3(0.25f), glm::vec3(0.25f)); //playerModel->getAABBMin(), playerModel->getAABBMax()
         playerGO->addComponent<PlayerComponent>(m_camera);
         playerGO->init();
         m_gameEntities.push_back(std::move(playerGO));

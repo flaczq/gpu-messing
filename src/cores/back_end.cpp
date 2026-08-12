@@ -148,7 +148,7 @@ void BackEnd::run() {
         processGlobalInput();
         m_camera->processInput();
         if (m_minimap) {
-            //m_minimapCamera->processInput();
+            m_minimapCamera->processInput();
         }
         SceneManager::getInstance().processInput();
 
@@ -175,7 +175,7 @@ void BackEnd::run() {
         m_camera->updateProjection();
         if (m_minimap) {
             m_minimapCamera->updateView(alpha);
-            //m_minimapCamera->updateProjection();
+            m_minimapCamera->updateProjection();
         }
 
         // renderrring at last

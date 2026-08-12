@@ -256,6 +256,9 @@
     <ClInclude Include="src\components\player_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
+    <ClInclude Include="src\utils\math_constants.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Game_Engine_2025.rc">
