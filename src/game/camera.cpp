@@ -96,5 +96,6 @@ void Camera::processMouseMovement(float xoffset, float yoffset, GLboolean clampP
         if (clampPitch) {
             m_followedTransform->setPitch(glm::clamp(m_followedTransform->getPitch(), MIN_PITCH, MAX_PITCH));
         }
+        m_followedTransform->updateRotation();
     }
 }

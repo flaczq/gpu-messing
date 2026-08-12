@@ -9,6 +9,7 @@ public:
 	TransformComponent(const glm::vec3& position, const glm::quat& rotation = glm::quat(), const glm::vec3& scale = glm::vec3(1.0f));
 
 	virtual void saveState();
+	void updateRotation();
 	virtual glm::mat4 getInterpolatedModelMatrix(float alpha);
 	virtual glm::mat4 getNormalMatrix();
 	glm::vec3 getInterpolatedPosition(float alpha) const;
@@ -42,6 +43,5 @@ protected:
 	glm::vec3 m_scale{}, m_prevScale{};
 	float m_yaw{};
 	float m_pitch{};
-	
-	bool m_dirty = true;
+	bool m_dirty{};
 };

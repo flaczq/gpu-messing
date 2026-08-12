@@ -27,6 +27,13 @@ void TransformComponent::saveState() {
 	m_prevScale = m_scale;
 }
 
+void TransformComponent::updateRotation() {
+	glm::quat qYaw = glm::angleAxis(glm::radians(-m_yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::quat qPitch = glm::angleAxis(glm::radians(m_pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	m_rotation = qYaw * qPitch;
+	//m_prevRotation = m_rotation;
+}
+
 glm::mat4 TransformComponent::getInterpolatedModelMatrix(float alpha) {
 	if (m_dirty) {
 		glm::vec3 interPosition = glm::mix(m_prevPosition, m_position, alpha);
