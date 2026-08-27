@@ -66,6 +66,7 @@ public:
 	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
 	void flush();
 	void renderImmediate();
+	void renderFrameBufferTexture();
 	void endFrameMinimap();
 	void endFrame();
 
