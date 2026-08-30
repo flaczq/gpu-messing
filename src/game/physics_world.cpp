@@ -78,7 +78,7 @@ void PhysicsWorld::flush() {
 		} else if (cmd.commandType == PhysicsCommandType::REMOVE) {
 			if (it != m_physicsBodies.end()) {
 				// does exist -> remove
-				delete it->second.transform;
+				//delete it->second.transform;
 				m_physicsBodies.erase(it);
 			}
 		}
@@ -112,7 +112,11 @@ void PhysicsWorld::step(float fixedt) {
 				// itself
 				continue;
 			}
+			// FIXME maybe checkCollisionWithOther i w środku te wszystkie metody..?
 			if (physicsBody.AABB->isCollidingWithOther(*targetPhysicsBody.AABB)) {
+				// instead of calling this on *Transform which won't compile
+				// call function that will suggest the position should be reverted
+				physicsBody.transform->weHaveToGoBack();
 				physicsBody.AABB->setColliding(true);
 				physicsBody.AABB->setColor(Constants::Colors::RED);
 				targetPhysicsBody.AABB->setColliding(true);

@@ -17,11 +17,11 @@ void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
 
     m_AABB.init();
-    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
+    m_AABB.updateToWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 }
 
 void PhysicsComponent::onFixedUpdate(float fixedt) {
-    m_AABB.updateWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
+    m_AABB.updateToWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 
     PhysicsCommandType commandType;
     if (getOwner()->isAlive() && !getOwner()->isPendingDeath()) {

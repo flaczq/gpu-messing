@@ -19,7 +19,7 @@ struct AABB {
 		m_color = Constants::Colors::BLACK;
 	}
 	// world position, rotation and scale
-	void updateWorld(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
+	void updateToWorld(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, position);
 		model *= glm::mat4_cast(rotation);

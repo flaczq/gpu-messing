@@ -35,6 +35,8 @@ public:
 	void setDirty(bool dirty) { m_dirty = dirty; }
 	glm::vec3 getWorldUp() const { return Constants::Math::WORLD_UP; }
 
+	void weHaveToGoBack() { m_position = m_prevPosition; }
+
 protected:
 	glm::mat4 m_model{};
 	glm::mat3 m_normal{};

@@ -19,7 +19,7 @@ void PlayerComponent::onInit() {
 	m_health = 100;
     m_verticalMode = VerticalMode::STANDING;
 
-    // set the camera
+    // set camera follow target position stuff boom sic!
     m_camera->follow(m_transform);
 }
 

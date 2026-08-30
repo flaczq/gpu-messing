@@ -234,7 +234,7 @@ void Renderer::renderFrameBufferTexture() {
     // off-screen rendering
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-    unsigned int texture;
+    unsigned int texture{};
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
@@ -279,17 +279,12 @@ void Renderer::sortQueueByDistance(std::vector<RendererCommand>& queue) const {
         return;
     }
 
-    /*std::map<float, RendererCommand> distanceSorted;
-    for (size_t i{}; i < m_blendingQueue.size(); i++) {
-        float distance = glm::length(m_camera->getViewPos() - m_blendingQueue[i].position);
-        distanceSorted[distance] = m_blendingQueue[i];
-    }*/
-
-    // sort by distance to camera (furthest to closest)
+    // sort by the distance to the followed=camera (furthest to closest)
+    // or to the beginning of the universe if there is no camera...
     TransformComponent* transform = m_camera->getFollowedTransform();
-    glm::vec3 cameraPos = transform ? transform->getPosition() : glm::vec3(0.0f);
-    std::sort(queue.begin(), queue.end(), [cameraPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
-        return glm::length(cameraPos - cmd2.position) < glm::length(cameraPos - cmd1.position);
+    glm::vec3 followedPos = transform ? transform->getPosition() : glm::vec3(0.0f);
+    std::sort(queue.begin(), queue.end(), [followedPos](const RendererCommand& cmd1, const RendererCommand& cmd2) {
+        return glm::length(followedPos - cmd2.position) < glm::length(followedPos - cmd1.position);
     });
 }
 

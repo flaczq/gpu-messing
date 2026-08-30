@@ -170,7 +170,7 @@ void SoldierScene::init() {
         playerGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
         playerGO->setSolid(true);
         playerGO->setAbstract(true);
-        playerGO->addComponent<TransformComponent>(glm::vec3(1.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
+        playerGO->addComponent<TransformComponent>(glm::vec3(21.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
         // TODO add FpsComponent -> sway
         //playerGO->addComponent<TransformFpsComponent>(m_camera);
         playerGO->addComponent<RenderComponent>(playerModel, playerMaterial);

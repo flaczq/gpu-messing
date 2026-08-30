@@ -14,7 +14,7 @@ enum class PhysicsCommandType {
 };
 
 struct PhysicsBody {
-	const TransformComponent* transform;
+	TransformComponent* transform;
 	AABB* AABB;
 };
 struct PhysicsCommand {
