@@ -35,6 +35,7 @@ public:
 	void setDirty(bool dirty) { m_dirty = dirty; }
 	glm::vec3 getWorldUp() const { return Constants::Math::WORLD_UP; }
 
+	// FIXME change this to MTV
 	void weHaveToGoBack() { m_position = m_prevPosition; }
 
 protected:

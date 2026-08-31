@@ -8,14 +8,22 @@
 
 class TransformComponent;
 
+// <=
+// BOT collides w/ only itself
+// MID collides w/ MID and BOT
+// TOP collides w/ every other
+enum class PhysicsLayer {
+	BOT = 1,
+	MID = 2,
+	TOP = 3
+};
+
 struct AABB {
 	glm::vec3 m_localMin, m_localMax;
 	glm::vec3 m_worldMin, m_worldMax;
-	bool m_colliding;
 	glm::vec3 m_color;
 
 	void init() {
-		m_colliding = false;
 		m_color = Constants::Colors::BLACK;
 	}
 	// world position, rotation and scale
@@ -40,17 +48,12 @@ struct AABB {
 			m_worldMin = glm::min(m_worldMin, corner);
 			m_worldMax = glm::max(m_worldMax, corner);
 		}
-
-		//setColor(Constants::Colors::BLACK);
 	}
 	glm::vec3 getSize() const { return m_worldMax - m_worldMin; };
 	glm::vec3 getCenter() const { return (m_worldMin + m_worldMax) * 0.5f; };
 	glm::vec3 getColor() const { return m_color; };
-	void setColor(const glm::vec3& color) { m_color = color; };
-	bool isColliding() const { return m_colliding; };
-	void setColliding(const bool colliding) { m_colliding = colliding; };
 
-	bool isCollidingWithOther(const AABB& other) const {
+	bool isCollidingWithOther(AABB other) const {
 		//LOG_D(Utils::getVec3Values(m_worldMin));
 		//LOG_D(Utils::getVec3Values(m_worldMax));
 		bool collX = (m_worldMin.x <= other.m_worldMax.x) && (m_worldMax.x >= other.m_worldMin.x);
@@ -62,15 +65,21 @@ struct AABB {
 
 class PhysicsComponent : public Component {
 public:
-	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax);
+	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer = PhysicsLayer::BOT);
 
 	void onInit() override;
 	void onFixedUpdate(float fixedt) override;
 
+	void processCollision(bool colliding);
+
 	AABB getAABB() const { return m_AABB; }
+	PhysicsLayer getLayer() const { return m_layer; }
+	bool isColliding() const { return m_colliding; };
 
 private:
 	TransformComponent* m_transform = nullptr;
 
 	AABB m_AABB{};
+	PhysicsLayer m_layer{};
+	bool m_colliding{};
 };

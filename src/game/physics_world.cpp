@@ -73,7 +73,7 @@ void PhysicsWorld::flush() {
 		if (cmd.commandType == PhysicsCommandType::ADD) {
 			if (it == m_physicsBodies.end()) {
 				// does not exist -> add
-				m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody.transform, cmd.physicsBody.AABB);
+				m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody.transform, cmd.physicsBody.physics);
 			}
 		} else if (cmd.commandType == PhysicsCommandType::REMOVE) {
 			if (it != m_physicsBodies.end()) {
@@ -90,37 +90,37 @@ void PhysicsWorld::flush() {
 
 void PhysicsWorld::step(float fixedt) {
 	for (auto& [name, physicsBody] : m_physicsBodies) {
-		physicsBody.AABB->setColliding(false);
-		physicsBody.AABB->setColor(Constants::Colors::GREEN);
+		physicsBody.physics->processCollision(false);
 	}
 
 	for (auto& [name, physicsBody] : m_physicsBodies) {
-		if (physicsBody.AABB->isColliding()) {
+		if (physicsBody.physics->isColliding()) {
 			continue;
 		}
-		// only TEST player
-		if (name != "player") {
+		if (physicsBody.physics->getLayer() != PhysicsLayer::TOP) {
+			// ONLY TO(P)LAYER
 			continue;
 		}
 
 		for (auto& [targetName, targetPhysicsBody] : m_physicsBodies) {
-			if (targetPhysicsBody.AABB->isColliding()) {
-				continue;
-			}
-			// compare addresses
 			if (&physicsBody == &targetPhysicsBody) {
-				// itself
+				// home address
 				continue;
 			}
-			// FIXME maybe checkCollisionWithOther i w środku te wszystkie metody..?
-			if (physicsBody.AABB->isCollidingWithOther(*targetPhysicsBody.AABB)) {
-				// instead of calling this on *Transform which won't compile
-				// call function that will suggest the position should be reverted
+			//if (targetPhysicsBody.physics->isColliding()) {
+			//	// checked
+			//	continue;
+			//}
+			if (physicsBody.physics->getLayer() < targetPhysicsBody.physics->getLayer()) {
+				// (p)layering
+				continue;
+			}
+
+			if (physicsBody.physics->getAABB().isCollidingWithOther(targetPhysicsBody.physics->getAABB())) {
 				physicsBody.transform->weHaveToGoBack();
-				physicsBody.AABB->setColliding(true);
-				physicsBody.AABB->setColor(Constants::Colors::RED);
-				targetPhysicsBody.AABB->setColliding(true);
-				targetPhysicsBody.AABB->setColor(Constants::Colors::RED);
+				physicsBody.physics->processCollision(true);
+				targetPhysicsBody.transform->weHaveToGoBack();
+				targetPhysicsBody.physics->processCollision(true);
 				LOG_D(name << " <-> " << targetName);
 				break;
 			}
@@ -145,9 +145,9 @@ std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 			physicsBody.second.transform->getPosition(),
 			physicsBody.second.transform->getRotation(),
 			physicsBody.second.transform->getScale(),
-			physicsBody.second.AABB->getSize(),
-			physicsBody.second.AABB->getCenter(),
-			physicsBody.second.AABB->getColor()
+			physicsBody.second.physics->getAABB().getSize(),
+			physicsBody.second.physics->getAABB().getCenter(),
+			physicsBody.second.physics->getAABB().getColor()
 		};
 		commands.push_back(command);
 	}

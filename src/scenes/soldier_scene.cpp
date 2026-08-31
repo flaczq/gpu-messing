@@ -174,7 +174,7 @@ void SoldierScene::init() {
         // TODO add FpsComponent -> sway
         //playerGO->addComponent<TransformFpsComponent>(m_camera);
         playerGO->addComponent<RenderComponent>(playerModel, playerMaterial);
-        playerGO->addComponent<PhysicsComponent>(glm::vec3(-0.25f), glm::vec3(0.25f)); //playerModel->getAABBMin(), playerModel->getAABBMax()
+        playerGO->addComponent<PhysicsComponent>(glm::vec3(-0.25f), glm::vec3(0.25f), PhysicsLayer::TOP); //playerModel->getAABBMin(), playerModel->getAABBMax()
         playerGO->addComponent<PlayerComponent>(m_camera);
         playerGO->init();
         m_gameEntities.push_back(std::move(playerGO));

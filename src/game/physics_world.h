@@ -7,6 +7,7 @@
 #include <vector>
 
 class TransformComponent;
+class PhysicsComponent;
 
 enum class PhysicsCommandType {
 	ADD,
@@ -15,7 +16,7 @@ enum class PhysicsCommandType {
 
 struct PhysicsBody {
 	TransformComponent* transform;
-	AABB* AABB;
+	PhysicsComponent* physics;
 };
 struct PhysicsCommand {
 	const std::string& name;

@@ -41,6 +41,7 @@ bool Renderer::init(GLFWwindow* window, Camera* camera) {
     m_outlineQueue.reserve(100);
     m_blendingQueue.reserve(100);
     m_topLayerQueue.reserve(100);
+    m_uiQueue.reserve(100);
 
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
@@ -105,6 +106,9 @@ void Renderer::registerInQueue(RendererQueueType queueType, const RendererComman
     case RendererQueueType::TOP_LAYER:
         m_topLayerQueue.push_back(command);
         break;
+    case RendererQueueType::UI:
+        m_uiQueue.push_back(command);
+        break;
     }
 }
 
@@ -113,7 +117,7 @@ void Renderer::flush() {
     //    ┏┓┏┓┏┓┏┓┳┳┏┓  ┏┓┏┓┏┓┏┓
     //    ┃┃┃┃┣┫┃┃┃┃┣   ┃┃┣┫┗┓┗┓
     //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
-    //                                       
+    //                          
     sortQueueByMaterial(m_opaqueQueue);
     renderSortedQueue(m_opaqueQueue, "opaque pass");
 
@@ -170,7 +174,7 @@ void Renderer::flush() {
     //    ┏┳┓┏┓┏┓  ┓ ┏┓┓┏┏┓┳┓  ┏┓┏┓┏┓┏┓
     //     ┃ ┃┃┃┃  ┃ ┣┫┗┫┣ ┣┫  ┃┃┣┫┗┓┗┓
     //     ┻ ┗┛┣┛  ┗┛┛┗┗┛┗┛┛┗  ┣┛┛┗┗┛┗┛
-    //                                   
+    //                                 
     if (!m_topLayerQueue.empty()) {
         // always last
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -186,11 +190,21 @@ void Renderer::flush() {
         m_camera->restoreDefaultProjection();
     }
 
+    //    ┳┳•  ┏┓┏┓┏┓┏┓
+    //    ┃┃┓  ┃┃┣┫┗┓┗┓
+    //    ┗┛┗  ┣┛┛┗┗┛┗┛
+    //                 
+    if (!m_uiQueue.empty()) {
+        sortQueueByMaterial(m_uiQueue);
+        renderSortedQueue(m_uiQueue, "ui pass");
+    }
+
     m_opaqueQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
     m_blendingQueue.clear();
     m_topLayerQueue.clear();
+    m_uiQueue.clear();
 }
 
 void Renderer::renderImmediate() {

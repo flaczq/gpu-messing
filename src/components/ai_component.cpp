@@ -9,7 +9,7 @@ void AIComponent::onInit() {
 }
 
 void AIComponent::onFixedUpdate(float fixedt) {
-    if (!getOwner()->getPhysics()->getAABB().isColliding()) {
+    if (!getOwner()->getPhysics()->isColliding()) {
         static float tt = 0.0f;
         tt += fixedt;
         float x = sin(tt * 0.5f) * 2.0f;

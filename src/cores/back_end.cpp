@@ -150,6 +150,7 @@ void BackEnd::run() {
         if (m_minimap) {
             m_minimapCamera->processInput();
         }
+        // set movement direction each frame
         SceneManager::getInstance().processInput();
 
         // logic (once per 60 frames): physics, collisions
@@ -157,13 +158,12 @@ void BackEnd::run() {
             float fixedt = static_cast<float>(FIXED_DT);
             SceneManager::getInstance().saveState();
 
-            // setting velocity to move
-            // PhysicsWorld -> registerInQueue()
+            // change transform position based on set direction
             SceneManager::getInstance().fixedUpdate(fixedt);
 
             // execute physics commands from queue
             PhysicsWorld::getInstance().flush();
-            // actual movement with collision
+            // actual movement with collisions
             PhysicsWorld::getInstance().step(fixedt);
             m_accumulator -= FIXED_DT;
         }

@@ -22,7 +22,8 @@ enum class RendererQueueType {
 	STENCIL,
 	OUTLINE,
 	BLENDING,
-	TOP_LAYER
+	TOP_LAYER,//TO_PLAYER
+	UI
 };
 
 struct RendererLight {
@@ -93,6 +94,7 @@ private:
 	std::vector<RendererCommand> m_outlineQueue;
 	std::vector<RendererCommand> m_blendingQueue;
 	std::vector<RendererCommand> m_topLayerQueue;
+	std::vector<RendererCommand> m_uiQueue;
 
 	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
 	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;
