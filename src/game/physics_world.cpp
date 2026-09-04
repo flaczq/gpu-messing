@@ -82,7 +82,6 @@ void PhysicsWorld::flush() {
 				m_physicsBodies.erase(it);
 			}
 		}
-		//m_physicsBodies.try_emplace(cmd.name, cmd.physicsBody->transform, cmd.physicsBody->AABB);
 	}
 
 	m_physicsQueue.clear();
@@ -90,7 +89,7 @@ void PhysicsWorld::flush() {
 
 void PhysicsWorld::step(float fixedt) {
 	for (auto& [name, physicsBody] : m_physicsBodies) {
-		physicsBody.physics->processCollision(false);
+		physicsBody.physics->setColliding(false);
 	}
 
 	for (auto& [name, physicsBody] : m_physicsBodies) {
@@ -116,16 +115,38 @@ void PhysicsWorld::step(float fixedt) {
 				continue;
 			}
 
-			if (physicsBody.physics->getAABB().isCollidingWithOther(targetPhysicsBody.physics->getAABB())) {
-				physicsBody.transform->weHaveToGoBack();
-				physicsBody.physics->processCollision(true);
-				targetPhysicsBody.transform->weHaveToGoBack();
-				targetPhysicsBody.physics->processCollision(true);
+			if (detectCollision(physicsBody.physics, targetPhysicsBody.physics)) {
+				physicsBody.physics->setColliding(true);
+				targetPhysicsBody.physics->setColliding(true);
+
+				resolveCollisionByMTV(physicsBody, targetPhysicsBody);
 				LOG_D(name << " <-> " << targetName);
 				break;
 			}
 		}
 	}
+}
+
+bool PhysicsWorld::isCollidingByAABB(AABB origin, AABB target) {
+	bool collX = (origin.getWorldMin().x <= target.getWorldMax().x) && (origin.getWorldMax().x >= target.getWorldMin().x);
+	bool collY = (origin.getWorldMin().y <= target.getWorldMax().y) && (origin.getWorldMax().y >= target.getWorldMin().y);
+	bool collZ = (origin.getWorldMin().z <= target.getWorldMax().z) && (origin.getWorldMax().z >= target.getWorldMin().z);
+	return collX && collY && collZ;
+};
+
+bool PhysicsWorld::detectCollision(PhysicsComponent* origin, PhysicsComponent* target) {
+	// FIXME first simple AABB collision check
+	// later detail collision check
+	bool colliding = isCollidingByAABB(origin->getAABB(), target->getAABB());
+	return colliding;
+}
+
+// TODO: Minimal Translation Vector
+void PhysicsWorld::resolveCollisionByMTV(PhysicsBody origin, PhysicsBody target) {
+	origin.transform->addPosition(glm::vec3(-1.0f, 0.0f, -1.0f));
+	// FIXME maybe check if it's moving..?
+	// then resolve only for moving entities
+	//target.transform->addPosition(glm::vec3(-1.0f));
 }
 
 void PhysicsWorld::end() {
@@ -140,6 +161,7 @@ void PhysicsWorld::end() {
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 	std::vector<RendererImmediateCommand> commands;
 	for (auto& physicsBody : m_physicsBodies) {
+		glm::vec3 color = physicsBody.second.physics->isColliding() ? Constants::Colors::RED : Constants::Colors::GREEN;
 		RendererImmediateCommand command = {
 			m_VAOAABB,
 			physicsBody.second.transform->getPosition(),
@@ -147,7 +169,7 @@ std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 			physicsBody.second.transform->getScale(),
 			physicsBody.second.physics->getAABB().getSize(),
 			physicsBody.second.physics->getAABB().getCenter(),
-			physicsBody.second.physics->getAABB().getColor()
+			color
 		};
 		commands.push_back(command);
 	}

@@ -2,7 +2,6 @@
 
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../utils/colors_constants.hpp"
 #include "../utils/math_utils.hpp"
 #include "component.h"
 
@@ -21,11 +20,7 @@ enum class PhysicsLayer {
 struct AABB {
 	glm::vec3 m_localMin, m_localMax;
 	glm::vec3 m_worldMin, m_worldMax;
-	glm::vec3 m_color;
 
-	void init() {
-		m_color = Constants::Colors::BLACK;
-	}
 	// world position, rotation and scale
 	void updateToWorld(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
 		glm::mat4 model = glm::mat4(1.0f);
@@ -49,18 +44,10 @@ struct AABB {
 			m_worldMax = glm::max(m_worldMax, corner);
 		}
 	}
+	glm::vec3 getWorldMin() const { return m_worldMin; };
+	glm::vec3 getWorldMax() const { return m_worldMax; };
 	glm::vec3 getSize() const { return m_worldMax - m_worldMin; };
 	glm::vec3 getCenter() const { return (m_worldMin + m_worldMax) * 0.5f; };
-	glm::vec3 getColor() const { return m_color; };
-
-	bool isCollidingWithOther(AABB other) const {
-		//LOG_D(Utils::getVec3Values(m_worldMin));
-		//LOG_D(Utils::getVec3Values(m_worldMax));
-		bool collX = (m_worldMin.x <= other.m_worldMax.x) && (m_worldMax.x >= other.m_worldMin.x);
-		bool collY = (m_worldMin.y <= other.m_worldMax.y) && (m_worldMax.y >= other.m_worldMin.y);
-		bool collZ = (m_worldMin.z <= other.m_worldMax.z) && (m_worldMax.z >= other.m_worldMin.z);
-		return collX && collY && collZ;
-	};
 };
 
 class PhysicsComponent : public Component {
@@ -70,11 +57,10 @@ public:
 	void onInit() override;
 	void onFixedUpdate(float fixedt) override;
 
-	void processCollision(bool colliding);
-
 	AABB getAABB() const { return m_AABB; }
 	PhysicsLayer getLayer() const { return m_layer; }
-	bool isColliding() const { return m_colliding; };
+	bool isColliding() const { return m_colliding; }
+	void setColliding(bool colliding) { m_colliding = colliding; }
 
 private:
 	TransformComponent* m_transform = nullptr;

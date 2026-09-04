@@ -36,6 +36,9 @@ public:
 	void registerInQueue(const PhysicsCommand& command);
 	void flush();
 	void step(float fixedt);
+	bool isCollidingByAABB(AABB origin, AABB target);
+	bool detectCollision(PhysicsComponent* origin, PhysicsComponent* target);
+	void resolveCollisionByMTV(PhysicsBody origin, PhysicsBody target);
 	void end();
 
 	std::vector<RendererImmediateCommand> getAABBCommand();

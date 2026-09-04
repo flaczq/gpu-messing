@@ -215,8 +215,11 @@ void Renderer::renderImmediate() {
         return;
     case RendererRenderDebugMode::AABB:
         queue = PhysicsWorld::getInstance().getAABBCommand();
-        assert(!queue.empty());
-        // same for all
+        if (queue.empty()) {
+            LOG_D("nothing to render immediately, sad QQ");
+            return;
+        }
+        // one VAO to rule them all
         VAO = queue[0].VAO;
         break;
     }

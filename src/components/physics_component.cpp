@@ -2,7 +2,6 @@
 #include "../configs/math_config.hpp"
 #include "../game/game_entity.h"
 #include "../game/physics_world.h"
-#include "../utils/colors_constants.hpp"
 #include "../utils/math_utils.hpp"
 #include "component.h"
 #include "physics_component.h"
@@ -18,7 +17,6 @@ void PhysicsComponent::onInit() {
     m_transform = getOwner()->getTransform();
     m_colliding = false;
 
-    m_AABB.init();
     m_AABB.updateToWorld(m_transform->getPosition(), m_transform->getRotation(), m_transform->getScale());
 }
 
@@ -42,9 +40,4 @@ void PhysicsComponent::onFixedUpdate(float fixedt) {
         body
     };
     PhysicsWorld::getInstance().registerInQueue(command);
-}
-
-void PhysicsComponent::processCollision(bool colliding) {
-    m_colliding = colliding;
-    m_AABB.m_color = m_colliding ? Constants::Colors::RED : Constants::Colors::GREEN;
 }
