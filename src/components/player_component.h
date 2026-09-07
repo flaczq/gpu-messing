@@ -15,7 +15,6 @@ class PlayerComponent : public Component {
 public:
 	PlayerComponent(Camera* camera);
 
-	void onInit() override;
 	void processInput();
 	void onFixedUpdate(float fixedt) override;
 

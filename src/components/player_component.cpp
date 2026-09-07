@@ -1,26 +1,22 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../game/camera.h"
-#include "../game/game_entity.h"
+#include "../ecs/entity.hpp"
 #include "../managers/input_manager.h"
 #include "../utils/enum_utils.hpp"
 #include "../utils/math_constants.hpp"
 #include "player_component.h"
-#include "transform_component.h"
 #include <string>
 
 PlayerComponent::PlayerComponent(Camera* camera)
 	: m_camera(camera)
 {
-}
-
-void PlayerComponent::onInit() {
-	m_transform = getOwner()->getTransform();
-	m_health = 100;
+    m_health = 100;
     m_verticalMode = VerticalMode::STANDING;
+    //m_transform = getOwner()->getTransform();
 
     // set camera follow target position stuff boom sic!
-    m_camera->follow(m_transform);
+    //m_camera->follow(m_transform);
 }
 
 // continuous key clicks -> movement
@@ -62,28 +58,28 @@ void PlayerComponent::processInput() {
 }
 
 void PlayerComponent::onFixedUpdate(float fixedt) {
-    if (glm::length(m_moveDir) > 0.0f) {
-        glm::vec3 flatFront = m_transform->getFlatFront();
-        glm::vec3 right = m_transform->getRight();
-        glm::vec3 direction = // front-back
-                              flatFront * m_moveDir.z +
-                              // left-right
-                              right * m_moveDir.x +
-                              // up-down
-                              Constants::Math::WORLD_UP * m_moveDir.y;
-        float velocity = MOVEMENT_SPEED * fixedt;
-        m_transform->addPosition(direction * velocity);
-    }
+    //if (glm::length(m_moveDir) > 0.0f) {
+    //    glm::vec3 flatFront = m_transform->getFlatFront();
+    //    glm::vec3 right = m_transform->getRight();
+    //    glm::vec3 direction = // front-back
+    //                          flatFront * m_moveDir.z +
+    //                          // left-right
+    //                          right * m_moveDir.x +
+    //                          // up-down
+    //                          Constants::Math::WORLD_UP * m_moveDir.y;
+    //    float velocity = MOVEMENT_SPEED * fixedt;
+    //    m_transform->addPosition(direction * velocity);
+    //}
 
-    if (!m_godMode) {
-        glm::vec3 position = m_transform->getPosition();
-        position.y = 0.0f;
-        m_transform->setPosition(position);
-    }
-    if (m_godModeChanged || m_verticalModeChanged) {
-        m_godModeChanged = false;
-        m_verticalModeChanged = false;
-    }
+    //if (!m_godMode) {
+    //    glm::vec3 position = m_transform->getPosition();
+    //    position.y = 0.0f;
+    //    m_transform->setPosition(position);
+    //}
+    //if (m_godModeChanged || m_verticalModeChanged) {
+    //    m_godModeChanged = false;
+    //    m_verticalModeChanged = false;
+    //}
 }
 
 void PlayerComponent::toggleVerticalMode() {

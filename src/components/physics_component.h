@@ -18,8 +18,8 @@ enum class PhysicsLayer {
 };
 
 struct AABB {
-	glm::vec3 m_localMin, m_localMax;
-	glm::vec3 m_worldMin, m_worldMax;
+	glm::vec3 localMin, localMax;
+	glm::vec3 worldMin, worldMax;
 
 	// world position, rotation and scale
 	void updateToWorld(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
@@ -30,31 +30,28 @@ struct AABB {
 
 		// AABB corners
 		glm::vec3 corners[8] = {
-			{ m_localMin.x, m_localMin.y, m_localMin.z }, { m_localMax.x, m_localMin.y, m_localMin.z },
-			{ m_localMin.x, m_localMax.y, m_localMin.z }, { m_localMax.x, m_localMax.y, m_localMin.z },
-			{ m_localMin.x, m_localMin.y, m_localMax.z }, { m_localMax.x, m_localMin.y, m_localMax.z },
-			{ m_localMin.x, m_localMax.y, m_localMax.z }, { m_localMax.x, m_localMax.y, m_localMax.z }
+			{ localMin.x, localMin.y, localMin.z }, { localMax.x, localMin.y, localMin.z },
+			{ localMin.x, localMax.y, localMin.z }, { localMax.x, localMax.y, localMin.z },
+			{ localMin.x, localMin.y, localMax.z }, { localMax.x, localMin.y, localMax.z },
+			{ localMin.x, localMax.y, localMax.z }, { localMax.x, localMax.y, localMax.z }
 		};
 
-		m_worldMin = glm::vec3(std::numeric_limits<float>::max());
-		m_worldMax = glm::vec3(std::numeric_limits<float>::lowest());
+		worldMin = glm::vec3(std::numeric_limits<float>::max());
+		worldMax = glm::vec3(std::numeric_limits<float>::lowest());
 		for (size_t i{}; i < 8; i++) {
 			glm::vec3 corner = glm::vec3(model * glm::vec4(corners[i], 1.0f));
-			m_worldMin = glm::min(m_worldMin, corner);
-			m_worldMax = glm::max(m_worldMax, corner);
+			worldMin = glm::min(worldMin, corner);
+			worldMax = glm::max(worldMax, corner);
 		}
 	}
-	glm::vec3 getWorldMin() const { return m_worldMin; };
-	glm::vec3 getWorldMax() const { return m_worldMax; };
-	glm::vec3 getSize() const { return m_worldMax - m_worldMin; };
-	glm::vec3 getCenter() const { return (m_worldMin + m_worldMax) * 0.5f; };
+	glm::vec3 getSize() const { return worldMax - worldMin; };
+	glm::vec3 getCenter() const { return (worldMin + worldMax) * 0.5f; };
 };
 
 class PhysicsComponent : public Component {
 public:
 	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer = PhysicsLayer::BOT);
 
-	void onInit() override;
 	void onFixedUpdate(float fixedt) override;
 
 	AABB getAABB() const { return m_AABB; }

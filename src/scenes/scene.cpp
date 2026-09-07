@@ -1,4 +1,4 @@
-#include "../game/game_entity.h"
+#include "../ecs/entity.hpp"
 #include "../game/physics_world.h"
 #include "../graphics/renderer.h"
 #include "scene.h"
@@ -8,7 +8,7 @@
 
 Scene::~Scene() = default;
 
-void Scene::init() {
+bool Scene::init() {
     // FIXME hardcoded max: 100
     m_aliveGameEntities.reserve(100);
     m_deadGameEntities.reserve(100);
@@ -16,21 +16,21 @@ void Scene::init() {
     //bool isStencilReqd = false;
     //bool isOutlineReqd = false;
     //bool isBlendingReqd = false;
-    for (auto& gameEntity : m_gameEntities) {
-        if (gameEntity->isAlive() && !gameEntity->isPendingDeath()) {
-            m_aliveGameEntities.push_back(gameEntity.get());
+    for (auto& Entity : m_gameEntities) {
+        if (Entity->isAlive() && !Entity->isPendingDeath()) {
+            m_aliveGameEntities.push_back(Entity.get());
 
-            //if (gameEntity->getRendererQueueType() == RendererQueueType::STENCIL) {
+            //if (Entity->getRendererQueueType() == RendererQueueType::STENCIL) {
             //    isStencilReqd = true;
             //}
-            //if (gameEntity->getRendererQueueType() == RendererQueueType::OUTLINE) {
+            //if (Entity->getRendererQueueType() == RendererQueueType::OUTLINE) {
             //    isOutlineReqd = true;
             //}
-            //if (gameEntity->getRendererQueueType() == RendererQueueType::BLENDING) {
+            //if (Entity->getRendererQueueType() == RendererQueueType::BLENDING) {
             //    isBlendingReqd = true;
             //}
         } else {
-            m_deadGameEntities.push_back(gameEntity.get());
+            m_deadGameEntities.push_back(Entity.get());
         }
     }
 
@@ -38,31 +38,33 @@ void Scene::init() {
     // reqd if i need it at the very start of a frame before update()
     //Renderer::getInstance().setStencilReqd(isStencilReqd || isOutlineReqd);
     //Renderer::getInstance().setBlendingReqd(isBlendingReqd);
+
+    return true;
 }
 
 void Scene::processInput() {
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        if (aliveGameEntity->getPlayer()) {
-            aliveGameEntity->getPlayer()->processInput();
+    for (auto& aliveEntity : m_aliveGameEntities) {
+        if (aliveEntity->getPlayer()) {
+            aliveEntity->getPlayer()->processInput();
         }
     }
 }
 
 void Scene::saveState() {
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        if (aliveGameEntity->getTransform()) {
-            aliveGameEntity->getTransform()->saveState();
+    for (auto& aliveEntity : m_aliveGameEntities) {
+        if (aliveEntity->getTransform()) {
+            aliveEntity->getTransform()->saveState();
         }
     }
 }
 
 void Scene::fixedUpdate(float fixedt) {
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        aliveGameEntity->fixedUpdate(fixedt);
+    for (auto& aliveEntity : m_aliveGameEntities) {
+        aliveEntity->fixedUpdate(fixedt);
 
-        //if (aliveGameEntity->getPhysics()) {
-        //    LOG_D(aliveGameEntity->getName() << " MIN: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMin)
-        //                                     << " MAX: " << Utils::getVec3Values(aliveGameEntity->getPhysics()->getAABB().worldMax));
+        //if (aliveEntity->getPhysics()) {
+        //    LOG_D(aliveEntity->getName() << " MIN: " << Utils::getVec3Values(aliveEntity->getPhysics()->getAABB().worldMin)
+        //                                     << " MAX: " << Utils::getVec3Values(aliveEntity->getPhysics()->getAABB().worldMax));
         //}
     }
 }
@@ -71,8 +73,8 @@ void Scene::update(float alpha) {
     //bool isStencilReqd = false;
     //bool isOutlineReqd = false;
     //bool isBlendingReqd = false;
-    for (auto& aliveGameEntity : m_aliveGameEntities) {
-        aliveGameEntity->update(alpha);
+    for (auto& aliveEntity : m_aliveGameEntities) {
+        aliveEntity->update(alpha);
 
         //if (queueType == RendererQueueType::STENCIL) {
         //    isStencilReqd = true;
@@ -97,10 +99,10 @@ void Scene::lateUpdate() {
         //LOG_D("CHECKING " << m_aliveGameEntities[i]->getName());
         if (m_aliveGameEntities[i]->isPendingDeath()) {
             //LOG_D("DEAD " << m_aliveGameEntities[i]->getName());
-            GameEntity* gameEntity = m_aliveGameEntities[i];
-            gameEntity->setPendingDeath(false);
-            gameEntity->setAlive(false);
-            m_deadGameEntities.push_back(gameEntity);
+            Entity* Entity = m_aliveGameEntities[i];
+            Entity->setPendingDeath(false);
+            Entity->setAlive(false);
+            m_deadGameEntities.push_back(Entity);
 
             // fast delete (swap & pop)
             m_aliveGameEntities[i] = m_aliveGameEntities.back();
@@ -117,10 +119,6 @@ void Scene::lateUpdate() {
 
 void Scene::end() {
     PhysicsWorld::getInstance().end();
-
-    for (auto& gameEntity : m_gameEntities) {
-        gameEntity->end();
-    }
 
     m_deadGameEntities.clear();
     m_aliveGameEntities.clear();

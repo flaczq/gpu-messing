@@ -1,5 +1,5 @@
 #include "../configs/math_config.hpp"
-#include "../game/game_entity.h"
+#include "../ecs/entity.hpp"
 #include "../managers/resource_manager.h"
 #include "rtx_scene.h"
 #include "scene.h"

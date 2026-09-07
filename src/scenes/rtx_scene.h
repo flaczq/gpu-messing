@@ -8,7 +8,7 @@ class RtxScene : public Scene {
 public:
 	RtxScene(Camera* camera);
 
-	void init() override;
+	bool init() override;
 	void saveState() override;
 	void fixedUpdate(float fixedt) override;
 	void update(float alpha) override;

@@ -2,13 +2,10 @@
 
 #include "component.h"
 
-class TransformComponent;
-
 class AIComponent : public Component {
 public:
-	void onInit() override;
-	void onFixedUpdate(float fixedt) override;
+	//public
 
 private:
-	TransformComponent* m_transform = nullptr;
+	//private
 };

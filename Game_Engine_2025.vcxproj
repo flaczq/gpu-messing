@@ -19,17 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\components\basic_component.cpp" />
+    <ClCompile Include="src\ecs\registry.cpp" />
     <ClCompile Include="src\components\player_component.cpp" />
     <ClCompile Include="src\scenes\rtx_scene.cpp" />
     <ClCompile Include="src\components\physics_component.cpp" />
     <ClCompile Include="src\components\ai_component.cpp" />
-    <ClCompile Include="src\components\transform_fps_component.cpp" />
     <ClCompile Include="src\components\dir_light_movement_component.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
     <ClCompile Include="src\graphics\mesh_generator.cpp" />
     <ClCompile Include="src\components\render_component.cpp" />
     <ClCompile Include="src\components\component.cpp" />
-    <ClCompile Include="src\game\game_entity.cpp" />
     <ClCompile Include="src\managers\input_manager.cpp" />
     <ClCompile Include="src\game\physics_world.cpp" />
     <ClCompile Include="src\managers\resource_manager.cpp" />
@@ -84,17 +84,19 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\components\basic_component.h" />
+    <ClInclude Include="src\ecs\registry.h" />
+    <ClInclude Include="src\components\component_id.hpp" />
     <ClInclude Include="src\components\player_component.h" />
     <ClInclude Include="src\scenes\rtx_scene.h" />
     <ClInclude Include="src\components\physics_component.h" />
     <ClInclude Include="src\components\ai_component.h" />
-    <ClInclude Include="src\components\transform_fps_component.h" />
     <ClInclude Include="src\components\dir_light_movement_component.h" />
     <ClInclude Include="src\graphics\material.h" />
     <ClInclude Include="src\graphics\mesh_generator.h" />
     <ClInclude Include="src\components\render_component.h" />
     <ClInclude Include="src\components\component.h" />
-    <ClInclude Include="src\game\game_entity.h" />
+    <ClInclude Include="src\ecs\entity.h" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\game\physics_world.h" />
     <ClInclude Include="src\configs\log_config.hpp" />

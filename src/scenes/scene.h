@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../game/game_entity.h"
+#include "../ecs/entity.hpp"
 #include <memory>
 #include <utility>
 #include <vector>
@@ -15,7 +15,7 @@ class Scene {
 public:
 	virtual ~Scene();
 
-	virtual void init();
+	virtual bool init();
 	virtual void processInput();
 	virtual void saveState();
 	virtual void fixedUpdate(float fixedt);
@@ -24,10 +24,10 @@ public:
 	virtual void end();
 
 	virtual SceneID getID() const = 0;
-	std::vector<GameEntity*> getGameEntites() const { return m_aliveGameEntities; }
+	std::vector<Entity*> getGameEntites() const { return m_aliveGameEntities; }
 
 protected:
-	std::vector<std::unique_ptr<GameEntity>> m_gameEntities;
-	std::vector<GameEntity*> m_aliveGameEntities;
-	std::vector<GameEntity*> m_deadGameEntities;
+	//std::vector<std::unique_ptr<Entity>> m_gameEntities;
+	std::vector<Entity*> m_aliveGameEntities;
+	std::vector<Entity*> m_deadGameEntities;
 };

@@ -2,7 +2,7 @@
 #include "../components/transform_component.h"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../game/game_entity.h"
+#include "../ecs/entity.hpp"
 #include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
 #include "../utils/colors_constants.hpp"
@@ -128,9 +128,9 @@ void PhysicsWorld::step(float fixedt) {
 }
 
 bool PhysicsWorld::isCollidingByAABB(AABB origin, AABB target) {
-	bool collX = (origin.getWorldMin().x <= target.getWorldMax().x) && (origin.getWorldMax().x >= target.getWorldMin().x);
-	bool collY = (origin.getWorldMin().y <= target.getWorldMax().y) && (origin.getWorldMax().y >= target.getWorldMin().y);
-	bool collZ = (origin.getWorldMin().z <= target.getWorldMax().z) && (origin.getWorldMax().z >= target.getWorldMin().z);
+	bool collX = (origin.worldMin.x <= target.worldMax.x) && (origin.worldMax.x >= target.worldMin.x);
+	bool collY = (origin.worldMin.y <= target.worldMax.y) && (origin.worldMax.y >= target.worldMin.y);
+	bool collZ = (origin.worldMin.z <= target.worldMax.z) && (origin.worldMax.z >= target.worldMin.z);
 	return collX && collY && collZ;
 };
 

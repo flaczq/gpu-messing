@@ -1,6 +1,6 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../game/game_entity.h"
+#include "../ecs/entity.hpp"
 #include "../utils/math_constants.hpp"
 #include "component.h"
 #include "transform_component.h"
