@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../components/transform_component.h"
+#include "../components/transform_component.hpp"
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
 #include <vector>

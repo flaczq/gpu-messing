@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\components\basic_component.cpp" />
+    <ClCompile Include="src\components\membership_component.cpp" />
     <ClCompile Include="src\ecs\registry.cpp" />
     <ClCompile Include="src\components\player_component.cpp" />
     <ClCompile Include="src\scenes\rtx_scene.cpp" />
@@ -84,9 +84,9 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\components\basic_component.h" />
+    <ClInclude Include="src\components\membership_component.h" />
     <ClInclude Include="src\ecs\registry.h" />
-    <ClInclude Include="src\components\component_id.hpp" />
+    <ClInclude Include="src\components\components_types.hpp" />
     <ClInclude Include="src\components\player_component.h" />
     <ClInclude Include="src\scenes\rtx_scene.h" />
     <ClInclude Include="src\components\physics_component.h" />
@@ -96,7 +96,7 @@
     <ClInclude Include="src\graphics\mesh_generator.h" />
     <ClInclude Include="src\components\render_component.h" />
     <ClInclude Include="src\components\component.h" />
-    <ClInclude Include="src\ecs\entity.h" />
+    <ClInclude Include="src\ecs\entity.hpp" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\game\physics_world.h" />
     <ClInclude Include="src\configs\log_config.hpp" />

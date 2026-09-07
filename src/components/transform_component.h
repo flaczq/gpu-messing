@@ -2,7 +2,7 @@
 
 #include "../configs/math_config.hpp"
 #include "../utils/math_constants.hpp"
-#include "component.h"
+#include "component.hpp"
 
 class TransformComponent : public Component {
 public:

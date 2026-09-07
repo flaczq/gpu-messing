@@ -1,6 +1,6 @@
 #pragma once
 
-#include "component.h"
+#include "component.hpp"
 
 class DirLightMovementComponent : public Component {
 public:

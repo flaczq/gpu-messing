@@ -1,5 +1,5 @@
-#include "../components/physics_component.h"
-#include "../components/transform_component.h"
+#include "../components/physics_component.hpp"
+#include "../components/transform_component.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../ecs/entity.hpp"

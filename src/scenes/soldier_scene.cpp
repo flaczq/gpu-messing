@@ -1,13 +1,14 @@
-#include "../components/ai_component.h"
-#include "../components/dir_light_movement_component.h"
-#include "../components/physics_component.h"
-#include "../components/player_component.h"
-#include "../components/render_component.h"
-#include "../components/transform_component.h"
+#include "../components/ai_component.hpp"
+#include "../components/dir_light_movement_component.hpp"
+#include "../components/physics_component.hpp"
+#include "../components/player_component.hpp"
+#include "../components/render_component.hpp"
+#include "../components/transform_component.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../game/camera.h"
 #include "../ecs/entity.hpp"
+#include "../ecs/registry.h"
+#include "../game/camera.h"
 #include "../game/physics_world.h"
 #include "../graphics/graphics_types.hpp"
 #include "../graphics/material.h"
@@ -105,6 +106,18 @@ bool SoldierScene::init() {
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
 
+    //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
+    //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
+    //      _\/\\\_______________/\\\/____________\//\\\______\///__      
+    //       _\/\\\\\\\\\\\______/\\\_______________\////\\\_________     
+    //        _\/\\\///////______\/\\\__________________\////\\\______    
+    //         _\/\\\_____________\//\\\____________________\////\\\___   
+    //          _\/\\\______________\///\\\___________/\\\______\//\\\__  
+    //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
+    //            _\///////////////________\/////////____\///////////_____
+    Registry registry;
+    registry.init();
+
     // FLOOR
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
@@ -112,13 +125,16 @@ bool SoldierScene::init() {
         // MATERIAL UNIFORMS
         floorMaterial->addBoolUniform("hasMatColor", true);
         floorMaterial->addVec3Uniform("matColor", Constants::Colors::NATGREEN);
-        auto floorGO = std::make_unique<Entity>("floor");
+        Entity floorE = registry.createEntity();
+        registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
+
+        /*auto floorGO = std::make_unique<Entity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
         floorGO->setSolid(true);
         floorGO->addComponent<TransformComponent>(glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
         floorGO->addComponent<PhysicsComponent>(floorModel->getAABBMin(), floorModel->getAABBMax());
-        m_gameEntities.push_back(std::move(floorGO));
+        m_gameEntities.push_back(std::move(floorGO));*/
     }
     // LIGHT
     auto lightModel = ResourceManager::getInstance().getModel("light_model");

@@ -2,8 +2,8 @@
 #include "../ecs/entity.hpp"
 #include "../graphics/material.h"
 #include "../graphics/model.h"
-#include "component.h"
-#include "render_component.h"
+#include "component.hpp"
+#include "render_component.hpp"
 #include <memory>
 
 RenderComponent::RenderComponent(std::shared_ptr<Model> model, std::shared_ptr<Material> material)

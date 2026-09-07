@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../configs/math_config.hpp"
-#include "component.h"
+#include "component.hpp"
 
 enum class VerticalMode {
 	STANDING,

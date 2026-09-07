@@ -1,26 +1,22 @@
 #pragma once
 
-#include "../components/component.h"
-#include "../components/component_id.hpp"
+#include "../components/i_component.hpp"
+#include "../configs/log_config.hpp"
 #include "entity.hpp"
 #include <memory>
 #include <unordered_map>
-
-class ComponentID;
+#include <utility>
+#include <vector>
 
 class Registry {
 public:
-	Registry() = default;
-	~Registry() = default;
-
 	bool init();
 	Entity createEntity();
 
 	template <typename T, typename... TArgs>
-	T& addComponentToEntity(Entity entity, TArgs&&... args) {
+	T& addComponent(Entity entity, TArgs&&... args) {
 		auto c = std::make_unique<T>(std::forward<TArgs>(args)...);
 		T* cPtr = c.get();
-
 		//if constexpr (std::is_base_of_v<TransformComponent, T>) {
 		//	m_transform = static_cast<TransformComponent*>(cPtr);
 		//} else if constexpr (std::is_base_of_v<RenderComponent, T>) {
@@ -30,10 +26,39 @@ public:
 		//} else if constexpr (std::is_base_of_v<PlayerComponent, T>) {
 		//	m_player = static_cast<PlayerComponent*>(cPtr);
 		//}
-
-		ComponentTypeID typeID = ComponentID::get<T>();
-		m_entities.push_back(std::move(c));
+		ComponentTypeID cTypeID = ComponentID::get<T>();
+		m_entitiesData[entity].components[cTypeID] = std::move(c);
+		LOG_D(m_entitiesData);
 		return *cPtr;
+	}
+	template <typename T>
+	bool hasComponent(Entity entity) const {
+		auto it = m_entitiesData.find(entity);
+		if (it == m_entitiesData.end()) {
+			LOG_E("REGISTRY::HAS_COMPONENT_NULLPTR: " << entity);
+			return false;
+		}
+
+		// same every time
+		ComponentTypeID cTypeID = ComponentID::get<T>();
+		auto cIt = it->second.components.find(cTypeID);
+		// found
+		return cIt != it->second.components.end();
+	}
+	// fold expression
+	template <typename... Comps>
+	bool hasComponents(Entity entity) const {
+		return (hasComponent<Comps>(entity) && ...);
+	}
+	template <typename... Comps>
+	std::vector<Entity> view() const {
+		std::vector<Entity> matchingEntities;
+		for (const auto& [entity, data] : m_entitiesData) {
+			if (hasComponents<Comps...>(entity)) {
+				matchingEntities.push_back(entity);
+			}
+		}
+		return matchingEntities;
 	}
 
 	//void fixedUpdate(float fixedt) const;
@@ -58,15 +83,11 @@ public:
 	//void destroy() { m_pendingDeath = true; }
 private:
 	struct EntityData {
-		std::unordered_map<ComponentTypeID, std::unique_ptr<Component>> components;
+		std::unordered_map<ComponentTypeID, std::unique_ptr<IComponent>> components;
 	};
 
 	Entity m_nextEntityID = 1;
 	std::unordered_map<Entity, EntityData> m_entitiesData;
-
-	//std::string m_name{};
-	//GroupID m_groupID{};
-	//std::vector<std::unique_ptr<Component>> m_components;
 
 	//TransformComponent* m_transform = nullptr;
 	//RenderComponent* m_render = nullptr;

@@ -4,7 +4,6 @@
 #include "cores/back_end.h"
 #include <crtdbg.h>
 #include <iostream>
-#include <memory>
 #include <stdlib.h>
 
 constexpr int SCREEN_WIDTH = 1280;
@@ -17,12 +16,13 @@ int main() {
     // no printf sync -> make std::cout faster
     std::ios_base::sync_with_stdio(false);
 
-    auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
-    if (!backEnd->init()) {
+    BackEnd backEnd(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
+    //auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
+    if (!backEnd.init()) {
         return -1;
     }
 
-    backEnd->run();
+    backEnd.run();
 
     return 0;
 }

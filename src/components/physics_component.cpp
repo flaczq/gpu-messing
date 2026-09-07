@@ -3,8 +3,8 @@
 #include "../ecs/entity.hpp"
 #include "../game/physics_world.h"
 #include "../utils/math_utils.hpp"
-#include "component.h"
-#include "physics_component.h"
+#include "component.hpp"
+#include "physics_component.hpp"
 
 PhysicsComponent::PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer)
     : m_AABB(AABBmin, AABBmax, AABBmin, AABBmax),

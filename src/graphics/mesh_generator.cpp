@@ -16,8 +16,8 @@ namespace MeshGenerator {
 		Vertex v0{}, v1{}, v2{}, v3{};
 
 		v0.Position = { -halfWidth, 0.0f, -halfDepth };
-		v1.Position = {  halfWidth, 0.0f, -halfDepth };
-		v2.Position = {  halfWidth, 0.0f,  halfDepth };
+		v1.Position = { halfWidth, 0.0f, -halfDepth };
+		v2.Position = { halfWidth, 0.0f,  halfDepth };
 		v3.Position = { -halfWidth, 0.0f,  halfDepth };
 
 		/*v0.Color = glm::vec3(1.0f, 0.5f, 0.0f);
@@ -27,15 +27,15 @@ namespace MeshGenerator {
 
 		v0.TexCoords = { 0.0f,     uvTiling };
 		v1.TexCoords = { uvTiling, uvTiling };
-		v2.TexCoords = { uvTiling, 0.0f     };
-		v3.TexCoords = { 0.0f,     0.0f     };
+		v2.TexCoords = { uvTiling, 0.0f };
+		v3.TexCoords = { 0.0f,     0.0f };
 
 		// up
 		v0.Normal = v1.Normal = v2.Normal = v3.Normal = { 0.0f, 1.0f, 0.0f };
 		// parallel to X axis
 		//v0.Tangent = v1.Tangent = v2.Tangent = v3.Tangent = { 1.0f, 0.0f, 0.0f };
 		//v0.Bitangent = v1.Bitangent = v2.Bitangent = v3.Bitangent = { 0.0f, 0.0f, 1.0f };
-		
+
 		// reset bones
 		/*for (size_t i{}; i < 4; i++) {
 			v0.BoneIDs[i] = v1.BoneIDs[i] = v2.BoneIDs[i] = v3.BoneIDs[i] = -1;
@@ -59,41 +59,41 @@ namespace MeshGenerator {
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
 
-		float halfWidth  = width  * 0.5f;
+		float halfWidth = width * 0.5f;
 		float halfHeight = height * 0.5f;
-		float halfDepth  = depth  * 0.5f;
+		float halfDepth = depth * 0.5f;
 
 		Vertex d0{}, d1{}, d2{}, d3{}, // down  (0-3)
-			   u0{}, u1{}, u2{}, u3{}, // up    (4-7)
-			   b0{}, b1{}, b2{}, b3{}, // back  (8-11)
-			   f0{}, f1{}, f2{}, f3{}, // front (12-15)
-			   l0{}, l1{}, l2{}, l3{}, // left  (16-19)
-			   r0{}, r1{}, r2{}, r3{}; // right (20-23)
+			u0{}, u1{}, u2{}, u3{}, // up    (4-7)
+			b0{}, b1{}, b2{}, b3{}, // back  (8-11)
+			f0{}, f1{}, f2{}, f3{}, // front (12-15)
+			l0{}, l1{}, l2{}, l3{}, // left  (16-19)
+			r0{}, r1{}, r2{}, r3{}; // right (20-23)
 
 		d0.Position = { -halfWidth, -halfHeight, -halfDepth };
-		d1.Position = {  halfWidth, -halfHeight, -halfDepth };
-		d2.Position = {  halfWidth, -halfHeight,  halfDepth };
+		d1.Position = { halfWidth, -halfHeight, -halfDepth };
+		d2.Position = { halfWidth, -halfHeight,  halfDepth };
 		d3.Position = { -halfWidth, -halfHeight,  halfDepth };
 		u0.Position = { -halfWidth,  halfHeight,  halfDepth };
-		u1.Position = {  halfWidth,  halfHeight,  halfDepth };
-		u2.Position = {  halfWidth,  halfHeight, -halfDepth };
+		u1.Position = { halfWidth,  halfHeight,  halfDepth };
+		u2.Position = { halfWidth,  halfHeight, -halfDepth };
 		u3.Position = { -halfWidth,  halfHeight, -halfDepth };
-		b0.Position = {  halfWidth, -halfHeight, -halfDepth };
+		b0.Position = { halfWidth, -halfHeight, -halfDepth };
 		b1.Position = { -halfWidth, -halfHeight, -halfDepth };
 		b2.Position = { -halfWidth,  halfHeight, -halfDepth };
-		b3.Position = {  halfWidth,  halfHeight, -halfDepth };
+		b3.Position = { halfWidth,  halfHeight, -halfDepth };
 		f0.Position = { -halfWidth, -halfHeight,  halfDepth };
-		f1.Position = {  halfWidth, -halfHeight,  halfDepth };
-		f2.Position = {  halfWidth,  halfHeight,  halfDepth };
+		f1.Position = { halfWidth, -halfHeight,  halfDepth };
+		f2.Position = { halfWidth,  halfHeight,  halfDepth };
 		f3.Position = { -halfWidth,  halfHeight,  halfDepth };
 		l0.Position = { -halfWidth, -halfHeight, -halfDepth };
 		l1.Position = { -halfWidth, -halfHeight,  halfDepth };
 		l2.Position = { -halfWidth,  halfHeight,  halfDepth };
 		l3.Position = { -halfWidth,  halfHeight, -halfDepth };
-		r0.Position = {  halfWidth, -halfHeight,  halfDepth };
-		r1.Position = {  halfWidth, -halfHeight, -halfDepth };
-		r2.Position = {  halfWidth,  halfHeight, -halfDepth };
-		r3.Position = {  halfWidth,  halfHeight,  halfDepth };
+		r0.Position = { halfWidth, -halfHeight,  halfDepth };
+		r1.Position = { halfWidth, -halfHeight, -halfDepth };
+		r2.Position = { halfWidth,  halfHeight, -halfDepth };
+		r3.Position = { halfWidth,  halfHeight,  halfDepth };
 
 		d0.TexCoords = u0.TexCoords = { 0.0f,             0.0f };
 		d1.TexCoords = u1.TexCoords = { width * uvTiling, 0.0f };
@@ -108,12 +108,12 @@ namespace MeshGenerator {
 		l2.TexCoords = r2.TexCoords = { depth * uvTiling, height * uvTiling };
 		l3.TexCoords = r3.TexCoords = { 0.0f,             height * uvTiling };
 
-		d0.Normal = d1.Normal = d2.Normal = d3.Normal = {  0.0f, -1.0f,  0.0f };
-		u0.Normal = u1.Normal = u2.Normal = u3.Normal = {  0.0f,  1.0f,  0.0f };
-		b0.Normal = b1.Normal = b2.Normal = b3.Normal = {  0.0f,  0.0f, -1.0f };
-		f0.Normal = f1.Normal = f2.Normal = f3.Normal = {  0.0f,  0.0f,  1.0f };
+		d0.Normal = d1.Normal = d2.Normal = d3.Normal = { 0.0f, -1.0f,  0.0f };
+		u0.Normal = u1.Normal = u2.Normal = u3.Normal = { 0.0f,  1.0f,  0.0f };
+		b0.Normal = b1.Normal = b2.Normal = b3.Normal = { 0.0f,  0.0f, -1.0f };
+		f0.Normal = f1.Normal = f2.Normal = f3.Normal = { 0.0f,  0.0f,  1.0f };
 		l0.Normal = l1.Normal = l2.Normal = l3.Normal = { -1.0f,  0.0f,  0.0f };
-		r0.Normal = r1.Normal = r2.Normal = r3.Normal = {  1.0f,  0.0f,  0.0f };
+		r0.Normal = r1.Normal = r2.Normal = r3.Normal = { 1.0f,  0.0f,  0.0f };
 
 		vertices = {
 			d0, d1, d2, d3,
@@ -158,7 +158,7 @@ namespace MeshGenerator {
 			unsigned int idx = static_cast<unsigned int>(vertices.size()) - 2;
 			indices.push_back(idx);
 			indices.push_back(idx + 1);
-		};
+			};
 
 		// perpendicular to X-axis
 		for (float x : {-half, half}) {

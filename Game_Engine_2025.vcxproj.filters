@@ -93,7 +93,7 @@
     <ClCompile Include="src\ecs\registry.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\basic_component.cpp">
+    <ClCompile Include="src\components\membership_component.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -211,7 +211,7 @@
     <ClInclude Include="src\managers\input_manager.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\ecs\entity.h">
+    <ClInclude Include="src\ecs\entity.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\components\component.h">
@@ -256,13 +256,13 @@
     <ClInclude Include="src\utils\math_constants.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\component_id.hpp">
+    <ClInclude Include="src\components\components_types.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\ecs\registry.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\basic_component.h">
+    <ClInclude Include="src\components\membership_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

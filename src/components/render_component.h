@@ -3,7 +3,7 @@
 #include "../configs/math_config.hpp"
 #include "../graphics/material.h"
 #include "../graphics/model.h"
-#include "component.h"
+#include "component.hpp"
 #include <memory>
 
 class TransformComponent;

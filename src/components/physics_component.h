@@ -3,7 +3,7 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../utils/math_utils.hpp"
-#include "component.h"
+#include "component.hpp"
 
 class TransformComponent;
 

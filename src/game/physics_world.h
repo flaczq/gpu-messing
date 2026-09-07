@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../components/physics_component.h"
+#include "../components/physics_component.hpp"
 #include "../configs/math_config.hpp"
 #include "../graphics/renderer.h"
 #include <unordered_map>

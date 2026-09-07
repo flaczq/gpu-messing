@@ -5,7 +5,7 @@
 #include "../managers/input_manager.h"
 #include "../utils/enum_utils.hpp"
 #include "../utils/math_constants.hpp"
-#include "player_component.h"
+#include "player_component.hpp"
 #include <string>
 
 PlayerComponent::PlayerComponent(Camera* camera)

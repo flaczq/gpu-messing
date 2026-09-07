@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdint>
 
 using ComponentTypeID = std::uint32_t;
@@ -15,4 +17,8 @@ private:
         static ComponentTypeID lastID = 0;
         return lastID++;
     }
+};
+
+struct IComponent {
+    virtual ~IComponent() = default;
 };

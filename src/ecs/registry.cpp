@@ -1,9 +1,11 @@
-#include "../components/component.h"
-#include "../components/component_id.hpp"
+#include "../components/i_component.hpp"
+#include "../configs/log_config.hpp"
 #include "entity.hpp"
 #include "registry.h"
 #include <memory>
 #include <unordered_map>
+#include <utility>
+#include <vector>
 
 bool Registry::init() {
 	m_entitiesData.clear();

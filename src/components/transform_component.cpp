@@ -2,8 +2,8 @@
 #include "../configs/math_config.hpp"
 #include "../ecs/entity.hpp"
 #include "../utils/math_constants.hpp"
-#include "component.h"
-#include "transform_component.h"
+#include "component.hpp"
+#include "transform_component.hpp"
 
 TransformComponent::TransformComponent(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale)
 	: m_position(position),

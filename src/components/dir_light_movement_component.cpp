@@ -1,5 +1,5 @@
-#include "component.h"
-#include "dir_light_movement_component.h"
+#include "component.hpp"
+#include "dir_light_movement_component.hpp"
 
 //void DirLightMovementComponent::onFixedUpdate(float fixedt) {
 //    static float tt = 0.0f;

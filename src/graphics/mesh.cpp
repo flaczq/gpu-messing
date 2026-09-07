@@ -152,7 +152,7 @@ void Mesh::setupMesh() {
     // normal
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
     glEnableVertexAttribArray(2);
-    
+
     // texture coordinates
     glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, TexCoords));
     glEnableVertexAttribArray(3);
