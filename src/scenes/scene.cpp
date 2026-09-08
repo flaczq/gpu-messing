@@ -1,37 +1,17 @@
-#include "../ecs/entity.hpp"
-#include "../game/physics_world.h"
-#include "../graphics/renderer.h"
+#include "../ecs/entites/entity.hpp"
+#include "../ecs/registry.h"
 #include "scene.h"
-#include <memory>
-#include <utility>
-#include <vector>
+
+Scene::Scene(Registry& registry)
+    : m_registry(registry)
+{
+}
 
 Scene::~Scene() = default;
 
 bool Scene::init() {
-    // FIXME hardcoded max: 100
-    m_aliveGameEntities.reserve(100);
-    m_deadGameEntities.reserve(100);
-
-    //bool isStencilReqd = false;
-    //bool isOutlineReqd = false;
-    //bool isBlendingReqd = false;
-    for (auto& Entity : m_gameEntities) {
-        if (Entity->isAlive() && !Entity->isPendingDeath()) {
-            m_aliveGameEntities.push_back(Entity.get());
-
-            //if (Entity->getRendererQueueType() == RendererQueueType::STENCIL) {
-            //    isStencilReqd = true;
-            //}
-            //if (Entity->getRendererQueueType() == RendererQueueType::OUTLINE) {
-            //    isOutlineReqd = true;
-            //}
-            //if (Entity->getRendererQueueType() == RendererQueueType::BLENDING) {
-            //    isBlendingReqd = true;
-            //}
-        } else {
-            m_deadGameEntities.push_back(Entity.get());
-        }
+    for (auto& entity : m_registry.view<>()) {
+        LOG_D(entity);
     }
 
     // first frame Renderer params

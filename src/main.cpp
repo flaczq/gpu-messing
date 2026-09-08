@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #define _CRTDBG_MAP_ALLOC
-#include "cores/back_end.h"
+#include "core/back_end.h"
 #include <crtdbg.h>
 #include <iostream>
 #include <stdlib.h>
@@ -17,7 +17,6 @@ int main() {
     std::ios_base::sync_with_stdio(false);
 
     BackEnd backEnd(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
-    //auto backEnd = std::make_unique<BackEnd>(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
     if (!backEnd.init()) {
         return -1;
     }

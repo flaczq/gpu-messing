@@ -1,16 +1,11 @@
-#include "../components/ai_component.hpp"
-#include "../components/dir_light_movement_component.hpp"
-#include "../components/physics_component.hpp"
-#include "../components/player_component.hpp"
-#include "../components/render_component.hpp"
-#include "../components/transform_component.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../ecs/entity.hpp"
+#include "../ecs/components/membership_component.hpp"
+#include "../ecs/components/transform_component.hpp"
+#include "../ecs/entites/entity.hpp"
 #include "../ecs/registry.h"
 #include "../game/camera.h"
 #include "../game/physics_world.h"
-#include "../graphics/graphics_types.hpp"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
 #include "../graphics/mesh_generator.h"
@@ -27,8 +22,8 @@
 #include <utility>
 #include <vector>
 
-SoldierScene::SoldierScene(Camera* camera)
-    : m_camera(camera)
+SoldierScene::SoldierScene(Registry& registry)
+    : Scene(registry)
 {
 }
 
@@ -106,18 +101,6 @@ bool SoldierScene::init() {
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
 
-    //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
-    //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
-    //      _\/\\\_______________/\\\/____________\//\\\______\///__      
-    //       _\/\\\\\\\\\\\______/\\\_______________\////\\\_________     
-    //        _\/\\\///////______\/\\\__________________\////\\\______    
-    //         _\/\\\_____________\//\\\____________________\////\\\___   
-    //          _\/\\\______________\///\\\___________/\\\______\//\\\__  
-    //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
-    //            _\///////////////________\/////////____\///////////_____
-    Registry registry;
-    registry.init();
-
     // FLOOR
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
@@ -125,8 +108,9 @@ bool SoldierScene::init() {
         // MATERIAL UNIFORMS
         floorMaterial->addBoolUniform("hasMatColor", true);
         floorMaterial->addVec3Uniform("matColor", Constants::Colors::NATGREEN);
-        Entity floorE = registry.createEntity();
-        registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
+        Entity floorE = m_registry.createEntity();
+        m_registry.addComponent<MembershipComponent>(floorE, "floor");
+        m_registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
 
         /*auto floorGO = std::make_unique<Entity>("floor");
         //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);

@@ -1,20 +1,12 @@
 #pragma once
 
-#include "../configs/gl_config.hpp"
-#include "../configs/math_config.hpp"
-#include "../graphics/graphics_types.hpp"
 #include "scene.h"
-#include <memory>
-#include <utility>
-#include <vector>
 
-class Camera;
-class Model;
-class Mesh;
+class Registry;
 
 class SoldierScene : public Scene {
 public:
-	SoldierScene(Camera* camera);
+	SoldierScene(Registry& registry);
 
 	bool init() override;
 	void saveState() override;
@@ -26,5 +18,5 @@ public:
 	SceneID getID() const override { return SceneID::SOLDIER; }
 
 private:
-	Camera* m_camera = nullptr;
+	//private
 };

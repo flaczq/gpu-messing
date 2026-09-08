@@ -12,5 +12,6 @@ struct MembershipComponent : public IComponent {
 	std::string name{};
 	GroupID groupID{};
 
-	MembershipComponent(std::string name, GroupID groupID) : name(name), groupID(groupID) {}
+	MembershipComponent(std::string name, GroupID groupID = GroupID::DEFAULT)
+		: name(name), groupID(groupID) {}
 };

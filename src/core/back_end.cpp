@@ -83,8 +83,6 @@ bool BackEnd::init() {
     // ONLY ONCE set 'this' as BackEnd
     glfwSetWindowUserPointer(m_window, this);
 
-    // probably needs this here to pass to every system etc.
-    // we'll see....
     //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
     //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
     //      _\/\\\_______________/\\\/____________\//\\\______\///__      
@@ -94,8 +92,7 @@ bool BackEnd::init() {
     //          _\/\\\______________\///\\\___________/\\\______\//\\\__  
     //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
     //            _\///////////////________\/////////____\///////////_____
-    //Registry registry;
-    //registry.init();
+    m_registry.init();
     //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
     //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
     //      _\/\\\_______________/\\\/____________\//\\\______\///__      
@@ -123,7 +120,7 @@ bool BackEnd::init() {
         m_minimapCamera->init();
     }
     // nothing else matters... but order
-    SceneManager::getInstance().init(m_camera.get());
+    SceneManager::getInstance().init(m_registry, m_camera.get());
     PhysicsWorld::getInstance().init();
     Renderer::getInstance().init(m_window, m_camera.get());
 
@@ -240,6 +237,7 @@ void BackEnd::run() {
     //                       
     SceneManager::getInstance().end();
     ResourceManager::getInstance().end();
+    m_registry.end();
 
     glfwDestroyWindow(m_window);
     m_window = nullptr;

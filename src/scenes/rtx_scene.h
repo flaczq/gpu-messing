@@ -2,11 +2,11 @@
 
 #include "scene.h"
 
-class Camera;
+class Registry;
 
 class RtxScene : public Scene {
 public:
-	RtxScene(Camera* camera);
+	RtxScene(Registry& registry);
 
 	bool init() override;
 	void saveState() override;
@@ -16,6 +16,7 @@ public:
 	void end() override;
 
 	SceneID getID() const override { return SceneID::RTX; }
+
 private:
-	Camera* m_camera = nullptr;
+	//private
 };

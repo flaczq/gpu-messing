@@ -1,18 +1,17 @@
-#include "../configs/math_config.hpp"
 #include "../ecs/entity.hpp"
-#include "../managers/resource_manager.h"
+#include "../ecs/registry.h"
 #include "rtx_scene.h"
 #include "scene.h"
-#include <memory>
 
-RtxScene::RtxScene(Camera* camera)
-	: m_camera(camera)
+RtxScene::RtxScene(Registry& registry)
+	: Scene(registry)
 {
 }
 
-void RtxScene::init() {
+bool RtxScene::init() {
     // add shinny ballz
-    Scene::init();
+    //m_registry.createEntity(shinyballz);
+    return Scene::init();
 }
 
 void RtxScene::saveState() {

@@ -1,11 +1,9 @@
-#include "../components/transform_component.hpp"
 #include "../configs/gl_config.hpp"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../cores/back_end.h"
+#include "../core/back_end.h"
 #include "../managers/input_manager.h"
 #include "../utils/enum_utils.hpp"
-#include "../ecs/entity.hpp"
 #include "camera.h"
 #include <ios>
 #include <iostream>
