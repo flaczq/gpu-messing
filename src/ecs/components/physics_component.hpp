@@ -1,11 +1,7 @@
 #pragma once
 
-#include "../configs/log_config.hpp"
-#include "../configs/math_config.hpp"
-#include "../utils/math_utils.hpp"
-#include "component.hpp"
-
-class TransformComponent;
+#include "../../configs/math_config.hpp"
+#include "i_component.hpp"
 
 // <=
 // BOT collides w/ only itself
@@ -48,21 +44,13 @@ struct AABB {
 	glm::vec3 getCenter() const { return (worldMin + worldMax) * 0.5f; };
 };
 
-class PhysicsComponent : public Component {
-public:
-	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer = PhysicsLayer::BOT);
+struct PhysicsComponent : public IComponent {
+	AABB AABB{};
+	PhysicsLayer layer{};
+	bool colliding{};
 
-	void onFixedUpdate(float fixedt) override;
-
-	AABB getAABB() const { return m_AABB; }
-	PhysicsLayer getLayer() const { return m_layer; }
-	bool isColliding() const { return m_colliding; }
-	void setColliding(bool colliding) { m_colliding = colliding; }
-
-private:
-	TransformComponent* m_transform = nullptr;
-
-	AABB m_AABB{};
-	PhysicsLayer m_layer{};
-	bool m_colliding{};
+	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer = PhysicsLayer::BOT)
+		: AABB(AABBmin, AABBmax, AABBmin, AABBmax),
+		  layer(layer),
+		  colliding(false) {}
 };

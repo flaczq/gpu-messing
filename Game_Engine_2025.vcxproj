@@ -19,17 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\components\membership_component.cpp" />
     <ClCompile Include="src\ecs\registry.cpp" />
-    <ClCompile Include="src\components\player_component.cpp" />
+    <ClCompile Include="src\ecs\components\player_component.cpp" />
+    <ClCompile Include="src\ecs\systems\ai_system.cpp" />
     <ClCompile Include="src\scenes\rtx_scene.cpp" />
-    <ClCompile Include="src\components\physics_component.cpp" />
-    <ClCompile Include="src\components\ai_component.cpp" />
-    <ClCompile Include="src\components\dir_light_movement_component.cpp" />
+    <ClCompile Include="src\ecs\components\physics_component.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
     <ClCompile Include="src\graphics\mesh_generator.cpp" />
-    <ClCompile Include="src\components\render_component.cpp" />
-    <ClCompile Include="src\components\component.cpp" />
+    <ClCompile Include="src\ecs\components\render_component.cpp" />
     <ClCompile Include="src\managers\input_manager.cpp" />
     <ClCompile Include="src\game\physics_world.cpp" />
     <ClCompile Include="src\managers\resource_manager.cpp" />
@@ -41,11 +38,11 @@
     <ClCompile Include="src\graphics\renderer.cpp" />
     <ClCompile Include="src\graphics\texture_primitive.cpp" />
     <ClCompile Include="src\game\camera.cpp" />
-    <ClCompile Include="src\cores\back_end.cpp" />
+    <ClCompile Include="src\core\back_end.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
-    <ClCompile Include="src\components\transform_component.cpp" />
+    <ClCompile Include="src\ecs\components\transform_component.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -84,19 +81,18 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\components\membership_component.h" />
+    <ClInclude Include="src\ecs\components\i_component.hpp" />
+    <ClInclude Include="src\ecs\components\membership_component.hpp" />
     <ClInclude Include="src\ecs\registry.h" />
-    <ClInclude Include="src\components\components_types.hpp" />
-    <ClInclude Include="src\components\player_component.h" />
+    <ClInclude Include="src\ecs\components\player_component.h" />
     <ClInclude Include="src\scenes\rtx_scene.h" />
-    <ClInclude Include="src\components\physics_component.h" />
-    <ClInclude Include="src\components\ai_component.h" />
-    <ClInclude Include="src\components\dir_light_movement_component.h" />
+    <ClInclude Include="src\ecs\components\physics_component.h" />
+    <ClInclude Include="src\ecs\components\ai_component.hpp" />
+    <ClInclude Include="src\ecs\components\dir_light_movement_component.hpp" />
     <ClInclude Include="src\graphics\material.h" />
     <ClInclude Include="src\graphics\mesh_generator.h" />
-    <ClInclude Include="src\components\render_component.h" />
-    <ClInclude Include="src\components\component.h" />
-    <ClInclude Include="src\ecs\entity.hpp" />
+    <ClInclude Include="src\ecs\components\render_component.h" />
+    <ClInclude Include="src\ecs\entites\entity.hpp" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\game\physics_world.h" />
     <ClInclude Include="src\configs\log_config.hpp" />
@@ -112,11 +108,12 @@
     <ClInclude Include="src\graphics\texture_primitive.h" />
     <ClInclude Include="src\game\camera.h" />
     <ClInclude Include="src\scenes\scene.h" />
-    <ClInclude Include="src\cores\back_end.h" />
+    <ClInclude Include="src\core\back_end.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphics\shader.h" />
-    <ClInclude Include="src\components\transform_component.h" />
+    <ClInclude Include="src\ecs\components\transform_component.h" />
+    <ClInclude Include="src\ecs\systems\ai_system.h" />
     <ClInclude Include="src\utils\colors_constants.hpp" />
     <ClInclude Include="src\utils\enum_utils.hpp" />
     <ClInclude Include="src\utils\math_constants.hpp" />

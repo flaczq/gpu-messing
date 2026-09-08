@@ -7,6 +7,7 @@ enum class SceneID {
 };
 
 class Registry;
+class AISystem;
 
 class Scene {
 public:
@@ -26,4 +27,6 @@ public:
 
 protected:
 	Registry& m_registry;
+	// systems for all scenes
+	AISystem aiSystem;
 };

@@ -24,7 +24,7 @@
     <ClCompile Include="libs\stb_image.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\cores\back_end.cpp">
+    <ClCompile Include="src\core\back_end.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\game\camera.cpp">
@@ -57,16 +57,13 @@
     <ClCompile Include="src\managers\input_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\component.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="src\components\transform_component.cpp">
+    <ClCompile Include="src\ecs\components\transform_component.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\scenes\scene.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\render_component.cpp">
+    <ClCompile Include="src\ecs\components\render_component.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\mesh_generator.cpp">
@@ -75,25 +72,19 @@
     <ClCompile Include="src\graphics\material.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\dir_light_movement_component.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="src\components\ai_component.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
-    <ClCompile Include="src\components\physics_component.cpp">
+    <ClCompile Include="src\ecs\components\physics_component.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\scenes\rtx_scene.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\player_component.cpp">
+    <ClCompile Include="src\ecs\components\player_component.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
     <ClCompile Include="src\ecs\registry.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\components\membership_component.cpp">
+    <ClCompile Include="src\ecs\systems\ai_system.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -163,7 +154,7 @@
     <ClInclude Include="libs\stb_image.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\cores\back_end.h">
+    <ClInclude Include="src\core\back_end.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\game\camera.h">
@@ -211,16 +202,13 @@
     <ClInclude Include="src\managers\input_manager.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\ecs\entity.hpp">
+    <ClInclude Include="src\ecs\entites\entity.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\component.h">
+    <ClInclude Include="src\ecs\components\transform_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\transform_component.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="src\components\render_component.h">
+    <ClInclude Include="src\ecs\components\render_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\mesh_generator.h">
@@ -229,16 +217,16 @@
     <ClInclude Include="src\graphics\material.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\dir_light_movement_component.h">
+    <ClInclude Include="src\ecs\components\dir_light_movement_component.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\ai_component.h">
+    <ClInclude Include="src\ecs\components\ai_component.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\enum_utils.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\physics_component.h">
+    <ClInclude Include="src\ecs\components\physics_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\math_utils.hpp">
@@ -250,19 +238,22 @@
     <ClInclude Include="src\utils\colors_constants.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\player_component.h">
+    <ClInclude Include="src\ecs\components\player_component.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\utils\math_constants.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\components_types.hpp">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="src\ecs\registry.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\components\membership_component.h">
+    <ClInclude Include="src\ecs\components\membership_component.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ecs\components\i_component.hpp">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ecs\systems\ai_system.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

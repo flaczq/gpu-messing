@@ -1,5 +1,6 @@
 #include "../ecs/entites/entity.hpp"
 #include "../ecs/registry.h"
+#include "../ecs/systems/ai_system.h"
 #include "scene.h"
 
 Scene::Scene(Registry& registry)
@@ -39,14 +40,7 @@ void Scene::saveState() {
 }
 
 void Scene::fixedUpdate(float fixedt) {
-    for (auto& aliveEntity : m_aliveGameEntities) {
-        aliveEntity->fixedUpdate(fixedt);
-
-        //if (aliveEntity->getPhysics()) {
-        //    LOG_D(aliveEntity->getName() << " MIN: " << Utils::getVec3Values(aliveEntity->getPhysics()->getAABB().worldMin)
-        //                                     << " MAX: " << Utils::getVec3Values(aliveEntity->getPhysics()->getAABB().worldMax));
-        //}
-    }
+    aiSystem.fixedUpdate(m_registry, fixedt);
 }
 
 void Scene::update(float alpha) {

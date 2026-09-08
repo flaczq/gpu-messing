@@ -2,9 +2,9 @@
 
 class Registry;
 
-class AISystem {
+class PhysicsSystem {
 public:
-	AISystem();
+	PhysicsSystem();
 
 	void fixedUpdate(Registry& registry, float fixedt);
 };

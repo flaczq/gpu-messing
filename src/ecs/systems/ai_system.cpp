@@ -8,7 +8,7 @@
 
 AISystem::AISystem() = default;
 
-void AISystem::onFixedUpdate(Registry& registry, float fixedt) {
+void AISystem::fixedUpdate(Registry& registry, float fixedt) {
     for (Entity entity : registry.view<TransformComponent, PhysicsComponent, AIComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
