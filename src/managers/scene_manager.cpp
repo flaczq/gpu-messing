@@ -1,5 +1,6 @@
 #include "../configs/log_config.hpp"
 #include "../ecs/registry.h"
+#include "../ecs/systems/physics_system.h"
 #include "../game/camera.h"
 #include "../graphics/renderer.h"
 #include "../scenes/rtx_scene.h"
@@ -19,12 +20,13 @@ SceneManager& SceneManager::getInstance() {
 
 SceneManager::SceneManager() = default;
 
-bool SceneManager::init(Registry& registry, Camera* camera) {
+bool SceneManager::init(Registry& registry, PhysicsSystem& physicsSystem, Camera* camera) {
 	m_registry = registry;
+	m_physicsSystem = physicsSystem;
 	m_camera = camera;
 
 	// default scene
-	m_currentScene = std::make_unique<SoldierScene>(m_registry, m_camera);
+	m_currentScene = std::make_unique<SoldierScene>(m_registry, m_physicsSystem, m_physicsSystem, m_camera);
 	m_currentScene->init();
 
 	return true;
@@ -44,13 +46,13 @@ void SceneManager::toggleScene() {
 	LOG_D("Changed CurrentScene to: " << Utils::getEnumName(nextSceneID));
 	switch (nextSceneID) {
 	case SceneID::SOLDIER:
-		m_currentScene = std::make_unique<SoldierScene>(m_registry, m_camera);
+		m_currentScene = std::make_unique<SoldierScene>(m_registry, m_physicsSystem, m_camera);
 		break;
 	case SceneID::RTX:
-		m_currentScene = std::make_unique<RtxScene>(m_registry, m_camera);
+		m_currentScene = std::make_unique<RtxScene>(m_registry, m_physicsSystem, m_camera);
 		break;
 		//case SceneID::FPS_GAME:
-		//	nextScene = std::make_unique<FpsGameScene>(m_registry, m_camera);
+		//	nextScene = std::make_unique<FpsGameScene>(m_registry, m_physicsSystem, m_camera);
 		//	break;
 	}
 

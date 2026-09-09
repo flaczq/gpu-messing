@@ -93,6 +93,7 @@ bool BackEnd::init() {
     //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
     //            _\///////////////________\/////////____\///////////_____
     m_registry.init();
+    m_physicsSystem.init();
     //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
     //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
     //      _\/\\\_______________/\\\/____________\//\\\______\///__      
@@ -120,7 +121,7 @@ bool BackEnd::init() {
         m_minimapCamera->init();
     }
     // nothing else matters... but order
-    SceneManager::getInstance().init(m_registry, m_camera.get());
+    SceneManager::getInstance().init(m_registry, m_physicsSystem, m_camera.get());
     PhysicsWorld::getInstance().init();
     Renderer::getInstance().init(m_window, m_camera.get());
 

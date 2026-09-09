@@ -3,8 +3,8 @@
 #include "../../configs/math_config.hpp"
 #include "i_component.hpp"
 
-// <=
 enum class PhysicsLayer {
+	// <=
 	BOT = 1, // collides only with itself
 	MID = 2, // collides with MID and BOT
 	TOP = 3  // collides with every other

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../ecs/registry.h"
 #include <memory>
 
 class Registry;
+class PhysicsSystem;
 class Camera;
 class Scene;
 
@@ -14,7 +14,7 @@ public:
 	SceneManager(const SceneManager&) = delete;
 	void operator=(const SceneManager&) = delete;
 
-	bool init(Registry& registry, Camera* camera);
+	bool init(Registry& registry, PhysicsSystem& physicsSystem, Camera* camera);
 	void toggleScene();
 	void processInput();
 	void saveState() const;
@@ -28,6 +28,8 @@ private:
 	SceneManager();
 
 	Registry& m_registry;
+	PhysicsSystem& m_physicsSystem;
+
 	Camera* m_camera = nullptr;
 
 	std::unique_ptr<Scene> m_currentScene;

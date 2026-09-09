@@ -3,10 +3,11 @@
 #include "scene.h"
 
 class Registry;
+class PhysicsSystem;
 
 class SoldierScene : public Scene {
 public:
-	SoldierScene(Registry& registry);
+	SoldierScene(Registry& registry, PhysicsSystem& physicsSystem);
 
 	bool init() override;
 	void saveState() override;

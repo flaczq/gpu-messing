@@ -20,13 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ecs\registry.cpp" />
-    <ClCompile Include="src\ecs\components\player_component.cpp" />
     <ClCompile Include="src\ecs\systems\ai_system.cpp" />
+    <ClCompile Include="src\ecs\systems\physics_system.cpp" />
+    <ClCompile Include="src\ecs\systems\transform_system.cpp" />
+    <ClCompile Include="src\ecs\systems\player_system.cpp" />
+    <ClCompile Include="src\ecs\systems\render_system.cpp" />
     <ClCompile Include="src\scenes\rtx_scene.cpp" />
-    <ClCompile Include="src\ecs\components\physics_component.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
     <ClCompile Include="src\graphics\mesh_generator.cpp" />
-    <ClCompile Include="src\ecs\components\render_component.cpp" />
     <ClCompile Include="src\managers\input_manager.cpp" />
     <ClCompile Include="src\game\physics_world.cpp" />
     <ClCompile Include="src\managers\resource_manager.cpp" />
@@ -42,7 +43,6 @@
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
-    <ClCompile Include="src\ecs\components\transform_component.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -82,16 +82,21 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ecs\components\i_component.hpp" />
-    <ClInclude Include="src\ecs\components\membership_component.hpp" />
+    <ClInclude Include="src\ecs\components\identity_component.hpp" />
+    <ClInclude Include="src\ecs\components\stats_component.hpp" />
     <ClInclude Include="src\ecs\registry.h" />
-    <ClInclude Include="src\ecs\components\player_component.h" />
+    <ClInclude Include="src\ecs\components\player_component.hpp" />
+    <ClInclude Include="src\ecs\systems\physics_system.h" />
+    <ClInclude Include="src\ecs\systems\transform_system.h" />
+    <ClInclude Include="src\ecs\systems\player_system.h" />
+    <ClInclude Include="src\ecs\systems\render_system.h" />
     <ClInclude Include="src\scenes\rtx_scene.h" />
-    <ClInclude Include="src\ecs\components\physics_component.h" />
+    <ClInclude Include="src\ecs\components\physics_component.hpp" />
     <ClInclude Include="src\ecs\components\ai_component.hpp" />
     <ClInclude Include="src\ecs\components\dir_light_movement_component.hpp" />
     <ClInclude Include="src\graphics\material.h" />
     <ClInclude Include="src\graphics\mesh_generator.h" />
-    <ClInclude Include="src\ecs\components\render_component.h" />
+    <ClInclude Include="src\ecs\components\render_component.hpp" />
     <ClInclude Include="src\ecs\entites\entity.hpp" />
     <ClInclude Include="src\managers\input_manager.h" />
     <ClInclude Include="src\game\physics_world.h" />
@@ -112,9 +117,10 @@
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphics\shader.h" />
-    <ClInclude Include="src\ecs\components\transform_component.h" />
+    <ClInclude Include="src\ecs\components\transform_component.hpp" />
     <ClInclude Include="src\ecs\systems\ai_system.h" />
-    <ClInclude Include="src\utils\colors_constants.hpp" />
+    <ClInclude Include="src\utils\color_constants.hpp" />
+    <ClInclude Include="src\utils\stats_constants.hpp" />
     <ClInclude Include="src\utils\enum_utils.hpp" />
     <ClInclude Include="src\utils\math_constants.hpp" />
     <ClInclude Include="src\utils\math_utils.hpp" />

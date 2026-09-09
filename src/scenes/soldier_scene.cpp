@@ -9,6 +9,7 @@
 #include "../ecs/components/transform_component.hpp"
 #include "../ecs/entites/entity.hpp"
 #include "../ecs/registry.h"
+#include "../ecs/systems/physics_system.h"
 #include "../game/camera.h"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
@@ -27,8 +28,8 @@
 #include <utility>
 #include <vector>
 
-SoldierScene::SoldierScene(Registry& registry)
-    : Scene(registry)
+SoldierScene::SoldierScene(Registry& registry, PhysicsSystem& physicsSystem)
+    : Scene(registry, physicsSystem)
 {
 }
 

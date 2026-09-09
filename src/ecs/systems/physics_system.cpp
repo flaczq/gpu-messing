@@ -1,3 +1,4 @@
+#include "../../configs/gl_config.hpp"
 #include "../../configs/math_config.hpp"
 #include "../components/physics_component.hpp"
 #include "../components/transform_component.hpp"
@@ -8,9 +9,45 @@
 
 PhysicsSystem::PhysicsSystem() = default;
 
-void PhysicsSystem::init() {
+PhysicsSystem::~PhysicsSystem() {
+    end();
+
+    glDeleteVertexArrays(1, &m_VAOAABB);
+    glDeleteBuffers(1, &m_VBOAABB);
+}
+
+bool PhysicsSystem::init() {
     // FIXME hardcoded max: 100
     m_physicsQueue.reserve(100);
+
+    // hardcoded AABB 1x1x1 (with the middle at 0.0)
+    float verticesAABB[] = {
+        // front
+        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
+        // back
+        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
+        // connectors
+        -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
+    };
+    glGenVertexArrays(1, &m_VAOAABB);
+    glGenBuffers(1, &m_VBOAABB);
+    glBindVertexArray(m_VAOAABB);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBOAABB);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesAABB), verticesAABB, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
+    return true;
 }
 
 void PhysicsSystem::fixedUpdate(Registry& registry, float fixedt) {
@@ -26,6 +63,74 @@ void PhysicsSystem::fixedUpdate(Registry& registry, float fixedt) {
         };
         registerInQueue(command);
     }
+}
+
+void PhysicsSystem::flush() {
+    for (auto& cmd : m_physicsQueue) {
+        cmd.physics->colliding = false;
+    }
+
+    for (auto& [name, physicsBody] : m_physicsQueue) {
+        if (physicsBody.physics->isColliding()) {
+            continue;
+        }
+        if (physicsBody.physics->getLayer() != PhysicsLayer::TOP) {
+            // ONLY TO(P)LAYER
+            continue;
+        }
+
+        for (auto& [targetName, targetPhysicsBody] : m_physicsQueue) {
+            if (&physicsBody == &targetPhysicsBody) {
+                // home address
+                continue;
+            }
+            //if (targetPhysicsBody.physics->isColliding()) {
+            //	// checked
+            //	continue;
+            //}
+            if (physicsBody.physics->getLayer() < targetPhysicsBody.physics->getLayer()) {
+                // (p)layering
+                continue;
+            }
+
+            if (detectCollision(physicsBody.physics, targetPhysicsBody.physics)) {
+                physicsBody.physics->setColliding(true);
+                targetPhysicsBody.physics->setColliding(true);
+
+                resolveCollisionByMTV(physicsBody, targetPhysicsBody);
+                LOG_D(name << " <-> " << targetName);
+                break;
+            }
+        }
+    }
+
+    m_physicsQueue.clear();
+}
+
+bool PhysicsSystem::isCollidingByAABB(AABB origin, AABB target) {
+    bool collX = (origin.worldMin.x <= target.worldMax.x) && (origin.worldMax.x >= target.worldMin.x);
+    bool collY = (origin.worldMin.y <= target.worldMax.y) && (origin.worldMax.y >= target.worldMin.y);
+    bool collZ = (origin.worldMin.z <= target.worldMax.z) && (origin.worldMax.z >= target.worldMin.z);
+    return collX && collY && collZ;
+};
+
+bool PhysicsSystem::detectCollision(PhysicsComponent* origin, PhysicsComponent* target) {
+    // FIXME first simple AABB collision check
+    // later detail collision check
+    bool colliding = isCollidingByAABB(origin->getAABB(), target->getAABB());
+    return colliding;
+}
+
+// TODO: Minimal Translation Vector
+void PhysicsSystem::resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target) {
+    origin.transform->addPosition(glm::vec3(-1.0f, 0.0f, -1.0f));
+    // FIXME maybe check if it's moving..?
+    // then resolve only for moving entities
+    //target.transform->addPosition(glm::vec3(-1.0f));
+}
+
+void PhysicsSystem::end() {
+    m_physicsQueue.clear();
 }
 
 void PhysicsSystem::updateAABB(AABB aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {

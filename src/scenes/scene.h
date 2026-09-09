@@ -7,11 +7,12 @@ enum class SceneID {
 };
 
 class Registry;
+class PhysicsSystem;
 
 class Scene {
 public:
 	// force transparency
-	explicit Scene(Registry& registry);
+	explicit Scene(Registry& registry, PhysicsSystem& physicsSystem);
 	virtual ~Scene();
 
 	virtual bool init();
@@ -27,5 +28,5 @@ public:
 protected:
 	Registry& m_registry;
 	// systems for all scenes
-	//PhysicsSystem& m_physicsSystem;
+	PhysicsSystem& m_physicsSystem;
 };

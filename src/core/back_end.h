@@ -3,6 +3,7 @@
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../ecs/registry.h"
+#include "../ecs/systems/physics_system.h"
 #include "../game/camera.h"
 #include "../managers/scene_manager.h"
 #include <memory>
@@ -25,7 +26,10 @@ private:
     unsigned int m_screenWidth{}, m_screenHeight{};
     unsigned int m_minimapWidth{}, m_minimapHeight{};
 
-    Registry m_registry;
+    Registry m_registry{};
+    PhysicsSystem m_physicsSystem{};
+    // all otehr systemts...
+
     GLFWwindow* m_window = nullptr;
     std::unique_ptr<Camera> m_camera;
     std::unique_ptr<Camera> m_minimapCamera;
