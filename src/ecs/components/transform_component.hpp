@@ -4,23 +4,26 @@
 #include "i_component.hpp"
 
 struct TransformComponent : public IComponent {
-	glm::vec3 position{}, prevPosition{};
-	glm::quat rotation{}, prevRotation{};
-	glm::vec3 scale{}, prevScale{};
-	glm::mat4 model{};
-	glm::mat3 normal{};
-	float yaw{};
-	float pitch{};
+	glm::vec3 position		{ 0.0f };
+	glm::vec3 prevPosition	{ 0.0f };
+	glm::quat rotation		{ 1.0f, 0.0f, 0.0f, 0.0f };
+	glm::quat prevRotation	{ 1.0f, 0.0f, 0.0f, 0.0f };
+	glm::vec3 scale			{ 1.0f };
+	glm::vec3 prevScale		{ 1.0f };
+	glm::mat4 model			{ 1.0f };
+	glm::mat3 normal		{ 1.0f };
+	// looking at (0,0,0)
+	float yaw	= -135.0f;
+	float pitch	= -11.5f;
 
-	TransformComponent(const glm::vec3& position, const glm::quat& rotation = glm::quat(), const glm::vec3& scale = glm::vec3(1.0f))
-		: position(position),
-		  prevPosition(position),
-		  rotation(rotation),
-		  prevRotation(rotation),
-		  scale(scale),
-		  prevScale(scale),
-		  model(glm::mat4(1.0f)),
-		  normal(glm::mat3(1.0f)),
-		  yaw(-135.0f),
-		  pitch(-11.5f) {}
+	TransformComponent() = default;
+	TransformComponent(const glm::vec3& position_,
+					   const glm::quat& rotation_ = glm::quat(),
+					   const glm::vec3& scale_ = glm::vec3(1.0f))
+		: position(position_),
+		  prevPosition(position_),
+		  rotation(rotation_),
+		  prevRotation(rotation_),
+		  scale(scale_),
+		  prevScale(scale_) {}
 };

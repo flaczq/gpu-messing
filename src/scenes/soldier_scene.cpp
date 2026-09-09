@@ -1,19 +1,24 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../ecs/components/membership_component.hpp"
+#include "../ecs/components/ai_component.hpp"
+#include "../ecs/components/dir_light_movement_component.hpp"
+#include "../ecs/components/identity_component.hpp"
+#include "../ecs/components/physics_component.hpp"
+#include "../ecs/components/render_component.hpp"
+#include "../ecs/components/stats_component.hpp"
 #include "../ecs/components/transform_component.hpp"
 #include "../ecs/entites/entity.hpp"
 #include "../ecs/registry.h"
 #include "../game/camera.h"
-#include "../game/physics_world.h"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
 #include "../graphics/mesh_generator.h"
 #include "../graphics/model.h"
 #include "../graphics/renderer.h"
 #include "../managers/resource_manager.h"
-#include "../utils/colors_constants.hpp"
+#include "../utils/color_constants.hpp"
 #include "../utils/math_utils.hpp"
+#include "../utils/stats_constants.hpp"
 #include "scene.h"
 #include "soldier_scene.h"
 #include <algorithm>
@@ -107,13 +112,16 @@ bool SoldierScene::init() {
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
         floorMaterial->addBoolUniform("hasMatColor", true);
-        floorMaterial->addVec3Uniform("matColor", Constants::Colors::NATGREEN);
+        floorMaterial->addVec3Uniform("matColor", Constants::Color::NATGREEN);
         Entity floorE = m_registry.createEntity();
-        m_registry.addComponent<MembershipComponent>(floorE, "floor");
+        m_registry.addComponent<IdentityComponent>(floorE, "floor");
+        m_registry.addComponent<StatsComponent>(floorE, Constants::Stats::Player::MAX_HEALTH, Constants::Stats::Player::MAX_HEALTH);
         m_registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
+        m_registry.addComponent<RenderComponent>(floorE, floorModel, floorMaterial);
+        m_registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax());
 
         /*auto floorGO = std::make_unique<Entity>("floor");
-        //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
+        //floorGO->setRenderQueueType(RenderQueueType::OPAQUE);
         floorGO->setSolid(true);
         floorGO->addComponent<TransformComponent>(glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
         floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
@@ -125,7 +133,7 @@ bool SoldierScene::init() {
     //auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
     //if (lightModel && lightMaterial) {
     //    lightMaterial->addBoolUniform("hasMatColor", true);
-    //    lightMaterial->addVec3Uniform("matColor", Constants::Colors::WHITE);
+    //    lightMaterial->addVec3Uniform("matColor", Constants::Color::WHITE);
     //    auto lightGO = std::make_unique<Entity>("light");
     //    lightGO->setSolid(true);
     //    lightGO->setAbstract(true);
@@ -162,7 +170,7 @@ bool SoldierScene::init() {
     //auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
     //if (playerModel && playerMaterial) {
     //    auto playerGO = std::make_unique<Entity>("player");
-    //    playerGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
+    //    playerGO->setRenderQueueType(RenderQueueType::TOP_LAYER);
     //    playerGO->setSolid(true);
     //    playerGO->setAbstract(true);
     //    playerGO->addComponent<TransformComponent>(glm::vec3(21.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
@@ -211,13 +219,13 @@ bool SoldierScene::init() {
     //auto stencilBox2Material = ResourceManager::getInstance().getMaterial("light_material");
     //if (stencilBoxModel && stencilBox1Material && stencilBox2Material) {
     //    auto stencilBoxGO = std::make_unique<Entity>("stencil_box1");
-    //    stencilBoxGO->setRendererQueueType(RendererQueueType::STENCIL);
+    //    stencilBoxGO->setRenderQueueType(RenderQueueType::STENCIL);
     //    stencilBoxGO->setSolid(true);
     //    stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f));
     //    stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox1Material);
     //    m_gameEntities.push_back(std::move(stencilBoxGO));
     //    stencilBoxGO = std::make_unique<Entity>("stencil_box2");
-    //    stencilBoxGO->setRendererQueueType(RendererQueueType::OUTLINE);
+    //    stencilBoxGO->setRenderQueueType(RenderQueueType::OUTLINE);
     //    stencilBoxGO->setSolid(true);
     //    stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f), glm::quat(), glm::vec3(1.1f));
     //    stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox2Material);
@@ -228,12 +236,12 @@ bool SoldierScene::init() {
     //auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     //if (windowModel && windowMaterial) {
     //    auto windowGO = std::make_unique<Entity>("window1");
-    //    windowGO->setRendererQueueType(RendererQueueType::BLENDING);
+    //    windowGO->setRenderQueueType(RenderQueueType::BLENDING);
     //    windowGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 3.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     //    windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
     //    m_gameEntities.push_back(std::move(windowGO));
     //    windowGO = std::make_unique<Entity>("window2");
-    //    windowGO->setRendererQueueType(RendererQueueType::BLENDING);
+    //    windowGO->setRenderQueueType(RenderQueueType::BLENDING);
     //    windowGO->addComponent<TransformComponent>(glm::vec3(-3.0f, 1.0f, 4.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     //    windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
     //    m_gameEntities.push_back(std::move(windowGO));
@@ -244,13 +252,13 @@ bool SoldierScene::init() {
     //if (grassModel && windowMaterial) {
     //    auto grassGO = std::make_unique<Entity>("grass1");
     //    grassGO->setSolid(true);
-    //    grassGO->setRendererQueueType(RendererQueueType::BLENDING);
+    //    grassGO->setRenderQueueType(RenderQueueType::BLENDING);
     //    grassGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 5.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     //    grassGO->addComponent<RenderComponent>(grassModel, windowMaterial);
     //    m_gameEntities.push_back(std::move(grassGO));
     //    grassGO = std::make_unique<Entity>("grass2");
     //    grassGO->setSolid(true);
-    //    grassGO->setRendererQueueType(RendererQueueType::BLENDING);
+    //    grassGO->setRenderQueueType(RenderQueueType::BLENDING);
     //    grassGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
     //    grassGO->addComponent<RenderComponent>(grassModel, windowMaterial);
     //    m_gameEntities.push_back(std::move(grassGO));

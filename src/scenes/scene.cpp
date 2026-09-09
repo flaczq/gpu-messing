@@ -1,6 +1,5 @@
 #include "../ecs/entites/entity.hpp"
 #include "../ecs/registry.h"
-#include "../ecs/systems/ai_system.h"
 #include "scene.h"
 
 Scene::Scene(Registry& registry)
@@ -11,7 +10,7 @@ Scene::Scene(Registry& registry)
 Scene::~Scene() = default;
 
 bool Scene::init() {
-    for (auto& entity : m_registry.view<>()) {
+    for (auto& entity : m_registry.viewAll()) {
         LOG_D(entity);
     }
 
@@ -50,13 +49,13 @@ void Scene::update(float alpha) {
     for (auto& aliveEntity : m_aliveGameEntities) {
         aliveEntity->update(alpha);
 
-        //if (queueType == RendererQueueType::STENCIL) {
+        //if (queueType == RenderQueueType::STENCIL) {
         //    isStencilReqd = true;
         //}
-        //if (queueType == RendererQueueType::OUTLINE) {
+        //if (queueType == RenderQueueType::OUTLINE) {
         //    isOutlineReqd = true;
         //}
-        //if (queueType == RendererQueueType::BLENDING) {
+        //if (queueType == RenderQueueType::BLENDING) {
         //    isBlendingReqd = true;
         //}
     }

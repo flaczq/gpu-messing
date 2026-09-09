@@ -5,5 +5,6 @@
 struct AIComponent : public IComponent {
 	float speedMultiplier = 1.0f;
 
-	//AIComponent(float speedMultiplier) : speedMultiplier(speedMultiplier) {}
+	AIComponent() = default;
+	AIComponent(float speedMultiplier_) : speedMultiplier(speedMultiplier_) {}
 };

@@ -15,8 +15,6 @@ public:
 	bool isCrouching(Registry& registry) const;
 
 private:
-	static constexpr float MOVEMENT_SPEED = 5.0f;
-
 	glm::vec3 m_moveDir = glm::vec3(0.0f);
 	bool m_verticalModeChanged = false;
 	bool m_godMode = false;

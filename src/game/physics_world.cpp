@@ -5,7 +5,7 @@
 #include "../ecs/entity.hpp"
 #include "../graphics/renderer.h"
 #include "../managers/scene_manager.h"
-#include "../utils/colors_constants.hpp"
+#include "../utils/color_constants.hpp"
 #include "../utils/math_utils.hpp"
 #include "physics_world.h"
 #include <algorithm>
@@ -64,6 +64,7 @@ void PhysicsWorld::registerInQueue(const PhysicsCommand& command) {
 	m_physicsQueue.push_back(command);
 }
 
+// FIXME move to SYSTEM
 void PhysicsWorld::flush() {
 	//m_physicsBodies.clear();
 
@@ -161,7 +162,7 @@ void PhysicsWorld::end() {
 std::vector<RendererImmediateCommand> PhysicsWorld::getAABBCommand() {
 	std::vector<RendererImmediateCommand> commands;
 	for (auto& physicsBody : m_physicsBodies) {
-		glm::vec3 color = physicsBody.second.physics->isColliding() ? Constants::Colors::RED : Constants::Colors::GREEN;
+		glm::vec3 color = physicsBody.second.physics->isColliding() ? Constants::Color::RED : Constants::Color::GREEN;
 		RendererImmediateCommand command = {
 			m_VAOAABB,
 			physicsBody.second.transform->getPosition(),

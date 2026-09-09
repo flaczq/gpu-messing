@@ -88,24 +88,24 @@ void Renderer::beginFrameMinimap(unsigned int minimapWidth, unsigned int minimap
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Renderer::registerInQueue(RendererQueueType queueType, const RendererCommand& command) {
+void Renderer::registerInQueue(RenderQueueType queueType, const RendererCommand& command) {
     switch (queueType) {
-    case RendererQueueType::OPAQUE:
+    case RenderQueueType::OPAQUE:
         m_opaqueQueue.push_back(command);
         break;
-    case RendererQueueType::STENCIL:
+    case RenderQueueType::STENCIL:
         m_stencilQueue.push_back(command);
         break;
-    case RendererQueueType::OUTLINE:
+    case RenderQueueType::OUTLINE:
         m_outlineQueue.push_back(command);
         break;
-    case RendererQueueType::BLENDING:
+    case RenderQueueType::BLENDING:
         m_blendingQueue.push_back(command);
         break;
-    case RendererQueueType::TOP_LAYER:
+    case RenderQueueType::TOP_LAYER:
         m_topLayerQueue.push_back(command);
         break;
-    case RendererQueueType::UI:
+    case RenderQueueType::UI:
         m_uiQueue.push_back(command);
         break;
     }

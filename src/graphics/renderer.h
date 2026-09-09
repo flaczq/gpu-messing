@@ -17,14 +17,6 @@ enum class RendererRenderDebugMode {
 	NONE,
 	AABB
 };
-enum class RendererQueueType {
-	OPAQUE,
-	STENCIL,
-	OUTLINE,
-	BLENDING,
-	TOP_LAYER,//TO_PLAYER
-	UI
-};
 
 struct RendererLight {
 	glm::vec3 direction;
@@ -64,7 +56,7 @@ public:
 	void toggleRenderDebugMode();
 	void beginFrame(unsigned int screenWidth, unsigned int screenHeight);
 	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
-	void registerInQueue(RendererQueueType queueType, const RendererCommand& command);
+	void registerInQueue(RenderQueueType queueType, const RendererCommand& command);
 	void flush();
 	void renderImmediate();
 	void renderFrameBufferTexture();

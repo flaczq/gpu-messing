@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../components/physics_component.hpp"
 #include "../configs/math_config.hpp"
 #include "../graphics/renderer.h"
 #include <unordered_map>
@@ -8,21 +7,6 @@
 
 class TransformComponent;
 class PhysicsComponent;
-
-enum class PhysicsCommandType {
-	ADD,
-	REMOVE
-};
-
-struct PhysicsBody {
-	TransformComponent* transform;
-	PhysicsComponent* physics;
-};
-struct PhysicsCommand {
-	const std::string& name;
-	PhysicsCommandType commandType;
-	PhysicsBody physicsBody;
-};
 
 class PhysicsWorld {
 public:

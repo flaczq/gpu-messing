@@ -9,7 +9,7 @@ void RenderSystem::update(Registry& registry, float alpha) {
     glm::mat3 normalMatrix = m_transform->getNormalMatrix();
     glm::vec3 interPosition = m_transform->getInterpolatedPosition(alpha);
     //m_transform->setDirty(false);
-    RendererQueueType queueType = getOwner()->getRendererQueueType();
+    RenderQueueType queueType = getOwner()->getRenderQueueType();
     RendererCommand command = {
         m_model.get(),
         m_material.get(),

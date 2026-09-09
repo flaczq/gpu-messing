@@ -1,5 +1,6 @@
 #include "../../configs/math_config.hpp"
 #include "../../managers/input_manager.h"
+#include "../../utils/enum_utils.hpp"
 #include "../../utils/math_constants.hpp"
 #include "../entites/entity.hpp"
 #include "../registry.h"

@@ -2,8 +2,7 @@
 
 #include "../configs/math_config.hpp"
 
-namespace Constants::Colors {
-
+namespace Constants::Color {
     inline constexpr glm::vec3 BLACK       { 0.0f , 0.0f , 0.0f  };
     inline constexpr glm::vec3 WHITE       { 1.0f , 1.0f , 1.0f  };
     inline constexpr glm::vec3 RED         { 1.0f , 0.0f , 0.0f  };
@@ -23,5 +22,4 @@ namespace Constants::Colors {
     inline constexpr glm::vec3 GRAY        { 0.5f , 0.5f , 0.5f  };
     inline constexpr glm::vec3 LIGHTGRAY   { 0.75f, 0.75f, 0.75f };
     inline constexpr glm::vec3 DARKGRAY    { 0.25f, 0.25f, 0.25f };
-
 }
