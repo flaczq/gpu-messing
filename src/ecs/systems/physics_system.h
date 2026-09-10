@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../../configs/math_config.hpp"
+#include "../../graphics/renderer.h"
+#include "../components/physics_component.hpp"
 #include <vector>
 
 struct PhysicsCommand {
@@ -10,7 +12,6 @@ struct PhysicsCommand {
 
 class Registry;
 class TransformComponent;
-class PhysicsComponent;
 
 class PhysicsSystem {
 public:
@@ -21,8 +22,7 @@ public:
 	void fixedUpdate(Registry& registry, float fixedt);
 	void flush();
 	void end();
-	//glm::vec3 getSize() const { return worldMax - worldMin; };
-	//glm::vec3 getCenter() const { return (worldMin + worldMax) * 0.5f; };
+	std::vector<RendererImmediateCommand> getAABBCommand();
 
 private:
 	std::vector<PhysicsCommand> m_physicsQueue;
@@ -34,4 +34,6 @@ private:
 	bool detectCollision(PhysicsComponent* origin, PhysicsComponent* target);
 	void resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target);
 	void registerInQueue(const PhysicsCommand& command);
+	glm::vec3 getAABBSize(AABB aabb) const;
+	glm::vec3 getAABBCenter(AABB aabb) const;
 };

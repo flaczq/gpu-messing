@@ -2,8 +2,9 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../core/back_end.h"
+#include "../ecs/components/render_component.hpp"
+#include "../ecs/systems/physics_system.h"
 #include "../game/camera.h"
-#include "../game/physics_world.h"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
 #include "../graphics/model.h"
@@ -26,8 +27,9 @@ Renderer& Renderer::getInstance() {
 
 Renderer::Renderer() = default;
 
-bool Renderer::init(GLFWwindow* window, Camera* camera) {
+bool Renderer::init(GLFWwindow* window, PhysicsSystem& physicsSystem, Camera* camera) {
     m_window = window;
+    m_physicsSystem = physicsSystem;
     m_camera = camera;
     m_light = {
         glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
@@ -213,7 +215,7 @@ void Renderer::renderImmediate() {
     case RendererRenderDebugMode::NONE:
         return;
     case RendererRenderDebugMode::AABB:
-        queue = PhysicsWorld::getInstance().getAABBCommand();
+        queue = m_physicsSystem.getAABBCommand();
         if (queue.empty()) {
             LOG_D("nothing to render immediately, sad QQ");
             return;

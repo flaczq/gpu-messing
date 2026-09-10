@@ -2,6 +2,8 @@
 
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
+#include "../ecs/components/render_component.hpp"
+#include "../ecs/systems/physics_system.h"
 #include <vector>
 
 class Camera;
@@ -51,7 +53,7 @@ public:
 	Renderer(const Renderer&) = delete;
 	void operator=(const Renderer&) = delete;
 
-	bool init(GLFWwindow* window, Camera* camera);
+	bool init(GLFWwindow* window, PhysicsSystem& physicsSystem, Camera* camera);
 	void toggleRenderMode();
 	void toggleRenderDebugMode();
 	void beginFrame(unsigned int screenWidth, unsigned int screenHeight);
@@ -73,6 +75,7 @@ private:
 	// hidden constructor
 	Renderer();
 
+	PhysicsSystem& m_physicsSystem;
 	GLFWwindow* m_window = nullptr;
 	Camera* m_camera = nullptr;
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;

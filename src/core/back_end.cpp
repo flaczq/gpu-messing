@@ -3,7 +3,6 @@
 #include "../configs/math_config.hpp"
 #include "../ecs/registry.h"
 #include "../game/camera.h"
-#include "../game/physics_world.h"
 #include "../graphics/renderer.h"
 #include "../managers/input_manager.h"
 #include "../managers/resource_manager.h"
@@ -122,8 +121,7 @@ bool BackEnd::init() {
     }
     // nothing else matters... but order
     SceneManager::getInstance().init(m_registry, m_physicsSystem, m_camera.get());
-    PhysicsWorld::getInstance().init();
-    Renderer::getInstance().init(m_window, m_camera.get());
+    Renderer::getInstance().init(m_window, m_physicsSystem, m_camera.get());
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓

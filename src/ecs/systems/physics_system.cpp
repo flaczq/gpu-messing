@@ -1,5 +1,8 @@
 #include "../../configs/gl_config.hpp"
+#include "../../configs/log_config.hpp"
 #include "../../configs/math_config.hpp"
+#include "../../graphics/renderer.h"
+#include "../../utils/color_constants.hpp"
 #include "../components/physics_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -70,35 +73,35 @@ void PhysicsSystem::flush() {
         cmd.physics->colliding = false;
     }
 
-    for (auto& [name, physicsBody] : m_physicsQueue) {
-        if (physicsBody.physics->isColliding()) {
+    for (auto& cmd : m_physicsQueue) {
+        if (cmd.physics->colliding) {
             continue;
         }
-        if (physicsBody.physics->getLayer() != PhysicsLayer::TOP) {
+        if (cmd.physics->layer != PhysicsLayer::TOP) {
             // ONLY TO(P)LAYER
             continue;
         }
 
-        for (auto& [targetName, targetPhysicsBody] : m_physicsQueue) {
-            if (&physicsBody == &targetPhysicsBody) {
+        for (auto& targetCmd : m_physicsQueue) {
+            if (&cmd.physics == &targetCmd.physics) {
                 // home address
                 continue;
             }
-            //if (targetPhysicsBody.physics->isColliding()) {
+            //if (targetCmd.physics->colliding) {
             //	// checked
             //	continue;
             //}
-            if (physicsBody.physics->getLayer() < targetPhysicsBody.physics->getLayer()) {
+            if (cmd.physics->layer < targetCmd.physics->layer) {
                 // (p)layering
                 continue;
             }
 
-            if (detectCollision(physicsBody.physics, targetPhysicsBody.physics)) {
-                physicsBody.physics->setColliding(true);
-                targetPhysicsBody.physics->setColliding(true);
+            if (detectCollision(cmd.physics, targetCmd.physics)) {
+                cmd.physics->colliding = true;
+                targetCmd.physics->colliding = true;
 
-                resolveCollisionByMTV(physicsBody, targetPhysicsBody);
-                LOG_D(name << " <-> " << targetName);
+                resolveCollisionByMTV(cmd, targetCmd);
+                LOG_D(&cmd << " <-> " << &targetCmd);
                 break;
             }
         }
@@ -117,13 +120,13 @@ bool PhysicsSystem::isCollidingByAABB(AABB origin, AABB target) {
 bool PhysicsSystem::detectCollision(PhysicsComponent* origin, PhysicsComponent* target) {
     // FIXME first simple AABB collision check
     // later detail collision check
-    bool colliding = isCollidingByAABB(origin->getAABB(), target->getAABB());
+    bool colliding = isCollidingByAABB(origin->AABB, target->AABB);
     return colliding;
 }
 
 // TODO: Minimal Translation Vector
 void PhysicsSystem::resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target) {
-    origin.transform->addPosition(glm::vec3(-1.0f, 0.0f, -1.0f));
+    origin.transform->position += glm::vec3(-1.0f, 0.0f, -1.0f);
     // FIXME maybe check if it's moving..?
     // then resolve only for moving entities
     //target.transform->addPosition(glm::vec3(-1.0f));
@@ -159,6 +162,32 @@ void PhysicsSystem::updateAABB(AABB aabb, const glm::vec3& position, const glm::
     }
 }
 
+std::vector<RendererImmediateCommand> PhysicsSystem::getAABBCommand() {
+    std::vector<RendererImmediateCommand> commands;
+    for (auto& cmd : m_physicsQueue) {
+        glm::vec3 color = cmd.physics->colliding ? Constants::Color::RED : Constants::Color::GREEN;
+        RendererImmediateCommand command = {
+            m_VAOAABB,
+            cmd.transform->position,
+            cmd.transform->rotation,
+            cmd.transform->scale,
+            getAABBSize(cmd.physics->AABB),
+            getAABBCenter(cmd.physics->AABB),
+            color
+        };
+        commands.push_back(command);
+    }
+    return commands;
+}
+
 void PhysicsSystem::registerInQueue(const PhysicsCommand& command) {
     m_physicsQueue.push_back(command);
+}
+
+glm::vec3 PhysicsSystem::getAABBSize(AABB aabb) const {
+    return aabb.worldMax - aabb.worldMin;
+}
+
+glm::vec3 PhysicsSystem::getAABBCenter(AABB aabb) const {
+    return (aabb.worldMin + aabb.worldMax) * 0.5f;
 }

@@ -51,9 +51,6 @@
     <ClCompile Include="src\managers\resource_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\game\physics_world.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="src\managers\input_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
@@ -194,9 +191,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\configs\log_config.hpp">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="src\game\physics_world.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\managers\input_manager.h">
