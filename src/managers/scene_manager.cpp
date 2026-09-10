@@ -36,14 +36,14 @@ void SceneManager::toggleScene() {
 	SceneID nextSceneID;
 
 	if (m_currentScene) {
-		nextSceneID = Utils::getEnumNext(m_currentScene->getID());
+		nextSceneID = Utils::Enum::getNext(m_currentScene->getID());
 		m_currentScene->end();
 	} else {
-		nextSceneID = Utils::getEnumFirst(SceneID::SOLDIER);
+		nextSceneID = Utils::Enum::getFirst(SceneID::SOLDIER);
 	}
 
 	// TODO: LOADING
-	LOG_D("Changed CurrentScene to: " << Utils::getEnumName(nextSceneID));
+	LOG_D("Changed CurrentScene to: " << Utils::Enum::getName(nextSceneID));
 	switch (nextSceneID) {
 	case SceneID::SOLDIER:
 		m_currentScene = std::make_unique<SoldierScene>(m_registry, m_physicsSystem, m_camera);

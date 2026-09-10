@@ -73,8 +73,8 @@ void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
 
 void PlayerSystem::toggleVerticalMode(Registry& registry) {
     m_verticalModeChanged = true;
-    m_verticalMode = Utils::getEnumNext(m_verticalMode);
-    LOG_D("Changed Player's vertical mode to: " << Utils::getEnumName(m_verticalMode));
+    m_verticalMode = Utils::Enum::getNext(m_verticalMode);
+    LOG_D("Changed Player's vertical mode to: " << Utils::Enum::getName(m_verticalMode));
 }
 
 void PlayerSystem::toggleGodMode(Registry& registry) {

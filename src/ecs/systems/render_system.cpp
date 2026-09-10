@@ -1,4 +1,5 @@
 #include "../../graphics/renderer.h"
+#include "../../utils/component_utils.hpp"
 #include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -12,9 +13,9 @@ void RenderSystem::update(Registry& registry, float alpha) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* render = registry.getComponent<RenderComponent>(entity);
 
-        glm::mat4 modelMatrix = transform->getInterpolatedModelMatrix(alpha);
-        glm::mat3 normalMatrix = transform->getNormalMatrix();
-        glm::vec3 interPosition = transform->getInterpolatedPosition(alpha);
+        glm::mat4 modelMatrix = Utils::Component::getInterpolatedModelMatrix(*transform, alpha);
+        glm::mat3 normalMatrix = Utils::Component::getNormalMatrix(modelMatrix);
+        glm::vec3 interPosition = Utils::Component::getInterpolatedPosition(*transform, alpha);
 
         RenderQueueType queueType = render->queueType;
         RendererCommand command = {

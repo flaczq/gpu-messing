@@ -51,14 +51,14 @@ bool Renderer::init(GLFWwindow* window, PhysicsSystem& physicsSystem, Camera* ca
 }
 
 void Renderer::toggleRenderMode() {
-    m_renderMode = Utils::getEnumNext(m_renderMode);
+    m_renderMode = Utils::Enum::getNext(m_renderMode);
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-    LOG_D("Changed RenderMode to: " << Utils::getEnumName(m_renderMode));
+    LOG_D("Changed RenderMode to: " << Utils::Enum::getName(m_renderMode));
 }
 
 void Renderer::toggleRenderDebugMode() {
-    m_renderDebugMode = Utils::getEnumNext(m_renderDebugMode);
-    LOG_D("Changed RenderDebugMode to: " << Utils::getEnumName(m_renderDebugMode));
+    m_renderDebugMode = Utils::Enum::getNext(m_renderDebugMode);
+    LOG_D("Changed RenderDebugMode to: " << Utils::Enum::getName(m_renderDebugMode));
 }
 
 void Renderer::beginFrame(unsigned int screenWidth, unsigned int screenHeight) {

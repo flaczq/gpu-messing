@@ -181,10 +181,8 @@ void BackEnd::run() {
             // change transform position based on set direction
             SceneManager::getInstance().fixedUpdate(fixedt);
 
-            // execute physics commands from queue
-            PhysicsWorld::getInstance().flush();
-            // actual movement with collisions
-            PhysicsWorld::getInstance().step(fixedt);
+            // execute physics command from queue with collisions
+            m_physicsSystem.flush();
             m_accumulator -= FIXED_DT;
         }
 

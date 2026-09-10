@@ -66,6 +66,11 @@ public:
 				matchingEntities.push_back(entity);
 			}
 		}
+		if (matchingEntities.empty()) {
+			std::string compNames{};
+			((compNames += typeid(Comps).name() + std::string(", ")), ...);
+			LOG_W("No entites found for " << compNames);
+		}
 		return matchingEntities;
 	}
 
