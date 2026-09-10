@@ -2,7 +2,7 @@
 
 #include "../configs/math_config.hpp"
 #include "../ecs/components/transform_component.hpp"
-#include "math_constants.hpp"
+#include "stats_constants.hpp"
 
 namespace Utils {
 	namespace Component {
@@ -44,7 +44,7 @@ namespace Utils {
 		}
 
 		constexpr glm::vec3 getRight(const TransformComponent& transform) {
-			return glm::normalize(glm::cross(getFront(transform), Constants::Math::WORLD_UP));
+			return glm::normalize(glm::cross(getFront(transform), Constants::Stats::World::WORLD_UP));
 		}
 
 		constexpr glm::vec3 getUp(const TransformComponent& transform) {

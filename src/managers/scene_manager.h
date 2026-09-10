@@ -14,14 +14,8 @@ public:
 	SceneManager(const SceneManager&) = delete;
 	void operator=(const SceneManager&) = delete;
 
-	bool init(Registry& registry, PhysicsSystem& physicsSystem, Camera* camera);
+	bool init(Registry& registry, PhysicsSystem& physicsSystem, Camera& camera);
 	void toggleScene();
-	void processInput();
-	void saveState() const;
-	void fixedUpdate(float fixedt) const;
-	void update(float alpha) const;
-	void lateUpdate() const;
-	void end() const;
 
 private:
 	// hidden constructor
@@ -29,8 +23,7 @@ private:
 
 	Registry& m_registry;
 	PhysicsSystem& m_physicsSystem;
-
-	Camera* m_camera = nullptr;
+	Camera& m_camera;
 
 	std::unique_ptr<Scene> m_currentScene;
 };

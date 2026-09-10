@@ -361,7 +361,7 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
-    backEnd->getCamera()->updateAspect(width, height);
+    backEnd->getCameraSystem().updateAspect(backEnd->getRegistry(), width, height);
 
     glViewport(0, 0, width, height);
 }

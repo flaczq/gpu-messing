@@ -2,9 +2,8 @@
 #include "../ecs/registry.h"
 #include "scene.h"
 
-Scene::Scene(Registry& registry, PhysicsSystem& physicsSystem)
-    : m_registry(registry),
-      m_physicsSystem(physicsSystem)
+Scene::Scene(Registry& registry)
+    : m_registry(registry)
 {
 }
 

@@ -2,6 +2,12 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../ecs/registry.h"
+#include "../ecs/systems/ai_system.h"
+#include "../ecs/systems/camera_system.h"
+#include "../ecs/systems/physics_system.h"
+#include "../ecs/systems/player_system.h"
+#include "../ecs/systems/render_system.h"
+#include "../ecs/systems/transform_system.h"
 #include "../game/camera.h"
 #include "../graphics/renderer.h"
 #include "../managers/input_manager.h"
@@ -92,7 +98,12 @@ bool BackEnd::init() {
     //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
     //            _\///////////////________\/////////____\///////////_____
     m_registry.init();
+    //m_transformSystem.init();
     m_physicsSystem.init();
+    //m_playerSystem.init();
+    //m_aiSystem.init();
+    //m_cameraSystem.init();
+    //m_renderSystem.init();
     //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
     //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
     //      _\/\\\_______________/\\\/____________\//\\\______\///__      
@@ -107,21 +118,20 @@ bool BackEnd::init() {
     //    ┓┃┃┓ ┃ 
     //    ┗┛┗┗ ┻ 
     //           
-    m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
-    m_camera->init();
-    // top-view minimap
-    if (m_minimap) {
-        m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
-        //m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-        //m_minimapCamera->setPreViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-        //m_minimapCamera->setYaw(-90.0f);
-        //m_minimapCamera->setPitch(-70.0f);
-        // FIXME: follow empty transform
-        m_minimapCamera->init();
-    }
+    //m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
+    //m_camera.init();
+    //// top-view minimap
+    //if (m_minimap) {
+    //    m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
+    //    //m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+    //    //m_minimapCamera->setPreViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
+    //    //m_minimapCamera->setYaw(-90.0f);
+    //    //m_minimapCamera->setPitch(-70.0f);
+    //    // FIXME: follow empty transform
+    //    m_minimapCamera->init();
+    //}
     // nothing else matters... but order
-    SceneManager::getInstance().init(m_registry, m_physicsSystem, m_camera.get());
-    Renderer::getInstance().init(m_window, m_physicsSystem, m_camera.get());
+    SceneManager::getInstance().init(m_registry, m_physicsSystem, m_cameraSystem);
 
     //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
     //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
@@ -166,7 +176,7 @@ void BackEnd::run() {
         glfwPollEvents();
 
         processGlobalInput();
-        m_camera->processInput();
+        m_camera.processInput();
         if (m_minimap) {
             m_minimapCamera->processInput();
         }
@@ -189,8 +199,8 @@ void BackEnd::run() {
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
         // lookAt()
-        m_camera->updateView(alpha);
-        m_camera->updateProjection();
+        m_camera.updateView(alpha);
+        m_camera.updateProjection();
         if (m_minimap) {
             m_minimapCamera->updateView(alpha);
             m_minimapCamera->updateProjection();
@@ -289,14 +299,14 @@ void BackEnd::showFps(GLFWwindow* window, double currentTime) {
 }
 
 void BackEnd::displayCameraData() {
-    glm::vec3 cameraPos = m_camera->getFollowedTransform()->getPosition();
+    glm::vec3 cameraPos = m_camera.getFollowedTransform()->getPosition();
     std::cout << std::fixed << std::setprecision(2);
     LOG("Camera: "
         << "X: " << std::showpos << cameraPos.x << "   "
         << "Y: " << std::showpos << cameraPos.y << "   "
         << "Z: " << std::showpos << cameraPos.z);// << "   "
-        //<< "YAW: " << m_camera->getYaw() << "   "
-        //<< "PITCH: " << m_camera->getPitch());
+        //<< "YAW: " << m_camera.getYaw() << "   "
+        //<< "PITCH: " << m_camera.getPitch());
     LOG_D("("
         << cameraPos.x << "f, "
         << cameraPos.y << "f, "

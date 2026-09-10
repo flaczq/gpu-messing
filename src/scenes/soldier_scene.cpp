@@ -28,8 +28,8 @@
 #include <utility>
 #include <vector>
 
-SoldierScene::SoldierScene(Registry& registry, PhysicsSystem& physicsSystem)
-    : Scene(registry, physicsSystem)
+SoldierScene::SoldierScene(Registry& registry)
+    : Scene(registry)
 {
 }
 
@@ -266,24 +266,4 @@ bool SoldierScene::init() {
     //}
 
     return Scene::init();
-}
-
-void SoldierScene::saveState() {
-    Scene::saveState();
-}
-
-void SoldierScene::fixedUpdate(float fixedt) {
-    Scene::fixedUpdate(fixedt);
-}
-
-void SoldierScene::update(float alpha) {
-    Scene::update(alpha);
-}
-
-void SoldierScene::lateUpdate() {
-    Scene::lateUpdate();
-}
-
-void SoldierScene::end() {
-    Scene::end();
 }

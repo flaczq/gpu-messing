@@ -7,5 +7,4 @@ public:
 	TransformSystem();
 
 	void saveState(Registry& registry);
-	void updateRotation(Registry& registry);
 };

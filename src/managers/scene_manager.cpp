@@ -20,13 +20,13 @@ SceneManager& SceneManager::getInstance() {
 
 SceneManager::SceneManager() = default;
 
-bool SceneManager::init(Registry& registry, PhysicsSystem& physicsSystem, Camera* camera) {
+bool SceneManager::init(Registry& registry, PhysicsSystem& physicsSystem, Camera& camera) {
 	m_registry = registry;
 	m_physicsSystem = physicsSystem;
 	m_camera = camera;
 
 	// default scene
-	m_currentScene = std::make_unique<SoldierScene>(m_registry, m_physicsSystem, m_physicsSystem, m_camera);
+	m_currentScene = std::make_unique<SoldierScene>(m_registry, m_physicsSystem, m_camera);
 	m_currentScene->init();
 
 	return true;
@@ -57,40 +57,4 @@ void SceneManager::toggleScene() {
 	}
 
 	m_currentScene->init();
-}
-
-void SceneManager::processInput() {
-	if (m_currentScene) {
-		m_currentScene->processInput();
-	}
-}
-
-void SceneManager::saveState() const {
-	if (m_currentScene) {
-		m_currentScene->saveState();
-	}
-}
-
-void SceneManager::fixedUpdate(float fixedt) const {
-	if (m_currentScene) {
-		m_currentScene->fixedUpdate(fixedt);
-	}
-}
-
-void SceneManager::update(float alpha) const {
-	if (m_currentScene) {
-		m_currentScene->update(alpha);
-	}
-}
-
-void SceneManager::lateUpdate() const {
-	if (m_currentScene) {
-		m_currentScene->lateUpdate();
-	}
-}
-
-void SceneManager::end() const {
-	if (m_currentScene) {
-		m_currentScene->end();
-	}
 }

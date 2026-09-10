@@ -3,7 +3,12 @@
 #include "../configs/gl_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../ecs/registry.h"
+#include "../ecs/systems/ai_system.h"
+#include "../ecs/systems/camera_system.h"
 #include "../ecs/systems/physics_system.h"
+#include "../ecs/systems/player_system.h"
+#include "../ecs/systems/render_system.h"
+#include "../ecs/systems/transform_system.h"
 #include "../game/camera.h"
 #include "../managers/scene_manager.h"
 #include <memory>
@@ -19,20 +24,22 @@ public:
 
     bool init();
     void run();
-
-    Camera* getCamera() const { return m_camera.get(); }
+    Registry& getRegistry() { return m_registry; }
+    CameraSystem& getCameraSystem() { return m_cameraSystem; }
 
 private:
     unsigned int m_screenWidth{}, m_screenHeight{};
     unsigned int m_minimapWidth{}, m_minimapHeight{};
 
     Registry m_registry{};
+    TransformSystem m_transformSystem{};
     PhysicsSystem m_physicsSystem{};
-    // all otehr systemts...
+    PlayerSystem m_playerSystem{};
+    AISystem m_aiSystem{};
+    CameraSystem m_cameraSystem{};
+    RenderSystem m_renderSystem{};
 
     GLFWwindow* m_window = nullptr;
-    std::unique_ptr<Camera> m_camera;
-    std::unique_ptr<Camera> m_minimapCamera;
     bool m_minimap = true;
 
     // textures

@@ -13,8 +13,8 @@ struct TransformComponent : public IComponent {
 	//glm::mat4 model		{ 1.0f };
 	//glm::mat3 normal		{ 1.0f };
 	// looking at (0,0,0)
-	float yaw	= -135.0f;
-	float pitch	= -11.5f;
+	float yaw				= -135.0f;
+	float pitch				= -11.5f;
 
 	TransformComponent() = default;
 	TransformComponent(const glm::vec3& position_,

@@ -20,10 +20,10 @@ struct AABB {
 struct PhysicsComponent : public IComponent {
 	AABB AABB{};
 	PhysicsLayer layer{};
-	bool colliding{};
+	bool isColliding{};
 
 	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer = PhysicsLayer::BOT)
 		: AABB(AABBmin, AABBmax, AABBmin, AABBmax),
 		  layer(layer),
-		  colliding(false) {}
+		  isColliding(false) {}
 };
