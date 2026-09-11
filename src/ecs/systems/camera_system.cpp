@@ -17,7 +17,7 @@ void CameraSystem::processInput(Registry& registry) {
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         processMouseScroll(camera, InputManager::getInstance().getScrollOffset());
-        processMouseMovement(transform, camera, InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
+        processMouseMovement(transform, InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
     }
 }
 
@@ -27,9 +27,8 @@ void CameraSystem::updateAspect(Registry& registry, int width, int height) {
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         // FIXME maybe NOT only for primary..?
-        if (camera->isPrimary) {
+        if (camera->type == CameraType::PRIMARY) {
             camera->aspect = ((float)width / (float)height);
-            camera->isProjectionDirty = true;
         }
     }
 }
@@ -39,55 +38,41 @@ void CameraSystem::updateView(Registry& registry, float alpha) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
-        glm::vec3 interPosition = Utils::Component::getInterpolatedPosition(*transform, alpha);
-        glm::vec3 front = Utils::Component::getFront(*transform);
-        glm::vec3 up = Utils::Component::getUp(*transform);
-        // FIXME standing/crouching
-        interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
-        // followed position, where you looking at, up vector
-        camera->view = glm::lookAt(interPosition, interPosition + front, up);
-    }
-}
-
-void CameraSystem::updateProjection(Registry& registry, bool force) {
-    for (Entity entity : registry.view<CameraComponent>()) {
-        auto* camera = registry.getComponent<CameraComponent>(entity);
-
-        if (camera->isProjectionDirty || force) {
-            camera->projection = glm::mat4(1.0f);
-            camera->projection = glm::perspective(glm::radians(camera->fov), camera->aspect, camera->nearPlane, camera->farPlane);
-            camera->isProjectionDirty = false;
+        // FIXME maybe NOT only for primary..?
+        if (camera->type == CameraType::PRIMARY) {
+            glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
+            glm::vec3 front = Utils::Component::calculateFront(*transform);
+            glm::vec3 up = Utils::Component::calculateUp(*transform);
+            // FIXME standing/crouching
+            interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
+            // followed position, where you looking at, up vector
+            camera->view = glm::lookAt(interPosition, interPosition + front, up);
         }
     }
 }
 
-void CameraSystem::restoreDefaultProjection(Registry& registry) {
+void CameraSystem::updateProjection(Registry& registry) {
     for (Entity entity : registry.view<CameraComponent>()) {
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
-        camera->fov = camera->lastFov;
-        camera->nearPlane = Constants::Stats::Camera::NEAR_PLANE;
-        camera->farPlane = Constants::Stats::Camera::FAR_PLANE;
-        camera->isProjectionDirty = true;
-        updateProjection(registry, true);
+        camera->projection = Utils::Component::calculatePerspective(*camera);
     }
 }
 
-void CameraSystem::processMouseScroll(CameraComponent* cameraComponent, float yOffset) {
+void CameraSystem::processMouseScroll(CameraComponent* camera, float yOffset) {
     if (yOffset != 0.0f) {
-        cameraComponent->isProjectionDirty = true;
-        cameraComponent->fov -= yOffset;
-        if (cameraComponent->fov < Constants::Stats::Camera::MIN_FOV) {
-            cameraComponent->fov = Constants::Stats::Camera::MIN_FOV;
+        camera->fov -= yOffset;
+        if (camera->fov < Constants::Stats::Camera::MIN_FOV) {
+            camera->fov = Constants::Stats::Camera::MIN_FOV;
         }
-        if (cameraComponent->fov > Constants::Stats::Camera::MAX_FOV) {
-            cameraComponent->fov = Constants::Stats::Camera::MAX_FOV;
+        if (camera->fov > Constants::Stats::Camera::MAX_FOV) {
+            camera->fov = Constants::Stats::Camera::MAX_FOV;
         }
-        cameraComponent->lastFov = cameraComponent->fov;
+        //camera->lastFov = camera->fov;
     }
 }
 
-void CameraSystem::processMouseMovement(TransformComponent* transform, CameraComponent* cameraComponent, float xOffset, float yOffset, bool clampPitch) {
+void CameraSystem::processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch) {
     // left-right
     transform->yaw += xOffset * Constants::Stats::Camera::MOUSE_SENSITIVITY;
     // up-down

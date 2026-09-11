@@ -12,10 +12,9 @@ public:
 	void processInput(Registry& registry);
 	void updateAspect(Registry& registry, int width, int height);
 	void updateView(Registry& registry, float alpha);
-	void updateProjection(Registry& registry, bool force = false);
-	void restoreDefaultProjection(Registry& registry);
+	void updateProjection(Registry& registry);
 
 private:
-	void processMouseScroll(CameraComponent* cameraComponent, float yOffset);
-	void processMouseMovement(TransformComponent* transform, CameraComponent* cameraComponent, float xOffset, float yOffset, bool clampPitch = true);
+	void processMouseScroll(CameraComponent* camera, float yOffset);
+	void processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch = true);
 };

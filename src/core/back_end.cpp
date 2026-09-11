@@ -103,7 +103,7 @@ bool BackEnd::init() {
     //m_playerSystem.init();
     //m_aiSystem.init();
     //m_cameraSystem.init();
-    //m_renderSystem.init();
+    m_renderSystem.init(m_window);
     //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
     //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
     //      _\/\\\_______________/\\\/____________\//\\\______\///__      

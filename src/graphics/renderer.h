@@ -10,16 +10,6 @@ class Camera;
 class Model;
 class Material;
 
-enum class RendererRenderMode {
-	STANDARD = GL_FILL,
-	WIREFRAME = GL_LINE,
-	POINTCLOUD = GL_POINT
-};
-enum class RendererRenderDebugMode {
-	NONE,
-	AABB
-};
-
 struct RendererLight {
 	glm::vec3 direction;
 	glm::vec3 color;
@@ -58,7 +48,6 @@ public:
 	void toggleRenderDebugMode();
 	void beginFrame(unsigned int screenWidth, unsigned int screenHeight);
 	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
-	void registerInQueue(RenderQueueType queueType, const RendererCommand& command);
 	void flush();
 	void renderImmediate();
 	void renderFrameBufferTexture();
@@ -75,21 +64,12 @@ private:
 	// hidden constructor
 	Renderer();
 
-	PhysicsSystem& m_physicsSystem;
-	GLFWwindow* m_window = nullptr;
-	Camera* m_camera = nullptr;
 	RendererRenderMode m_renderMode = RendererRenderMode::STANDARD;
 	RendererRenderDebugMode m_renderDebugMode = RendererRenderDebugMode::NONE;
 	RendererLight m_light{};
+	glm::mat4 activeProjection{};
 	//bool m_stencilReqd = false;
 	//bool m_blendingReqd = false;
-
-	std::vector<RendererCommand> m_opaqueQueue;
-	std::vector<RendererCommand> m_stencilQueue;
-	std::vector<RendererCommand> m_outlineQueue;
-	std::vector<RendererCommand> m_blendingQueue;
-	std::vector<RendererCommand> m_topLayerQueue;
-	std::vector<RendererCommand> m_uiQueue;
 
 	void sortQueueByMaterial(std::vector<RendererCommand>& queue) const;
 	void sortQueueByDistance(std::vector<RendererCommand>& queue) const;

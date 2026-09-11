@@ -28,26 +28,6 @@ Renderer& Renderer::getInstance() {
 Renderer::Renderer() = default;
 
 bool Renderer::init(GLFWwindow* window, PhysicsSystem& physicsSystem, Camera* camera) {
-    m_window = window;
-    m_physicsSystem = physicsSystem;
-    m_camera = camera;
-    m_light = {
-        glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
-        glm::vec3(1.0f)
-    };
-
-    // FIXME hardcoded max: 100
-    m_opaqueQueue.reserve(100);
-    m_stencilQueue.reserve(100);
-    m_outlineQueue.reserve(100);
-    m_blendingQueue.reserve(100);
-    m_topLayerQueue.reserve(100);
-    m_uiQueue.reserve(100);
-
-    // standard, lines (wireframe), points
-    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-
-    return true;
 }
 
 void Renderer::toggleRenderMode() {
@@ -88,29 +68,6 @@ void Renderer::beginFrameMinimap(unsigned int minimapWidth, unsigned int minimap
 
     glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void Renderer::registerInQueue(RenderQueueType queueType, const RendererCommand& command) {
-    switch (queueType) {
-    case RenderQueueType::OPAQUE:
-        m_opaqueQueue.push_back(command);
-        break;
-    case RenderQueueType::STENCIL:
-        m_stencilQueue.push_back(command);
-        break;
-    case RenderQueueType::OUTLINE:
-        m_outlineQueue.push_back(command);
-        break;
-    case RenderQueueType::BLENDING:
-        m_blendingQueue.push_back(command);
-        break;
-    case RenderQueueType::TOP_LAYER:
-        m_topLayerQueue.push_back(command);
-        break;
-    case RenderQueueType::UI:
-        m_uiQueue.push_back(command);
-        break;
-    }
 }
 
 // ORDER: opaque -> transparent back-to-front
@@ -330,8 +287,8 @@ void Renderer::renderSortedQueue(std::vector<RendererCommand>& queue, const std:
                 currShader->use();
 
                 // draws per-shader (rarely)
-                currShader->setMat4fv("projection", m_camera->getProjection());
-                currShader->setMat4fv("view", m_camera->getViewMatrix());
+                currShader->setMat4fv("projection", camera.projection);
+                currShader->setMat4fv("view", camera.view);
                 currShader->setVec3fv("viewPos", cmd.position);
                 currShader->setVec3fv("lightDir", m_light.direction);
                 currShader->setVec3fv("lightColor", m_light.color);

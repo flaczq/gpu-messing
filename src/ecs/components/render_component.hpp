@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../configs/gl_config.hpp"
 #include "i_component.hpp"
 #include <memory>
 
@@ -10,6 +11,15 @@ enum class RenderQueueType {
 	BLENDING,
 	TOP_LAYER,
 	UI
+};
+enum class RenderMode {
+	STANDARD = GL_FILL,
+	WIREFRAME = GL_LINE,
+	POINTCLOUD = GL_POINT
+};
+enum class RenderDebugMode {
+	NONE,
+	AABB
 };
 
 class Model;
