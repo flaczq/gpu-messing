@@ -1,8 +1,8 @@
 #pragma once
 
 #include "../../configs/math_config.hpp"
-#include "../../graphics/renderer.h"
 #include "../components/physics_component.hpp"
+#include "../components/render_component.hpp"
 #include <vector>
 
 struct PhysicsCommand {
@@ -20,9 +20,9 @@ public:
 
 	bool init();
 	void fixedUpdate(Registry& registry, float fixedt);
-	void flush();
+	void execute();
 	void end();
-	std::vector<RendererImmediateCommand> getAABBCommand();
+	std::vector<RenderImmediateCommand> getAABBCommand();
 
 private:
 	std::vector<PhysicsCommand> m_physicsQueue{};

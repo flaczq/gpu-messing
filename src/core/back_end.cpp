@@ -193,7 +193,7 @@ void BackEnd::run() {
             SceneManager::getInstance().fixedUpdate(fixedt);
 
             // execute physics command from queue with collisions
-            m_physicsSystem.flush();
+            m_physicsSystem.execute();
             m_accumulator -= FIXED_DT;
         }
 
@@ -210,23 +210,23 @@ void BackEnd::run() {
 
         // renderrring at last
         // --- main camera
-        Renderer::getInstance().beginFrame(m_screenWidth, m_screenHeight);
+        m_renderSystem.beginFrame(m_screenWidth, m_screenHeight);
         // Renderer -> registerInQueue()
         SceneManager::getInstance().update(alpha);
         // execute drawing commands from queues
-        Renderer::getInstance().flush();
+        m_renderSystem.execute();
         // probably for debug only
-        Renderer::getInstance().renderImmediate();
+        m_renderSystem.renderImmediate();
         // --- minimap camera
         if (m_minimap) {
-            Renderer::getInstance().setCamera(m_minimapCamera.get());
-            Renderer::getInstance().beginFrameMinimap(m_minimapWidth, m_minimapHeight);
+            //m_renderSystem.setCamera(m_minimapCamera.get());
+            m_renderSystem.beginFrameMinimap(m_minimapWidth, m_minimapHeight);
             SceneManager::getInstance().update(alpha);
-            Renderer::getInstance().flush();
-            Renderer::getInstance().endFrameMinimap();
-            Renderer::getInstance().setCamera(m_camera.get());
+            m_renderSystem.execute();
+            m_renderSystem.endFrameMinimap();
+            //m_renderSystem.setCamera(m_camera.get());
         }
-        Renderer::getInstance().endFrame();
+        m_renderSystem.endFrame();
 
         //TexturePrimitive::bind(diffuseMapTP, 0);
         //TexturePrimitive::bind(specularMapTP, 1);
@@ -274,15 +274,15 @@ void BackEnd::processGlobalInput() {
     }
     // RENDER MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_O)) {
-        Renderer::getInstance().toggleRenderMode();
+        m_renderSystem.toggleRenderMode();
     }
     // RENDER DEBUG MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_P)) {
-        Renderer::getInstance().toggleRenderDebugMode();
+        m_renderSystem.toggleRenderDebugMode();
     }
     // INFO: POSITION, CAMERA
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {
-        displayCameraData();
+        m_cameraSystem.logMainCameraPosition(m_registry);
     }
     #endif
 }
@@ -298,19 +298,4 @@ void BackEnd::showFps(GLFWwindow* window, double currentTime) {
         m_fpsNr = 0;
         m_fpsLastTime += 1.0;
     }
-}
-
-void BackEnd::displayCameraData() {
-    glm::vec3 cameraPos = m_camera.getFollowedTransform()->getPosition();
-    std::cout << std::fixed << std::setprecision(2);
-    LOG("Camera: "
-        << "X: " << std::showpos << cameraPos.x << "   "
-        << "Y: " << std::showpos << cameraPos.y << "   "
-        << "Z: " << std::showpos << cameraPos.z);// << "   "
-        //<< "YAW: " << m_camera.getYaw() << "   "
-        //<< "PITCH: " << m_camera.getPitch());
-    LOG_D("("
-        << cameraPos.x << "f, "
-        << cameraPos.y << "f, "
-        << cameraPos.z << "f)");
 }

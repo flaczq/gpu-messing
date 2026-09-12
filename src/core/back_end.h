@@ -9,7 +9,6 @@
 #include "../ecs/systems/player_system.h"
 #include "../ecs/systems/render_system.h"
 #include "../ecs/systems/transform_system.h"
-#include "../game/camera.h"
 #include "../managers/scene_manager.h"
 #include <memory>
 

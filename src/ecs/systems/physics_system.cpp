@@ -1,10 +1,10 @@
 #include "../../configs/gl_config.hpp"
 #include "../../configs/log_config.hpp"
 #include "../../configs/math_config.hpp"
-#include "../../graphics/renderer.h"
 #include "../../utils/color_constants.hpp"
 #include "../../utils/component_utils.hpp"
 #include "../components/physics_component.hpp"
+#include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
 #include "../registry.h"
@@ -73,7 +73,7 @@ void PhysicsSystem::registerInQueue(const PhysicsCommand& command) {
     m_physicsQueue.push_back(command);
 }
 
-void PhysicsSystem::flush() {
+void PhysicsSystem::execute() {
     for (auto& cmd : m_physicsQueue) {
         cmd.physics->isColliding = false;
     }
@@ -167,11 +167,11 @@ void PhysicsSystem::updateAABB(AABB aabb, const glm::vec3& position, const glm::
     }
 }
 
-std::vector<RendererImmediateCommand> PhysicsSystem::getAABBCommand() {
-    std::vector<RendererImmediateCommand> commands;
+std::vector<RenderImmediateCommand> PhysicsSystem::getAABBCommand() {
+    std::vector<RenderImmediateCommand> commands;
     for (auto& cmd : m_physicsQueue) {
         glm::vec3 color = cmd.physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
-        RendererImmediateCommand command = {
+        RenderImmediateCommand command = {
             m_VAOAABB,
             cmd.transform->position,
             cmd.transform->rotation,

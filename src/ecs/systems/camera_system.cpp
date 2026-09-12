@@ -1,13 +1,16 @@
 #include "../../configs/gl_config.hpp"
+#include "../../configs/log_config.hpp"
 #include "../../configs/math_config.hpp"
 #include "../../managers/input_manager.h"
 #include "../../utils/component_utils.hpp"
+#include "../../utils/math_utils.hpp"
 #include "../../utils/stats_constants.hpp"
 #include "../components/camera_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
 #include "../registry.h"
 #include "camera_system.h"
+#include <iomanip>
 
 CameraSystem::CameraSystem() = default;
 
@@ -16,8 +19,8 @@ void CameraSystem::processInput(Registry& registry) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
-        processMouseScroll(camera, InputManager::getInstance().getScrollOffset());
-        processMouseMovement(transform, InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
+        _processMouseScroll(camera, InputManager::getInstance().getScrollOffset());
+        _processMouseMovement(transform, InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
     }
 }
 
@@ -33,8 +36,10 @@ void CameraSystem::updateView(Registry& registry, float alpha) {
             glm::vec3 up = Utils::Component::calculateUp(*transform);
             // FIXME standing/crouching
             interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
+            
             // followed position, where you looking at, up vector
             camera->view = glm::lookAt(interPosition, interPosition + front, up);
+            break;
         }
     }
 }
@@ -55,11 +60,31 @@ void CameraSystem::updateAspect(Registry& registry, int width, int height) {
         // FIXME maybe NOT only for primary..?
         if (camera->isPrimary) {
             camera->aspect = ((float)width / (float)height);
+            break;
         }
     }
 }
 
-void CameraSystem::processMouseScroll(CameraComponent* camera, float yOffset) {
+void CameraSystem::logMainCameraPosition(Registry& registry) {
+    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
+        auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* camera = registry.getComponent<CameraComponent>(entity);
+
+        if (camera->isPrimary) {
+            std::cout << std::fixed << std::setprecision(2);
+            LOG("Camera: "
+                << "X: " << std::showpos << transform->position.x << "   "
+                << "Y: " << std::showpos << transform->position.y << "   "
+                << "Z: " << std::showpos << transform->position.z);// << "   "
+            //<< "YAW: " << m_camera.getYaw() << "   "
+            //<< "PITCH: " << m_camera.getPitch());
+            LOG_D(Utils::Math::getVec3Values(transform->position));
+            break;
+        }
+    }
+}
+
+void CameraSystem::_processMouseScroll(CameraComponent* camera, float yOffset) {
     if (yOffset != 0.0f) {
         camera->fov -= yOffset;
         if (camera->fov < Constants::Stats::Camera::MIN_FOV) {
@@ -72,7 +97,7 @@ void CameraSystem::processMouseScroll(CameraComponent* camera, float yOffset) {
     }
 }
 
-void CameraSystem::processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch) {
+void CameraSystem::_processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch) {
     // left-right
     transform->yaw += xOffset * Constants::Stats::Camera::MOUSE_SENSITIVITY;
     // up-down

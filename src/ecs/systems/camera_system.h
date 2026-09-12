@@ -13,8 +13,9 @@ public:
 	void updateView(Registry& registry, float alpha);
 	void updateProjection(Registry& registry);
 	void updateAspect(Registry& registry, int width, int height);
+	void logMainCameraPosition(Registry& registry);
 
 private:
-	void processMouseScroll(CameraComponent* camera, float yOffset);
-	void processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch = true);
+	void _processMouseScroll(CameraComponent* camera, float yOffset);
+	void _processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch = true);
 };
