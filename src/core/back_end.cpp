@@ -282,7 +282,7 @@ void BackEnd::processGlobalInput() {
     }
     // INFO: POSITION, CAMERA
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {
-        m_cameraSystem.logMainCameraPosition(m_registry);
+        m_cameraSystem.mainCameraLogPosition(m_registry);
     }
     #endif
 }

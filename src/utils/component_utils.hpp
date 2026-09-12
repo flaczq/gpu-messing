@@ -55,8 +55,8 @@ namespace Utils {
 		}
 
 		// CAMERA COMPONENT
-		constexpr glm::mat4 calculatePerspective(const CameraComponent& camera) {
-			return glm::perspective(glm::radians(camera.fov), camera.aspect, camera.nearPlane, camera.farPlane);
+		constexpr glm::mat4 calculatePerspective(float fov, float aspect, float nearPlane, float farPlane) {
+			return glm::perspective(glm::radians(fov), aspect, nearPlane, farPlane);
 		}
 	}
 }

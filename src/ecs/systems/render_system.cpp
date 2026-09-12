@@ -3,7 +3,7 @@
 #include "../../core/back_end.h"
 #include "../../graphics/material.h"
 #include "../../graphics/shader.h"
-#include "../../utils/component_utils.hpp"
+#include "../../managers/resource_manager.h"
 #include "../../utils/component_utils.hpp"
 #include "../../utils/enum_utils.hpp"
 #include "../components/camera_component.hpp"
@@ -89,7 +89,6 @@ void RenderSystem::update(Registry& registry, float alpha) {
         glm::mat4 modelMatrix = Utils::Component::calculateInterpolatedModelMatrix(*transform, alpha);
         glm::mat3 normalMatrix = Utils::Component::calculateNormalMatrix(modelMatrix);
         glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
-
         RenderQueueType queueType = render->queueType;
         RenderCommand command = {
             render->model.get(),
@@ -132,7 +131,7 @@ void RenderSystem::execute() {
     //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
     //                          
     _sortQueueByMaterial(m_opaqueQueue);
-    _renderSortedQueue(m_opaqueQueue, "opaque pass");
+    _renderSortedQueue(m_opaqueQueue, "opaque pass", m_renderContext.mainCamera->projection);
 
     //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
     //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
@@ -145,7 +144,7 @@ void RenderSystem::execute() {
         glStencilMask(0xFF);
         // ---
         _sortQueueByMaterial(m_stencilQueue);
-        _renderSortedQueue(m_stencilQueue, "stencil pass");
+        _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.mainCamera->projection);
     }
 
     //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
@@ -158,7 +157,7 @@ void RenderSystem::execute() {
         glStencilMask(0x00);
         // ---
         _sortQueueByMaterial(m_outlineQueue);
-        _renderSortedQueue(m_outlineQueue, "outline pass");
+        _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.mainCamera->projection);
         // ---
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
@@ -178,7 +177,7 @@ void RenderSystem::execute() {
         //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
         // ---
         _sortQueueByDistance(m_blendingQueue);
-        _renderSortedQueue(m_blendingQueue, "blending pass");
+        _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.mainCamera->projection);
         // ---
         glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
@@ -192,15 +191,14 @@ void RenderSystem::execute() {
         // always last
         glClear(GL_DEPTH_BUFFER_BIT);
         // different fov and planes for top layer
-        m_camera->setFov(45.0f);
-        m_camera->setNearPlane(0.01f);
-        m_camera->setFarPlane(10.0f);
-        m_camera->updateProjection(true);
-        // ---
+        // same aspect
+        float fov = 45.0f;
+        float aspect = m_renderContext.mainCamera->aspect;
+        float nearPlane = 0.01f;
+        float farPlane = 10.0f;
+        glm::mat4 topLayerProjection = Utils::Component::calculatePerspective(fov, aspect, nearPlane, farPlane);
         _sortQueueByMaterial(m_topLayerQueue);
-        _renderSortedQueue(m_topLayerQueue, "top layer pass");
-        // ---
-        m_camera->restoreDefaultProjection();
+        _renderSortedQueue(m_topLayerQueue, "top layer pass", topLayerProjection);
     }
 
     //    ┳┳•  ┏┓┏┓┏┓┏┓
@@ -209,7 +207,7 @@ void RenderSystem::execute() {
     //                 
     if (!m_uiQueue.empty()) {
         _sortQueueByMaterial(m_uiQueue);
-        _renderSortedQueue(m_uiQueue, "ui pass");
+        _renderSortedQueue(m_uiQueue, "ui pass", m_renderContext.mainCamera->projection);
     }
 
     m_opaqueQueue.clear();
@@ -244,7 +242,7 @@ void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const
 }
 
 // TODO: use UBO
-void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const std::string& name) const {
+void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const {
     if (queue.empty()) {
         //LOG_D("Empty queue for: " << name << " - nothing to render");
         return;
@@ -258,18 +256,19 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
     for (auto& cmd : queue) {
         Material* currMaterial = cmd.material;
         if (currMaterial != lastMaterial) {
-            //const std::string& lastMN = (lastMaterial != nullptr) ? lastMaterial->getName() : "NULL";
+            const std::string& lastMN = (lastMaterial != nullptr) ? lastMaterial->getName() : "NULL";
             //LOG_D("Switching material from: " << lastMN << " to: " << currMaterial->getName());
             Shader* currShader = currMaterial->getShader();
             if (currShader != lastShader) {
-                //unsigned int lastSI = (lastShader != nullptr) ? lastShader->getID() : 999;
+                unsigned int lastSI = (lastShader != nullptr) ? lastShader->getID() : 999;
                 //LOG_D("Switching shader from: " << lastSI << " to: " << currShader->getID());
                 currShader->use();
 
                 // draws per-shader (rarely)
-                currShader->setMat4fv("projection", m_renderContext.mainCamera->projection);
+                currShader->setMat4fv("projection", projection);
                 currShader->setMat4fv("view", m_renderContext.mainCamera->view);
                 currShader->setVec3fv("viewPos", cmd.position);
+                // FIXME !!!!!!!!
                 currShader->setVec3fv("lightDir", m_light.direction);
                 currShader->setVec3fv("lightColor", m_light.color);
                 //LOG_D("per-shader draws with shader: " << currShader->getID());
@@ -300,9 +299,10 @@ void RenderSystem::renderImmediate() {
     std::vector<RenderImmediateCommand> queue;
     unsigned int VAO{};
     switch (m_renderDebugMode) {
-    case RendererRenderDebugMode::NONE:
+    case RenderDebugMode::NONE:
         return;
-    case RendererRenderDebugMode::AABB:
+    case RenderDebugMode::AABB:
+        // FIXME !!!!!!!!!!!!
         queue = m_physicsSystem.getAABBCommand();
         if (queue.empty()) {
             LOG_D("nothing to render immediately, sad QQ");
@@ -318,8 +318,8 @@ void RenderSystem::renderImmediate() {
 
     auto shader = ResourceManager::getInstance().getShader("simple_shader");
     shader->use();
-    shader->setMat4fv("projection", m_camera->getProjection());
-    shader->setMat4fv("view", m_camera->getViewMatrix());
+    shader->setMat4fv("projection", m_renderContext.mainCamera->projection);
+    shader->setMat4fv("view", m_renderContext.mainCamera->view);
     for (auto& cmd : queue) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cmd.center);
@@ -383,7 +383,7 @@ void RenderSystem::toggleRenderDebugMode() {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
-    backEnd->getCameraSystem().updateAspect(backEnd->getRegistry(), width, height);
+    backEnd->getCameraSystem().mainCameraUpdateAspect(backEnd->getRegistry(), width, height);
 
     glViewport(0, 0, width, height);
 }

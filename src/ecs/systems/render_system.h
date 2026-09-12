@@ -26,13 +26,17 @@ struct RenderCommand {
 	glm::mat3 normalMatrix;
 	glm::vec3 position;
 };
-struct RendererImmediateCommand {
+struct RenderImmediateCommand {
 	unsigned int VAO;
 	glm::vec3 position;
 	glm::quat rotation;
 	glm::vec3 scale;
 	glm::vec3 size;
 	glm::vec3 center;
+	glm::vec3 color;
+};
+struct RendererLight {
+	glm::vec3 direction;
 	glm::vec3 color;
 };
 
@@ -73,6 +77,6 @@ private:
 	void _registerInQueue(RenderQueueType queueType, const RenderCommand& command);
 	void _sortQueueByMaterial(std::vector<RenderCommand>& queue) const;
 	void _sortQueueByDistance(std::vector<RenderCommand>& queue) const;
-	void _renderSortedQueue(std::vector<RenderCommand>& queue, const std::string& name) const;
+	void _renderSortedQueue(std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const;
 	void _renderFrameBufferTexture();
 };
