@@ -2,6 +2,7 @@
 
 #include "../../configs/gl_config.hpp"
 #include "../../configs/math_config.hpp"
+#include "../components/dir_light_movement_component.hpp"
 #include "../components/render_component.hpp"
 #include <vector>
 
@@ -18,6 +19,8 @@ enum class RenderDebugMode {
 struct RenderContext {
 	CameraComponent* mainCamera;
 	TransformComponent* mainCameraTransform;
+	DirLightMovementComponent* dirLightMovement;
+	std::vector<RenderImmediateCommand> renderImmediateCommands;
 };
 struct RenderCommand {
 	Model* model;
@@ -27,16 +30,11 @@ struct RenderCommand {
 	glm::vec3 position;
 };
 struct RenderImmediateCommand {
-	unsigned int VAO;
 	glm::vec3 position;
 	glm::quat rotation;
 	glm::vec3 scale;
 	glm::vec3 size;
 	glm::vec3 center;
-	glm::vec3 color;
-};
-struct RendererLight {
-	glm::vec3 direction;
 	glm::vec3 color;
 };
 
@@ -49,13 +47,14 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 class RenderSystem {
 public:
 	RenderSystem();
+	~RenderSystem();
 
 	bool init(GLFWwindow* window);
 	void beginFrame(unsigned int width, unsigned int height);
 	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
 	void update(Registry& registry, float alpha);
 	void execute();
-	void renderImmediate();
+	void renderImmediate() const;
 	void endFrame();
 	void endFrameMinimap();
 	void toggleRenderMode();
@@ -69,10 +68,12 @@ private:
 	std::vector<RenderCommand> m_blendingQueue{};
 	std::vector<RenderCommand> m_topLayerQueue{};
 	std::vector<RenderCommand> m_uiQueue{};
+	unsigned int m_VAOAABB{};
+	unsigned int m_VBOAABB{};
+	RenderContext m_renderContext{};
 
 	RenderMode m_renderMode = RenderMode::STANDARD;
 	RenderDebugMode m_renderDebugMode = RenderDebugMode::NONE;
-	RenderContext m_renderContext{};
 
 	void _registerInQueue(RenderQueueType queueType, const RenderCommand& command);
 	void _sortQueueByMaterial(std::vector<RenderCommand>& queue) const;

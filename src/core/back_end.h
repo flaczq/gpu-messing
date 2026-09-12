@@ -5,6 +5,7 @@
 #include "../ecs/registry.h"
 #include "../ecs/systems/ai_system.h"
 #include "../ecs/systems/camera_system.h"
+#include "../ecs/systems/dir_light_movement_system.h"
 #include "../ecs/systems/physics_system.h"
 #include "../ecs/systems/player_system.h"
 #include "../ecs/systems/render_system.h"
@@ -37,6 +38,7 @@ private:
     AISystem m_aiSystem{};
     CameraSystem m_cameraSystem{};
     RenderSystem m_renderSystem{};
+    DirLightMovementSystem m_dirLightMovementSystem{};
 
     GLFWwindow* m_window = nullptr;
     bool m_minimap = true;
@@ -54,7 +56,6 @@ private:
     double m_accumulator = 0.0;
     static constexpr double FIXED_DT = 1.0 / 60.0;
 
-    void processGlobalInput();
-    void showFps(GLFWwindow* window, double currentTime);
-    void displayCameraData();
+    void _processGlobalInput();
+    void _showFps(GLFWwindow* window, double currentTime);
 };

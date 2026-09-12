@@ -4,12 +4,11 @@
 #include "../ecs/registry.h"
 #include "../ecs/systems/ai_system.h"
 #include "../ecs/systems/camera_system.h"
+#include "../ecs/systems/dir_light_movement_system.h"
 #include "../ecs/systems/physics_system.h"
 #include "../ecs/systems/player_system.h"
 #include "../ecs/systems/render_system.h"
 #include "../ecs/systems/transform_system.h"
-#include "../game/camera.h"
-#include "../graphics/renderer.h"
 #include "../managers/input_manager.h"
 #include "../managers/resource_manager.h"
 #include "../managers/scene_manager.h"
@@ -175,7 +174,7 @@ void BackEnd::run() {
         // events to call InputManager
         glfwPollEvents();
 
-        processGlobalInput();
+        _processGlobalInput();
         // player movement direction
         m_playerSystem.processInput(m_registry);
         // mouse scroll and movement
@@ -237,7 +236,7 @@ void BackEnd::run() {
         InputManager::getInstance().reset();
 
         // bonus
-        showFps(m_window, currentTime);
+        _showFps(m_window, currentTime);
     }
 
     //    ┏┓┏┓┳┳┓┏┓  ┏┓┓┏┏┓┳┓
@@ -253,7 +252,7 @@ void BackEnd::run() {
     glfwTerminate();
 }
 
-void BackEnd::processGlobalInput() {
+void BackEnd::_processGlobalInput() {
     // EXIT
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_ESCAPE)) {
         glfwSetWindowShouldClose(m_window, true);
@@ -287,7 +286,7 @@ void BackEnd::processGlobalInput() {
     #endif
 }
 
-void BackEnd::showFps(GLFWwindow* window, double currentTime) {
+void BackEnd::_showFps(GLFWwindow* window, double currentTime) {
     m_fpsNr++;
     // update every 1sec
     if (currentTime - m_fpsLastTime >= 1.0) {

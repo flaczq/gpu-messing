@@ -47,10 +47,10 @@ namespace Utils {
 		}
 
 		// PHYSICS COMPONENT
-		glm::vec3 calculateAABBSize(AABB aabb) {
+		constexpr glm::vec3 calculateAABBSize(AABB aabb) {
 			return aabb.worldMax - aabb.worldMin;
 		}
-		glm::vec3 calculateAABBCenter(AABB aabb) {
+		constexpr glm::vec3 calculateAABBCenter(AABB aabb) {
 			return (aabb.worldMin + aabb.worldMax) * 0.5f;
 		}
 

@@ -2,7 +2,6 @@
 
 #include "../../configs/math_config.hpp"
 #include "../components/physics_component.hpp"
-#include "../components/render_component.hpp"
 #include <vector>
 
 struct PhysicsCommand {
@@ -21,17 +20,13 @@ public:
 	bool init();
 	void fixedUpdate(Registry& registry, float fixedt);
 	void execute();
-	void end();
-	std::vector<RenderImmediateCommand> getAABBCommand();
 
 private:
 	std::vector<PhysicsCommand> m_physicsQueue{};
-	unsigned int m_VAOAABB{};
-	unsigned int m_VBOAABB{};
 
-	void registerInQueue(const PhysicsCommand& command);
-	void updateAABB(AABB aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
-	bool detectCollision(PhysicsComponent* origin, PhysicsComponent* target);
-	bool isCollidingByAABB(AABB origin, AABB target);
-	void resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target);
+	void _registerInQueue(const PhysicsCommand& command);
+	void _updateAABB(AABB aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
+	bool _detectCollision(PhysicsComponent* origin, PhysicsComponent* target);
+	bool _isCollidingByAABB(AABB origin, AABB target);
+	void _resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target);
 };

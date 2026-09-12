@@ -4,9 +4,12 @@
 #include "../../graphics/material.h"
 #include "../../graphics/shader.h"
 #include "../../managers/resource_manager.h"
+#include "../../utils/color_constants.hpp"
 #include "../../utils/component_utils.hpp"
 #include "../../utils/enum_utils.hpp"
 #include "../components/camera_component.hpp"
+#include "../components/dir_light_movement_component.hpp"
+#include "../components/physics_component.hpp"
 #include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -16,12 +19,20 @@
 
 RenderSystem::RenderSystem() = default;
 
+RenderSystem::~RenderSystem() {
+    m_opaqueQueue.clear();
+    m_stencilQueue.clear();
+    m_outlineQueue.clear();
+    m_blendingQueue.clear();
+    m_topLayerQueue.clear();
+    m_uiQueue.clear();
+
+    glDeleteVertexArrays(1, &m_VAOAABB);
+    glDeleteBuffers(1, &m_VBOAABB);
+}
+
 bool RenderSystem::init(GLFWwindow* window) {
     m_window = window;
-    //m_light = {
-    //    glm::normalize(glm::vec3(0.5f, -1.0f, -0.5f)),
-    //    glm::vec3(1.0f)
-    //};
 
     // FIXME hardcoded max: 100
     m_opaqueQueue.reserve(100);
@@ -33,6 +44,33 @@ bool RenderSystem::init(GLFWwindow* window) {
 
     // standard, lines (wireframe), points
     glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
+
+    // hardcoded AABB 1x1x1 (with the middle at 0.0)
+    float verticesAABB[] = {
+        // front
+        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
+        // back
+        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
+        // connectors
+        -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
+    };
+    glGenVertexArrays(1, &m_VAOAABB);
+    glGenBuffers(1, &m_VBOAABB);
+    glBindVertexArray(m_VAOAABB);
+    glBindBuffer(GL_ARRAY_BUFFER, m_VBOAABB);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesAABB), verticesAABB, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
 
     return true;
 }
@@ -81,6 +119,32 @@ void RenderSystem::update(Registry& registry, float alpha) {
     }
     assert(m_renderContext.mainCamera != nullptr);
     assert(m_renderContext.mainCameraTransform != nullptr);
+    for (Entity entity : registry.view<TransformComponent, DirLightMovementComponent>()) {
+        auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* dirLightMovement = registry.getComponent<DirLightMovementComponent>(entity);
+
+        m_renderContext.dirLightMovement = dirLightMovement;
+        // TODO more than single directional light
+        break;
+    }
+    // is this premature optimization..?
+    if (m_renderDebugMode == RenderDebugMode::AABB) {
+        for (Entity entity : registry.view<TransformComponent, PhysicsComponent>()) {
+            auto* transform = registry.getComponent<TransformComponent>(entity);
+            auto* physics = registry.getComponent<PhysicsComponent>(entity);
+
+            glm::vec3 color = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
+            RenderImmediateCommand command = {
+                    transform->position,
+                    transform->rotation,
+                    transform->scale,
+                    Utils::Component::calculateAABBSize(physics->AABB),
+                    Utils::Component::calculateAABBCenter(physics->AABB),
+                    color
+            };
+            m_renderContext.renderImmediateCommands.push_back(command);
+        }
+    }
 
     for (Entity entity : registry.view<TransformComponent, RenderComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
@@ -268,9 +332,8 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
                 currShader->setMat4fv("projection", projection);
                 currShader->setMat4fv("view", m_renderContext.mainCamera->view);
                 currShader->setVec3fv("viewPos", cmd.position);
-                // FIXME !!!!!!!!
-                currShader->setVec3fv("lightDir", m_light.direction);
-                currShader->setVec3fv("lightColor", m_light.color);
+                currShader->setVec3fv("lightDir", m_renderContext.dirLightMovement->direction);
+                currShader->setVec3fv("lightColor", m_renderContext.dirLightMovement->color);
                 //LOG_D("per-shader draws with shader: " << currShader->getID());
 
                 lastShader = currShader;
@@ -295,21 +358,19 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
     }
 }
 
-void RenderSystem::renderImmediate() {
+void RenderSystem::renderImmediate() const {
     std::vector<RenderImmediateCommand> queue;
     unsigned int VAO{};
     switch (m_renderDebugMode) {
     case RenderDebugMode::NONE:
         return;
     case RenderDebugMode::AABB:
-        // FIXME !!!!!!!!!!!!
-        queue = m_physicsSystem.getAABBCommand();
+        queue = m_renderContext.renderImmediateCommands;
         if (queue.empty()) {
             LOG_D("nothing to render immediately, sad QQ");
             return;
         }
-        // one VAO to rule them all
-        VAO = queue[0].VAO;
+        VAO = m_VAOAABB;
         break;
     }
 
