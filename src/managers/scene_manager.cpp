@@ -1,7 +1,5 @@
 #include "../configs/log_config.hpp"
 #include "../ecs/registry.h"
-#include "../ecs/systems/physics_system.h"
-#include "../game/camera.h"
 #include "../graphics/renderer.h"
 #include "../scenes/rtx_scene.h"
 #include "../scenes/scene.h"
@@ -20,13 +18,11 @@ SceneManager& SceneManager::getInstance() {
 
 SceneManager::SceneManager() = default;
 
-bool SceneManager::init(Registry& registry, PhysicsSystem& physicsSystem, Camera& camera) {
+bool SceneManager::init(Registry& registry) {
 	m_registry = registry;
-	m_physicsSystem = physicsSystem;
-	m_camera = camera;
 
 	// default scene
-	m_currentScene = std::make_unique<SoldierScene>(m_registry, m_physicsSystem, m_camera);
+	m_currentScene = std::make_unique<SoldierScene>(m_registry);
 	m_currentScene->init();
 
 	return true;

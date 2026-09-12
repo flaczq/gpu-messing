@@ -3,8 +3,25 @@
 #include "../../configs/gl_config.hpp"
 #include <vector>
 
+enum class RenderMode {
+	STANDARD = GL_FILL,
+	WIREFRAME = GL_LINE,
+	POINTCLOUD = GL_POINT
+};
+enum class RenderDebugMode {
+	NONE,
+	AABB
+};
+
+struct RenderContext {
+	CameraComponent* mainCamera;
+	TransformComponent* mainCameraTransform;
+};
+
 class Registry;
+class TransformComponent;
 class RenderComponent;
+class CameraComponent;
 
 class RenderSystem {
 public:
@@ -22,7 +39,8 @@ private:
 	std::vector<RendererCommand> m_topLayerQueue{};
 	std::vector<RendererCommand> m_uiQueue{};
 
-	RenderMode m_renderMode{};
+	RenderMode m_renderMode = RenderMode::STANDARD;
+	RenderContext m_renderContext{};
 
 	void registerInQueue(RenderQueueType queueType, const RendererCommand& command);
 };

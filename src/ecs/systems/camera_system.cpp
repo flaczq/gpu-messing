@@ -21,25 +21,13 @@ void CameraSystem::processInput(Registry& registry) {
     }
 }
 
-void CameraSystem::updateAspect(Registry& registry, int width, int height) {
-    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
-        auto* transform = registry.getComponent<TransformComponent>(entity);
-        auto* camera = registry.getComponent<CameraComponent>(entity);
-
-        // FIXME maybe NOT only for primary..?
-        if (camera->type == CameraType::PRIMARY) {
-            camera->aspect = ((float)width / (float)height);
-        }
-    }
-}
-
 void CameraSystem::updateView(Registry& registry, float alpha) {
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         // FIXME maybe NOT only for primary..?
-        if (camera->type == CameraType::PRIMARY) {
+        if (camera->isPrimary) {
             glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
             glm::vec3 front = Utils::Component::calculateFront(*transform);
             glm::vec3 up = Utils::Component::calculateUp(*transform);
@@ -56,6 +44,18 @@ void CameraSystem::updateProjection(Registry& registry) {
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         camera->projection = Utils::Component::calculatePerspective(*camera);
+    }
+}
+
+void CameraSystem::updateAspect(Registry& registry, int width, int height) {
+    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
+        auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* camera = registry.getComponent<CameraComponent>(entity);
+
+        // FIXME maybe NOT only for primary..?
+        if (camera->isPrimary) {
+            camera->aspect = ((float)width / (float)height);
+        }
     }
 }
 

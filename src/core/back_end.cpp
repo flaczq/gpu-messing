@@ -176,17 +176,18 @@ void BackEnd::run() {
         glfwPollEvents();
 
         processGlobalInput();
-        m_camera.processInput();
-        if (m_minimap) {
-            m_minimapCamera->processInput();
-        }
-        // set movement direction each frame
-        SceneManager::getInstance().processInput();
+        // player movement direction
+        m_playerSystem.processInput(m_registry);
+        // mouse scroll and movement
+        m_cameraSystem.processInput(m_registry);
+        //if (m_minimap) {
+        //    m_minimapCamera->processInput();
+        //}
 
         // logic (once per 60 frames): physics, collisions
         while (m_accumulator >= FIXED_DT) {
             float fixedt = static_cast<float>(FIXED_DT);
-            SceneManager::getInstance().saveState();
+            m_transformSystem.saveState(m_registry);
 
             // change transform position based on set direction
             SceneManager::getInstance().fixedUpdate(fixedt);
@@ -199,12 +200,13 @@ void BackEnd::run() {
         // Interpolation (smoothing the frames in-between physics and rendering)
         float alpha = static_cast<float>(m_accumulator / FIXED_DT);
         // lookAt()
-        m_camera.updateView(alpha);
-        m_camera.updateProjection();
-        if (m_minimap) {
-            m_minimapCamera->updateView(alpha);
-            m_minimapCamera->updateProjection();
-        }
+        m_cameraSystem.updateView(m_registry, alpha);
+        // if it's only used in RenderSystem - just calculate it there and delete this
+        m_cameraSystem.updateProjection(m_registry);
+        //if (m_minimap) {
+        //    m_minimapCamera->updateView(alpha);
+        //    m_minimapCamera->updateProjection();
+        //}
 
         // renderrring at last
         // --- main camera

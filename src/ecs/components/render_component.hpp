@@ -12,15 +12,6 @@ enum class RenderQueueType {
 	TOP_LAYER,
 	UI
 };
-enum class RenderMode {
-	STANDARD = GL_FILL,
-	WIREFRAME = GL_LINE,
-	POINTCLOUD = GL_POINT
-};
-enum class RenderDebugMode {
-	NONE,
-	AABB
-};
 
 class Model;
 class Material;

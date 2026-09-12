@@ -14,7 +14,7 @@ void AISystem::fixedUpdate(Registry& registry, float fixedt) {
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
         auto* ai = registry.getComponent<AIComponent>(entity);
         
-        if (!physics->colliding) {
+        if (!physics->isColliding) {
             static float tt = 0.0f;
             tt += fixedt;
             float x = sin(tt * 0.5f) * 2.0f;

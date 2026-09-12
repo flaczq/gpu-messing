@@ -3,8 +3,6 @@
 #include <memory>
 
 class Registry;
-class PhysicsSystem;
-class Camera;
 class Scene;
 
 class SceneManager {
@@ -14,16 +12,13 @@ public:
 	SceneManager(const SceneManager&) = delete;
 	void operator=(const SceneManager&) = delete;
 
-	bool init(Registry& registry, PhysicsSystem& physicsSystem, Camera& camera);
+	bool init(Registry& registry);
 	void toggleScene();
 
 private:
 	// hidden constructor
 	SceneManager();
 
-	Registry& m_registry;
-	PhysicsSystem& m_physicsSystem;
-	Camera& m_camera;
-
-	std::unique_ptr<Scene> m_currentScene;
+	Registry& m_registry{};
+	std::unique_ptr<Scene> m_currentScene{};
 };

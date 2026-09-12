@@ -1,6 +1,7 @@
 #include "../../configs/gl_config.hpp"
 #include "../../graphics/renderer.h"
 #include "../../utils/component_utils.hpp"
+#include "../components/camera_component.hpp"
 #include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -31,6 +32,21 @@ bool RenderSystem::init(GLFWwindow* window) {
 }
 
 void RenderSystem::update(Registry& registry, float alpha) {
+    RenderContext m_renderContext{};
+    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
+        auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* camera = registry.getComponent<CameraComponent>(entity);
+
+        if (camera->isPrimary) {
+            // found data for RenderContext
+            m_renderContext.mainCamera = camera;
+            m_renderContext.mainCameraTransform = transform;
+            break;
+        }
+    }
+    assert(m_renderContext.mainCamera != nullptr);
+    assert(m_renderContext.mainCameraTransform != nullptr);
+
     for (Entity entity : registry.view<TransformComponent, RenderComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* render = registry.getComponent<RenderComponent>(entity);

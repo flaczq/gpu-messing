@@ -3,5 +3,8 @@
 #include "i_component.hpp"
 
 struct PlayerComponent : public IComponent {
-	//TAG
+	bool isPrimary{};
+
+	PlayerComponent(bool isPrimary_ = true)
+		: isPrimary(isPrimary_) {}
 };

@@ -10,9 +10,9 @@ public:
 	CameraSystem();
 
 	void processInput(Registry& registry);
-	void updateAspect(Registry& registry, int width, int height);
 	void updateView(Registry& registry, float alpha);
 	void updateProjection(Registry& registry);
+	void updateAspect(Registry& registry, int width, int height);
 
 private:
 	void processMouseScroll(CameraComponent* camera, float yOffset);
