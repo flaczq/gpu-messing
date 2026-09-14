@@ -7,6 +7,7 @@
 #include "../../utils/color_constants.hpp"
 #include "../../utils/component_utils.hpp"
 #include "../../utils/enum_utils.hpp"
+#include "../../utils/math_utils.hpp"
 #include "../components/camera_component.hpp"
 #include "../components/dir_light_movement_component.hpp"
 #include "../components/physics_component.hpp"
@@ -96,7 +97,7 @@ void RenderSystem::beginFrameMinimap(unsigned int minimapWidth, unsigned int min
 }
 
 void RenderSystem::update(Registry& registry, float alpha) {
-    RenderContext m_renderContext{};
+    m_renderContext = RenderContext{};
     // CAMERA
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
@@ -292,7 +293,7 @@ void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const
     // sort by material address
     std::sort(queue.begin(), queue.end(), [](const RenderCommand& cmd1, const RenderCommand& cmd2) {
         return cmd1.material < cmd2.material;
-        });
+    });
 }
 
 void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const {
@@ -304,7 +305,7 @@ void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const
     glm::vec3 cameraPosition = m_renderContext.cameraPosition;
     std::sort(queue.begin(), queue.end(), [cameraPosition](const RenderCommand& cmd1, const RenderCommand& cmd2) {
         return glm::length(cameraPosition - cmd2.position) < glm::length(cameraPosition - cmd1.position);
-        });
+    });
 }
 
 // TODO: use UBO

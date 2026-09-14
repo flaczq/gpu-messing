@@ -92,7 +92,7 @@ bool PhysicsSystem::_isCollidingByAABB(AABB origin, AABB target) {
 
 // TODO: Minimal Translation Vector
 void PhysicsSystem::_resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target) {
-    origin.transform->position += glm::vec3(-1.0f, 0.0f, -1.0f);
+    //origin.transform->position += glm::vec3(-1.0f, 0.0f, -1.0f);
     // FIXME maybe check if it's moving..?
     // then resolve only for moving entities
     //target.transform->addPosition(glm::vec3(-1.0f));
