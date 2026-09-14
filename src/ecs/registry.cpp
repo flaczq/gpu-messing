@@ -8,9 +8,8 @@
 #include <vector>
 
 bool Registry::init() {
-	m_entitiesData.clear();
-	// 0 = NULL_ENTITY
-	m_nextEntityID = 1;
+	//m_entitiesData.clear();
+	//m_nextEntityID = 1;
 
 	return true;
 }
@@ -33,4 +32,6 @@ std::vector<Entity> Registry::viewAll() const {
 
 void Registry::end() {
 	m_entitiesData.clear();
+	// 0 = NULL_ENTITY
+	m_nextEntityID = 1;
 }

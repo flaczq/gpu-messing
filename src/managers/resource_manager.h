@@ -32,18 +32,17 @@ public:
 	std::shared_ptr<Texture> getTexture(const std::string& modelName, const std::string& path, const std::string& type, const aiScene* scene);
 
 	void reloadShaders();
-	void end();
 
 private:
 	// hidden constructor
 	ResourceManager();
 
-	std::unordered_map<std::string, std::shared_ptr<Model>> m_models;
-	std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders;
-	std::unordered_map<std::string, std::shared_ptr<Material>> m_materials;
-	std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures;
+	std::unordered_map<std::string, std::shared_ptr<Model>> m_models{};
+	std::unordered_map<std::string, std::shared_ptr<Shader>> m_shaders{};
+	std::unordered_map<std::string, std::shared_ptr<Material>> m_materials{};
+	std::unordered_map<std::string, std::shared_ptr<Texture>> m_textures{};
 
-	unsigned int loadTextureFromMemory(const aiTexture* textureMem, const std::string& path);
-	unsigned int loadTextureFromFile(const std::string& path);
-	void uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
+	unsigned int _loadTextureFromMemory(const aiTexture* textureMem, const std::string& path);
+	unsigned int _loadTextureFromFile(const std::string& path);
+	void _uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
 };

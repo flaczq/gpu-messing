@@ -28,7 +28,7 @@ public:
 		auto it = m_entitiesData.find(entity);
 		if (it == m_entitiesData.end()) {
 			LOG_E("REGISTRY::GET_COMPONENT_ENTITY_NULLPTR: " << entity);
-			return false;
+			return nullptr;
 		}
 
 		// same every time.. i hope..?
@@ -76,9 +76,9 @@ public:
 
 private:
 	struct EntityData {
-		std::unordered_map<ComponentTypeID, std::unique_ptr<IComponent>> components;
+		std::unordered_map<ComponentTypeID, std::unique_ptr<IComponent>> components{};
 	};
 
 	Entity m_nextEntityID = 1;
-	std::unordered_map<Entity, EntityData> m_entitiesData;
+	std::unordered_map<Entity, EntityData> m_entitiesData{};
 };

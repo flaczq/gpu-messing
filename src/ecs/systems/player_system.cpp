@@ -1,7 +1,9 @@
 #include "../../configs/math_config.hpp"
 #include "../../managers/input_manager.h"
-#include "../../utils/enum_utils.hpp"
-#include "../../utils/math_constants.hpp"
+#include "../../utils/component_utils.hpp"
+#include "../../utils/math_utils.hpp"
+#include "../components/player_component.hpp"
+#include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
 #include "../registry.h"
 #include "player_system.h"
@@ -10,79 +12,85 @@ PlayerSystem::PlayerSystem() = default;
 
 // continuous key clicks -> movement
 void PlayerSystem::processInput(Registry& registry) {
-    // CROUCHING/STANDING
-    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
-        toggleVerticalMode();
-    }
-    // GOD MODE
-    if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
-        toggleGodMode();
-    }
+    // TODO only primary Player for now
+    for (Entity entity : registry.view<PlayerComponent>()) {
+        auto* player = registry.getComponent<PlayerComponent>(entity);
 
-    // MOVEMENT
-    glm::vec3 moveDir = glm::vec3(0.0f);
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_W)) {
-        moveDir.z += 1.0f;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_S)) {
-        moveDir.z -= 1.0f;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_A)) {
-        moveDir.x -= 1.0f;
-    }
-    if (InputManager::getInstance().isKeyDown(GLFW_KEY_D)) {
-        moveDir.x += 1.0f;
-    }
-    // GOD MODE ACTIVATED
-    if (m_godMode) {
-        if (InputManager::getInstance().isKeyDown(GLFW_KEY_Q)) {
-            moveDir.y -= 1.0f;
+        if (player->isPrimary) {
+            // CROUCHING/STANDING
+            if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
+                _toggleCrouching(player);
+            }
+            // GOD MODE
+            if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
+                _toggleGodMode(player);
+            }
+
+            // MOVEMENT
+            glm::vec3 moveDir = glm::vec3(0.0f);
+            if (InputManager::getInstance().isKeyDown(GLFW_KEY_W)) {
+                moveDir.z += 1.0f;
+            }
+            if (InputManager::getInstance().isKeyDown(GLFW_KEY_S)) {
+                moveDir.z -= 1.0f;
+            }
+            if (InputManager::getInstance().isKeyDown(GLFW_KEY_A)) {
+                moveDir.x -= 1.0f;
+            }
+            if (InputManager::getInstance().isKeyDown(GLFW_KEY_D)) {
+                moveDir.x += 1.0f;
+            }
+            // GOD MODE ACTIVATED
+            if (player->isGodMode) {
+                if (InputManager::getInstance().isKeyDown(GLFW_KEY_Q)) {
+                    moveDir.y -= 1.0f;
+                }
+                if (InputManager::getInstance().isKeyDown(GLFW_KEY_E)) {
+                    moveDir.y += 1.0f;
+                }
+            }
+            // normalize diagonal movement
+            player->moveDir = glm::length(moveDir) > 0.0f ? glm::normalize(moveDir) : glm::vec3(0.0f);
+            break;
         }
-        if (InputManager::getInstance().isKeyDown(GLFW_KEY_E)) {
-            moveDir.y += 1.0f;
-        }
     }
-    // normalize diagonal movement
-    m_moveDir = glm::length(moveDir) > 0.0f ? glm::normalize(moveDir) : glm::vec3(0.0f);
 }
 
 void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
-    if (glm::length(m_moveDir) > 0.0f) {
-        glm::vec3 flatFront = m_transform->getFlatFront();
-        glm::vec3 right = m_transform->getRight();
-        glm::vec3 direction = // front-back
-                              flatFront * m_moveDir.z +
-                              // left-right
-                              right * m_moveDir.x +
-                              // up-down
-                              Constants::Math::WORLD_UP * m_moveDir.y;
-        float velocity = MOVEMENT_SPEED * fixedt;
-        m_transform->addPosition(direction * velocity);
-    }
+    // TODO only primary Player for now
+    for (Entity entity : registry.view<TransformComponent, PlayerComponent>()) {
+        auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* player = registry.getComponent<PlayerComponent>(entity);
 
-    if (!m_godMode) {
-        glm::vec3 position = m_transform->getPosition();
-        position.y = 0.0f;
-        m_transform->setPosition(position);
-    }
-    if (m_godModeChanged || m_verticalModeChanged) {
-        m_godModeChanged = false;
-        m_verticalModeChanged = false;
+        if (player->isPrimary) {
+            if (glm::length(player->moveDir) > 0.0f) {
+                glm::vec3 up = Constants::Stats::World::WORLD_UP;
+                glm::vec3 flatFront = Utils::Component::calculateFlatFront(*transform);
+                glm::vec3 right = Utils::Component::calculateRight(*transform);
+                glm::vec3 direction =
+                    // front-back
+                    flatFront * player->moveDir.z +
+                    // left-right
+                    right * player->moveDir.x +
+                    // up-down
+                    up * player->moveDir.y;
+                float velocity = Constants::Stats::Player::MOVEMENT_SPEED * fixedt;
+                transform->position += direction * velocity;
+            }
+            if (!player->isGodMode) {
+                transform->position.y = 0.0f;
+            }
+            break;
+        }
     }
 }
 
-void PlayerSystem::toggleVerticalMode(Registry& registry) {
-    m_verticalModeChanged = true;
-    m_verticalMode = Utils::Enum::getNext(m_verticalMode);
-    LOG_D("Changed Player's vertical mode to: " << Utils::Enum::getName(m_verticalMode));
+void PlayerSystem::_toggleCrouching(PlayerComponent* player) {
+    player->isCrouching = !player->isCrouching;
+    LOG_D("Changed Player's crouching to: " << std::boolalpha << player->isCrouching);
 }
 
-void PlayerSystem::toggleGodMode(Registry& registry) {
-    m_godMode = !m_godMode;
-    m_godModeChanged = true;
-    LOG_D("Changed Player's GOD mode to: " << std::boolalpha << m_godMode);
-}
-
-bool PlayerSystem::isCrouching(Registry& registry) const {
-    return m_verticalMode == VerticalMode::CROUCHING;
+void PlayerSystem::_toggleGodMode(PlayerComponent* player) {
+    player->isGodMode = !player->isGodMode;
+    LOG_D("Changed Player's GOD mode to: " << std::boolalpha << player->isGodMode);
 }

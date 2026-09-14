@@ -59,7 +59,7 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, st
       m_diffuseColor(diffuseColor),
       m_drawType(drawType)
 {
-	setupMesh();
+	_setupMesh();
 }
 
 Mesh::~Mesh() {
@@ -120,7 +120,7 @@ void Mesh::draw(const Shader& shader) {
     glBindVertexArray(0);
 }
 
-void Mesh::setupMesh() {
+void Mesh::_setupMesh() {
     //    ┏┓┏┓┏┳┓┳┳┏┓
     //    ┗┓┣  ┃ ┃┃┃┃
     //    ┗┛┗┛ ┻ ┗┛┣┛

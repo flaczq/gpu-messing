@@ -6,12 +6,9 @@ class Registry;
 
 class RtxScene : public Scene {
 public:
-	RtxScene(Registry& registry);
-
-	bool init() override;
-
+	bool init(Registry& registry) override;
+	void end(Registry& registry) override;
 	SceneID getID() const override { return SceneID::RTX; }
 
-private:
-	//private
+//private:
 };

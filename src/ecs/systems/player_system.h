@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../configs/math_config.hpp"
+#include "../components/player_component.hpp"
 
 class Registry;
 
@@ -10,13 +11,8 @@ public:
 
 	void processInput(Registry& registry);
 	void fixedUpdate(Registry& registry, float fixedt);
-	void toggleVerticalMode(Registry& registry);
-	void toggleGodMode(Registry& registry);
-	bool isCrouching(Registry& registry) const;
 
 private:
-	glm::vec3 m_moveDir = glm::vec3(0.0f);
-	bool m_verticalModeChanged = false;
-	bool m_godMode = false;
-	bool m_godModeChanged = false;
+	void _toggleCrouching(PlayerComponent* player);
+	void _toggleGodMode(PlayerComponent* player);
 };

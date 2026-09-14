@@ -3,13 +3,13 @@
 #include "rtx_scene.h"
 #include "scene.h"
 
-RtxScene::RtxScene(Registry& registry)
-	: Scene(registry)
-{
-}
-
-bool RtxScene::init() {
+bool RtxScene::init(Registry& registry) {
     // add shinny ballz
     //m_registry.createEntity(shinyballz);
-    return Scene::init();
+
+    return Scene::init(registry);
+}
+
+void RtxScene::end(Registry& registry) {
+    Scene::end(registry);
 }

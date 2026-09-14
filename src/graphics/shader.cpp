@@ -27,7 +27,7 @@ Shader& Shader::operator=(Shader&& other) noexcept {
 Shader::Shader(const GLchar* vertPath, const GLchar* fragPath) {
     m_vertexPath = vertPath;
     m_fragmentPath = fragPath;
-    compile();
+    _compile();
 }
 
 Shader::~Shader() {
@@ -68,10 +68,10 @@ void Shader::setMat4fv(const std::string& name, const glm::mat4& value) const {
 }
 
 void Shader::reload() {
-    compile();
+    _compile();
 }
 
-void Shader::compile() {
+void Shader::_compile() {
     //    ┏┓•┓ ┏┓  ┓ ┏┓┏┓┳┓•┳┓┏┓
     //    ┣ ┓┃ ┣   ┃ ┃┃┣┫┃┃┓┃┃┃┓
     //    ┻ ┗┗┛┗┛  ┗┛┗┛┛┗┻┛┗┛┗┗┛

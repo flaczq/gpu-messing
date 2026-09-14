@@ -3,8 +3,9 @@
 #include "i_component.hpp"
 
 struct AIComponent : public IComponent {
-	float speedMultiplier = 1.0f;
+	float speedMultiplier{};
 
 	AIComponent() = default;
-	AIComponent(float speedMultiplier_) : speedMultiplier(speedMultiplier_) {}
+	AIComponent(float speedMultiplier_)
+		: speedMultiplier(speedMultiplier_) {}
 };

@@ -9,10 +9,10 @@
 namespace Utils {
 	namespace Component {
 		// TRANSFORM COMPONENT
-		constexpr glm::vec3 calculateInterpolatedPosition(const TransformComponent& transform, float alpha) {
+		inline glm::vec3 calculateInterpolatedPosition(const TransformComponent& transform, float alpha) {
 			return glm::mix(transform.prevPosition, transform.position, alpha);
 		}
-		constexpr glm::mat4 calculateInterpolatedModelMatrix(const TransformComponent& transform, float alpha) {
+		inline glm::mat4 calculateInterpolatedModelMatrix(const TransformComponent& transform, float alpha) {
 			glm::vec3 interPosition = calculateInterpolatedPosition(transform, alpha);
 			glm::quat interRotation = glm::slerp(transform.prevRotation, transform.rotation, alpha);
 			glm::vec3 interScale = glm::mix(transform.prevScale, transform.scale, alpha);
@@ -22,27 +22,27 @@ namespace Utils {
 			model = glm::scale(model, interScale);
 			return model;
 		}
-		constexpr glm::mat4 calculateNormalMatrix(const glm::mat4& model) {
+		inline glm::mat4 calculateNormalMatrix(const glm::mat4& model) {
 			return glm::transpose(glm::inverse(glm::mat3(model)));
 		}
-		constexpr glm::vec3 calculateFront(const TransformComponent& transform) {
+		inline glm::vec3 calculateFront(const TransformComponent& transform) {
 			glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
 			front.x = cos(glm::radians(transform.yaw)) * cos(glm::radians(transform.pitch));
 			front.y = sin(glm::radians(transform.pitch));
 			front.z = sin(glm::radians(transform.yaw)) * cos(glm::radians(transform.pitch));
 			return glm::normalize(front);
 		}
-		constexpr glm::vec3 calculateFlatFront(const TransformComponent& transform) {
+		inline glm::vec3 calculateFlatFront(const TransformComponent& transform) {
 			glm::vec3 flatFront = glm::vec3(0.0f, 0.0f, 0.0f);
 			flatFront.x = cos(glm::radians(transform.yaw));
 			flatFront.y = 0.0f;
 			flatFront.z = sin(glm::radians(transform.yaw));
 			return glm::normalize(flatFront);
 		}
-		constexpr glm::vec3 calculateRight(const TransformComponent& transform) {
+		inline glm::vec3 calculateRight(const TransformComponent& transform) {
 			return glm::normalize(glm::cross(calculateFront(transform), Constants::Stats::World::WORLD_UP));
 		}
-		constexpr glm::vec3 calculateUp(const TransformComponent& transform) {
+		inline glm::vec3 calculateUp(const TransformComponent& transform) {
 			return glm::normalize(glm::cross(calculateRight(transform), calculateFront(transform)));
 		}
 
@@ -55,7 +55,16 @@ namespace Utils {
 		}
 
 		// CAMERA COMPONENT
-		constexpr glm::mat4 calculatePerspective(float fov, float aspect, float nearPlane, float farPlane) {
+		inline glm::mat4 calculateView(const TransformComponent& transform, float alpha) {
+			glm::vec3 interPosition = calculateInterpolatedPosition(transform, alpha);
+			glm::vec3 front = calculateFront(transform);
+			glm::vec3 up = calculateUp(transform);
+			// FIXME standing/crouching
+			interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
+			// followed position, where you looking at, up vector
+			return glm::lookAt(interPosition, interPosition + front, up);
+		}
+		inline glm::mat4 calculateProjection(float fov, float aspect, float nearPlane, float farPlane) {
 			return glm::perspective(glm::radians(fov), aspect, nearPlane, farPlane);
 		}
 	}

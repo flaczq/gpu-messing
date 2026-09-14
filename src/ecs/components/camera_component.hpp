@@ -10,18 +10,10 @@ struct CameraComponent : public IComponent {
     float fov               = Constants::Stats::Camera::DEFAULT_FOV;
     float nearPlane         = Constants::Stats::Camera::NEAR_PLANE;
     float farPlane          = Constants::Stats::Camera::FAR_PLANE;
-    int screenWidth{};
-    int screenHeight{};
+    float aspect            = 1.67f;
     bool isPrimary{};
-    float aspect{};
 
-    CameraComponent() = default;
-    CameraComponent(int screenWidth_,
-                    int screenHeight_,
-                    bool isPrimary_ = true)
-        : screenWidth(screenWidth_),
-          screenHeight(screenHeight_),
-          isPrimary(isPrimary_) {
-        aspect = (float)screenWidth / (float)screenHeight;
-    }
+    //CameraComponent() = default;
+    CameraComponent(bool isPrimary_ = true)
+        : isPrimary(isPrimary_) {}
 };

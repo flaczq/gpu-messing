@@ -12,6 +12,7 @@
 #include "../managers/input_manager.h"
 #include "../managers/resource_manager.h"
 #include "../managers/scene_manager.h"
+#include "../utils/stats_constants.hpp"
 #include "back_end.h"
 #include <iomanip>
 #include <ios>
@@ -38,7 +39,6 @@ bool BackEnd::init() {
     //    ┏┳┓┓┏•┏┓  •┏┓  •┏┳┓
     //     ┃ ┣┫┓┗┓  ┓┗┓  ┓ ┃ 
     //     ┻ ┛┗┗┗┛  ┗┗┛  ┗ ┻ 
-    //                       
     glfwInit();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -97,47 +97,19 @@ bool BackEnd::init() {
     //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
     //            _\///////////////________\/////////____\///////////_____
     m_registry.init();
-    //m_transformSystem.init();
     m_physicsSystem.init();
-    //m_playerSystem.init();
-    //m_aiSystem.init();
-    //m_cameraSystem.init();
-    m_renderSystem.init(m_window);
-    //    __/\\\\\\\\\\\\\\\________/\\\\\\\\\_____/\\\\\\\\\\\___        
-    //     _\/\\\///////////______/\\\////////____/\\\/////////\\\_       
-    //      _\/\\\_______________/\\\/____________\//\\\______\///__      
-    //       _\/\\\\\\\\\\\______/\\\_______________\////\\\_________     
-    //        _\/\\\///////______\/\\\__________________\////\\\______    
-    //         _\/\\\_____________\//\\\____________________\////\\\___   
-    //          _\/\\\______________\///\\\___________/\\\______\//\\\__  
-    //           _\/\\\\\\\\\\\\\\\____\////\\\\\\\\\_\///\\\\\\\\\\\/___ 
-    //            _\///////////////________\/////////____\///////////_____
-
-    //    •┳┓•┏┳┓
-    //    ┓┃┃┓ ┃ 
-    //    ┗┛┗┗ ┻ 
-    //           
-    //m_camera = std::make_unique<Camera>(m_screenWidth, m_screenHeight);
-    //m_camera.init();
-    //// top-view minimap
-    //if (m_minimap) {
-    //    m_minimapCamera = std::make_unique<Camera>(m_minimapWidth, m_minimapHeight);
-    //    //m_minimapCamera->setViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-    //    //m_minimapCamera->setPreViewPos(glm::vec3(8.0f, 20.0f, 15.0f));
-    //    //m_minimapCamera->setYaw(-90.0f);
-    //    //m_minimapCamera->setPitch(-70.0f);
-    //    // FIXME: follow empty transform
-    //    m_minimapCamera->init();
-    //}
-    // nothing else matters... but order
-    SceneManager::getInstance().init(m_registry, m_physicsSystem, m_cameraSystem);
-
-    //    ┏┳┓┏┓┏┓┏┓┏┳┓┳┳┳┓┏┓  ┏┓┳┓•┳┳┓┳┏┳┓•┓┏┏┓┏┓
-    //     ┃ ┣  ┃┃  ┃ ┃┃┣┫┣   ┃┃┣┫┓┃┃┃┃ ┃ ┓┃┃┣ ┗┓
-    //     ┻ ┗┛┗┛┗┛ ┻ ┗┛┛┗┗┛  ┣┛┛┗┗┛ ┗┻ ┻ ┗┗┛┗┛┗┛
-    //                                           
-    //diffuseMapTP = TexturePrimitive::load("../assets/container2.png");
-    //specularMapTP = TexturePrimitive::load("../assets/container2_specular.png");
+    m_renderSystem.init();
+    //    __/\\\\____________/\\\\_____/\\\\\\\\\\\\____/\\\\\\\\\__________________        
+    //     _\/\\\\\\________/\\\\\\___/\\\//////////___/\\\///////\\\________________       
+    //      _\/\\\//\\\____/\\\//\\\__/\\\_____________\/\\\_____\/\\\________________      
+    //       _\/\\\\///\\\/\\\/_\/\\\_\/\\\____/\\\\\\\_\/\\\\\\\\\\\/_____/\\\\\\\\\\_     
+    //        _\/\\\__\///\\\/___\/\\\_\/\\\___\/////\\\_\/\\\//////\\\____\/\\\//////__    
+    //         _\/\\\____\///_____\/\\\_\/\\\_______\/\\\_\/\\\____\//\\\___\/\\\\\\\\\\_   
+    //          _\/\\\_____________\/\\\_\/\\\_______\/\\\_\/\\\_____\//\\\__\////////\\\_  
+    //           _\/\\\_____________\/\\\_\//\\\\\\\\\\\\/__\/\\\______\//\\\__/\\\\\\\\\\_ 
+    //            _\///______________\///___\////////////____\///________\///__\//////////__
+    InputManager::getInstance().init();
+    SceneManager::getInstance().init(m_registry);
 
     // set callbacks: window resize, single key click, mouse, scroll
     glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
@@ -152,15 +124,28 @@ bool BackEnd::init() {
 }
 
 void BackEnd::run() {
+    // set camera aspect ratio with "real" dimensions
+    int width{};
+    int height{};
+    glfwGetFramebufferSize(m_window, &width, &height);
+    m_cameraSystem.updateAspect(m_registry, width, height);
+    // save time for FPS
     m_fpsLastTime = glfwGetTime();
 
-    //    ┳┳┓┏┓•┳┓   ┓ ┏┓┏┓┏┓
-    //    ┃┃┃┣┫┓┃┃   ┃ ┃┃┃┃┃┃
-    //    ┛ ┗┛┗┗┛┗   ┗┛┗┛┗┛┣┛
-    //                                 
-    // time -> events -> logic -> render
+    //    ███    ███  █████  ██ ███    ██     ██       ██████   ██████  ██████  
+    //    ████  ████ ██   ██ ██ ████   ██     ██      ██    ██ ██    ██ ██   ██ 
+    //    ██ ████ ██ ███████ ██ ██ ██  ██     ██      ██    ██ ██    ██ ██████  
+    //    ██  ██  ██ ██   ██ ██ ██  ██ ██     ██      ██    ██ ██    ██ ██      
+    //    ██      ██ ██   ██ ██ ██   ████     ███████  ██████   ██████  ██      
     while (!glfwWindowShouldClose(m_window)) {
-        // deltaTime
+        //        ███      ▄█    ▄▄▄▄███▄▄▄▄      ▄████████ 
+        //    ▀█████████▄ ███  ▄██▀▀▀███▀▀▀██▄   ███    ███ 
+        //       ▀███▀▀██ ███▌ ███   ███   ███   ███    █▀  
+        //        ███   ▀ ███▌ ███   ███   ███  ▄███▄▄▄     
+        //        ███     ███▌ ███   ███   ███ ▀▀███▀▀▀     
+        //        ███     ███  ███   ███   ███   ███    █▄  
+        //        ███     ███  ███   ███   ███   ███    ███ 
+        //       ▄████▀   █▀    ▀█   ███   █▀    ██████████ 
         double currentTime = glfwGetTime();
         double dt = currentTime - m_lastTime;
         // death spiral safe
@@ -170,71 +155,72 @@ void BackEnd::run() {
         m_lastTime = currentTime;
         m_accumulator += dt;
 
+        //       ▄████████  ▄█    █▄     ▄████████ ███▄▄▄▄       ███        ▄████████ 
+        //      ███    ███ ███    ███   ███    ███ ███▀▀▀██▄ ▀█████████▄   ███    ███ 
+        //      ███    █▀  ███    ███   ███    █▀  ███   ███    ▀███▀▀██   ███    █▀  
+        //     ▄███▄▄▄     ███    ███  ▄███▄▄▄     ███   ███     ███   ▀   ███        
+        //    ▀▀███▀▀▀     ███    ███ ▀▀███▀▀▀     ███   ███     ███     ▀███████████ 
+        //      ███    █▄  ███    ███   ███    █▄  ███   ███     ███              ███ 
+        //      ███    ███ ███    ███   ███    ███ ███   ███     ███        ▄█    ███ 
+        //      ██████████  ▀██████▀    ██████████  ▀█   █▀     ▄████▀    ▄████████▀  
         InputManager::getInstance().copyKeys();
         // events to call InputManager
         glfwPollEvents();
-
         _processGlobalInput();
-        // player movement direction
+        // player's movement direction
         m_playerSystem.processInput(m_registry);
         // mouse scroll and movement
         m_cameraSystem.processInput(m_registry);
-        //if (m_minimap) {
-        //    m_minimapCamera->processInput();
-        //}
 
-        // logic (once per 60 frames): physics, collisions
-        while (m_accumulator >= FIXED_DT) {
-            float fixedt = static_cast<float>(FIXED_DT);
+        // once per 60 frames
+        while (m_accumulator >= Constants::Stats::World::FIXED_DT) {
+            //     ▄█        ▄██████▄     ▄██████▄   ▄█   ▄████████ 
+            //    ███       ███    ███   ███    ███ ███  ███    ███ 
+            //    ███       ███    ███   ███    █▀  ███▌ ███    █▀  
+            //    ███       ███    ███  ▄███        ███▌ ███        
+            //    ███       ███    ███ ▀▀███ ████▄  ███▌ ███        
+            //    ███       ███    ███   ███    ███ ███  ███    █▄  
+            //    ███▌    ▄ ███    ███   ███    ███ ███  ███    ███ 
+            //    █████▄▄██  ▀██████▀    ████████▀  █▀   ████████▀  
+            //    ▀                                                 
+            float fixedt = static_cast<float>(Constants::Stats::World::FIXED_DT);
+            // interpolation setup
             m_transformSystem.saveState(m_registry);
-
-            // change transform position based on set direction
-            SceneManager::getInstance().fixedUpdate(fixedt);
-
-            // execute physics command from queue with collisions
+            // actual movement change
+            m_aiSystem.fixedUpdate(m_registry, fixedt);
+            m_dirLightMovementSystem.fixedUpdate(m_registry, fixedt);
+            m_playerSystem.fixedUpdate(m_registry, fixedt);
+            // physics step: collision
+            m_physicsSystem.fixedUpdate(m_registry, fixedt);
             m_physicsSystem.execute();
-            m_accumulator -= FIXED_DT;
+            m_accumulator -= Constants::Stats::World::FIXED_DT;
         }
 
-        // Interpolation (smoothing the frames in-between physics and rendering)
-        float alpha = static_cast<float>(m_accumulator / FIXED_DT);
-        // lookAt()
-        m_cameraSystem.updateView(m_registry, alpha);
-        // if it's only used in RenderSystem - just calculate it there and delete this
-        m_cameraSystem.updateProjection(m_registry);
-        //if (m_minimap) {
-        //    m_minimapCamera->updateView(alpha);
-        //    m_minimapCamera->updateProjection();
-        //}
-
-        // renderrring at last
-        // --- main camera
-        m_renderSystem.beginFrame(m_screenWidth, m_screenHeight);
-        // Renderer -> registerInQueue()
-        SceneManager::getInstance().update(alpha);
-        // execute drawing commands from queues
+        //       ▄████████    ▄████████ ███▄▄▄▄   ████████▄     ▄████████    ▄████████ 
+        //      ███    ███   ███    ███ ███▀▀▀██▄ ███   ▀███   ███    ███   ███    ███ 
+        //      ███    ███   ███    █▀  ███   ███ ███    ███   ███    █▀    ███    ███ 
+        //     ▄███▄▄▄▄██▀  ▄███▄▄▄     ███   ███ ███    ███  ▄███▄▄▄      ▄███▄▄▄▄██▀ 
+        //    ▀▀███▀▀▀▀▀   ▀▀███▀▀▀     ███   ███ ███    ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   
+        //    ▀███████████   ███    █▄  ███   ███ ███    ███   ███    █▄  ▀███████████ 
+        //      ███    ███   ███    ███ ███   ███ ███   ▄███   ███    ███   ███    ███ 
+        //      ███    ███   ██████████  ▀█   █▀  ████████▀    ██████████   ███    ███ 
+        //      ███    ███                                                  ███    ███ 
+        // interpolation (smoothing the frames in-between physics and rendering)
+        float alpha = static_cast<float>(m_accumulator / Constants::Stats::World::FIXED_DT);
+        // moved to RenderSystem
+        //m_cameraSystem.updateView(m_registry, alpha);
+        //m_cameraSystem.updateProjection(m_registry);
+        m_renderSystem.beginFrame(width, height);
+        // calculate render context and register queues
+        m_renderSystem.update(m_registry, alpha);
+        // sort and render
         m_renderSystem.execute();
-        // probably for debug only
+        // debug mode
         m_renderSystem.renderImmediate();
-        // --- minimap camera
-        if (m_minimap) {
-            //m_renderSystem.setCamera(m_minimapCamera.get());
-            m_renderSystem.beginFrameMinimap(m_minimapWidth, m_minimapHeight);
-            SceneManager::getInstance().update(alpha);
-            m_renderSystem.execute();
-            m_renderSystem.endFrameMinimap();
-            //m_renderSystem.setCamera(m_camera.get());
-        }
-        m_renderSystem.endFrame();
+        m_renderSystem.endFrame(m_window);
 
-        //TexturePrimitive::bind(diffuseMapTP, 0);
-        //TexturePrimitive::bind(specularMapTP, 1);
-
-        // game entities clean up
-        SceneManager::getInstance().lateUpdate();
-        // reset input changes for mouse
+        // reset input changes for mouse scroll and movement
         InputManager::getInstance().reset();
-
         // bonus
         _showFps(m_window, currentTime);
     }
@@ -242,10 +228,8 @@ void BackEnd::run() {
     //    ┏┓┏┓┳┳┓┏┓  ┏┓┓┏┏┓┳┓
     //    ┃┓┣┫┃┃┃┣   ┃┃┃┃┣ ┣┫
     //    ┗┛┛┗┛ ┗┗┛  ┗┛┗┛┗┛┛┗
-    //                       
-    SceneManager::getInstance().end();
-    ResourceManager::getInstance().end();
-    m_registry.end();
+    // delete raw pointers inside containers
+    // no raw pointers for now so chill
 
     glfwDestroyWindow(m_window);
     m_window = nullptr;
@@ -269,7 +253,7 @@ void BackEnd::_processGlobalInput() {
     }
     // SCENES
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_K)) {
-        SceneManager::getInstance().toggleScene();
+        SceneManager::getInstance().toggleScene(m_registry);
     }
     // RENDER MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_O)) {
@@ -281,7 +265,7 @@ void BackEnd::_processGlobalInput() {
     }
     // INFO: POSITION, CAMERA
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {
-        m_cameraSystem.mainCameraLogPosition(m_registry);
+        m_cameraSystem.logPosition(m_registry);
     }
     #endif
 }

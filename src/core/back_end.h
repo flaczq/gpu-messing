@@ -10,8 +10,6 @@
 #include "../ecs/systems/player_system.h"
 #include "../ecs/systems/render_system.h"
 #include "../ecs/systems/transform_system.h"
-#include "../managers/scene_manager.h"
-#include <memory>
 
 enum class GraphicsAPI {
     OPEN_GL,
@@ -28,23 +26,21 @@ public:
     CameraSystem& getCameraSystem() { return m_cameraSystem; }
 
 private:
-    unsigned int m_screenWidth{}, m_screenHeight{};
-    unsigned int m_minimapWidth{}, m_minimapHeight{};
+    unsigned int m_screenWidth{};
+    unsigned int m_screenHeight{};
+    unsigned int m_minimapWidth{};
+    unsigned int m_minimapHeight{};
 
+    GLFWwindow* m_window{};
+    // ECS
     Registry m_registry{};
-    TransformSystem m_transformSystem{};
-    PhysicsSystem m_physicsSystem{};
-    PlayerSystem m_playerSystem{};
     AISystem m_aiSystem{};
     CameraSystem m_cameraSystem{};
-    RenderSystem m_renderSystem{};
     DirLightMovementSystem m_dirLightMovementSystem{};
-
-    GLFWwindow* m_window = nullptr;
-    bool m_minimap = true;
-
-    // textures
-    //unsigned int diffuseMapTP, specularMapTP;
+    PhysicsSystem m_physicsSystem{};
+    PlayerSystem m_playerSystem{};
+    RenderSystem m_renderSystem{};
+    TransformSystem m_transformSystem{};
 
     // for showFps()
     double m_fpsLastTime{};
@@ -52,9 +48,8 @@ private:
     float m_fpsLastFrame = 0.0f;
 
     // time
-    double m_lastTime = 0.0;
-    double m_accumulator = 0.0;
-    static constexpr double FIXED_DT = 1.0 / 60.0;
+    double m_lastTime = 0.0f;
+    double m_accumulator = 0.0f;
 
     void _processGlobalInput();
     void _showFps(GLFWwindow* window, double currentTime);

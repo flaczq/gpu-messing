@@ -22,7 +22,10 @@ struct PhysicsComponent : public IComponent {
 	PhysicsLayer layer{};
 	bool isColliding{};
 
-	PhysicsComponent(const glm::vec3& AABBmin, const glm::vec3& AABBmax, PhysicsLayer layer = PhysicsLayer::BOT)
+	PhysicsComponent() = default;
+	PhysicsComponent(const glm::vec3& AABBmin,
+					 const glm::vec3& AABBmax,
+					 PhysicsLayer layer = PhysicsLayer::BOT)
 		: AABB(AABBmin, AABBmax, AABBmin, AABBmax),
 		  layer(layer),
 		  isColliding(false) {}

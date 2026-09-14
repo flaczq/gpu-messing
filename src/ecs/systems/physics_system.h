@@ -2,20 +2,19 @@
 
 #include "../../configs/math_config.hpp"
 #include "../components/physics_component.hpp"
+#include "../components/transform_component.hpp"
 #include <vector>
 
 struct PhysicsCommand {
-	TransformComponent* transform;
-	PhysicsComponent* physics;
+	TransformComponent* transform{};
+	PhysicsComponent* physics{};
 };
 
 class Registry;
-class TransformComponent;
 
 class PhysicsSystem {
 public:
 	PhysicsSystem();
-	~PhysicsSystem();
 
 	bool init();
 	void fixedUpdate(Registry& registry, float fixedt);

@@ -31,5 +31,5 @@ private:
 	glm::vec3 m_diffuseColor;
 	GLenum m_drawType;
 
-	void setupMesh();
+	void _setupMesh();
 };

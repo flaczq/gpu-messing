@@ -22,7 +22,7 @@ Model::Model(const std::string& name, const std::string& path)
 	  m_AABBMin(std::numeric_limits<float>::max()),
 	  m_AABBMax(std::numeric_limits<float>::lowest())
 {
-	loadModel(path);
+	_loadModel(path);
 }
 
 Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABBMin, glm::vec3 AABBMax)
@@ -41,7 +41,7 @@ void Model::draw(const Shader& shader) {
 	}
 }
 
-void Model::loadModel(const std::string& path) {
+void Model::_loadModel(const std::string& path) {
 	Assimp::Importer importer{};
 	const aiScene * scene = importer.ReadFile(path,
 		aiProcess_Triangulate      | // convert all primitives into triangles
@@ -56,14 +56,14 @@ void Model::loadModel(const std::string& path) {
 
 	m_directory = path.substr(0, path.find_last_of('/'));
 
-	processNode(scene->mRootNode, scene);
+	_processNode(scene->mRootNode, scene);
 }
 
-void Model::processNode(const aiNode* node, const aiScene* scene) {
+void Model::_processNode(const aiNode* node, const aiScene* scene) {
 	// process all mesh nodes (if exist)
 	for (size_t i{}; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		std::unique_ptr<Mesh> newMesh = processMesh(mesh, scene);
+		std::unique_ptr<Mesh> newMesh = _processMesh(mesh, scene);
 		m_meshes.push_back(std::move(newMesh));
 
 		glm::vec3 meshMin(mesh->mAABB.mMin.x, mesh->mAABB.mMin.y, mesh->mAABB.mMin.z);
@@ -74,11 +74,11 @@ void Model::processNode(const aiNode* node, const aiScene* scene) {
 
 	// recursive: process all nodes' children
 	for (size_t i{}; i < node->mNumChildren; i++) {
-		processNode(node->mChildren[i], scene);
+		_processNode(node->mChildren[i], scene);
 	}
 }
 
-std::unique_ptr<Mesh> Model::processMesh(const aiMesh* mesh, const aiScene* scene) {
+std::unique_ptr<Mesh> Model::_processMesh(const aiMesh* mesh, const aiScene* scene) {
 	std::vector<Vertex> vertices;
 	std::vector<unsigned int> indices;
 	std::vector<std::shared_ptr<Texture>> textures;
@@ -137,11 +137,11 @@ std::unique_ptr<Mesh> Model::processMesh(const aiMesh* mesh, const aiScene* scen
 	if (mesh->mMaterialIndex >= 0) {
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		// diffuse maps
-		auto diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", scene);
+		auto diffuseMaps = _loadMaterialTextures(material, aiTextureType_DIFFUSE, "diffuse", scene);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 		// specular maps
-		auto specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", scene);
+		auto specularMaps = _loadMaterialTextures(material, aiTextureType_SPECULAR, "specular", scene);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
 		// no textures and no vertex colors
@@ -157,7 +157,7 @@ std::unique_ptr<Mesh> Model::processMesh(const aiMesh* mesh, const aiScene* scen
 	return std::make_unique<Mesh>(vertices, indices, textures, hasDiffuseColor, diffuseColor);
 }
 
-std::vector<std::shared_ptr<Texture>> Model::loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const {
+std::vector<std::shared_ptr<Texture>> Model::_loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const {
 	std::vector<std::shared_ptr<Texture>> textures;
 
 	for (size_t i{}; i < mat->GetTextureCount(type); i++) {

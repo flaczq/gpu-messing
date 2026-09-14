@@ -33,9 +33,6 @@
     <ClCompile Include="src\graphics\mesh.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\texture_primitive.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
     <ClCompile Include="src\managers\scene_manager.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
@@ -158,9 +155,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\mesh.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\texture_primitive.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\scenes\scene.h">

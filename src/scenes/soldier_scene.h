@@ -6,12 +6,9 @@ class Registry;
 
 class SoldierScene : public Scene {
 public:
-	SoldierScene(Registry& registry);
-
-	bool init() override;
-
+	bool init(Registry& registry) override;
+	void end(Registry& registry) override;
 	SceneID getID() const override { return SceneID::SOLDIER; }
 
-private:
-	//private
+//private:
 };

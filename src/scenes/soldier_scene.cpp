@@ -1,21 +1,20 @@
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
 #include "../ecs/components/ai_component.hpp"
+#include "../ecs/components/camera_component.hpp"
 #include "../ecs/components/dir_light_movement_component.hpp"
 #include "../ecs/components/identity_component.hpp"
 #include "../ecs/components/physics_component.hpp"
+#include "../ecs/components/player_component.hpp"
 #include "../ecs/components/render_component.hpp"
 #include "../ecs/components/stats_component.hpp"
 #include "../ecs/components/transform_component.hpp"
 #include "../ecs/entites/entity.hpp"
 #include "../ecs/registry.h"
-#include "../ecs/systems/physics_system.h"
-#include "../game/camera.h"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
 #include "../graphics/mesh_generator.h"
 #include "../graphics/model.h"
-#include "../graphics/renderer.h"
 #include "../managers/resource_manager.h"
 #include "../utils/color_constants.hpp"
 #include "../utils/math_utils.hpp"
@@ -28,12 +27,7 @@
 #include <utility>
 #include <vector>
 
-SoldierScene::SoldierScene(Registry& registry)
-    : Scene(registry)
-{
-}
-
-bool SoldierScene::init() {
+bool SoldierScene::init(Registry& registry) {
     //    ┓ ┏┓┏┓┳┓  ┳┓┏┓┏┳┓┏┓
     //    ┃ ┃┃┣┫┃┃  ┃┃┣┫ ┃ ┣┫
     //    ┗┛┗┛┛┗┻┛  ┻┛┛┗ ┻ ┛┗
@@ -53,7 +47,6 @@ bool SoldierScene::init() {
     ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
-
     auto simpleShader = ResourceManager::getInstance().getShader("simple_shader");
     auto gizmoShader = ResourceManager::getInstance().getShader("gizmo_shader");
     auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
@@ -107,29 +100,21 @@ bool SoldierScene::init() {
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
 
-    // FLOOR
+    // ENTITIES
+    // --- floor
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
         floorMaterial->addBoolUniform("hasMatColor", true);
         floorMaterial->addVec3Uniform("matColor", Constants::Color::NATGREEN);
-        Entity floorE = m_registry.createEntity();
-        m_registry.addComponent<IdentityComponent>(floorE, "floor");
-        m_registry.addComponent<StatsComponent>(floorE, Constants::Stats::Player::MAX_HEALTH, Constants::Stats::Player::MAX_HEALTH);
-        m_registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
-        m_registry.addComponent<RenderComponent>(floorE, floorModel, floorMaterial);
-        m_registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax());
-
-        /*auto floorGO = std::make_unique<Entity>("floor");
-        //floorGO->setRenderQueueType(RenderQueueType::OPAQUE);
-        floorGO->setSolid(true);
-        floorGO->addComponent<TransformComponent>(glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
-        floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
-        floorGO->addComponent<PhysicsComponent>(floorModel->getAABBMin(), floorModel->getAABBMax());
-        m_gameEntities.push_back(std::move(floorGO));*/
+        Entity floorE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(floorE, "floor");
+        registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
+        registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax());
+        registry.addComponent<RenderComponent>(floorE, floorModel, floorMaterial);
     }
-    // LIGHT
+    //// --- light
     //auto lightModel = ResourceManager::getInstance().getModel("light_model");
     //auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
     //if (lightModel && lightMaterial) {
@@ -143,7 +128,7 @@ bool SoldierScene::init() {
     //    lightGO->addComponent<DirLightMovementComponent>();
     //    m_gameEntities.push_back(std::move(lightGO));
     //}
-    //// GRID
+    //// --- grid
     //auto gridModel = ResourceManager::getInstance().getModel("grid_model");
     //auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
     //if (gridModel && gridMaterial) {
@@ -155,7 +140,7 @@ bool SoldierScene::init() {
     //    gridGO->addComponent<RenderComponent>(gridModel, gridMaterial);
     //    m_gameEntities.push_back(std::move(gridGO));
     //}
-    //// GIZMO
+    //// --- gizmo
     ////auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
     ////auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
     ////if (gizmoModel && gizmoMaterial) {
@@ -166,22 +151,19 @@ bool SoldierScene::init() {
     ////    gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
     ////    m_gameEntities.push_back(std::move(gizmoGO));
     ////}
-    //// PLAYER -> FPS ARMS
-    //auto playerModel = ResourceManager::getInstance().getModel("player_model");
-    //auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
-    //if (playerModel && playerMaterial) {
-    //    auto playerGO = std::make_unique<Entity>("player");
-    //    playerGO->setRenderQueueType(RenderQueueType::TOP_LAYER);
-    //    playerGO->setSolid(true);
-    //    playerGO->setAbstract(true);
-    //    playerGO->addComponent<TransformComponent>(glm::vec3(21.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
-    //    // TODO add FpsComponent -> sway
-    //    playerGO->addComponent<RenderComponent>(playerModel, playerMaterial);
-    //    playerGO->addComponent<PhysicsComponent>(glm::vec3(-0.25f), glm::vec3(0.25f), PhysicsLayer::TOP); //playerModel->getAABBMin(), playerModel->getAABBMax()
-    //    playerGO->addComponent<PlayerComponent>(m_camera);
-    //    m_gameEntities.push_back(std::move(playerGO));
-    //}
-    //// SOLDIER
+    // --- fps arms
+    auto playerModel = ResourceManager::getInstance().getModel("player_model");
+    auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
+    if (playerModel && playerMaterial) {
+        Entity playerE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(playerE, "player");
+        registry.addComponent<TransformComponent>(playerE, glm::vec3(21.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
+        //registry.addComponent<PhysicsComponent>(playerE, glm::vec3(-0.25f), glm::vec3(0.25f), PhysicsLayer::TOP);
+        registry.addComponent<PlayerComponent>(playerE);
+        registry.addComponent<CameraComponent>(playerE);
+        registry.addComponent<RenderComponent>(playerE, playerModel, playerMaterial, RenderQueueType::TOP_LAYER);
+    }
+    //// --- soldier
     //auto soldierModel = ResourceManager::getInstance().getModel("soldier_model");
     //auto soldierMaterial = ResourceManager::getInstance().getMaterial("soldier_material");
     //if (soldierModel && soldierMaterial) {
@@ -203,7 +185,7 @@ bool SoldierScene::init() {
     //        m_gameEntities.push_back(std::move(soldierGO));
     //    }
     //}
-    //// SHERMAN TANK
+    //// --- sherman tank
     ///*auto tankModel = ResourceManager::getInstance().getModel("tank_model");
     //auto tankMaterial = ResourceManager::getInstance().getMaterial("tank_material");
     //if (tankModel && tankMaterial) {
@@ -214,7 +196,7 @@ bool SoldierScene::init() {
     //    tankGO->addComponent<PhysicsComponent>(tankModel->getAABBMin(), tankModel->getAABBMax());
     //    m_gameEntities.push_back(std::move(tankGO));
     //}*/
-    //// STENCIL BOXES
+    //// --- stencil boxes
     ///*auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
     //auto stencilBox1Material = ResourceManager::getInstance().getMaterial("window_material");
     //auto stencilBox2Material = ResourceManager::getInstance().getMaterial("light_material");
@@ -232,7 +214,7 @@ bool SoldierScene::init() {
     //    stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox2Material);
     //    m_gameEntities.push_back(std::move(stencilBoxGO));
     //}*/
-    //// WINDOW
+    //// --- window
     //auto windowModel = ResourceManager::getInstance().getModel("window_model");
     //auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     //if (windowModel && windowMaterial) {
@@ -247,7 +229,7 @@ bool SoldierScene::init() {
     //    windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
     //    m_gameEntities.push_back(std::move(windowGO));
     //}
-    //// GRASS
+    //// --- grass
     //auto grassModel = ResourceManager::getInstance().getModel("grass_model");
     ////auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     //if (grassModel && windowMaterial) {
@@ -265,5 +247,9 @@ bool SoldierScene::init() {
     //    m_gameEntities.push_back(std::move(grassGO));
     //}
 
-    return Scene::init();
+    return Scene::init(registry);
+}
+
+void SoldierScene::end(Registry& registry) {
+    Scene::end(registry);
 }

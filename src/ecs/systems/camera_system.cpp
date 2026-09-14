@@ -24,34 +24,33 @@ void CameraSystem::processInput(Registry& registry) {
     }
 }
 
-void CameraSystem::updateView(Registry& registry, float alpha) {
-    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
-        auto* transform = registry.getComponent<TransformComponent>(entity);
-        auto* camera = registry.getComponent<CameraComponent>(entity);
+//void CameraSystem::updateView(Registry& registry, float alpha) {
+//    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
+//        auto* transform = registry.getComponent<TransformComponent>(entity);
+//        auto* camera = registry.getComponent<CameraComponent>(entity);
+//
+//        glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
+//        glm::vec3 front = Utils::Component::calculateFront(*transform);
+//        glm::vec3 up = Utils::Component::calculateUp(*transform);
+//        // FIXME standing/crouching
+//        interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
+//            
+//        // followed position, where you looking at, up vector
+//        camera->view = glm::lookAt(interPosition, interPosition + front, up);
+//    }
+//}
 
-        //if (camera->isPrimary) {
-        glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
-        glm::vec3 front = Utils::Component::calculateFront(*transform);
-        glm::vec3 up = Utils::Component::calculateUp(*transform);
-        // FIXME standing/crouching
-        interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
-            
-        // followed position, where you looking at, up vector
-        camera->view = glm::lookAt(interPosition, interPosition + front, up);
-        break;
-    }
-}
+// calculation moved to RenderSystem
+//void CameraSystem::updateProjection(Registry& registry) {
+//    for (Entity entity : registry.view<CameraComponent>()) {
+//        auto* camera = registry.getComponent<CameraComponent>(entity);
+//        
+//        camera->projection = Utils::Component::calculateProjection(camera->fov, camera->aspect, camera->nearPlane, camera->farPlane);
+//    }
+//}
 
-void CameraSystem::updateProjection(Registry& registry) {
-    for (Entity entity : registry.view<CameraComponent>()) {
-        auto* camera = registry.getComponent<CameraComponent>(entity);
-
-        //if (camera->isPrimary) {
-        camera->projection = Utils::Component::calculatePerspective(camera->fov, camera->aspect, camera->nearPlane, camera->farPlane);
-    }
-}
-
-void CameraSystem::mainCameraUpdateAspect(Registry& registry, int width, int height) {
+void CameraSystem::updateAspect(Registry& registry, int width, int height) {
+    // TODO only primary Camera for now
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
@@ -63,7 +62,8 @@ void CameraSystem::mainCameraUpdateAspect(Registry& registry, int width, int hei
     }
 }
 
-void CameraSystem::mainCameraLogPosition(Registry& registry) {
+void CameraSystem::logPosition(Registry& registry) {
+    // TODO only primary Camera for now
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
@@ -73,9 +73,7 @@ void CameraSystem::mainCameraLogPosition(Registry& registry) {
             LOG("Camera: "
                 << "X: " << std::showpos << transform->position.x << "   "
                 << "Y: " << std::showpos << transform->position.y << "   "
-                << "Z: " << std::showpos << transform->position.z);// << "   "
-            //<< "YAW: " << m_camera.getYaw() << "   "
-            //<< "PITCH: " << m_camera.getPitch());
+                << "Z: " << std::showpos << transform->position.z);
             LOG_D(Utils::Math::getVec3Values(transform->position));
             break;
         }
@@ -91,7 +89,6 @@ void CameraSystem::_processMouseScroll(CameraComponent* camera, float yOffset) {
         if (camera->fov > Constants::Stats::Camera::MAX_FOV) {
             camera->fov = Constants::Stats::Camera::MAX_FOV;
         }
-        //camera->lastFov = camera->fov;
     }
 }
 

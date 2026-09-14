@@ -13,12 +13,11 @@ public:
 	void operator=(const SceneManager&) = delete;
 
 	bool init(Registry& registry);
-	void toggleScene();
+	void toggleScene(Registry& registry);
 
 private:
 	// hidden constructor
 	SceneManager();
 
-	Registry& m_registry{};
 	std::unique_ptr<Scene> m_currentScene{};
 };

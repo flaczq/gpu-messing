@@ -20,20 +20,11 @@
 RenderSystem::RenderSystem() = default;
 
 RenderSystem::~RenderSystem() {
-    m_opaqueQueue.clear();
-    m_stencilQueue.clear();
-    m_outlineQueue.clear();
-    m_blendingQueue.clear();
-    m_topLayerQueue.clear();
-    m_uiQueue.clear();
-
     glDeleteVertexArrays(1, &m_VAOAABB);
     glDeleteBuffers(1, &m_VBOAABB);
 }
 
-bool RenderSystem::init(GLFWwindow* window) {
-    m_window = window;
-
+bool RenderSystem::init() {
     // FIXME hardcoded max: 100
     m_opaqueQueue.reserve(100);
     m_stencilQueue.reserve(100);
@@ -106,46 +97,57 @@ void RenderSystem::beginFrameMinimap(unsigned int minimapWidth, unsigned int min
 
 void RenderSystem::update(Registry& registry, float alpha) {
     RenderContext m_renderContext{};
+    // CAMERA
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         // find primary camera for RenderContext
         if (camera->isPrimary) {
-            m_renderContext.mainCamera = camera;
-            m_renderContext.mainCameraTransform = transform;
+            // view and projection for most passes
+            m_renderContext.cameraView = Utils::Component::calculateView(*transform, alpha);
+            m_renderContext.cameraProjection = Utils::Component::calculateProjection(
+                camera->fov,
+                camera->aspect,
+                camera->nearPlane,
+                camera->farPlane
+            );
+            m_renderContext.cameraAspect = camera->aspect;
+            m_renderContext.cameraPosition = transform->position;
             break;
         }
     }
-    assert(m_renderContext.mainCamera != nullptr);
-    assert(m_renderContext.mainCameraTransform != nullptr);
-    for (Entity entity : registry.view<TransformComponent, DirLightMovementComponent>()) {
-        auto* transform = registry.getComponent<TransformComponent>(entity);
+    // DIR_LIGHT_MOVEMENT
+    for (Entity entity : registry.view<DirLightMovementComponent>()) {
         auto* dirLightMovement = registry.getComponent<DirLightMovementComponent>(entity);
 
-        m_renderContext.dirLightMovement = dirLightMovement;
-        // TODO more than single directional light
+        m_renderContext.hasDirLightMovement = true;
+        m_renderContext.dirLightMovementDirection = dirLightMovement->direction;
+        m_renderContext.dirLightMovementColor = dirLightMovement->color;
+        // TODO only primary Directional Light for now
         break;
     }
-    // is this premature optimization..?
-    if (m_renderDebugMode == RenderDebugMode::AABB) {
-        for (Entity entity : registry.view<TransformComponent, PhysicsComponent>()) {
-            auto* transform = registry.getComponent<TransformComponent>(entity);
-            auto* physics = registry.getComponent<PhysicsComponent>(entity);
 
-            glm::vec3 color = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
-            RenderImmediateCommand command = {
-                    transform->position,
-                    transform->rotation,
-                    transform->scale,
-                    Utils::Component::calculateAABBSize(physics->AABB),
-                    Utils::Component::calculateAABBCenter(physics->AABB),
-                    color
-            };
-            m_renderContext.renderImmediateCommands.push_back(command);
-        }
+    // PHYSICS
+    for (Entity entity : registry.view<TransformComponent, PhysicsComponent>()) {
+        auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* physics = registry.getComponent<PhysicsComponent>(entity);
+
+        glm::vec3 AABBSize = Utils::Component::calculateAABBSize(physics->AABB);
+        glm::vec3 AABBCenter = Utils::Component::calculateAABBCenter(physics->AABB);
+        glm::vec3 color = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
+        RenderImmediateCommand command = {
+                transform->position,
+                transform->rotation,
+                transform->scale,
+                AABBSize,
+                AABBCenter,
+                color
+        };
+        m_renderImmediateCommands.push_back(command);
     }
 
+    // RENDER
     for (Entity entity : registry.view<TransformComponent, RenderComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* render = registry.getComponent<RenderComponent>(entity);
@@ -195,7 +197,7 @@ void RenderSystem::execute() {
     //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
     //                          
     _sortQueueByMaterial(m_opaqueQueue);
-    _renderSortedQueue(m_opaqueQueue, "opaque pass", m_renderContext.mainCamera->projection);
+    _renderSortedQueue(m_opaqueQueue, "opaque pass", m_renderContext.cameraProjection);
 
     //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
     //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
@@ -208,7 +210,7 @@ void RenderSystem::execute() {
         glStencilMask(0xFF);
         // ---
         _sortQueueByMaterial(m_stencilQueue);
-        _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.mainCamera->projection);
+        _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.cameraProjection);
     }
 
     //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
@@ -221,7 +223,7 @@ void RenderSystem::execute() {
         glStencilMask(0x00);
         // ---
         _sortQueueByMaterial(m_outlineQueue);
-        _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.mainCamera->projection);
+        _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.cameraProjection);
         // ---
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
@@ -241,7 +243,7 @@ void RenderSystem::execute() {
         //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
         // ---
         _sortQueueByDistance(m_blendingQueue);
-        _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.mainCamera->projection);
+        _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.cameraProjection);
         // ---
         glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
@@ -252,15 +254,14 @@ void RenderSystem::execute() {
     //     ┻ ┗┛┣┛  ┗┛┛┗┗┛┗┛┛┗  ┣┛┛┗┗┛┗┛
     //                                 
     if (!m_topLayerQueue.empty()) {
-        // always last
+        // always last (before UI)
         glClear(GL_DEPTH_BUFFER_BIT);
-        // different fov and planes for top layer
-        // same aspect
-        float fov = 45.0f;
-        float aspect = m_renderContext.mainCamera->aspect;
-        float nearPlane = 0.01f;
-        float farPlane = 10.0f;
-        glm::mat4 topLayerProjection = Utils::Component::calculatePerspective(fov, aspect, nearPlane, farPlane);
+        glm::mat4 topLayerProjection = Utils::Component::calculateProjection(
+            45.0f,
+            m_renderContext.cameraAspect,
+            0.01f,
+            10.0f
+        );
         _sortQueueByMaterial(m_topLayerQueue);
         _renderSortedQueue(m_topLayerQueue, "top layer pass", topLayerProjection);
     }
@@ -270,8 +271,9 @@ void RenderSystem::execute() {
     //    ┗┛┗  ┣┛┛┗┗┛┗┛
     //                 
     if (!m_uiQueue.empty()) {
+        // always last (last last)
         _sortQueueByMaterial(m_uiQueue);
-        _renderSortedQueue(m_uiQueue, "ui pass", m_renderContext.mainCamera->projection);
+        _renderSortedQueue(m_uiQueue, "ui pass", m_renderContext.cameraProjection);
     }
 
     m_opaqueQueue.clear();
@@ -290,7 +292,7 @@ void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const
     // sort by material address
     std::sort(queue.begin(), queue.end(), [](const RenderCommand& cmd1, const RenderCommand& cmd2) {
         return cmd1.material < cmd2.material;
-    });
+        });
 }
 
 void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const {
@@ -299,10 +301,10 @@ void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const
     }
 
     // sort by the distance to the main camera (furthest to closest)
-    glm::vec3 mainCameraPosition = m_renderContext.mainCameraTransform->position;
-    std::sort(queue.begin(), queue.end(), [mainCameraPosition](const RenderCommand& cmd1, const RenderCommand& cmd2) {
-        return glm::length(mainCameraPosition - cmd2.position) < glm::length(mainCameraPosition - cmd1.position);
-    });
+    glm::vec3 cameraPosition = m_renderContext.cameraPosition;
+    std::sort(queue.begin(), queue.end(), [cameraPosition](const RenderCommand& cmd1, const RenderCommand& cmd2) {
+        return glm::length(cameraPosition - cmd2.position) < glm::length(cameraPosition - cmd1.position);
+        });
 }
 
 // TODO: use UBO
@@ -329,11 +331,13 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
                 currShader->use();
 
                 // draws per-shader (rarely)
+                currShader->setMat4fv("view", m_renderContext.cameraView);
                 currShader->setMat4fv("projection", projection);
-                currShader->setMat4fv("view", m_renderContext.mainCamera->view);
                 currShader->setVec3fv("viewPos", cmd.position);
-                currShader->setVec3fv("lightDir", m_renderContext.dirLightMovement->direction);
-                currShader->setVec3fv("lightColor", m_renderContext.dirLightMovement->color);
+                if (m_renderContext.hasDirLightMovement) {
+                    currShader->setVec3fv("lightDir", m_renderContext.dirLightMovementDirection);
+                    currShader->setVec3fv("lightColor", m_renderContext.dirLightMovementColor);
+                }
                 //LOG_D("per-shader draws with shader: " << currShader->getID());
 
                 lastShader = currShader;
@@ -358,14 +362,14 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
     }
 }
 
-void RenderSystem::renderImmediate() const {
+void RenderSystem::renderImmediate() {
     std::vector<RenderImmediateCommand> queue;
     unsigned int VAO{};
     switch (m_renderDebugMode) {
     case RenderDebugMode::NONE:
         return;
     case RenderDebugMode::AABB:
-        queue = m_renderContext.renderImmediateCommands;
+        queue = m_renderImmediateCommands;
         if (queue.empty()) {
             LOG_D("nothing to render immediately, sad QQ");
             return;
@@ -379,8 +383,8 @@ void RenderSystem::renderImmediate() const {
 
     auto shader = ResourceManager::getInstance().getShader("simple_shader");
     shader->use();
-    shader->setMat4fv("projection", m_renderContext.mainCamera->projection);
-    shader->setMat4fv("view", m_renderContext.mainCamera->view);
+    shader->setMat4fv("view", m_renderContext.cameraView);
+    shader->setMat4fv("projection", m_renderContext.cameraProjection);
     for (auto& cmd : queue) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cmd.center);
@@ -393,6 +397,8 @@ void RenderSystem::renderImmediate() const {
 
     glBindVertexArray(0);
     glEnable(GL_DEPTH_TEST);
+
+    m_renderImmediateCommands.clear();
 }
 
 // TUTORIAL: unused
@@ -416,7 +422,7 @@ void RenderSystem::_renderFrameBufferTexture() {
     glDeleteFramebuffers(1, &fbo);
 }
 
-void RenderSystem::endFrame() {
+void RenderSystem::endFrame(GLFWwindow* window) {
     // no need to unbind it every time but w/e
     glBindVertexArray(0);
 
@@ -424,7 +430,7 @@ void RenderSystem::endFrame() {
     //glDisable(GL_STENCIL_TEST);
     //glDisable(GL_BLEND);
 
-    glfwSwapBuffers(m_window);
+    glfwSwapBuffers(window);
 }
 
 void RenderSystem::endFrameMinimap() {
@@ -444,7 +450,7 @@ void RenderSystem::toggleRenderDebugMode() {
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
-    backEnd->getCameraSystem().mainCameraUpdateAspect(backEnd->getRegistry(), width, height);
+    backEnd->getCameraSystem().updateAspect(backEnd->getRegistry(), width, height);
 
     glViewport(0, 0, width, height);
 }

@@ -37,7 +37,6 @@
     <ClCompile Include="src\managers\scene_manager.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\model.cpp" />
-    <ClCompile Include="src\graphics\texture_primitive.cpp" />
     <ClCompile Include="src\core\back_end.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -110,7 +109,6 @@
     <ClInclude Include="src\managers\scene_manager.h" />
     <ClInclude Include="src\graphics\mesh.h" />
     <ClInclude Include="src\graphics\model.h" />
-    <ClInclude Include="src\graphics\texture_primitive.h" />
     <ClInclude Include="src\scenes\scene.h" />
     <ClInclude Include="src\core\back_end.h" />
     <ClInclude Include="libs\stb_image.h" />

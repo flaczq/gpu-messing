@@ -8,10 +8,6 @@
 
 PhysicsSystem::PhysicsSystem() = default;
 
-PhysicsSystem::~PhysicsSystem() {
-    m_physicsQueue.clear();
-}
-
 bool PhysicsSystem::init() {
     // FIXME hardcoded max: 100
     m_physicsQueue.reserve(100);
