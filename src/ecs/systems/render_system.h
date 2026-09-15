@@ -77,7 +77,7 @@ private:
 	unsigned int m_VBOAABB{};
 
 	RenderMode m_renderMode = RenderMode::STANDARD;
-	RenderDebugMode m_renderDebugMode = RenderDebugMode::NONE;
+	RenderDebugMode m_renderDebugMode = RenderDebugMode::AABB;
 
 	void _registerInQueue(RenderQueueType queueType, const RenderCommand& command);
 	void _sortQueueByMaterial(std::vector<RenderCommand>& queue) const;

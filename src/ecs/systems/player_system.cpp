@@ -2,6 +2,7 @@
 #include "../../managers/input_manager.h"
 #include "../../utils/component_utils.hpp"
 #include "../../utils/math_utils.hpp"
+#include "../components/camera_component.hpp"
 #include "../components/player_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -12,18 +13,17 @@ PlayerSystem::PlayerSystem() = default;
 
 // continuous key clicks -> movement
 void PlayerSystem::processInput(Registry& registry) {
-    // TODO only primary Player for now
     for (Entity entity : registry.view<PlayerComponent>()) {
         auto* player = registry.getComponent<PlayerComponent>(entity);
 
         if (player->isPrimary) {
             // CROUCHING/STANDING
             if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
-                _toggleCrouching(player);
+                _toggleCrouching(*player);
             }
             // GOD MODE
             if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
-                _toggleGodMode(player);
+                _toggleGodMode(*player);
             }
 
             // MOVEMENT
@@ -51,46 +51,48 @@ void PlayerSystem::processInput(Registry& registry) {
             }
             // normalize diagonal movement
             player->moveDir = glm::length(moveDir) > 0.0f ? glm::normalize(moveDir) : glm::vec3(0.0f);
+            // TODO only primary Player for now
             break;
         }
     }
 }
 
 void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
-    // TODO only primary Player for now
-    for (Entity entity : registry.view<TransformComponent, PlayerComponent>()) {
+    for (Entity entity : registry.view<TransformComponent, CameraComponent, PlayerComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* camera = registry.getComponent<CameraComponent>(entity);
         auto* player = registry.getComponent<PlayerComponent>(entity);
 
         if (player->isPrimary) {
             if (glm::length(player->moveDir) > 0.0f) {
                 glm::vec3 up = Constants::Stats::World::WORLD_UP;
-                glm::vec3 flatFront = Utils::Component::calculateFlatFront(*transform);
-                glm::vec3 right = Utils::Component::calculateRight(*transform);
+                glm::vec3 flatFront = Utils::Component::calculateFlatFront(*camera);
+                glm::vec3 right = Utils::Component::calculateRight(*camera);
                 glm::vec3 direction =
+                    // up-down
+                    up * player->moveDir.y +
                     // front-back
                     flatFront * player->moveDir.z +
                     // left-right
-                    right * player->moveDir.x +
-                    // up-down
-                    up * player->moveDir.y;
+                    right * player->moveDir.x;
                 float velocity = Constants::Stats::Player::MOVEMENT_SPEED * fixedt;
                 transform->position += direction * velocity;
             }
             if (!player->isGodMode) {
                 transform->position.y = 0.0f;
             }
+            // TODO only primary Player for now
             break;
         }
     }
 }
 
-void PlayerSystem::_toggleCrouching(PlayerComponent* player) {
-    player->isCrouching = !player->isCrouching;
-    LOG_D("Changed Player's crouching to: " << std::boolalpha << player->isCrouching);
+void PlayerSystem::_toggleCrouching(PlayerComponent& player) {
+    player.isCrouching = !player.isCrouching;
+    LOG_D("Changed Player's crouching to: " << std::boolalpha << player.isCrouching);
 }
 
-void PlayerSystem::_toggleGodMode(PlayerComponent* player) {
-    player->isGodMode = !player->isGodMode;
-    LOG_D("Changed Player's GOD mode to: " << std::boolalpha << player->isGodMode);
+void PlayerSystem::_toggleGodMode(PlayerComponent& player) {
+    player.isGodMode = !player.isGodMode;
+    LOG_D("Changed Player's GOD mode to: " << std::boolalpha << player.isGodMode);
 }

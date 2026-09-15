@@ -13,6 +13,6 @@ public:
 	void fixedUpdate(Registry& registry, float fixedt);
 
 private:
-	void _toggleCrouching(PlayerComponent* player);
-	void _toggleGodMode(PlayerComponent* player);
+	void _toggleCrouching(PlayerComponent& player);
+	void _toggleGodMode(PlayerComponent& player);
 };

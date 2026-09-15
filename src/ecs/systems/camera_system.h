@@ -17,6 +17,6 @@ public:
 	void logPosition(Registry& registry);
 
 private:
-	void _processMouseScroll(CameraComponent* camera, float yOffset);
-	void _processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch = true);
+	void _processMouseScroll(CameraComponent& camera, float yOffset);
+	void _processMouseMovement(TransformComponent& transform, CameraComponent& camera, float xOffset, float yOffset, bool clampPitch = true);
 };

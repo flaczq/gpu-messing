@@ -1,9 +1,6 @@
-#include "../../configs/gl_config.hpp"
 #include "../../configs/log_config.hpp"
 #include "../../configs/math_config.hpp"
 #include "../../managers/input_manager.h"
-#include "../../utils/component_utils.hpp"
-#include "../../utils/math_utils.hpp"
 #include "../../utils/stats_constants.hpp"
 #include "../components/camera_component.hpp"
 #include "../components/transform_component.hpp"
@@ -19,11 +16,12 @@ void CameraSystem::processInput(Registry& registry) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
-        _processMouseScroll(camera, InputManager::getInstance().getScrollOffset());
-        _processMouseMovement(transform, InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
+        _processMouseScroll(*camera, InputManager::getInstance().getScrollOffset());
+        _processMouseMovement(*transform, *camera, InputManager::getInstance().getOffsetX(), InputManager::getInstance().getOffsetY());
     }
 }
 
+// unused: moved to RenderSystem
 //void CameraSystem::updateView(Registry& registry, float alpha) {
 //    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
 //        auto* transform = registry.getComponent<TransformComponent>(entity);
@@ -40,7 +38,7 @@ void CameraSystem::processInput(Registry& registry) {
 //    }
 //}
 
-// calculation moved to RenderSystem
+// unused: moved to RenderSystem
 //void CameraSystem::updateProjection(Registry& registry) {
 //    for (Entity entity : registry.view<CameraComponent>()) {
 //        auto* camera = registry.getComponent<CameraComponent>(entity);
@@ -50,20 +48,19 @@ void CameraSystem::processInput(Registry& registry) {
 //}
 
 void CameraSystem::updateAspect(Registry& registry, int width, int height) {
-    // TODO only primary Camera for now
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         if (camera->isPrimary) {
-            camera->aspect = ((float)width / (float)height);
+            camera->aspect = (float)width / (float)height;
+            // TODO only primary Camera for now
             break;
         }
     }
 }
 
 void CameraSystem::logPosition(Registry& registry) {
-    // TODO only primary Camera for now
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
@@ -71,38 +68,40 @@ void CameraSystem::logPosition(Registry& registry) {
         if (camera->isPrimary) {
             std::cout << std::fixed << std::setprecision(2);
             LOG("Camera: "
-                << "X: " << std::showpos << transform->position.x << "   "
-                << "Y: " << std::showpos << transform->position.y << "   "
-                << "Z: " << std::showpos << transform->position.z);
-            LOG_D(Utils::Math::getVec3Values(transform->position));
+                << "X: "     << std::showpos << transform->position.x << "   "
+                << "Y: "     << std::showpos << transform->position.y << "   "
+                << "Z: "     << std::showpos << transform->position.z << "   "
+                << "YAW: "   << std::showpos << camera->yaw           << "   "
+                << "PITCH: " << std::showpos << camera->pitch);
+            // TODO only primary Camera for now
             break;
         }
     }
 }
 
-void CameraSystem::_processMouseScroll(CameraComponent* camera, float yOffset) {
+void CameraSystem::_processMouseScroll(CameraComponent& camera, float yOffset) {
     if (yOffset != 0.0f) {
-        camera->fov -= yOffset;
-        if (camera->fov < Constants::Stats::Camera::MIN_FOV) {
-            camera->fov = Constants::Stats::Camera::MIN_FOV;
+        camera.fov -= yOffset;
+        if (camera.fov < Constants::Stats::Camera::MIN_FOV) {
+            camera.fov = Constants::Stats::Camera::MIN_FOV;
         }
-        if (camera->fov > Constants::Stats::Camera::MAX_FOV) {
-            camera->fov = Constants::Stats::Camera::MAX_FOV;
+        if (camera.fov > Constants::Stats::Camera::MAX_FOV) {
+            camera.fov = Constants::Stats::Camera::MAX_FOV;
         }
     }
 }
 
-void CameraSystem::_processMouseMovement(TransformComponent* transform, float xOffset, float yOffset, bool clampPitch) {
+void CameraSystem::_processMouseMovement(TransformComponent& transform, CameraComponent& camera, float xOffset, float yOffset, bool clampPitch) {
     // left-right
-    transform->yaw += xOffset * Constants::Stats::Camera::MOUSE_SENSITIVITY;
+    camera.yaw += xOffset * Constants::Stats::Camera::MOUSE_SENSITIVITY;
     // up-down
-    transform->pitch += yOffset * Constants::Stats::Camera::MOUSE_SENSITIVITY;
+    camera.pitch += yOffset * Constants::Stats::Camera::MOUSE_SENSITIVITY;
     if (clampPitch) {
-        transform->pitch = glm::clamp(transform->pitch, Constants::Stats::Camera::MIN_PITCH, Constants::Stats::Camera::MAX_PITCH);
+        camera.pitch = glm::clamp(camera.pitch, Constants::Stats::Camera::MIN_PITCH, Constants::Stats::Camera::MAX_PITCH);
     }
     // update rotation
-    glm::quat qYaw = glm::angleAxis(glm::radians(-transform->yaw), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::quat qPitch = glm::angleAxis(glm::radians(transform->pitch), glm::vec3(1.0f, 0.0f, 0.0f));
-    transform->rotation = qYaw * qPitch;
+    glm::quat qYaw = glm::angleAxis(glm::radians(-camera.yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::quat qPitch = glm::angleAxis(glm::radians(camera.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+    transform.rotation = qYaw * qPitch;
     //transform->prevRotation = transform->rotation;
 }

@@ -25,26 +25,6 @@ namespace Utils {
 		inline glm::mat4 calculateNormalMatrix(const glm::mat4& model) {
 			return glm::transpose(glm::inverse(glm::mat3(model)));
 		}
-		inline glm::vec3 calculateFront(const TransformComponent& transform) {
-			glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
-			front.x = cos(glm::radians(transform.yaw)) * cos(glm::radians(transform.pitch));
-			front.y = sin(glm::radians(transform.pitch));
-			front.z = sin(glm::radians(transform.yaw)) * cos(glm::radians(transform.pitch));
-			return glm::normalize(front);
-		}
-		inline glm::vec3 calculateFlatFront(const TransformComponent& transform) {
-			glm::vec3 flatFront = glm::vec3(0.0f, 0.0f, 0.0f);
-			flatFront.x = cos(glm::radians(transform.yaw));
-			flatFront.y = 0.0f;
-			flatFront.z = sin(glm::radians(transform.yaw));
-			return glm::normalize(flatFront);
-		}
-		inline glm::vec3 calculateRight(const TransformComponent& transform) {
-			return glm::normalize(glm::cross(calculateFront(transform), Constants::Stats::World::WORLD_UP));
-		}
-		inline glm::vec3 calculateUp(const TransformComponent& transform) {
-			return glm::normalize(glm::cross(calculateRight(transform), calculateFront(transform)));
-		}
 
 		// PHYSICS COMPONENT
 		constexpr glm::vec3 calculateAABBSize(AABB aabb) {
@@ -55,10 +35,30 @@ namespace Utils {
 		}
 
 		// CAMERA COMPONENT
-		inline glm::mat4 calculateView(const TransformComponent& transform, float alpha, float yOffset = 0.0f) {
+		inline glm::vec3 calculateFront(const CameraComponent& camera) {
+			glm::vec3 front = glm::vec3(0.0f, 0.0f, 0.0f);
+			front.x = cos(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+			front.y = sin(glm::radians(camera.pitch));
+			front.z = sin(glm::radians(camera.yaw)) * cos(glm::radians(camera.pitch));
+			return glm::normalize(front);
+		}
+		inline glm::vec3 calculateFlatFront(const CameraComponent& camera) {
+			glm::vec3 flatFront = glm::vec3(0.0f, 0.0f, 0.0f);
+			flatFront.x = cos(glm::radians(camera.yaw));
+			flatFront.y = 0.0f;
+			flatFront.z = sin(glm::radians(camera.yaw));
+			return glm::normalize(flatFront);
+		}
+		inline glm::vec3 calculateRight(const CameraComponent& camera) {
+			return glm::normalize(glm::cross(calculateFront(camera), Constants::Stats::World::WORLD_UP));
+		}
+		inline glm::vec3 calculateUp(const CameraComponent& camera) {
+			return glm::normalize(glm::cross(calculateRight(camera), calculateFront(camera)));
+		}
+		inline glm::mat4 calculateView(const TransformComponent& transform, const CameraComponent& camera, float alpha, float yOffset = 0.0f) {
 			glm::vec3 interPosition = calculateInterpolatedPosition(transform, alpha);
-			glm::vec3 front = calculateFront(transform);
-			glm::vec3 up = calculateUp(transform);
+			glm::vec3 front = calculateFront(camera);
+			glm::vec3 up = calculateUp(camera);
 			interPosition.y += yOffset;
 			// followed position, where you looking at, up vector
 			return glm::lookAt(interPosition, interPosition + front, up);

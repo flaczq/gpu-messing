@@ -13,15 +13,17 @@ void DirLightMovementSystem::fixedUpdate(Registry& registry, float fixedt) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* dirLightMovement = registry.getComponent<DirLightMovementComponent>(entity);
 
-        static float tt = 0.0f;
-        tt += fixedt;
-        float x = sin(tt);
-        float z = cos(tt);
-        glm::vec3 lightPos = glm::normalize(glm::vec3(x, 1.0f, z));
-        transform->position = lightPos * 11.0f;
-        dirLightMovement->direction = -lightPos;
-        dirLightMovement->color = Constants::Color::WHITE;
-        // TODO more than single directional light
-        break;
+        if (dirLightMovement->isPrimary) {
+            static float tt = 0.0f;
+            tt += fixedt;
+            float x = sin(tt);
+            float z = cos(tt);
+            glm::vec3 lightPos = glm::normalize(glm::vec3(x, 1.0f, z));
+            transform->position = lightPos * 11.0f;
+            dirLightMovement->direction = -lightPos;
+            dirLightMovement->color = Constants::Color::WHITE;
+            // TODO more than single directional light
+            break;
+        }
     }
 }

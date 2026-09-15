@@ -99,7 +99,7 @@ void RenderSystem::beginFrameMinimap(unsigned int minimapWidth, unsigned int min
 void RenderSystem::update(Registry& registry, float alpha) {
     m_renderContext = RenderContext{};
     // CAMERA+PLAYER
-    for (Entity entity : registry.view<TransformComponent, CameraComponent, PlayerComponent>()) {
+    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
         auto* player = registry.getComponent<PlayerComponent>(entity);
@@ -108,11 +108,11 @@ void RenderSystem::update(Registry& registry, float alpha) {
         if (camera->isPrimary) {
             float yOffset = 0.0f;
             // FIXME make it more abstract because Camera can follow not-Player entity
-            if (player) {
+            if (player != nullptr) {
                 yOffset = player->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
             }
             // view and projection for most passes
-            m_renderContext.cameraView = Utils::Component::calculateView(*transform, alpha, yOffset);
+            m_renderContext.cameraView = Utils::Component::calculateView(*transform, *camera, alpha, yOffset);
             m_renderContext.cameraProjection = Utils::Component::calculateProjection(
                 camera->fov,
                 camera->aspect,
@@ -128,11 +128,13 @@ void RenderSystem::update(Registry& registry, float alpha) {
     for (Entity entity : registry.view<DirLightMovementComponent>()) {
         auto* dirLightMovement = registry.getComponent<DirLightMovementComponent>(entity);
 
-        m_renderContext.hasDirLightMovement = true;
-        m_renderContext.dirLightMovementDirection = dirLightMovement->direction;
-        m_renderContext.dirLightMovementColor = dirLightMovement->color;
-        // TODO only primary Directional Light for now
-        break;
+        if (dirLightMovement->isPrimary) {
+            m_renderContext.hasDirLightMovement = true;
+            m_renderContext.dirLightMovementDirection = dirLightMovement->direction;
+            m_renderContext.dirLightMovementColor = dirLightMovement->color;
+            // TODO only primary Directional Light for now
+            break;
+        }
     }
 
     // PHYSICS
@@ -175,6 +177,24 @@ void RenderSystem::update(Registry& registry, float alpha) {
 }
 
 void RenderSystem::_registerInQueue(RenderQueueType queueType, const RenderCommand& command) {
+    //       ▄████████    ▄████████ ███▄▄▄▄   ████████▄     ▄████████    ▄████████      
+    //      ███    ███   ███    ███ ███▀▀▀██▄ ███   ▀███   ███    ███   ███    ███      
+    //      ███    ███   ███    █▀  ███   ███ ███    ███   ███    █▀    ███    ███      
+    //     ▄███▄▄▄▄██▀  ▄███▄▄▄     ███   ███ ███    ███  ▄███▄▄▄      ▄███▄▄▄▄██▀      
+    //    ▀▀███▀▀▀▀▀   ▀▀███▀▀▀     ███   ███ ███    ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀        
+    //    ▀███████████   ███    █▄  ███   ███ ███    ███   ███    █▄  ▀███████████      
+    //      ███    ███   ███    ███ ███   ███ ███   ▄███   ███    ███   ███    ███      
+    //      ███    ███   ██████████  ▀█   █▀  ████████▀    ██████████   ███    ███      
+    //      ███    ███                                                  ███    ███      
+    // 
+    //       ▄███████▄    ▄████████    ▄████████    ▄████████    ▄████████    ▄████████ 
+    //      ███    ███   ███    ███   ███    ███   ███    ███   ███    ███   ███    ███ 
+    //      ███    ███   ███    ███   ███    █▀    ███    █▀    ███    █▀    ███    █▀  
+    //      ███    ███   ███    ███   ███          ███         ▄███▄▄▄       ███        
+    //    ▀█████████▀  ▀███████████ ▀███████████ ▀███████████ ▀▀███▀▀▀     ▀███████████ 
+    //      ███          ███    ███          ███          ███   ███    █▄           ███ 
+    //      ███          ███    ███    ▄█    ███    ▄█    ███   ███    ███    ▄█    ███ 
+    //     ▄████▀        ███    █▀   ▄████████▀   ▄████████▀    ██████████  ▄████████▀  
     switch (queueType) {
     case RenderQueueType::OPAQUE:
         m_opaqueQueue.push_back(command);
@@ -199,67 +219,100 @@ void RenderSystem::_registerInQueue(RenderQueueType queueType, const RenderComma
 
 // ORDER: opaque -> transparent back-to-front
 void RenderSystem::execute() {
-    //    ┏┓┏┓┏┓┏┓┳┳┏┓  ┏┓┏┓┏┓┏┓
-    //    ┃┃┃┃┣┫┃┃┃┃┣   ┃┃┣┫┗┓┗┓
-    //    ┗┛┣┛┛┗┗┻┗┛┗┛  ┣┛┛┗┗┛┗┛
-    //                          
+    //     ▄██████▄     ▄███████▄    ▄████████ ████████▄   ███    █▄     ▄████████ 
+    //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███   ███    ███ 
+    //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███   ███    █▀  
+    //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███  ▄███▄▄▄     
+    //    ███    ███ ▀█████████▀  ▀███████████ ███    ███  ███    ███ ▀▀███▀▀▀     
+    //    ███    ███   ███          ███    ███ ███    ███  ███    ███   ███    █▄  
+    //    ███    ███   ███          ███    ███ ███  ▀ ███  ███    ███   ███    ███ 
+    //     ▀██████▀   ▄████▀        ███    █▀   ▀██████▀▄█ ████████▀    ██████████ 
     _sortQueueByMaterial(m_opaqueQueue);
     _renderSortedQueue(m_opaqueQueue, "opaque pass", m_renderContext.cameraProjection);
 
-    //    ┏┓┏┳┓┏┓┳┓┏┓•┓   ┏┓┏┓┏┓┏┓
-    //    ┗┓ ┃ ┣ ┃┃┃ ┓┃   ┃┃┣┫┗┓┗┓
-    //    ┗┛ ┻ ┗┛┛┗┗┛┗┗┛  ┣┛┛┗┗┛┗┛
-    //                            
+    //       ▄████████     ███        ▄████████ ███▄▄▄▄    ▄████████  ▄█   ▄█       
+    //      ███    ███ ▀█████████▄   ███    ███ ███▀▀▀██▄ ███    ███ ███  ███       
+    //      ███    █▀     ▀███▀▀██   ███    █▀  ███   ███ ███    █▀  ███▌ ███       
+    //      ███            ███   ▀  ▄███▄▄▄     ███   ███ ███        ███▌ ███       
+    //    ▀███████████     ███     ▀▀███▀▀▀     ███   ███ ███        ███▌ ███       
+    //             ███     ███       ███    █▄  ███   ███ ███    █▄  ███  ███       
+    //       ▄█    ███     ███       ███    ███ ███   ███ ███    ███ ███  ███▌    ▄ 
+    //     ▄████████▀     ▄████▀     ██████████  ▀█   █▀  ████████▀  █▀   █████▄▄██ 
+    //                                                                    ▀         
     if (!m_stencilQueue.empty()) {
         glEnable(GL_STENCIL_TEST);
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glStencilMask(0xFF);
-        // ---
+
         _sortQueueByMaterial(m_stencilQueue);
         _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.cameraProjection);
     }
 
-    //    ┏┓┳┳┏┳┓┓ ┳┳┓┏┓  ┏┓┏┓┏┓┏┓
-    //    ┃┃┃┃ ┃ ┃ ┃┃┃┣   ┃┃┣┫┗┓┗┓
-    //    ┗┛┗┛ ┻ ┗┛┻┛┗┗┛  ┣┛┛┗┗┛┗┛
-    //                            
+    //     ▄██████▄  ███    █▄      ███      ▄█        ▄█  ███▄▄▄▄      ▄████████ 
+    //    ███    ███ ███    ███ ▀█████████▄ ███       ███  ███▀▀▀██▄   ███    ███ 
+    //    ███    ███ ███    ███    ▀███▀▀██ ███       ███▌ ███   ███   ███    █▀  
+    //    ███    ███ ███    ███     ███   ▀ ███       ███▌ ███   ███  ▄███▄▄▄     
+    //    ███    ███ ███    ███     ███     ███       ███▌ ███   ███ ▀▀███▀▀▀     
+    //    ███    ███ ███    ███     ███     ███       ███  ███   ███   ███    █▄  
+    //    ███    ███ ███    ███     ███     ███▌    ▄ ███  ███   ███   ███    ███ 
+    //     ▀██████▀  ████████▀     ▄████▀   █████▄▄██ █▀    ▀█   █▀    ██████████ 
+    //                                      ▀                                     
     if (!m_outlineQueue.empty()) {
         glDisable(GL_DEPTH_TEST);
         glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
         glStencilMask(0x00);
-        // ---
+
         _sortQueueByMaterial(m_outlineQueue);
         _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.cameraProjection);
-        // ---
+
         glEnable(GL_DEPTH_TEST);
         glStencilFunc(GL_ALWAYS, 0, 0xFF);
         glStencilMask(0xFF);
         glDisable(GL_STENCIL_TEST);
     }
 
-    //    ┳┓┓ ┏┓┳┓┳┓•┳┓┏┓  ┏┓┏┓┏┓┏┓
-    //    ┣┫┃ ┣ ┃┃┃┃┓┃┃┃┓  ┃┃┣┫┗┓┗┓
-    //    ┻┛┗┛┗┛┛┗┻┛┗┛┗┗┛  ┣┛┛┗┗┛┗┛
-    //                             
+    //    ▀█████████▄   ▄█          ▄████████ ███▄▄▄▄   ████████▄   ▄█  ███▄▄▄▄      ▄██████▄  
+    //      ███    ███ ███         ███    ███ ███▀▀▀██▄ ███   ▀███ ███  ███▀▀▀██▄   ███    ███ 
+    //      ███    ███ ███         ███    █▀  ███   ███ ███    ███ ███▌ ███   ███   ███    █▀  
+    //     ▄███▄▄▄██▀  ███        ▄███▄▄▄     ███   ███ ███    ███ ███▌ ███   ███  ▄███        
+    //    ▀▀███▀▀▀██▄  ███       ▀▀███▀▀▀     ███   ███ ███    ███ ███▌ ███   ███ ▀▀███ ████▄  
+    //      ███    ██▄ ███         ███    █▄  ███   ███ ███    ███ ███  ███   ███   ███    ███ 
+    //      ███    ███ ███▌    ▄   ███    ███ ███   ███ ███   ▄███ ███  ███   ███   ███    ███ 
+    //    ▄█████████▀  █████▄▄██   ██████████  ▀█   █▀  ████████▀  █▀    ▀█   █▀    ████████▀  
+    //                 ▀                                                                       
     if (!m_blendingQueue.empty()) {
         glDisable(GL_CULL_FACE);
         glEnable(GL_BLEND);
         // src: factor == source color vector, dst: factor == 1 - source color vector
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-        // ---
+
         _sortQueueByDistance(m_blendingQueue);
         _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.cameraProjection);
-        // ---
+
         glEnable(GL_CULL_FACE);
         glDisable(GL_BLEND);
     }
 
-    //    ┏┳┓┏┓┏┓  ┓ ┏┓┓┏┏┓┳┓  ┏┓┏┓┏┓┏┓
-    //     ┃ ┃┃┃┃  ┃ ┣┫┗┫┣ ┣┫  ┃┃┣┫┗┓┗┓
-    //     ┻ ┗┛┣┛  ┗┛┛┗┗┛┗┛┛┗  ┣┛┛┗┗┛┗┛
-    //                                 
+    //        ███      ▄██████▄     ▄███████▄                        
+    //    ▀█████████▄ ███    ███   ███    ███                        
+    //       ▀███▀▀██ ███    ███   ███    ███                        
+    //        ███   ▀ ███    ███   ███    ███                        
+    //        ███     ███    ███ ▀█████████▀                         
+    //        ███     ███    ███   ███                               
+    //        ███     ███    ███   ███                               
+    //       ▄████▀    ▀██████▀   ▄████▀                             
+    //                                                               
+    //     ▄█          ▄████████ ▄██   ▄      ▄████████    ▄████████ 
+    //    ███         ███    ███ ███   ██▄   ███    ███   ███    ███ 
+    //    ███         ███    ███ ███▄▄▄███   ███    █▀    ███    ███ 
+    //    ███         ███    ███ ▀▀▀▀▀▀███  ▄███▄▄▄      ▄███▄▄▄▄██▀ 
+    //    ███       ▀███████████ ▄██   ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   
+    //    ███         ███    ███ ███   ███   ███    █▄  ▀███████████ 
+    //    ███▌    ▄   ███    ███ ███   ███   ███    ███   ███    ███ 
+    //    █████▄▄██   ███    █▀   ▀█████▀    ██████████   ███    ███ 
+    //    ▀                                               ███    ███ 
     if (!m_topLayerQueue.empty()) {
         // always last (before UI)
         glClear(GL_DEPTH_BUFFER_BIT);
@@ -273,10 +326,15 @@ void RenderSystem::execute() {
         _renderSortedQueue(m_topLayerQueue, "top layer pass", topLayerProjection);
     }
 
-    //    ┳┳•  ┏┓┏┓┏┓┏┓
-    //    ┃┃┓  ┃┃┣┫┗┓┗┓
-    //    ┗┛┗  ┣┛┛┗┗┛┗┛
-    //                 
+    //    ███    █▄   ▄█  
+    //    ███    ███ ███  
+    //    ███    ███ ███▌ 
+    //    ███    ███ ███▌ 
+    //    ███    ███ ███▌ 
+    //    ███    ███ ███  
+    //    ███    ███ ███  
+    //    ████████▀  █▀   
+    //                    
     if (!m_uiQueue.empty()) {
         // always last (last last)
         _sortQueueByMaterial(m_uiQueue);

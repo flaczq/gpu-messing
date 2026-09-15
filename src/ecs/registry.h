@@ -31,7 +31,6 @@ public:
 			return nullptr;
 		}
 
-		// same every time.. i hope..?
 		ComponentTypeID cTypeID = ComponentID::get<T>();
 		auto cIt = it->second.components.find(cTypeID);
 		if (cIt == it->second.components.end()) {

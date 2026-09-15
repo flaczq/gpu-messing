@@ -6,8 +6,8 @@
 #include <vector>
 
 struct PhysicsCommand {
-	TransformComponent* transform{};
-	PhysicsComponent* physics{};
+	TransformComponent& transform;
+	PhysicsComponent& physics;
 };
 
 class Registry;
@@ -24,8 +24,8 @@ private:
 	std::vector<PhysicsCommand> m_physicsQueue{};
 
 	void _registerInQueue(const PhysicsCommand& command);
-	void _updateAABB(AABB aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
-	bool _detectCollision(PhysicsComponent* origin, PhysicsComponent* target);
-	bool _isCollidingByAABB(AABB origin, AABB target);
-	void _resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target);
+	void _updateAABB(AABB& aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
+	bool _detectCollision(const PhysicsComponent& physicsX, const PhysicsComponent& physicsY);
+	bool _isCollidingByAABB(const AABB& aabbX, const AABB& aabbY);
+	void _resolveCollisionByMTV(PhysicsCommand& commandX, PhysicsCommand& commandY);
 };

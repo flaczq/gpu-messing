@@ -28,10 +28,23 @@
 #include <vector>
 
 bool SoldierScene::init(Registry& registry) {
-    //    ┓ ┏┓┏┓┳┓  ┳┓┏┓┏┳┓┏┓
-    //    ┃ ┃┃┣┫┃┃  ┃┃┣┫ ┃ ┣┫
-    //    ┗┛┗┛┛┗┻┛  ┻┛┛┗ ┻ ┛┗
-    //                       
+    //     ▄█        ▄██████▄     ▄████████ ████████▄                                  
+    //    ███       ███    ███   ███    ███ ███   ▀███                                 
+    //    ███       ███    ███   ███    ███ ███    ███                                 
+    //    ███       ███    ███   ███    ███ ███    ███                                 
+    //    ███       ███    ███ ▀███████████ ███    ███                                 
+    //    ███       ███    ███   ███    ███ ███    ███                                 
+    //    ███▌    ▄ ███    ███   ███    ███ ███   ▄███                                 
+    //    █████▄▄██  ▀██████▀    ███    █▀  ████████▀                                  
+    //    ▀                                                                            
+    //       ▄████████    ▄████████    ▄████████    ▄████████     ███        ▄████████ 
+    //      ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄   ███    ███ 
+    //      ███    ███   ███    █▀    ███    █▀    ███    █▀     ▀███▀▀██   ███    █▀  
+    //      ███    ███   ███          ███         ▄███▄▄▄         ███   ▀   ███        
+    //    ▀███████████ ▀███████████ ▀███████████ ▀▀███▀▀▀         ███     ▀███████████ 
+    //      ███    ███          ███          ███   ███    █▄      ███              ███ 
+    //      ███    ███    ▄█    ███    ▄█    ███   ███    ███     ███        ▄█    ███ 
+    //      ███    █▀   ▄████████▀   ▄████████▀    ██████████    ▄████▀    ▄████████▀  
     // TEXTURES
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
@@ -62,7 +75,15 @@ bool SoldierScene::init(Registry& registry) {
     ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
 
-    // MODELS
+    //       ▄▄▄▄███▄▄▄▄    ▄██████▄  ████████▄     ▄████████  ▄█          ▄████████ 
+    //     ▄██▀▀▀███▀▀▀██▄ ███    ███ ███   ▀███   ███    ███ ███         ███    ███ 
+    //     ███   ███   ███ ███    ███ ███    ███   ███    █▀  ███         ███    █▀  
+    //     ███   ███   ███ ███    ███ ███    ███  ▄███▄▄▄     ███         ███        
+    //     ███   ███   ███ ███    ███ ███    ███ ▀▀███▀▀▀     ███       ▀███████████ 
+    //     ███   ███   ███ ███    ███ ███    ███   ███    █▄  ███                ███ 
+    //     ███   ███   ███ ███    ███ ███   ▄███   ███    ███ ███▌    ▄    ▄█    ███ 
+    //      ▀█   ███   █▀   ▀██████▀  ████████▀    ██████████ █████▄▄██  ▄████████▀  
+    //                                                        ▀                      
     // --- floor
     glm::vec3 floorSize = glm::vec3(14.0f, 0.0f, 14.0f);
     auto floor = MeshGenerator::createPlane(floorSize.x, floorSize.z);
@@ -100,7 +121,14 @@ bool SoldierScene::init(Registry& registry) {
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
 
-    // ENTITIES
+    //       ▄████████ ███▄▄▄▄       ███      ▄█      ███      ▄█     ▄████████    ▄████████ 
+    //      ███    ███ ███▀▀▀██▄ ▀█████████▄ ███  ▀█████████▄ ███    ███    ███   ███    ███ 
+    //      ███    █▀  ███   ███    ▀███▀▀██ ███▌    ▀███▀▀██ ███▌   ███    █▀    ███    █▀  
+    //     ▄███▄▄▄     ███   ███     ███   ▀ ███▌     ███   ▀ ███▌  ▄███▄▄▄       ███        
+    //    ▀▀███▀▀▀     ███   ███     ███     ███▌     ███     ███▌ ▀▀███▀▀▀     ▀███████████ 
+    //      ███    █▄  ███   ███     ███     ███      ███     ███    ███    █▄           ███ 
+    //      ███    ███ ███   ███     ███     ███      ███     ███    ███    ███    ▄█    ███ 
+    //      ██████████  ▀█   █▀     ▄████▀   █▀      ▄████▀   █▀     ██████████  ▄████████▀  
     // --- floor
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");

@@ -5,9 +5,7 @@
 #include "../scenes/soldier_scene.h"
 #include "../utils/enum_utils.hpp"
 #include "scene_manager.h"
-#include <iostream>
 #include <memory>
-#include <string>
 #include <utility>
 
 SceneManager& SceneManager::getInstance() {

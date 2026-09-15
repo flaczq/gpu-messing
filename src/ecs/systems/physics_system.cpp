@@ -1,5 +1,6 @@
 #include "../../configs/log_config.hpp"
 #include "../../configs/math_config.hpp"
+#include "../../utils/math_utils.hpp"
 #include "../components/physics_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -23,8 +24,8 @@ void PhysicsSystem::fixedUpdate(Registry& registry, float fixedt) {
         _updateAABB(physics->AABB, transform->position, transform->rotation, transform->scale);
 
         PhysicsCommand command = {
-            transform,
-            physics
+            *transform,
+            *physics
         };
         _registerInQueue(command);
     }
@@ -36,14 +37,14 @@ void PhysicsSystem::_registerInQueue(const PhysicsCommand& command) {
 
 void PhysicsSystem::execute() {
     for (auto& cmd : m_physicsQueue) {
-        cmd.physics->isColliding = false;
+        cmd.physics.isColliding = false;
     }
 
     for (auto& cmd : m_physicsQueue) {
-        if (cmd.physics->isColliding) {
+        if (cmd.physics.isColliding) {
             continue;
         }
-        if (cmd.physics->layer != PhysicsLayer::TOP) {
+        if (cmd.physics.layer != PhysicsLayer::TOP) {
             // ONLY TO(P)LAYER
             continue;
         }
@@ -53,18 +54,18 @@ void PhysicsSystem::execute() {
                 // home address
                 continue;
             }
-            //if (targetCmd.physics->isColliding) {
+            //if (targetCmd.physics.isColliding) {
             //	// checked
             //	continue;
             //}
-            if (cmd.physics->layer < targetCmd.physics->layer) {
+            if (cmd.physics.layer < targetCmd.physics.layer) {
                 // (p)layering
                 continue;
             }
 
             if (_detectCollision(cmd.physics, targetCmd.physics)) {
-                cmd.physics->isColliding = true;
-                targetCmd.physics->isColliding = true;
+                cmd.physics.isColliding = true;
+                targetCmd.physics.isColliding = true;
 
                 _resolveCollisionByMTV(cmd, targetCmd);
                 //LOG_D(&cmd << " <-> " << &targetCmd);
@@ -76,29 +77,29 @@ void PhysicsSystem::execute() {
     m_physicsQueue.clear();
 }
 
-bool PhysicsSystem::_detectCollision(PhysicsComponent* origin, PhysicsComponent* target) {
+bool PhysicsSystem::_detectCollision(const PhysicsComponent& physicsX, const PhysicsComponent& physicsY) {
     // FIXME first simple AABB collision check
     // later detail collision check
-    bool colliding = _isCollidingByAABB(origin->AABB, target->AABB);
+    bool colliding = _isCollidingByAABB(physicsX.AABB, physicsY.AABB);
     return colliding;
 }
 
-bool PhysicsSystem::_isCollidingByAABB(AABB origin, AABB target) {
-    bool collX = (origin.worldMin.x <= target.worldMax.x) && (origin.worldMax.x >= target.worldMin.x);
-    bool collY = (origin.worldMin.y <= target.worldMax.y) && (origin.worldMax.y >= target.worldMin.y);
-    bool collZ = (origin.worldMin.z <= target.worldMax.z) && (origin.worldMax.z >= target.worldMin.z);
+bool PhysicsSystem::_isCollidingByAABB(const AABB& aabbX, const AABB& aabbY) {
+    bool collX = (aabbX.worldMin.x <= aabbY.worldMax.x) && (aabbX.worldMax.x >= aabbY.worldMin.x);
+    bool collY = (aabbX.worldMin.y <= aabbY.worldMax.y) && (aabbX.worldMax.y >= aabbY.worldMin.y);
+    bool collZ = (aabbX.worldMin.z <= aabbY.worldMax.z) && (aabbX.worldMax.z >= aabbY.worldMin.z);
     return collX && collY && collZ;
 }
 
 // TODO: Minimal Translation Vector
-void PhysicsSystem::_resolveCollisionByMTV(PhysicsCommand origin, PhysicsCommand target) {
-    //origin.transform->position += glm::vec3(-1.0f, 0.0f, -1.0f);
+void PhysicsSystem::_resolveCollisionByMTV(PhysicsCommand& commandX, PhysicsCommand& commandY) {
+    //commandX.transform.position += glm::vec3(-1.0f, 0.0f, -1.0f);
     // FIXME maybe check if it's moving..?
     // then resolve only for moving entities
-    //target.transform->addPosition(glm::vec3(-1.0f));
+    //commandY.transform.addPosition(glm::vec3(-1.0f));
 }
 
-void PhysicsSystem::_updateAABB(AABB aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
+void PhysicsSystem::_updateAABB(AABB& aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale) {
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, position);
     model *= glm::mat4_cast(rotation);

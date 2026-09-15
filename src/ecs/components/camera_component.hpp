@@ -11,6 +11,9 @@ struct CameraComponent : public IComponent {
     float nearPlane         = Constants::Stats::Camera::NEAR_PLANE;
     float farPlane          = Constants::Stats::Camera::FAR_PLANE;
     float aspect            = 1.67f;
+    // looking at (0,0,0)
+    float yaw               = -69.0f;
+    float pitch             = -1.0f;
     bool isPrimary{};
 
     //CameraComponent() = default;
