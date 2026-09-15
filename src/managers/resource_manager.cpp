@@ -65,7 +65,7 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 		return;
 	}
 
-	unsigned int textureID = loadTextureFromFile(path);
+	unsigned int textureID = _loadTextureFromFile(path);
 	auto texture = std::make_shared<Texture>();
 	texture->id = textureID;
 	texture->type = typeName;
@@ -137,12 +137,12 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelNam
 		const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(name.c_str());
 		// again check if texture is embedded or outside (.png file)
 		if (embeddedTexture) {
-			texture->id = loadTextureFromMemory(embeddedTexture, path);
+			texture->id = _loadTextureFromMemory(embeddedTexture, path);
 		} else {
-			texture->id = loadTextureFromFile(path);
+			texture->id = _loadTextureFromFile(path);
 		}
 	} else {
-		texture->id = loadTextureFromFile(path);
+		texture->id = _loadTextureFromFile(path);
 	}
 
 
@@ -157,13 +157,7 @@ void ResourceManager::reloadShaders() {
 	LOG_D("Hot-loaded shaders...");
 }
 
-void ResourceManager::end() {
-	m_models.clear();
-	m_materials.clear();
-	m_textures.clear();
-}
-
-unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem, const std::string& path) {
+unsigned int ResourceManager::_loadTextureFromMemory(const aiTexture* textureMem, const std::string& path) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	//stbi_set_flip_vertically_on_load(true);
@@ -196,7 +190,7 @@ unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem,
 	}
 
 	if (data) {
-		uploadToGPU(data, textureID, width, height, channels, isBGR);
+		_uploadToGPU(data, textureID, width, height, channels, isBGR);
 
 		if (isStbiData) {
 			stbi_image_free(data);
@@ -210,7 +204,7 @@ unsigned int ResourceManager::loadTextureFromMemory(const aiTexture* textureMem,
 	return textureID;
 }
 
-unsigned int ResourceManager::loadTextureFromFile(const std::string& path) {
+unsigned int ResourceManager::_loadTextureFromFile(const std::string& path) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	//stbi_set_flip_vertically_on_load(true);
@@ -219,7 +213,7 @@ unsigned int ResourceManager::loadTextureFromFile(const std::string& path) {
 	unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 	if (data) {
 		// always RGB/RGBA so isBGR = false
-		uploadToGPU(data, textureID, width, height, channels, false);
+		_uploadToGPU(data, textureID, width, height, channels, false);
 		stbi_image_free(data);
 	} else {
 		LOG_E("RESOURCE_MANAGER::ASSIMP_LOAD_TEXTURE_FROM_FILE_FAILED: " << path);
@@ -228,7 +222,7 @@ unsigned int ResourceManager::loadTextureFromFile(const std::string& path) {
 	return textureID;
 }
 
-void ResourceManager::uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR) {
+void ResourceManager::_uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR) {
 	GLenum gpuFormat = GL_RGBA;
 	GLenum dataFormat = GL_RGBA;
 

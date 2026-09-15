@@ -30,5 +30,5 @@ private:
 	unsigned int m_vertex{}, m_fragment{};
 	std::string m_vertexPath{}, m_fragmentPath{};
 
-	void compile();
+	void _compile();
 };

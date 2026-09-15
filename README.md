@@ -1,5 +1,8 @@
 # 🌃 ©️ Engine Runner 2049
 ## Soon to be 🅰️🅰️🅰️🅰️-game standard (trust me bro!)
+- C++
+- ECS design pattern
+- no AI
 
 🤖 *cells interlinked within cells*
 
@@ -8,4 +11,4 @@
 🖌️ [for those who come after](ATTRIBUTIONS.md)
 
 ## What it can do for now
-![army3](army3.png)
+![army_ecs](army_ecs.png)

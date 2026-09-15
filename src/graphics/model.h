@@ -33,8 +33,8 @@ private:
 	glm::vec3 m_AABBMin{};
 	glm::vec3 m_AABBMax{};
 
-	void loadModel(const std::string& path);
-	void processNode(const aiNode* node, const aiScene* scene);
-	std::unique_ptr<Mesh> processMesh(const aiMesh* mesh, const aiScene* scene);
-	std::vector<std::shared_ptr<Texture>> loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const;
+	void _loadModel(const std::string& path);
+	void _processNode(const aiNode* node, const aiScene* scene);
+	std::unique_ptr<Mesh> _processMesh(const aiMesh* mesh, const aiScene* scene);
+	std::vector<std::shared_ptr<Texture>> _loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const;
 };

@@ -1,14 +1,11 @@
 #include "../configs/log_config.hpp"
-#include "../game/camera.h"
-#include "../graphics/renderer.h"
+#include "../ecs/registry.h"
 #include "../scenes/rtx_scene.h"
 #include "../scenes/scene.h"
 #include "../scenes/soldier_scene.h"
 #include "../utils/enum_utils.hpp"
 #include "scene_manager.h"
-#include <iostream>
 #include <memory>
-#include <string>
 #include <utility>
 
 SceneManager& SceneManager::getInstance() {
@@ -18,75 +15,36 @@ SceneManager& SceneManager::getInstance() {
 
 SceneManager::SceneManager() = default;
 
-bool SceneManager::init(Camera* camera) {
-	m_camera = camera;
-
+bool SceneManager::init(Registry& registry) {
 	// default scene
-	m_currentScene = std::make_unique<SoldierScene>(m_camera);
-	m_currentScene->init();
+	m_currentScene = std::make_unique<SoldierScene>();
+	m_currentScene->init(registry);
 
 	return true;
 }
 
-void SceneManager::toggleScene() {
+void SceneManager::toggleScene(Registry& registry) {
 	SceneID nextSceneID;
-
 	if (m_currentScene) {
-		nextSceneID = Utils::getEnumNext(m_currentScene->getID());
-		m_currentScene->end();
+		m_currentScene->end(registry);
+		nextSceneID = Utils::Enum::getNext(m_currentScene->getID());
 	} else {
-		nextSceneID = Utils::getEnumFirst(SceneID::SOLDIER);
+		nextSceneID = Utils::Enum::getFirst(SceneID::SOLDIER);
 	}
 
 	// TODO: LOADING
-	LOG_D("Changed CurrentScene to: " << Utils::getEnumName(nextSceneID));
+	LOG_D("Changed CurrentScene to: " << Utils::Enum::getName(nextSceneID));
 	switch (nextSceneID) {
 	case SceneID::SOLDIER:
-		m_currentScene = std::make_unique<SoldierScene>(m_camera);
+		m_currentScene = std::make_unique<SoldierScene>();
 		break;
 	case SceneID::RTX:
-		m_currentScene = std::make_unique<RtxScene>(m_camera);
+		m_currentScene = std::make_unique<RtxScene>();
 		break;
 		//case SceneID::FPS_GAME:
-		//	nextScene = std::make_unique<FpsGameScene>(m_camera);
+		//	nextScene = std::make_unique<FpsGameScene>();
 		//	break;
 	}
 
-	m_currentScene->init();
-}
-
-void SceneManager::processInput() {
-	if (m_currentScene) {
-		m_currentScene->processInput();
-	}
-}
-
-void SceneManager::saveState() const {
-	if (m_currentScene) {
-		m_currentScene->saveState();
-	}
-}
-
-void SceneManager::fixedUpdate(float fixedt) const {
-	if (m_currentScene) {
-		m_currentScene->fixedUpdate(fixedt);
-	}
-}
-
-void SceneManager::update(float alpha) const {
-	if (m_currentScene) {
-		m_currentScene->update(alpha);
-	}
-}
-
-void SceneManager::lateUpdate() const {
-	if (m_currentScene) {
-		m_currentScene->lateUpdate();
-	}
-}
-
-void SceneManager::end() const {
-	if (m_currentScene) {
-		m_currentScene->end();
-	}
+	m_currentScene->init(registry);
 }

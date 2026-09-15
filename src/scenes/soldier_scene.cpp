@@ -1,24 +1,24 @@
-#include "../components/ai_component.h"
-#include "../components/dir_light_movement_component.h"
-#include "../components/physics_component.h"
-#include "../components/player_component.h"
-#include "../components/render_component.h"
-#include "../components/transform_component.h"
-#include "../components/transform_fps_component.h"
 #include "../configs/log_config.hpp"
 #include "../configs/math_config.hpp"
-#include "../game/camera.h"
-#include "../game/game_entity.h"
-#include "../game/physics_world.h"
-#include "../graphics/graphics_types.hpp"
+#include "../ecs/components/ai_component.hpp"
+#include "../ecs/components/camera_component.hpp"
+#include "../ecs/components/dir_light_movement_component.hpp"
+#include "../ecs/components/identity_component.hpp"
+#include "../ecs/components/physics_component.hpp"
+#include "../ecs/components/player_component.hpp"
+#include "../ecs/components/render_component.hpp"
+#include "../ecs/components/stats_component.hpp"
+#include "../ecs/components/transform_component.hpp"
+#include "../ecs/entites/entity.hpp"
+#include "../ecs/registry.h"
 #include "../graphics/material.h"
 #include "../graphics/mesh.h"
 #include "../graphics/mesh_generator.h"
 #include "../graphics/model.h"
-#include "../graphics/renderer.h"
 #include "../managers/resource_manager.h"
-#include "../utils/colors_constants.hpp"
+#include "../utils/color_constants.hpp"
 #include "../utils/math_utils.hpp"
+#include "../utils/stats_constants.hpp"
 #include "scene.h"
 #include "soldier_scene.h"
 #include <algorithm>
@@ -27,16 +27,24 @@
 #include <utility>
 #include <vector>
 
-SoldierScene::SoldierScene(Camera* camera)
-    : m_camera(camera)
-{
-}
-
-void SoldierScene::init() {
-    //    ┓ ┏┓┏┓┳┓  ┳┓┏┓┏┳┓┏┓
-    //    ┃ ┃┃┣┫┃┃  ┃┃┣┫ ┃ ┣┫
-    //    ┗┛┗┛┛┗┻┛  ┻┛┛┗ ┻ ┛┗
-    //                       
+bool SoldierScene::init(Registry& registry) {
+    //     ▄█        ▄██████▄     ▄████████ ████████▄                                  
+    //    ███       ███    ███   ███    ███ ███   ▀███                                 
+    //    ███       ███    ███   ███    ███ ███    ███                                 
+    //    ███       ███    ███   ███    ███ ███    ███                                 
+    //    ███       ███    ███ ▀███████████ ███    ███                                 
+    //    ███       ███    ███   ███    ███ ███    ███                                 
+    //    ███▌    ▄ ███    ███   ███    ███ ███   ▄███                                 
+    //    █████▄▄██  ▀██████▀    ███    █▀  ████████▀                                  
+    //    ▀                                                                            
+    //       ▄████████    ▄████████    ▄████████    ▄████████     ███        ▄████████ 
+    //      ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄   ███    ███ 
+    //      ███    ███   ███    █▀    ███    █▀    ███    █▀     ▀███▀▀██   ███    █▀  
+    //      ███    ███   ███          ███         ▄███▄▄▄         ███   ▀   ███        
+    //    ▀███████████ ▀███████████ ▀███████████ ▀▀███▀▀▀         ███     ▀███████████ 
+    //      ███    ███          ███          ███   ███    █▄      ███              ███ 
+    //      ███    ███    ▄█    ███    ▄█    ███   ███    ███     ███        ▄█    ███ 
+    //      ███    █▀   ▄████████▀   ▄████████▀    ██████████    ▄████▀    ▄████████▀  
     // TEXTURES
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
@@ -52,7 +60,6 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
-
     auto simpleShader = ResourceManager::getInstance().getShader("simple_shader");
     auto gizmoShader = ResourceManager::getInstance().getShader("gizmo_shader");
     auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
@@ -68,7 +75,15 @@ void SoldierScene::init() {
     ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
 
-    // MODELS
+    //       ▄▄▄▄███▄▄▄▄    ▄██████▄  ████████▄     ▄████████  ▄█          ▄████████ 
+    //     ▄██▀▀▀███▀▀▀██▄ ███    ███ ███   ▀███   ███    ███ ███         ███    ███ 
+    //     ███   ███   ███ ███    ███ ███    ███   ███    █▀  ███         ███    █▀  
+    //     ███   ███   ███ ███    ███ ███    ███  ▄███▄▄▄     ███         ███        
+    //     ███   ███   ███ ███    ███ ███    ███ ▀▀███▀▀▀     ███       ▀███████████ 
+    //     ███   ███   ███ ███    ███ ███    ███   ███    █▄  ███                ███ 
+    //     ███   ███   ███ ███    ███ ███   ▄███   ███    ███ ███▌    ▄    ▄█    ███ 
+    //      ▀█   ███   █▀   ▀██████▀  ████████▀    ██████████ █████▄▄██  ▄████████▀  
+    //                                                        ▀                      
     // --- floor
     glm::vec3 floorSize = glm::vec3(14.0f, 0.0f, 14.0f);
     auto floor = MeshGenerator::createPlane(floorSize.x, floorSize.z);
@@ -106,80 +121,74 @@ void SoldierScene::init() {
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
 
-    // FLOOR
+    //       ▄████████ ███▄▄▄▄       ███      ▄█      ███      ▄█     ▄████████    ▄████████ 
+    //      ███    ███ ███▀▀▀██▄ ▀█████████▄ ███  ▀█████████▄ ███    ███    ███   ███    ███ 
+    //      ███    █▀  ███   ███    ▀███▀▀██ ███▌    ▀███▀▀██ ███▌   ███    █▀    ███    █▀  
+    //     ▄███▄▄▄     ███   ███     ███   ▀ ███▌     ███   ▀ ███▌  ▄███▄▄▄       ███        
+    //    ▀▀███▀▀▀     ███   ███     ███     ███▌     ███     ███▌ ▀▀███▀▀▀     ▀███████████ 
+    //      ███    █▄  ███   ███     ███     ███      ███     ███    ███    █▄           ███ 
+    //      ███    ███ ███   ███     ███     ███      ███     ███    ███    ███    ▄█    ███ 
+    //      ██████████  ▀█   █▀     ▄████▀   █▀      ▄████▀   █▀     ██████████  ▄████████▀  
+    // --- floor
     auto floorModel = ResourceManager::getInstance().getModel("floor_model");
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
         floorMaterial->addBoolUniform("hasMatColor", true);
-        floorMaterial->addVec3Uniform("matColor", Constants::Colors::NATGREEN);
-        auto floorGO = std::make_unique<GameEntity>("floor");
-        //floorGO->setRendererQueueType(RendererQueueType::OPAQUE);
-        floorGO->setSolid(true);
-        floorGO->addComponent<TransformComponent>(glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
-        floorGO->addComponent<RenderComponent>(floorModel, floorMaterial);
-        floorGO->addComponent<PhysicsComponent>(floorModel->getAABBMin(), floorModel->getAABBMax());
-        floorGO->init();
-        m_gameEntities.push_back(std::move(floorGO));
+        floorMaterial->addVec3Uniform("matColor", Constants::Color::NATGREEN);
+        Entity floorE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(floorE, "floor");
+        registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
+        registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax());
+        registry.addComponent<RenderComponent>(floorE, floorModel, floorMaterial);
     }
-    // LIGHT
+    // --- light
     auto lightModel = ResourceManager::getInstance().getModel("light_model");
     auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
     if (lightModel && lightMaterial) {
         lightMaterial->addBoolUniform("hasMatColor", true);
-        lightMaterial->addVec3Uniform("matColor", Constants::Colors::WHITE);
-        auto lightGO = std::make_unique<GameEntity>("light");
-        lightGO->setSolid(true);
-        lightGO->setAbstract(true);
-        lightGO->addComponent<TransformComponent>(glm::vec3(3.0f, 0.0f, 3.0f), glm::quat(), glm::vec3(0.2f));
-        lightGO->addComponent<RenderComponent>(lightModel, lightMaterial);
-        lightGO->addComponent<DirLightMovementComponent>();
-        lightGO->init();
-        m_gameEntities.push_back(std::move(lightGO));
+        lightMaterial->addVec3Uniform("matColor", Constants::Color::WHITE);
+        Entity lightE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(lightE, "light");
+        registry.addComponent<TransformComponent>(lightE, glm::vec3(3.0f, 0.0f, 3.0f), glm::quat(), glm::vec3(0.2f));
+        registry.addComponent<DirLightMovementComponent>(lightE, -glm::vec3(3.0f, 0.0f, 3.0f), Constants::Color::WHITE);
+        registry.addComponent<RenderComponent>(lightE, lightModel, lightMaterial);
     }
-    // GRID
+    // --- grid
     auto gridModel = ResourceManager::getInstance().getModel("grid_model");
     auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
     if (gridModel && gridMaterial) {
+        // same shader so it has to be set back to 'false'
         gridMaterial->addBoolUniform("hasMatColor", false);
-        auto gridGO = std::make_unique<GameEntity>("grid");
-        gridGO->setSolid(true);
-        gridGO->setAbstract(true);
-        gridGO->addComponent<TransformComponent>(glm::vec3(gridSize / 2.0f));
-        gridGO->addComponent<RenderComponent>(gridModel, gridMaterial);
-        gridGO->init();
-        m_gameEntities.push_back(std::move(gridGO));
+        Entity gridE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(gridE, "grid");
+        registry.addComponent<TransformComponent>(gridE, glm::vec3(gridSize / 2.0f));
+        registry.addComponent<RenderComponent>(gridE, gridModel, gridMaterial);
     }
-    // GIZMO
+    // --- gizmo
     //auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
     //auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
     //if (gizmoModel && gizmoMaterial) {
-    //    auto gizmoGO = std::make_unique<GameEntity>("gizmo");
+    //    auto gizmoGO = std::make_unique<Entity>("gizmo");
     //    gizmoGO->setSolid(true);
     //    gizmoGO->setAbstract(true);
     //    gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), glm::vec3(7.5f));
     //    gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
-    //    gizmoGO->init();
     //    m_gameEntities.push_back(std::move(gizmoGO));
     //}
-    // PLAYER -> FPS ARMS
+    // --- fps arms
     auto playerModel = ResourceManager::getInstance().getModel("player_model");
     auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
     if (playerModel && playerMaterial) {
-        auto playerGO = std::make_unique<GameEntity>("player");
-        playerGO->setRendererQueueType(RendererQueueType::TOP_LAYER);
-        playerGO->setSolid(true);
-        playerGO->setAbstract(true);
-        playerGO->addComponent<TransformComponent>(glm::vec3(21.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
-        // TODO add FpsComponent -> sway
-        //playerGO->addComponent<TransformFpsComponent>(m_camera);
-        playerGO->addComponent<RenderComponent>(playerModel, playerMaterial);
-        playerGO->addComponent<PhysicsComponent>(glm::vec3(-0.25f), glm::vec3(0.25f), PhysicsLayer::TOP); //playerModel->getAABBMin(), playerModel->getAABBMax()
-        playerGO->addComponent<PlayerComponent>(m_camera);
-        playerGO->init();
-        m_gameEntities.push_back(std::move(playerGO));
+        Entity playerE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(playerE, "player");
+        registry.addComponent<TransformComponent>(playerE, glm::vec3(1.7f, 0.0f, 17.0f), glm::quat(), glm::vec3(0.2f));
+        registry.addComponent<PhysicsComponent>(playerE, glm::vec3(-0.25f), glm::vec3(0.25f), PhysicsLayer::TOP);
+        registry.addComponent<PlayerComponent>(playerE);
+        registry.addComponent<CameraComponent>(playerE);
+        registry.addComponent<RenderComponent>(playerE, playerModel, playerMaterial, RenderQueueType::TOP_LAYER);
     }
-    // SOLDIER
+    // --- soldier
     auto soldierModel = ResourceManager::getInstance().getModel("soldier_model");
     auto soldierMaterial = ResourceManager::getInstance().getMaterial("soldier_material");
     if (soldierModel && soldierMaterial) {
@@ -191,105 +200,75 @@ void SoldierScene::init() {
             size_t col = i % 7;
             glm::vec3 sPos = glm::vec3(3.0f, 0.01f, 3.0f) + glm::vec3(col * spacing, 0.0f, row * spacing);
             glm::quat sRotQ = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            auto soldierGO = std::make_unique<GameEntity>("soldier_" + std::to_string(i), GroupID::SOLDIERS);
-            soldierGO->addComponent<TransformComponent>(sPos, sRotQ, glm::vec3(100.0f));
-            soldierGO->addComponent<RenderComponent>(soldierModel, soldierMaterial);
-            soldierGO->addComponent<PhysicsComponent>(soldierModel->getAABBMin(), soldierModel->getAABBMax());
+            Entity soldierE = registry.createEntity();
+            registry.addComponent<IdentityComponent>(soldierE, "soldier_" + std::to_string(i), LayerID::SOLDIERS);
+            registry.addComponent<TransformComponent>(soldierE, sPos, sRotQ, glm::vec3(100.0f));
+            registry.addComponent<PhysicsComponent>(soldierE, soldierModel->getAABBMin(), soldierModel->getAABBMax());
+            registry.addComponent<RenderComponent>(soldierE, soldierModel, soldierMaterial);
             if (i == 30) {
-                soldierGO->addComponent<AIComponent>();
+                registry.addComponent<AIComponent>(soldierE, 2.3f);
             }
-            soldierGO->init();
-            m_gameEntities.push_back(std::move(soldierGO));
         }
     }
-    // SHERMAN TANK
+    // --- sherman tank
     /*auto tankModel = ResourceManager::getInstance().getModel("tank_model");
     auto tankMaterial = ResourceManager::getInstance().getMaterial("tank_material");
     if (tankModel && tankMaterial) {
         glm::quat tRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        auto tankGO = std::make_unique<GameEntity>("tank");
+        auto tankGO = std::make_unique<Entity>("tank");
         tankGO->addComponent<TransformComponent>(glm::vec3(15.0f, 0.01f, 8.0f), tRotQ, glm::vec3(5.0f));
         tankGO->addComponent<RenderComponent>(tankModel, tankMaterial);
         tankGO->addComponent<PhysicsComponent>(tankModel->getAABBMin(), tankModel->getAABBMax());
-        tankGO->init();
         m_gameEntities.push_back(std::move(tankGO));
     }*/
-    // STENCIL BOXES
+    //// --- stencil boxes
     /*auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
     auto stencilBox1Material = ResourceManager::getInstance().getMaterial("window_material");
     auto stencilBox2Material = ResourceManager::getInstance().getMaterial("light_material");
     if (stencilBoxModel && stencilBox1Material && stencilBox2Material) {
-        auto stencilBoxGO = std::make_unique<GameEntity>("stencil_box1");
-        stencilBoxGO->setRendererQueueType(RendererQueueType::STENCIL);
+        auto stencilBoxGO = std::make_unique<Entity>("stencil_box1");
+        stencilBoxGO->setRenderQueueType(RenderQueueType::STENCIL);
         stencilBoxGO->setSolid(true);
         stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f));
         stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox1Material);
-        stencilBoxGO->init();
         m_gameEntities.push_back(std::move(stencilBoxGO));
-        stencilBoxGO = std::make_unique<GameEntity>("stencil_box2");
-        stencilBoxGO->setRendererQueueType(RendererQueueType::OUTLINE);
+        stencilBoxGO = std::make_unique<Entity>("stencil_box2");
+        stencilBoxGO->setRenderQueueType(RenderQueueType::OUTLINE);
         stencilBoxGO->setSolid(true);
         stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f), glm::quat(), glm::vec3(1.1f));
         stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox2Material);
-        stencilBoxGO->init();
         m_gameEntities.push_back(std::move(stencilBoxGO));
     }*/
-    // WINDOW
+    //// --- window
     auto windowModel = ResourceManager::getInstance().getModel("window_model");
     auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     if (windowModel && windowMaterial) {
-        auto windowGO = std::make_unique<GameEntity>("window1");
-        windowGO->setRendererQueueType(RendererQueueType::BLENDING);
-        windowGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 3.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
-        windowGO->init();
-        m_gameEntities.push_back(std::move(windowGO));
-        windowGO = std::make_unique<GameEntity>("window2");
-        windowGO->setRendererQueueType(RendererQueueType::BLENDING);
-        windowGO->addComponent<TransformComponent>(glm::vec3(-3.0f, 1.0f, 4.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        windowGO->addComponent<RenderComponent>(windowModel, windowMaterial);
-        windowGO->init();
-        m_gameEntities.push_back(std::move(windowGO));
+        Entity windowE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(windowE, "window_1");
+        registry.addComponent<TransformComponent>(windowE, glm::vec3(-2.0f, 1.0f, 3.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial, RenderQueueType::BLENDING);
+        windowE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(windowE, "window_2");
+        registry.addComponent<TransformComponent>(windowE, glm::vec3(-3.0f, 1.0f, 4.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial, RenderQueueType::BLENDING);
     }
-    // GRASS
+    //// --- grass
     auto grassModel = ResourceManager::getInstance().getModel("grass_model");
     //auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     if (grassModel && windowMaterial) {
-        auto grassGO = std::make_unique<GameEntity>("grass1");
-        grassGO->setSolid(true);
-        grassGO->setRendererQueueType(RendererQueueType::BLENDING);
-        grassGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 5.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        grassGO->addComponent<RenderComponent>(grassModel, windowMaterial);
-        grassGO->init();
-        m_gameEntities.push_back(std::move(grassGO));
-        grassGO = std::make_unique<GameEntity>("grass2");
-        grassGO->setSolid(true);
-        grassGO->setRendererQueueType(RendererQueueType::BLENDING);
-        grassGO->addComponent<TransformComponent>(glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        grassGO->addComponent<RenderComponent>(grassModel, windowMaterial);
-        grassGO->init();
-        m_gameEntities.push_back(std::move(grassGO));
+        Entity grassE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(grassE, "grass_1");
+        registry.addComponent<TransformComponent>(grassE, glm::vec3(-2.0f, 1.0f, 5.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        registry.addComponent<RenderComponent>(grassE, grassModel, windowMaterial, RenderQueueType::BLENDING);
+        grassE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(grassE, "grass_2");
+        registry.addComponent<TransformComponent>(grassE, glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
+        registry.addComponent<RenderComponent>(grassE, grassModel, windowMaterial, RenderQueueType::BLENDING);
     }
 
-    Scene::init();
+    return Scene::init(registry);
 }
 
-void SoldierScene::saveState() {
-    Scene::saveState();
-}
-
-void SoldierScene::fixedUpdate(float fixedt) {
-    Scene::fixedUpdate(fixedt);
-}
-
-void SoldierScene::update(float alpha) {
-    Scene::update(alpha);
-}
-
-void SoldierScene::lateUpdate() {
-    Scene::lateUpdate();
-}
-
-void SoldierScene::end() {
-    Scene::end();
+void SoldierScene::end(Registry& registry) {
+    Scene::end(registry);
 }

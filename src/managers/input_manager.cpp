@@ -6,38 +6,36 @@ InputManager& InputManager::getInstance() {
     return instance;
 }
 
-InputManager::InputManager()
-    : m_lastX(640.0f),
-      m_lastY(384.0f),
-      m_offsetX(0.0f),
-      m_offsetY(0.0f),
-      m_scrollOffset(0.0f)
-{
+InputManager::InputManager() = default;
+
+bool InputManager::init() {
     // just to be sure
     std::fill(std::begin(m_currKeys), std::end(m_currKeys), false);
     std::fill(std::begin(m_prevKeys), std::end(m_prevKeys), false);
+
+    return true;
 }
 
 void InputManager::copyKeys() {
     memcpy(m_prevKeys, m_currKeys, sizeof(m_currKeys));
 }
 
-void InputManager::processMouseMovement(double xpos, double ypos) {
+void InputManager::processMouseMovement(double xPosition, double yPosition) {
     if (m_firstMouse) {
-        m_lastX = (float)xpos;
-        m_lastY = (float)ypos;
+        m_lastX = (float)xPosition;
+        m_lastY = (float)yPosition;
         m_firstMouse = false;
     }
 
-    m_offsetX = (float)xpos - m_lastX;
-    m_offsetY = m_lastY - (float)ypos;
+    m_offsetX = (float)xPosition - m_lastX;
+    m_offsetY = m_lastY - (float)yPosition;
 
-    m_lastX = (float)xpos;
-    m_lastY = (float)ypos;
+    m_lastX = (float)xPosition;
+    m_lastY = (float)yPosition;
 }
 
-void InputManager::processMouseScroll(double scrollOffset) {
-    m_scrollOffset = static_cast<float>(scrollOffset);
+void InputManager::processMouseScroll(double yOffset) {
+    m_scrollOffset = static_cast<float>(yOffset);
 }
 
 void InputManager::setKeyState(int key, bool pressed) {
