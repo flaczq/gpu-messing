@@ -130,7 +130,8 @@ bool SoldierScene::init(Registry& registry) {
     auto gridModel = ResourceManager::getInstance().getModel("grid_model");
     auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
     if (gridModel && gridMaterial) {
-        //gridMaterial->addBoolUniform("hasMatColor", false);
+        // same shader so it has to be set back to 'false'
+        gridMaterial->addBoolUniform("hasMatColor", false);
         Entity gridE = registry.createEntity();
         registry.addComponent<IdentityComponent>(gridE, "grid");
         registry.addComponent<TransformComponent>(gridE, glm::vec3(gridSize / 2.0f));
@@ -153,7 +154,7 @@ bool SoldierScene::init(Registry& registry) {
     if (playerModel && playerMaterial) {
         Entity playerE = registry.createEntity();
         registry.addComponent<IdentityComponent>(playerE, "player");
-        registry.addComponent<TransformComponent>(playerE, glm::vec3(21.0f, 0.0f, 1.0f), glm::quat(), glm::vec3(0.2f));
+        registry.addComponent<TransformComponent>(playerE, glm::vec3(1.7f, 0.0f, 17.0f), glm::quat(), glm::vec3(0.2f));
         registry.addComponent<PhysicsComponent>(playerE, glm::vec3(-0.25f), glm::vec3(0.25f), PhysicsLayer::TOP);
         registry.addComponent<PlayerComponent>(playerE);
         registry.addComponent<CameraComponent>(playerE);
@@ -217,11 +218,11 @@ bool SoldierScene::init(Registry& registry) {
         Entity windowE = registry.createEntity();
         registry.addComponent<IdentityComponent>(windowE, "window_1");
         registry.addComponent<TransformComponent>(windowE, glm::vec3(-2.0f, 1.0f, 3.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial);
+        registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial, RenderQueueType::BLENDING);
         windowE = registry.createEntity();
         registry.addComponent<IdentityComponent>(windowE, "window_2");
         registry.addComponent<TransformComponent>(windowE, glm::vec3(-3.0f, 1.0f, 4.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
-        registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial);
+        registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial, RenderQueueType::BLENDING);
     }
     //// --- grass
     auto grassModel = ResourceManager::getInstance().getModel("grass_model");

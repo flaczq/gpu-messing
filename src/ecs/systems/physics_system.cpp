@@ -67,7 +67,7 @@ void PhysicsSystem::execute() {
                 targetCmd.physics->isColliding = true;
 
                 _resolveCollisionByMTV(cmd, targetCmd);
-                LOG_D(&cmd << " <-> " << &targetCmd);
+                //LOG_D(&cmd << " <-> " << &targetCmd);
                 break;
             }
         }

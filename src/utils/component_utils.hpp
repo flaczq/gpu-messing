@@ -55,12 +55,11 @@ namespace Utils {
 		}
 
 		// CAMERA COMPONENT
-		inline glm::mat4 calculateView(const TransformComponent& transform, float alpha) {
+		inline glm::mat4 calculateView(const TransformComponent& transform, float alpha, float yOffset = 0.0f) {
 			glm::vec3 interPosition = calculateInterpolatedPosition(transform, alpha);
 			glm::vec3 front = calculateFront(transform);
 			glm::vec3 up = calculateUp(transform);
-			// FIXME standing/crouching
-			interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
+			interPosition.y += yOffset;
 			// followed position, where you looking at, up vector
 			return glm::lookAt(interPosition, interPosition + front, up);
 		}

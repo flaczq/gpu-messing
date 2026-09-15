@@ -15,9 +15,9 @@ void DirLightMovementSystem::fixedUpdate(Registry& registry, float fixedt) {
 
         static float tt = 0.0f;
         tt += fixedt;
-        float x = sin(tt * 0.5f) * 2.0f;
+        float x = sin(tt);
         float z = cos(tt);
-        glm::vec3 lightPos = glm::normalize(glm::vec3(x, 0.0f, z));
+        glm::vec3 lightPos = glm::normalize(glm::vec3(x, 1.0f, z));
         transform->position = lightPos * 11.0f;
         dirLightMovement->direction = -lightPos;
         dirLightMovement->color = Constants::Color::WHITE;

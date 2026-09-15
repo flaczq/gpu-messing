@@ -98,15 +98,21 @@ void RenderSystem::beginFrameMinimap(unsigned int minimapWidth, unsigned int min
 
 void RenderSystem::update(Registry& registry, float alpha) {
     m_renderContext = RenderContext{};
-    // CAMERA
-    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
+    // CAMERA+PLAYER
+    for (Entity entity : registry.view<TransformComponent, CameraComponent, PlayerComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
+        auto* player = registry.getComponent<PlayerComponent>(entity);
 
         // find primary camera for RenderContext
         if (camera->isPrimary) {
+            float yOffset = 0.0f;
+            // FIXME make it more abstract because Camera can follow not-Player entity
+            if (player) {
+                yOffset = player->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
+            }
             // view and projection for most passes
-            m_renderContext.cameraView = Utils::Component::calculateView(*transform, alpha);
+            m_renderContext.cameraView = Utils::Component::calculateView(*transform, alpha, yOffset);
             m_renderContext.cameraProjection = Utils::Component::calculateProjection(
                 camera->fov,
                 camera->aspect,
