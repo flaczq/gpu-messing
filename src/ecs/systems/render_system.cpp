@@ -5,7 +5,6 @@
 #include "../../graphics/shader.h"
 #include "../../managers/resource_manager.h"
 #include "../../utils/color_constants.hpp"
-#include "../../utils/component_utils.hpp"
 #include "../../utils/enum_utils.hpp"
 #include "../../utils/math_utils.hpp"
 #include "../components/camera_component.hpp"
@@ -102,18 +101,23 @@ void RenderSystem::update(Registry& registry, float alpha) {
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
-        auto* player = registry.getComponent<PlayerComponent>(entity);
+        auto* optionalPlayer = registry.getComponent<PlayerComponent>(entity);
 
         // find primary camera for RenderContext
         if (camera->isPrimary) {
             float yOffset = 0.0f;
-            // FIXME make it more abstract because Camera can follow not-Player entity
-            if (player != nullptr) {
-                yOffset = player->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
+            // FIXME make it more abstract because Camera can follow non-Player entity
+            if (optionalPlayer != nullptr) {
+                yOffset = optionalPlayer->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
             }
             // view and projection for most passes
-            m_renderContext.cameraView = Utils::Component::calculateView(*transform, *camera, alpha, yOffset);
-            m_renderContext.cameraProjection = Utils::Component::calculateProjection(
+            m_renderContext.cameraView = Utils::Math::calculateView(transform->position,
+                                                                    transform->prevPosition,
+                                                                    camera->yaw,
+                                                                    camera->pitch,
+                                                                    alpha,
+                                                                    yOffset);
+            m_renderContext.cameraProjection = Utils::Math::calculateProjection(
                 camera->fov,
                 camera->aspect,
                 camera->nearPlane,
@@ -121,6 +125,7 @@ void RenderSystem::update(Registry& registry, float alpha) {
             );
             m_renderContext.cameraAspect = camera->aspect;
             m_renderContext.cameraPosition = transform->position;
+            // TODO only primary Camera for now
             break;
         }
     }
@@ -142,8 +147,8 @@ void RenderSystem::update(Registry& registry, float alpha) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
 
-        glm::vec3 AABBSize = Utils::Component::calculateAABBSize(physics->AABB);
-        glm::vec3 AABBCenter = Utils::Component::calculateAABBCenter(physics->AABB);
+        glm::vec3 AABBSize = Utils::Math::calculateSize(physics->AABB.worldMin, physics->AABB.worldMax);
+        glm::vec3 AABBCenter = Utils::Math::calculateCenter(physics->AABB.worldMin, physics->AABB.worldMax);
         glm::vec3 color = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
         RenderImmediateCommand command = {
                 transform->position,
@@ -161,9 +166,17 @@ void RenderSystem::update(Registry& registry, float alpha) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* render = registry.getComponent<RenderComponent>(entity);
 
-        glm::mat4 modelMatrix = Utils::Component::calculateInterpolatedModelMatrix(*transform, alpha);
-        glm::mat3 normalMatrix = Utils::Component::calculateNormalMatrix(modelMatrix);
-        glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
+        glm::mat4 modelMatrix = Utils::Math::calculateInterpolatedModelMatrix(transform->position,
+                                                                              transform->prevPosition,
+                                                                              transform->rotation,
+                                                                              transform->prevRotation,
+                                                                              transform->scale,
+                                                                              transform->prevScale,
+                                                                              alpha);
+        glm::mat3 normalMatrix = Utils::Math::calculateNormalMatrix(modelMatrix);
+        glm::vec3 interPosition = Utils::Math::calculateInterpolatedPosition(transform->position,
+                                                                             transform->prevPosition,
+                                                                             alpha);
         RenderQueueType queueType = render->queueType;
         RenderCommand command = {
             render->model.get(),
@@ -316,7 +329,7 @@ void RenderSystem::execute() {
     if (!m_topLayerQueue.empty()) {
         // always last (before UI)
         glClear(GL_DEPTH_BUFFER_BIT);
-        glm::mat4 topLayerProjection = Utils::Component::calculateProjection(
+        glm::mat4 topLayerProjection = Utils::Math::calculateProjection(
             45.0f,
             m_renderContext.cameraAspect,
             0.01f,
@@ -428,8 +441,9 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
 }
 
 void RenderSystem::renderImmediate() {
-    std::vector<RenderImmediateCommand> queue;
     unsigned int VAO{};
+    std::vector<RenderImmediateCommand> queue;
+
     switch (m_renderDebugMode) {
     case RenderDebugMode::NONE:
         return;
@@ -470,6 +484,7 @@ void RenderSystem::renderImmediate() {
 void RenderSystem::_renderFrameBufferTexture() {
     unsigned int fbo{};
     glGenFramebuffers(1, &fbo);
+
     // off-screen rendering
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
@@ -481,6 +496,18 @@ void RenderSystem::_renderFrameBufferTexture() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // target, attachment, textarget, texture, level
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+    
+    // renderbuffer
+    unsigned int rbo{};
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    // attach renderbuffer to framebuffer's depth and stencil attachments
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        LOG_E("RENDER_SYSTEM::FRAMEBUFFER_NOT_COMPLETE");
+    }
 
     // main window rendering
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -514,6 +541,7 @@ void RenderSystem::toggleRenderDebugMode() {
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    // crazy static BS
     BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
     backEnd->getCameraSystem().updateAspect(backEnd->getRegistry(), width, height);
 

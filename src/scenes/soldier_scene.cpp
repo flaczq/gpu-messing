@@ -28,15 +28,6 @@
 #include <vector>
 
 bool SoldierScene::init(Registry& registry) {
-    //     ▄█        ▄██████▄     ▄████████ ████████▄                                  
-    //    ███       ███    ███   ███    ███ ███   ▀███                                 
-    //    ███       ███    ███   ███    ███ ███    ███                                 
-    //    ███       ███    ███   ███    ███ ███    ███                                 
-    //    ███       ███    ███ ▀███████████ ███    ███                                 
-    //    ███       ███    ███   ███    ███ ███    ███                                 
-    //    ███▌    ▄ ███    ███   ███    ███ ███   ▄███                                 
-    //    █████▄▄██  ▀██████▀    ███    █▀  ████████▀                                  
-    //    ▀                                                                            
     //       ▄████████    ▄████████    ▄████████    ▄████████     ███        ▄████████ 
     //      ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄   ███    ███ 
     //      ███    ███   ███    █▀    ███    █▀    ███    █▀     ▀███▀▀██   ███    █▀  
@@ -45,7 +36,7 @@ bool SoldierScene::init(Registry& registry) {
     //      ███    ███          ███          ███   ███    █▄      ███              ███ 
     //      ███    ███    ▄█    ███    ▄█    ███   ███    ███     ███        ▄█    ███ 
     //      ███    █▀   ▄████████▀   ▄████████▀    ██████████    ▄████▀    ▄████████▀  
-    // TEXTURES
+    // --- TEXTURES
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
     ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
@@ -166,16 +157,14 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<RenderComponent>(gridE, gridModel, gridMaterial);
     }
     // --- gizmo
-    //auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
-    //auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
-    //if (gizmoModel && gizmoMaterial) {
-    //    auto gizmoGO = std::make_unique<Entity>("gizmo");
-    //    gizmoGO->setSolid(true);
-    //    gizmoGO->setAbstract(true);
-    //    gizmoGO->addComponent<TransformComponent>(glm::vec3(0.0f), glm::quat(), glm::vec3(7.5f));
-    //    gizmoGO->addComponent<RenderComponent>(gizmoModel, gizmoMaterial);
-    //    m_gameEntities.push_back(std::move(gizmoGO));
-    //}
+    auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
+    auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
+    if (gizmoModel && gizmoMaterial) {
+        Entity gizmoE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(gizmoE, "gizmo");
+        registry.addComponent<TransformComponent>(gizmoE, glm::vec3(0.0f), glm::quat(), glm::vec3(7.5f));
+        registry.addComponent<RenderComponent>(gizmoE, gizmoModel, gizmoMaterial);
+    }
     // --- fps arms
     auto playerModel = ResourceManager::getInstance().getModel("player_model");
     auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
@@ -221,25 +210,21 @@ bool SoldierScene::init(Registry& registry) {
         tankGO->addComponent<PhysicsComponent>(tankModel->getAABBMin(), tankModel->getAABBMax());
         m_gameEntities.push_back(std::move(tankGO));
     }*/
-    //// --- stencil boxes
-    /*auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
+    // --- stencil boxes
+    auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
     auto stencilBox1Material = ResourceManager::getInstance().getMaterial("window_material");
     auto stencilBox2Material = ResourceManager::getInstance().getMaterial("light_material");
     if (stencilBoxModel && stencilBox1Material && stencilBox2Material) {
-        auto stencilBoxGO = std::make_unique<Entity>("stencil_box1");
-        stencilBoxGO->setRenderQueueType(RenderQueueType::STENCIL);
-        stencilBoxGO->setSolid(true);
-        stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f));
-        stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox1Material);
-        m_gameEntities.push_back(std::move(stencilBoxGO));
-        stencilBoxGO = std::make_unique<Entity>("stencil_box2");
-        stencilBoxGO->setRenderQueueType(RenderQueueType::OUTLINE);
-        stencilBoxGO->setSolid(true);
-        stencilBoxGO->addComponent<TransformComponent>(glm::vec3(5.0f, 1.0f, 6.0f), glm::quat(), glm::vec3(1.1f));
-        stencilBoxGO->addComponent<RenderComponent>(stencilBoxModel, stencilBox2Material);
-        m_gameEntities.push_back(std::move(stencilBoxGO));
-    }*/
-    //// --- window
+        Entity stencilBoxE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(stencilBoxE, "stencil_box_1");
+        registry.addComponent<TransformComponent>(stencilBoxE, glm::vec3(5.0f, 1.0f, 6.0f));
+        //registry.addComponent<RenderComponent>(stencilBoxE, stencilBoxModel, stencilBox1Material, RenderQueueType::STENCIL);
+        stencilBoxE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(stencilBoxE, "stencil_box_2");
+        registry.addComponent<TransformComponent>(stencilBoxE, glm::vec3(5.0f, 1.0f, 6.0f), glm::quat(), glm::vec3(1.1f));
+        //registry.addComponent<RenderComponent>(stencilBoxE, stencilBoxModel, stencilBox2Material, RenderQueueType::OUTLINE);
+    }
+    // --- window
     auto windowModel = ResourceManager::getInstance().getModel("window_model");
     auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     if (windowModel && windowMaterial) {
@@ -252,7 +237,7 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<TransformComponent>(windowE, glm::vec3(-3.0f, 1.0f, 4.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         registry.addComponent<RenderComponent>(windowE, windowModel, windowMaterial, RenderQueueType::BLENDING);
     }
-    //// --- grass
+    // --- grass
     auto grassModel = ResourceManager::getInstance().getModel("grass_model");
     //auto windowMaterial = ResourceManager::getInstance().getMaterial("window_material");
     if (grassModel && windowMaterial) {

@@ -1,6 +1,5 @@
 #include "../../configs/math_config.hpp"
 #include "../../managers/input_manager.h"
-#include "../../utils/component_utils.hpp"
 #include "../../utils/math_utils.hpp"
 #include "../components/camera_component.hpp"
 #include "../components/player_component.hpp"
@@ -58,16 +57,20 @@ void PlayerSystem::processInput(Registry& registry) {
 }
 
 void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
-    for (Entity entity : registry.view<TransformComponent, CameraComponent, PlayerComponent>()) {
+    for (Entity entity : registry.view<TransformComponent, PlayerComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
-        auto* camera = registry.getComponent<CameraComponent>(entity);
         auto* player = registry.getComponent<PlayerComponent>(entity);
+        auto* optionalCamera = registry.getComponent<CameraComponent>(entity);
 
-        if (player->isPrimary) {
+        if (optionalCamera == nullptr) {
+            continue;
+        }
+
+        if (player->isPrimary && optionalCamera->isPrimary) {
             if (glm::length(player->moveDir) > 0.0f) {
                 glm::vec3 up = Constants::Stats::World::WORLD_UP;
-                glm::vec3 flatFront = Utils::Component::calculateFlatFront(*camera);
-                glm::vec3 right = Utils::Component::calculateRight(*camera);
+                glm::vec3 flatFront = Utils::Math::calculateFlatFront(optionalCamera->yaw);
+                glm::vec3 right = Utils::Math::calculateRight(optionalCamera->yaw, optionalCamera->pitch);
                 glm::vec3 direction =
                     // up-down
                     up * player->moveDir.y +

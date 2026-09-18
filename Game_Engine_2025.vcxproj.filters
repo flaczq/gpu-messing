@@ -253,9 +253,6 @@
     <ClInclude Include="src\ecs\components\stats_component.hpp">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\utils\component_utils.hpp">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
     <ClInclude Include="src\ecs\systems\camera_system.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>

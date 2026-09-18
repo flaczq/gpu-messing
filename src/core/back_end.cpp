@@ -30,7 +30,7 @@ BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int heigh
     if (graphicsAPI == GraphicsAPI::OPEN_GL) {
         LOG("*** OpenGL for Windows");
     } else if (graphicsAPI == GraphicsAPI::VULKAN) {
-        LOG_E("*** Vulkan for Windows - Not implemented... yet");
+        LOG_E("BACK_END::VULKAN_WINDOWS_NOT_IMPLEMENTED..._YET");
         throw std::logic_error("Not implemented for Vulkan... yet");
     }
 }
@@ -57,13 +57,13 @@ bool BackEnd::init() {
     )");
 
     if (m_window == nullptr) {
-        LOG_E("Failed to create GLFW window");
+        LOG_E("BACK_END::GLFW_WINDOW_FAILED");
         glfwTerminate();
         return false;
     }
 
     if (glfwInit() == GL_FALSE) {
-        LOG_E("Failed to init GLFW");
+        LOG_E("BACK_END::GLFW_INIT_FAILED");
         glfwTerminate();
         return false;
     }
@@ -78,7 +78,7 @@ bool BackEnd::init() {
     glewExperimental = GL_TRUE;
 
     if (glewInit()) {
-        LOG_E("Failed to init GLEW");
+        LOG_E("BACK_END::GLEW_INIT_FAILED");
         glfwDestroyWindow(m_window);
         glfwTerminate();
         return false;

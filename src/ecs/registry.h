@@ -34,7 +34,7 @@ public:
 		ComponentTypeID cTypeID = ComponentID::get<T>();
 		auto cIt = it->second.components.find(cTypeID);
 		if (cIt == it->second.components.end()) {
-			LOG_W("REGISTRY::GET_COMPONENT_COMPONENT_NULLPTR: " << cTypeID);
+			LOG_W("REGISTRY::No component found for typeID: " << cTypeID);
 			return nullptr;
 		}
 		return static_cast<T*>(cIt->second.get());
@@ -43,7 +43,7 @@ public:
 	bool hasComponent(Entity entity) const {
 		auto it = m_entitiesData.find(entity);
 		if (it == m_entitiesData.end()) {
-			LOG_E("REGISTRY::GET_COMPONENT_ENTITY_NULLPTR: " << entity);
+			LOG_E("REGISTRY::HAS_COMPONENT_ENTITY_NULLPTR: " << entity);
 			return false;
 		}
 
@@ -68,7 +68,7 @@ public:
 		if (matchingEntities.empty()) {
 			std::string compNames{};
 			((compNames += typeid(Comps).name() + std::string(", ")), ...);
-			LOG_W("No entites found for " << compNames);
+			LOG_W("REGISTRY::No entites found for " << compNames);
 		}
 		return matchingEntities;
 	}

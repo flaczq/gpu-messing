@@ -21,35 +21,8 @@ void CameraSystem::processInput(Registry& registry) {
     }
 }
 
-// unused: moved to RenderSystem
-//void CameraSystem::updateView(Registry& registry, float alpha) {
-//    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
-//        auto* transform = registry.getComponent<TransformComponent>(entity);
-//        auto* camera = registry.getComponent<CameraComponent>(entity);
-//
-//        glm::vec3 interPosition = Utils::Component::calculateInterpolatedPosition(*transform, alpha);
-//        glm::vec3 front = Utils::Component::calculateFront(*transform);
-//        glm::vec3 up = Utils::Component::calculateUp(*transform);
-//        // FIXME standing/crouching
-//        interPosition.y += Constants::Stats::Camera::STANDING_OFFSET;
-//            
-//        // followed position, where you looking at, up vector
-//        camera->view = glm::lookAt(interPosition, interPosition + front, up);
-//    }
-//}
-
-// unused: moved to RenderSystem
-//void CameraSystem::updateProjection(Registry& registry) {
-//    for (Entity entity : registry.view<CameraComponent>()) {
-//        auto* camera = registry.getComponent<CameraComponent>(entity);
-//        
-//        camera->projection = Utils::Component::calculateProjection(camera->fov, camera->aspect, camera->nearPlane, camera->farPlane);
-//    }
-//}
-
 void CameraSystem::updateAspect(Registry& registry, int width, int height) {
-    for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
-        auto* transform = registry.getComponent<TransformComponent>(entity);
+    for (Entity entity : registry.view<CameraComponent>()) {
         auto* camera = registry.getComponent<CameraComponent>(entity);
 
         if (camera->isPrimary) {

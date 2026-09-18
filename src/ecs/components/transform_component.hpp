@@ -10,8 +10,6 @@ struct TransformComponent : public IComponent {
 	glm::quat prevRotation	{ 1.0f, 0.0f, 0.0f, 0.0f };
 	glm::vec3 scale			{ 1.0f };
 	glm::vec3 prevScale		{ 1.0f };
-	//glm::mat4 model		{ 1.0f };
-	//glm::mat3 normal		{ 1.0f };
 
 	TransformComponent() = default;
 	TransformComponent(const glm::vec3& position_,

@@ -20,8 +20,8 @@ void AISystem::fixedUpdate(Registry& registry, float fixedt) {
             float x = sin(tt * 0.5f) * 2.0f;
             float z = cos(tt);
             glm::vec3 newPos = glm::normalize(glm::vec3(x, 0.0f, z));
-            transform->position = newPos;
-            transform->rotation = newPos;
+            transform->position = newPos * ai->speedMultiplier;
+            transform->rotation = newPos * ai->speedMultiplier;
         }
     }
 }

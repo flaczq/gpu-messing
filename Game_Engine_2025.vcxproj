@@ -117,7 +117,6 @@
     <ClInclude Include="src\ecs\components\transform_component.hpp" />
     <ClInclude Include="src\ecs\systems\ai_system.h" />
     <ClInclude Include="src\utils\color_constants.hpp" />
-    <ClInclude Include="src\utils\component_utils.hpp" />
     <ClInclude Include="src\utils\stats_constants.hpp" />
     <ClInclude Include="src\utils\enum_utils.hpp" />
     <ClInclude Include="src\utils\math_utils.hpp" />
