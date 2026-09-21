@@ -15,6 +15,4 @@ public:
 	virtual bool init(Registry& registry) = 0;
 	virtual void end(Registry& registry) = 0;
 	virtual SceneID getID() const = 0;
-
-//protected:
 };

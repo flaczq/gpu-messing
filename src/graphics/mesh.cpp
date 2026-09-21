@@ -75,7 +75,7 @@ void Mesh::draw(const Shader& shader) {
     unsigned int normalNr = 1;
     unsigned int heightNr = 1;
 
-    for (size_t i{}; i < m_textures.size(); i++) {
+    for (unsigned int i{}; i < m_textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
 
         std::string number;

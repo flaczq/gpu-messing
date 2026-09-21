@@ -118,7 +118,7 @@ void PhysicsSystem::_updateAABB(AABB& aabb, const glm::vec3& position, const glm
 
     aabb.worldMin = glm::vec3(std::numeric_limits<float>::max());
     aabb.worldMax = glm::vec3(std::numeric_limits<float>::lowest());
-    for (size_t i{}; i < 8; i++) {
+    for (unsigned int i{}; i < 8; i++) {
         glm::vec3 corner = glm::vec3(model * glm::vec4(corners[i], 1.0f));
         aabb.worldMin = glm::min(aabb.worldMin, corner);
         aabb.worldMax = glm::max(aabb.worldMax, corner);

@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\api\backend.cpp" />
+    <ClCompile Include="src\api\opengl\opengl_backend.cpp" />
+    <ClCompile Include="src\api\opengl\opengl_render.cpp" />
+    <ClCompile Include="src\api\render.cpp" />
     <ClCompile Include="src\ecs\registry.cpp" />
     <ClCompile Include="src\ecs\systems\ai_system.cpp" />
     <ClCompile Include="src\ecs\systems\camera_system.cpp" />
@@ -37,7 +41,6 @@
     <ClCompile Include="src\managers\scene_manager.cpp" />
     <ClCompile Include="src\graphics\mesh.cpp" />
     <ClCompile Include="src\graphics\model.cpp" />
-    <ClCompile Include="src\core\back_end.cpp" />
     <ClCompile Include="src\graphics\shader.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="libs\stb_image.cpp" />
@@ -53,6 +56,8 @@
     <None Include="README.md" />
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
+    <None Include="shaders\tex.frag" />
+    <None Include="shaders\tex.vert" />
     <None Include="shaders\window.frag" />
     <None Include="shaders\window.vert" />
     <None Include="shaders\lambert.frag" />
@@ -79,6 +84,9 @@
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\api\opengl\opengl_backend.h" />
+    <ClInclude Include="src\api\opengl\opengl_render.h" />
+    <ClInclude Include="src\api\render.h" />
     <ClInclude Include="src\ecs\components\camera_component.hpp" />
     <ClInclude Include="src\ecs\components\i_component.hpp" />
     <ClInclude Include="src\ecs\components\identity_component.hpp" />
@@ -110,7 +118,7 @@
     <ClInclude Include="src\graphics\mesh.h" />
     <ClInclude Include="src\graphics\model.h" />
     <ClInclude Include="src\scenes\scene.h" />
-    <ClInclude Include="src\core\back_end.h" />
+    <ClInclude Include="src\api\backend.h" />
     <ClInclude Include="libs\stb_image.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="src\graphics\shader.h" />

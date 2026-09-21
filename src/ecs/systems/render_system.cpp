@@ -1,6 +1,6 @@
+#include "../../api/backend.h"
 #include "../../configs/gl_config.hpp"
 #include "../../configs/log_config.hpp"
-#include "../../core/back_end.h"
 #include "../../graphics/material.h"
 #include "../../graphics/shader.h"
 #include "../../managers/resource_manager.h"
@@ -14,6 +14,7 @@
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
 #include "../registry.h"
+#include "../systems/camera_system.h"
 #include "render_system.h"
 #include <algorithm>
 
@@ -63,10 +64,12 @@ bool RenderSystem::init() {
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
+    _renderFrameBufferTexture();
+
     return true;
 }
 
-void RenderSystem::beginFrame(unsigned int width, unsigned int height) {
+void RenderSystem::beginFrame(unsigned int width, unsigned int height) const {
     glViewport(0, 0, width, height);
 
     // Z-depth test
@@ -95,21 +98,35 @@ void RenderSystem::beginFrameMinimap(unsigned int minimapWidth, unsigned int min
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
+void RenderSystem::customConfiguration(unsigned int phase) {
+    if (phase == 0) {
+        glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
+        glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    } else if (phase == 1) {
+        //screenShader.use();
+        //glBindVertexArray(m_quadVAO);
+        //glDisable(GL_DEPTH_TEST);
+        //glBindTexture(GL_TEXTURE_2D, m_fbTexture);
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
+}
+
 void RenderSystem::update(Registry& registry, float alpha) {
     m_renderContext = RenderContext{};
     // CAMERA+PLAYER
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
-        auto* optionalPlayer = registry.getComponent<PlayerComponent>(entity);
+        //auto* optionalPlayer = registry.getComponent<PlayerComponent>(entity);
 
         // find primary camera for RenderContext
         if (camera->isPrimary) {
             float yOffset = 0.0f;
             // FIXME make it more abstract because Camera can follow non-Player entity
-            if (optionalPlayer != nullptr) {
-                yOffset = optionalPlayer->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
-            }
+            //if (optionalPlayer != nullptr) {
+            //    yOffset = optionalPlayer->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
+            //}
             // view and projection for most passes
             m_renderContext.cameraView = Utils::Math::calculateView(transform->position,
                                                                     transform->prevPosition,
@@ -482,26 +499,25 @@ void RenderSystem::renderImmediate() {
 
 // TUTORIAL: unused
 void RenderSystem::_renderFrameBufferTexture() {
-    unsigned int fbo{};
-    glGenFramebuffers(1, &fbo);
-
+    //unsigned int fbo{};
+    glGenFramebuffers(1, &m_framebuffer);
     // off-screen rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
 
-    unsigned int texture{};
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    //unsigned int texture{};
+    glGenTextures(1, &m_fbTexture);
+    glBindTexture(GL_TEXTURE_2D, m_fbTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // target, attachment, textarget, texture, level
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-    
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fbTexture, 0);
+
     // renderbuffer
     unsigned int rbo{};
     glGenRenderbuffers(1, &rbo);
     glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 768);
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
     // attach renderbuffer to framebuffer's depth and stencil attachments
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
@@ -511,7 +527,29 @@ void RenderSystem::_renderFrameBufferTexture() {
 
     // main window rendering
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glDeleteFramebuffers(1, &fbo);
+    //glDeleteFramebuffers(1, &m_framebuffer);
+
+    // screen quad VAO
+    float quadVertices[] = {
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    unsigned int quadVBO;
+    glGenVertexArrays(1, &m_quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(m_quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
 
 void RenderSystem::endFrame(GLFWwindow* window) {
@@ -544,6 +582,5 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     // crazy static BS
     BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
     backEnd->getCameraSystem().updateAspect(backEnd->getRegistry(), width, height);
-
-    glViewport(0, 0, width, height);
+    backEnd->setViewport(0, 0, width, height);
 }

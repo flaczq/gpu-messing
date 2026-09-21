@@ -53,8 +53,9 @@ public:
 	~RenderSystem();
 
 	bool init();
-	void beginFrame(unsigned int width, unsigned int height);
+	void beginFrame(unsigned int width, unsigned int height) const;
 	void beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight);
+	void customConfiguration(unsigned int phase = 0);
 	void update(Registry& registry, float alpha);
 	void execute();
 	void renderImmediate();
@@ -75,6 +76,9 @@ private:
 	std::vector<RenderImmediateCommand> m_renderImmediateCommands{};
 	unsigned int m_VAOAABB{};
 	unsigned int m_VBOAABB{};
+	unsigned int m_framebuffer{};
+	unsigned int m_fbTexture{};
+	unsigned int m_quadVAO;
 
 	RenderMode m_renderMode = RenderMode::STANDARD;
 	RenderDebugMode m_renderDebugMode = RenderDebugMode::NONE;

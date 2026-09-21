@@ -16,8 +16,8 @@ namespace MeshGenerator {
 		Vertex v0{}, v1{}, v2{}, v3{};
 
 		v0.Position = { -halfWidth, 0.0f, -halfDepth };
-		v1.Position = { halfWidth, 0.0f, -halfDepth };
-		v2.Position = { halfWidth, 0.0f,  halfDepth };
+		v1.Position = {  halfWidth, 0.0f, -halfDepth };
+		v2.Position = {  halfWidth, 0.0f,  halfDepth };
 		v3.Position = { -halfWidth, 0.0f,  halfDepth };
 
 		/*v0.Color = glm::vec3(1.0f, 0.5f, 0.0f);
@@ -37,7 +37,7 @@ namespace MeshGenerator {
 		//v0.Bitangent = v1.Bitangent = v2.Bitangent = v3.Bitangent = { 0.0f, 0.0f, 1.0f };
 
 		// reset bones
-		/*for (size_t i{}; i < 4; i++) {
+		/*for (unsigned int i{}; i < 4; i++) {
 			v0.BoneIDs[i] = v1.BoneIDs[i] = v2.BoneIDs[i] = v3.BoneIDs[i] = -1;
 			v0.Weights[i] = v1.Weights[i] = v2.Weights[i] = v3.Weights[i] = 0.0f;
 		}*/
@@ -64,36 +64,36 @@ namespace MeshGenerator {
 		float halfDepth = depth * 0.5f;
 
 		Vertex d0{}, d1{}, d2{}, d3{}, // down  (0-3)
-			u0{}, u1{}, u2{}, u3{}, // up    (4-7)
-			b0{}, b1{}, b2{}, b3{}, // back  (8-11)
-			f0{}, f1{}, f2{}, f3{}, // front (12-15)
-			l0{}, l1{}, l2{}, l3{}, // left  (16-19)
-			r0{}, r1{}, r2{}, r3{}; // right (20-23)
+			   u0{}, u1{}, u2{}, u3{}, // up    (4-7)
+			   b0{}, b1{}, b2{}, b3{}, // back  (8-11)
+			   f0{}, f1{}, f2{}, f3{}, // front (12-15)
+			   l0{}, l1{}, l2{}, l3{}, // left  (16-19)
+			   r0{}, r1{}, r2{}, r3{}; // right (20-23)
 
 		d0.Position = { -halfWidth, -halfHeight, -halfDepth };
-		d1.Position = { halfWidth, -halfHeight, -halfDepth };
-		d2.Position = { halfWidth, -halfHeight,  halfDepth };
+		d1.Position = {  halfWidth, -halfHeight, -halfDepth };
+		d2.Position = {  halfWidth, -halfHeight,  halfDepth };
 		d3.Position = { -halfWidth, -halfHeight,  halfDepth };
 		u0.Position = { -halfWidth,  halfHeight,  halfDepth };
-		u1.Position = { halfWidth,  halfHeight,  halfDepth };
-		u2.Position = { halfWidth,  halfHeight, -halfDepth };
+		u1.Position = {  halfWidth,  halfHeight,  halfDepth };
+		u2.Position = {  halfWidth,  halfHeight, -halfDepth };
 		u3.Position = { -halfWidth,  halfHeight, -halfDepth };
-		b0.Position = { halfWidth, -halfHeight, -halfDepth };
+		b0.Position = {  halfWidth, -halfHeight, -halfDepth };
 		b1.Position = { -halfWidth, -halfHeight, -halfDepth };
 		b2.Position = { -halfWidth,  halfHeight, -halfDepth };
-		b3.Position = { halfWidth,  halfHeight, -halfDepth };
+		b3.Position = {  halfWidth,  halfHeight, -halfDepth };
 		f0.Position = { -halfWidth, -halfHeight,  halfDepth };
-		f1.Position = { halfWidth, -halfHeight,  halfDepth };
-		f2.Position = { halfWidth,  halfHeight,  halfDepth };
+		f1.Position = {  halfWidth, -halfHeight,  halfDepth };
+		f2.Position = {  halfWidth,  halfHeight,  halfDepth };
 		f3.Position = { -halfWidth,  halfHeight,  halfDepth };
 		l0.Position = { -halfWidth, -halfHeight, -halfDepth };
 		l1.Position = { -halfWidth, -halfHeight,  halfDepth };
 		l2.Position = { -halfWidth,  halfHeight,  halfDepth };
 		l3.Position = { -halfWidth,  halfHeight, -halfDepth };
-		r0.Position = { halfWidth, -halfHeight,  halfDepth };
-		r1.Position = { halfWidth, -halfHeight, -halfDepth };
-		r2.Position = { halfWidth,  halfHeight, -halfDepth };
-		r3.Position = { halfWidth,  halfHeight,  halfDepth };
+		r0.Position = {  halfWidth, -halfHeight,  halfDepth };
+		r1.Position = {  halfWidth, -halfHeight, -halfDepth };
+		r2.Position = {  halfWidth,  halfHeight, -halfDepth };
+		r3.Position = {  halfWidth,  halfHeight,  halfDepth };
 
 		d0.TexCoords = u0.TexCoords = { 0.0f,             0.0f };
 		d1.TexCoords = u1.TexCoords = { width * uvTiling, 0.0f };

@@ -51,11 +51,13 @@ bool SoldierScene::init(Registry& registry) {
     ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
     ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
+    ResourceManager::getInstance().loadShader("tex_shader", "../shaders/tex.vert", "../shaders/tex.frag");
     auto simpleShader = ResourceManager::getInstance().getShader("simple_shader");
     auto gizmoShader = ResourceManager::getInstance().getShader("gizmo_shader");
     auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
     auto modelShader = ResourceManager::getInstance().getShader("model_shader");
     auto windowShader = ResourceManager::getInstance().getShader("window_shader");
+    auto texShader = ResourceManager::getInstance().getShader("tex_shader");
     // MATERIALS
     ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("light_material", simpleShader);
@@ -65,6 +67,7 @@ bool SoldierScene::init(Registry& registry) {
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
     ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
+    ResourceManager::getInstance().loadMaterial("fbs_material", texShader);
 
     //       ▄▄▄▄███▄▄▄▄    ▄██████▄  ████████▄     ▄████████  ▄█          ▄████████ 
     //     ▄██▀▀▀███▀▀▀██▄ ███    ███ ███   ▀███   ███    ███ ███         ███    ███ 
@@ -111,6 +114,12 @@ bool SoldierScene::init(Registry& registry) {
     auto grassM = std::make_unique<Mesh>(std::move(grass));
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
+    // --- framebuffer screen
+    auto potatoTexture = ResourceManager::getInstance().getTexture("potato_texture");
+    auto fbs = MeshGenerator::createPlane(2.0f, 2.0f, potatoTexture);
+    auto fbsM = std::make_unique<Mesh>(std::move(fbs));
+    auto fbsMM = std::make_shared<Model>("fbs_model", std::move(fbsM));
+    ResourceManager::getInstance().addModel(std::move(fbsMM));
 
     //       ▄████████ ███▄▄▄▄       ███      ▄█      ███      ▄█     ▄████████    ▄████████ 
     //      ███    ███ ███▀▀▀██▄ ▀█████████▄ ███  ▀█████████▄ ███    ███    ███   ███    ███ 
@@ -157,14 +166,14 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<RenderComponent>(gridE, gridModel, gridMaterial);
     }
     // --- gizmo
-    auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
+    /*auto gizmoModel = ResourceManager::getInstance().getModel("gizmo_model");
     auto gizmoMaterial = ResourceManager::getInstance().getMaterial("gizmo_material");
     if (gizmoModel && gizmoMaterial) {
         Entity gizmoE = registry.createEntity();
         registry.addComponent<IdentityComponent>(gizmoE, "gizmo");
         registry.addComponent<TransformComponent>(gizmoE, glm::vec3(0.0f), glm::quat(), glm::vec3(7.5f));
         registry.addComponent<RenderComponent>(gizmoE, gizmoModel, gizmoMaterial);
-    }
+    }*/
     // --- fps arms
     auto playerModel = ResourceManager::getInstance().getModel("player_model");
     auto playerMaterial = ResourceManager::getInstance().getMaterial("player_material");
@@ -184,9 +193,9 @@ bool SoldierScene::init(Registry& registry) {
         // MATERIAL UNIFORMS
         //soldierMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
         float spacing = 1.5f;
-        for (size_t i{}; i < 49; i++) {
-            size_t row = i / 7;
-            size_t col = i % 7;
+        for (unsigned int i{}; i < 49; i++) {
+            unsigned int row = i / 7;
+            unsigned int col = i % 7;
             glm::vec3 sPos = glm::vec3(3.0f, 0.01f, 3.0f) + glm::vec3(col * spacing, 0.0f, row * spacing);
             glm::quat sRotQ = glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
             Entity soldierE = registry.createEntity();
@@ -204,11 +213,11 @@ bool SoldierScene::init(Registry& registry) {
     auto tankMaterial = ResourceManager::getInstance().getMaterial("tank_material");
     if (tankModel && tankMaterial) {
         glm::quat tRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        auto tankGO = std::make_unique<Entity>("tank");
-        tankGO->addComponent<TransformComponent>(glm::vec3(15.0f, 0.01f, 8.0f), tRotQ, glm::vec3(5.0f));
-        tankGO->addComponent<RenderComponent>(tankModel, tankMaterial);
-        tankGO->addComponent<PhysicsComponent>(tankModel->getAABBMin(), tankModel->getAABBMax());
-        m_gameEntities.push_back(std::move(tankGO));
+        Entity tankE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(tankE, "tank");
+        registry.addComponent<TransformComponent>(tankE, glm::vec3(15.0f, 0.01f, 8.0f), tRotQ, glm::vec3(5.0f));
+        registry.addComponent<RenderComponent>(tankE, tankModel, tankMaterial);
+        registry.addComponent<PhysicsComponent>(tankE, tankModel->getAABBMin(), tankModel->getAABBMax());
     }*/
     // --- stencil boxes
     auto stencilBoxModel = ResourceManager::getInstance().getModel("stencil_box_model");
@@ -249,6 +258,15 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<IdentityComponent>(grassE, "grass_2");
         registry.addComponent<TransformComponent>(grassE, glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         registry.addComponent<RenderComponent>(grassE, grassModel, windowMaterial, RenderQueueType::BLENDING);
+    }
+    // --- framebuffer screen
+    auto fbsModel = ResourceManager::getInstance().getModel("fbs_model");
+    auto fbsMaterial = ResourceManager::getInstance().getMaterial("fbs_material");
+    if (fbsModel && fbsMaterial) {
+        Entity fbsE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(fbsE, "fbs");
+        registry.addComponent<TransformComponent>(fbsE, glm::vec3(0.0f));
+        registry.addComponent<RenderComponent>(fbsE, fbsModel, fbsMaterial);
     }
 
     return Scene::init(registry);

@@ -1,13 +1,14 @@
 ﻿#pragma once
 
 #define _CRTDBG_MAP_ALLOC
-#include "core/back_end.h"
+#include "api/backend.h"
 #include <crtdbg.h>
 #include <iostream>
+#include <memory>
 #include <stdlib.h>
 
-constexpr int SCREEN_WIDTH = 1280;
-constexpr int SCREEN_HEIGHT = 768;
+constexpr unsigned int SCREEN_WIDTH = 1280;
+constexpr unsigned int SCREEN_HEIGHT = 768;
 
 int main() {
     // check for memory leaks
@@ -16,12 +17,12 @@ int main() {
     // no printf sync -> make std::cout faster
     std::ios_base::sync_with_stdio(false);
 
-    BackEnd backEnd(GraphicsAPI::OPEN_GL, SCREEN_WIDTH, SCREEN_HEIGHT);
-    if (!backEnd.init()) {
+    std::unique_ptr<BackEnd> backEnd = BackEnd::create(GraphicsAPI::OPENGL);
+    if (!backEnd->init(SCREEN_WIDTH, SCREEN_HEIGHT)) {
         return -1;
     }
 
-    backEnd.run();
+    backEnd->run();
 
     return 0;
 }

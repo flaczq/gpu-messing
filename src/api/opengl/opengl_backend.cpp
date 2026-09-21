@@ -1,51 +1,42 @@
-#include "../configs/gl_config.hpp"
-#include "../configs/log_config.hpp"
-#include "../configs/math_config.hpp"
-#include "../ecs/registry.h"
-#include "../ecs/systems/ai_system.h"
-#include "../ecs/systems/camera_system.h"
-#include "../ecs/systems/dir_light_movement_system.h"
-#include "../ecs/systems/physics_system.h"
-#include "../ecs/systems/player_system.h"
-#include "../ecs/systems/render_system.h"
-#include "../ecs/systems/transform_system.h"
-#include "../managers/input_manager.h"
-#include "../managers/resource_manager.h"
-#include "../managers/scene_manager.h"
-#include "../utils/stats_constants.hpp"
-#include "back_end.h"
-#include <iomanip>
+#include "../../configs/gl_config.hpp"
+#include "../../configs/log_config.hpp"
+#include "../../configs/math_config.hpp"
+#include "../../ecs/registry.h"
+#include "../../ecs/systems/ai_system.h"
+#include "../../ecs/systems/camera_system.h"
+#include "../../ecs/systems/dir_light_movement_system.h"
+#include "../../ecs/systems/physics_system.h"
+#include "../../ecs/systems/player_system.h"
+#include "../../ecs/systems/render_system.h"
+#include "../../ecs/systems/transform_system.h"
+#include "../../managers/input_manager.h"
+#include "../../managers/resource_manager.h"
+#include "../../managers/scene_manager.h"
+#include "../../utils/stats_constants.hpp"
+#include "../backend.h"
+#include "opengl_backend.h"
 #include <ios>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
 
-BackEnd::BackEnd(GraphicsAPI graphicsAPI, unsigned int width, unsigned int height)
-    : m_screenWidth(width),
-      m_screenHeight(height),
-      m_minimapWidth(width / 4),
-      m_minimapHeight(height / 4)
-{
-    if (graphicsAPI == GraphicsAPI::OPEN_GL) {
-        LOG("*** OpenGL for Windows");
-    } else if (graphicsAPI == GraphicsAPI::VULKAN) {
-        LOG_E("BACK_END::VULKAN_WINDOWS_NOT_IMPLEMENTED..._YET");
-        throw std::logic_error("Not implemented for Vulkan... yet");
-    }
-}
-
-bool BackEnd::init() {
-    //    ┏┳┓┓┏•┏┓  •┏┓  •┏┳┓
-    //     ┃ ┣┫┓┗┓  ┓┗┓  ┓ ┃ 
-    //     ┻ ┛┗┗┗┛  ┗┗┛  ┗ ┻ 
+bool OpenGLBackEnd::init(unsigned int width, unsigned int height) {
+    //        ███        ▄█    █▄     ▄█     ▄████████       ▄█     ▄████████       ▄█      ███    
+    //    ▀█████████▄   ███    ███   ███    ███    ███      ███    ███    ███      ███  ▀█████████▄ 
+    //       ▀███▀▀██   ███    ███   ███▌   ███    █▀       ███▌   ███    █▀       ███▌    ▀███▀▀██ 
+    //        ███   ▀  ▄███▄▄▄▄███▄▄ ███▌   ███             ███▌   ███             ███▌     ███   ▀ 
+    //        ███     ▀▀███▀▀▀▀███▀  ███▌ ▀███████████      ███▌ ▀███████████      ███▌     ███     
+    //        ███       ███    ███   ███           ███      ███           ███      ███      ███     
+    //        ███       ███    ███   ███     ▄█    ███      ███     ▄█    ███      ███      ███     
+    //       ▄████▀     ███    █▀    █▀    ▄████████▀       █▀    ▄████████▀       █▀      ▄████▀   
     glfwInit();
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    m_window = glfwCreateWindow(m_screenWidth, m_screenHeight, "(C) Engine Runner 2049", nullptr, nullptr);
+    m_window = glfwCreateWindow(width, height, "(C) Engine Runner 2049", nullptr, nullptr);
     LOG(R"(
      ## cells interlinked within cells ##
       ___   ___  _  _   ___  
@@ -57,13 +48,13 @@ bool BackEnd::init() {
     )");
 
     if (m_window == nullptr) {
-        LOG_E("BACK_END::GLFW_WINDOW_FAILED");
+        LOG_E("BACKEND::GLFW_WINDOW_FAILED");
         glfwTerminate();
         return false;
     }
 
     if (glfwInit() == GL_FALSE) {
-        LOG_E("BACK_END::GLFW_INIT_FAILED");
+        LOG_E("BACKEND::GLFW_INIT_FAILED");
         glfwTerminate();
         return false;
     }
@@ -78,7 +69,7 @@ bool BackEnd::init() {
     glewExperimental = GL_TRUE;
 
     if (glewInit()) {
-        LOG_E("BACK_END::GLEW_INIT_FAILED");
+        LOG_E("BACKEND::GLEW_INIT_FAILED");
         glfwDestroyWindow(m_window);
         glfwTerminate();
         return false;
@@ -122,7 +113,7 @@ bool BackEnd::init() {
     return true;
 }
 
-void BackEnd::run() {
+void OpenGLBackEnd::run() {
     // setup camera aspect ratio with "real" dimensions
     int width{};
     int height{};
@@ -269,7 +260,11 @@ void BackEnd::run() {
     glfwTerminate();
 }
 
-void BackEnd::_processGlobalInput() {
+void OpenGLBackEnd::setViewport(int x, int y, int width, int height) {
+    glViewport(x, y, width, height);
+}
+
+void OpenGLBackEnd::_processGlobalInput() {
     // EXIT
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_ESCAPE)) {
         glfwSetWindowShouldClose(m_window, true);
@@ -283,8 +278,8 @@ void BackEnd::_processGlobalInput() {
     //    ███    ███   ███    █▄    ███    ██▄ ███    ███   ███    ███ 
     //    ███   ▄███   ███    ███   ███    ███ ███    ███   ███    ███ 
     //    ████████▀    ██████████ ▄█████████▀  ████████▀    ████████▀  
-    #ifdef _DEBUG
-    // HOTLOAD SHADERS
+#ifdef _DEBUG
+// HOTLOAD SHADERS
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_L)) {
         ResourceManager::getInstance().reloadShaders();
     }
@@ -304,10 +299,10 @@ void BackEnd::_processGlobalInput() {
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_I)) {
         m_cameraSystem.logPosition(m_registry);
     }
-    #endif
+#endif
 }
 
-void BackEnd::_showFps(GLFWwindow* window, double currentTime) {
+void OpenGLBackEnd::_showFps(GLFWwindow* window, double currentTime) {
     m_fpsNr++;
     // update every 1sec
     if (currentTime - m_fpsLastTime >= 1.0) {

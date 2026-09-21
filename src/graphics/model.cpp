@@ -36,7 +36,7 @@ Model::Model(const std::string& name, std::unique_ptr<Mesh> mesh, glm::vec3 AABB
 Model::~Model() = default;
 
 void Model::draw(const Shader& shader) {
-	for (size_t i{}; i < m_meshes.size(); i++) {
+	for (unsigned int i{}; i < m_meshes.size(); i++) {
 		m_meshes[i]->draw(shader);
 	}
 }
@@ -61,7 +61,7 @@ void Model::_loadModel(const std::string& path) {
 
 void Model::_processNode(const aiNode* node, const aiScene* scene) {
 	// process all mesh nodes (if exist)
-	for (size_t i{}; i < node->mNumMeshes; i++) {
+	for (unsigned int i{}; i < node->mNumMeshes; i++) {
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		std::unique_ptr<Mesh> newMesh = _processMesh(mesh, scene);
 		m_meshes.push_back(std::move(newMesh));
@@ -73,7 +73,7 @@ void Model::_processNode(const aiNode* node, const aiScene* scene) {
 	}
 
 	// recursive: process all nodes' children
-	for (size_t i{}; i < node->mNumChildren; i++) {
+	for (unsigned int i{}; i < node->mNumChildren; i++) {
 		_processNode(node->mChildren[i], scene);
 	}
 }
@@ -87,7 +87,7 @@ std::unique_ptr<Mesh> Model::_processMesh(const aiMesh* mesh, const aiScene* sce
 	glm::vec3 diffuseColor = glm::vec3(1.0f);
 
 	// vertices
-	for (size_t i{}; i < mesh->mNumVertices; i++) {
+	for (unsigned int i{}; i < mesh->mNumVertices; i++) {
 		Vertex vertex{};
 
 		// Position
@@ -126,9 +126,9 @@ std::unique_ptr<Mesh> Model::_processMesh(const aiMesh* mesh, const aiScene* sce
 	}
 
 	// indices
-	for (size_t i{}; i < mesh->mNumFaces; i++) {
+	for (unsigned int i{}; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
-		for (size_t j{}; j < face.mNumIndices; j++) {
+		for (unsigned int j{}; j < face.mNumIndices; j++) {
 			indices.push_back(face.mIndices[j]);
 		}
 	}
@@ -160,7 +160,7 @@ std::unique_ptr<Mesh> Model::_processMesh(const aiMesh* mesh, const aiScene* sce
 std::vector<std::shared_ptr<Texture>> Model::_loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const {
 	std::vector<std::shared_ptr<Texture>> textures;
 
-	for (size_t i{}; i < mat->GetTextureCount(type); i++) {
+	for (unsigned int i{}; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		// load texture into str
 		mat->GetTexture(type, static_cast<unsigned int>(i), &str);
