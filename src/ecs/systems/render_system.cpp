@@ -10,6 +10,7 @@
 #include "../components/camera_component.hpp"
 #include "../components/dir_light_movement_component.hpp"
 #include "../components/physics_component.hpp"
+#include "../components/player_component.hpp"
 #include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -41,25 +42,19 @@ bool RenderSystem::init() {
 }
 
 void RenderSystem::beginFrame(int width, int height) const {
-    RendererState state{
-        .depthTest = true,
-        .faceCulling = true,
-        .clearColor = glm::vec4(0.2f, 0.1f, 0.1f, 1.0f),
-        .clearColorBB = true,
-        .clearDepthBB = true,
-        .clearStencilBB = true
-    };
-    m_renderer->beginFrame(0, 0, width, height, state);
+    m_renderer->beginFrame(0, 0, width, height);
 }
 
 void RenderSystem::beginFrameMinimap(int minimapWidth, int minimapHeight) {
-    RendererState state{
-        .scissorTest = true,
-        .clearColor = glm::vec4(0.2f, 0.1f, 0.1f, 1.0f),
-        .clearColorBB = true,
-        .clearDepthBB = true
-    };
-    m_renderer->beginFrame(minimapWidth * 3, minimapHeight * 3, minimapWidth, minimapHeight, state);
+    m_renderer->beginFrameMinimap(minimapWidth * 3, minimapHeight * 3, minimapWidth, minimapHeight);
+}
+
+void RenderSystem::endFrame() {
+    m_renderer->endFrame();
+}
+
+void RenderSystem::endFrameMinimap() {
+    m_renderer->endFrameMinimap();
 }
 
 void RenderSystem::update(Registry& registry, float alpha) {
@@ -68,15 +63,15 @@ void RenderSystem::update(Registry& registry, float alpha) {
     for (Entity entity : registry.view<TransformComponent, CameraComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* camera = registry.getComponent<CameraComponent>(entity);
-        //auto* optionalPlayer = registry.getComponent<PlayerComponent>(entity);
+        auto* optionalPlayer = registry.getComponent<PlayerComponent>(entity);
 
         // find primary camera for RenderContext
         if (camera->isPrimary) {
             float yOffset = 0.0f;
             // FIXME make it more abstract because Camera can follow non-Player entity
-            //if (optionalPlayer != nullptr) {
-            //    yOffset = optionalPlayer->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
-            //}
+            if (optionalPlayer != nullptr) {
+                yOffset = optionalPlayer->isCrouching ? Constants::Stats::Camera::CROUCHING_OFFSET : Constants::Stats::Camera::STANDING_OFFSET;
+            }
             // view and projection for most passes
             m_renderContext.cameraView = Utils::Math::calculateView(transform->position,
                                                                     transform->prevPosition,
@@ -391,7 +386,7 @@ void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const s
 
 void RenderSystem::renderImmediate() {
     unsigned int VAO{};
-    std::vector<RenderImmediateCommand> queue;
+    std::vector<RenderImmediateCommand> queue{};
 
     switch (m_renderDebugMode) {
     case RenderDebugMode::NONE:
@@ -428,11 +423,6 @@ void RenderSystem::renderImmediate() {
     glEnable(GL_DEPTH_TEST);
 
     m_renderImmediateCommands.clear();
-}
-
-void RenderSystem::endFrame(GLFWwindow* window) {
-    // FIXME: cant use GLFWwindow here!
-    m_renderer->endFrame(window);
 }
 
 void RenderSystem::toggleRasterizationMode() {

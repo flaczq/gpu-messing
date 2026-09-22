@@ -148,7 +148,7 @@ void Mesh::_setupMesh() {
     // color
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Color));
     glEnableVertexAttribArray(1);
-    
+
     // normal
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, Normal));
     glEnableVertexAttribArray(2);

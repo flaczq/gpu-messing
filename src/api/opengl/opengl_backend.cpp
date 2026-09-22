@@ -23,7 +23,7 @@
 #include <thread>
 
 OpenGLBackEnd::OpenGLBackEnd()
-    : m_renderSystem(std::make_unique<OpenGLRenderer>())
+    : m_renderSystem(std::make_unique<OpenGLRenderer>(m_window))
 {
 }
 
@@ -232,7 +232,7 @@ void OpenGLBackEnd::run() {
         m_renderSystem.execute();
         // debug mode
         m_renderSystem.renderImmediate();
-        m_renderSystem.endFrame(m_window);
+        m_renderSystem.endFrame();
 
         // reset input changes for mouse scroll and movement
         InputManager::getInstance().reset();

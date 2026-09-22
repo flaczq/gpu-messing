@@ -27,6 +27,8 @@
 #include <utility>
 #include <vector>
 
+SoldierScene::SoldierScene() = default;
+
 bool SoldierScene::init(Registry& registry) {
     //       ▄████████    ▄████████    ▄████████    ▄████████     ███        ▄████████ 
     //      ███    ███   ███    ███   ███    ███   ███    ███ ▀█████████▄   ███    ███ 

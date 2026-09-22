@@ -19,17 +19,17 @@ struct Vertex {
 };
 
 struct Texture {
-	Texture(Texture&& other) noexcept : id(other.id), type(std::move(other.type)), path(std::move(other.path)) {
+	Texture(Texture&& other) noexcept
+		: id(other.id),
+		  type(std::move(other.type)),
+		  path(std::move(other.path))
+	{
 		other.id = 0;
 	}
 	Texture(const Texture&) = delete;
 	Texture& operator=(const Texture&) = delete;
 	Texture() = default;
-	~Texture() {
-		if (id != 0) {
-			glDeleteTextures(1, &id);
-		}
-	}
+	~Texture() { if (id != 0) glDeleteTextures(1, &id); }
 
 	unsigned int id{};
 	std::string type{};

@@ -3,6 +3,8 @@
 #include "rtx_scene.h"
 #include "scene.h"
 
+RtxScene::RtxScene() = default;
+
 bool RtxScene::init(Registry& registry) {
     // add shinny ballz
     //m_registry.createEntity(shinyballz);

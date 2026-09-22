@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../configs/gl_config.hpp"
 #include "../components/camera_component.hpp"
 #include "../components/transform_component.hpp"
 

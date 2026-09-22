@@ -29,7 +29,7 @@ public:
 private:
 	std::string m_name{};
 	std::string m_directory{};
-	std::vector<std::unique_ptr<Mesh>> m_meshes;
+	std::vector<std::unique_ptr<Mesh>> m_meshes{};
 	glm::vec3 m_AABBMin{};
 	glm::vec3 m_AABBMax{};
 

@@ -24,12 +24,12 @@ public:
 private:
 	unsigned int m_VAO{}, m_VBO{}, m_EBO{};
 
-	std::vector<Vertex> m_vertices;
-	std::vector<unsigned int> m_indices;
-	std::vector<std::shared_ptr<Texture>> m_textures;
-	bool m_hasDiffuseColor;
-	glm::vec3 m_diffuseColor;
-	GLenum m_drawType;
+	std::vector<Vertex> m_vertices{};
+	std::vector<unsigned int> m_indices{};
+	std::vector<std::shared_ptr<Texture>> m_textures{};
+	bool m_hasDiffuseColor{};
+	glm::vec3 m_diffuseColor{};
+	GLenum m_drawType{};
 
 	void _setupMesh();
 };

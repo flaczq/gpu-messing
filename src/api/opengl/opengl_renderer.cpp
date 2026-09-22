@@ -8,6 +8,11 @@
 #include "../i_renderer.h"
 #include "opengl_renderer.h"
 
+OpenGLRenderer::OpenGLRenderer(GLFWwindow*& windowRef)
+    : m_windowRef(windowRef)
+{
+}
+
 OpenGLRenderer::~OpenGLRenderer() {
     glDeleteVertexArrays(1, &m_VAOAABB);
     glDeleteBuffers(1, &m_VBOAABB);
@@ -96,52 +101,36 @@ void OpenGLRenderer::init() {
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 }
 
-void OpenGLRenderer::beginFrame(int x, int y, int width, int height, const RendererState& state) {
-    // TODO: add caching
+void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
     // Viewport
     glViewport(x, y, width, height);
 
     // Z-Depth Test
-    if (state.depthTest) {
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
-    } else {
-        glDisable(GL_DEPTH_TEST);
-    }
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+
     // Face Culling
-    if (state.faceCulling) {
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-    } else {
-        glDisable(GL_CULL_FACE);
-    }
-    // Scissor Test
-    if (state.scissorTest) {
-        glEnable(GL_SCISSOR_TEST);
-        glScissor(x, y, width, height);
-    } else {
-        glDisable(GL_SCISSOR_TEST);
-    }
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     // Clear Buffers
-    GLbitfield clearFlags = 0;
-    if (state.clearColorBB) {
-        clearFlags |= GL_COLOR_BUFFER_BIT;
-    }
-    if (state.clearDepthBB) {
-        clearFlags |= GL_DEPTH_BUFFER_BIT;
-    }
-    if (state.clearStencilBB) {
-        clearFlags |= GL_STENCIL_BUFFER_BIT;
-    }
-    if (clearFlags != 0) {
-        glClearColor(state.clearColor.r, state.clearColor.g, state.clearColor.b, state.clearColor.a);
-        glClear(clearFlags);
-    }
+    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void OpenGLRenderer::endFrame(GLFWwindow* window) {
+void OpenGLRenderer::beginFrameMinimap(int x, int y, int width, int height) {
+    glViewport(x, y, width, height);
+
+    // Scissor Test
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(x, y, width, height);
+
+    glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void OpenGLRenderer::endFrame() {
     // no need to unbind it every time but w/e
     glBindVertexArray(0);
 
@@ -149,12 +138,13 @@ void OpenGLRenderer::endFrame(GLFWwindow* window) {
     //glDisable(GL_STENCIL_TEST);
     //glDisable(GL_BLEND);
 
-    glfwSwapBuffers(window);
-
-    //MINIMAP
-    //glDisable(GL_SCISSOR_TEST);
+    assert(m_windowRef);
+    glfwSwapBuffers(m_windowRef);
 }
 
+void OpenGLRenderer::endFrameMinimap() {
+    glDisable(GL_SCISSOR_TEST);
+}
 
 void OpenGLRenderer::stencilPass() {
     glEnable(GL_STENCIL_TEST);

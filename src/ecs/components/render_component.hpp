@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../../configs/gl_config.hpp"
 #include "i_component.hpp"
 #include <memory>
 

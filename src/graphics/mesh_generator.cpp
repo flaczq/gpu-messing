@@ -64,11 +64,11 @@ namespace MeshGenerator {
 		float halfDepth = depth * 0.5f;
 
 		Vertex d0{}, d1{}, d2{}, d3{}, // down  (0-3)
-			   u0{}, u1{}, u2{}, u3{}, // up    (4-7)
-			   b0{}, b1{}, b2{}, b3{}, // back  (8-11)
-			   f0{}, f1{}, f2{}, f3{}, // front (12-15)
-			   l0{}, l1{}, l2{}, l3{}, // left  (16-19)
-			   r0{}, r1{}, r2{}, r3{}; // right (20-23)
+				     u0{}, u1{}, u2{}, u3{}, // up    (4-7)
+				     b0{}, b1{}, b2{}, b3{}, // back  (8-11)
+				     f0{}, f1{}, f2{}, f3{}, // front (12-15)
+				     l0{}, l1{}, l2{}, l3{}, // left  (16-19)
+				     r0{}, r1{}, r2{}, r3{}; // right (20-23)
 
 		d0.Position = { -halfWidth, -halfHeight, -halfDepth };
 		d1.Position = {  halfWidth, -halfHeight, -halfDepth };

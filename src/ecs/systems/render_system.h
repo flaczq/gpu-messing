@@ -49,10 +49,11 @@ public:
 	bool init();
 	void beginFrame(int width, int height) const;
 	void beginFrameMinimap(int minimapWidth, int minimapHeight);
+	void endFrame();
+	void endFrameMinimap();
 	void update(Registry& registry, float alpha);
 	void execute();
 	void renderImmediate();
-	void endFrame(GLFWwindow* window);
 	void toggleRasterizationMode();
 	void toggleRenderDebugMode();
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../configs/gl_config.hpp"
 #include "../i_renderer.h"
 
 enum class RasterizationMode {
@@ -12,11 +13,14 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 class OpenGLRenderer : public IRenderer {
 public:
+	OpenGLRenderer(GLFWwindow*& windowRef);
 	~OpenGLRenderer() override;
 
 	void init() override;
-	void beginFrame(int x, int y, int width, int height, const RendererState& state) override;
-	void endFrame(GLFWwindow* window) override;
+	void beginFrame(int x, int y, int width, int height) override;
+	void beginFrameMinimap(int x, int y, int width, int height) override;
+	void endFrame() override;
+	void endFrameMinimap() override;
 	void stencilPass() override;
 	void outlinePass(bool start = true) override;
 	void blendingPass(bool start = true) override;
@@ -25,7 +29,9 @@ public:
 	void toggleRasterizationMode() override;
 	unsigned int getVAOAABB() const override { return m_VAOAABB; }
 private:
-	GLFWwindow* m_window{};
+	// reference to pointer (!!)
+	// have to do it like this because RenderSystem can't now about GLFWWindow
+	GLFWwindow*& m_windowRef;
 
 	RasterizationMode m_rasterizationMode = RasterizationMode::STANDARD;
 	// AABB
