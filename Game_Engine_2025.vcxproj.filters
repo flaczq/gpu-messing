@@ -81,13 +81,13 @@
     <ClCompile Include="src\api\opengl\opengl_backend.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\api\opengl\opengl_render.cpp">
+    <ClCompile Include="src\api\opengl\opengl_renderer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\api\render.cpp">
+    <ClCompile Include="src\api\i_renderer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\api\backend.cpp">
+    <ClCompile Include="src\api\i_backend.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
   </ItemGroup>
@@ -159,7 +159,7 @@
     <ClInclude Include="libs\stb_image.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\api\backend.h">
+    <ClInclude Include="src\api\i_backend.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\model.h">
@@ -276,10 +276,10 @@
     <ClInclude Include="src\api\opengl\opengl_backend.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\api\opengl\opengl_render.h">
+    <ClInclude Include="src\api\opengl\opengl_renderer.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
-    <ClInclude Include="src\api\render.h">
+    <ClInclude Include="src\api\i_renderer.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

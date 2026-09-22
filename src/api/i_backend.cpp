@@ -1,10 +1,12 @@
 #include "../configs/log_config.hpp"
 #include "./opengl/opengl_backend.h"
-#include "backend.h"
+#include "i_backend.h"
 #include <memory>
 #include <stdexcept>
 
-std::unique_ptr<BackEnd> BackEnd::create(GraphicsAPI api) {
+IBackEnd::~IBackEnd() = default;
+
+std::unique_ptr<IBackEnd> IBackEnd::create(GraphicsAPI api) {
     switch (api) {
     case GraphicsAPI::OPENGL:
         LOG("*** OpenGL for Windows");

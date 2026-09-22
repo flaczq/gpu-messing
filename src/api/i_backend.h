@@ -10,9 +10,9 @@ enum class GraphicsAPI {
 class Registry;
 class CameraSystem;
 
-class BackEnd {
+class IBackEnd {
 public:
-    virtual ~BackEnd() = default;
+    virtual ~IBackEnd();
 
     virtual bool init(unsigned int width, unsigned int height) = 0;
     virtual void run() = 0;
@@ -20,5 +20,5 @@ public:
     virtual CameraSystem& getCameraSystem() = 0;
     virtual void setViewport(int x, int y, int width, int height) = 0;
 
-    static std::unique_ptr<BackEnd> create(GraphicsAPI api);
+    static std::unique_ptr<IBackEnd> create(GraphicsAPI api);
 };

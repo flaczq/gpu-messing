@@ -13,13 +13,19 @@
 #include "../../managers/resource_manager.h"
 #include "../../managers/scene_manager.h"
 #include "../../utils/stats_constants.hpp"
-#include "../backend.h"
+#include "../i_backend.h"
 #include "opengl_backend.h"
+#include "opengl_renderer.h"
 #include <ios>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
+
+OpenGLBackEnd::OpenGLBackEnd()
+    : m_renderSystem(std::make_unique<OpenGLRenderer>())
+{
+}
 
 bool OpenGLBackEnd::init(unsigned int width, unsigned int height) {
     //        ███        ▄█    █▄     ▄█     ▄████████       ▄█     ▄████████       ▄█      ███    
@@ -75,7 +81,7 @@ bool OpenGLBackEnd::init(unsigned int width, unsigned int height) {
         return false;
     }
 
-    // ONLY ONCE set 'this' as BackEnd
+    // ONLY ONCE set 'this' as BackEnd (for static calls)
     glfwSetWindowUserPointer(m_window, this);
 
     //       ▄████████  ▄████████    ▄████████ 
@@ -102,10 +108,10 @@ bool OpenGLBackEnd::init(unsigned int width, unsigned int height) {
     SceneManager::getInstance().init(m_registry);
 
     // set callbacks: window resize, single key click, mouse, scroll
-    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
-    glfwSetKeyCallback(m_window, key_callback);
-    glfwSetCursorPosCallback(m_window, mouse_callback);
-    glfwSetScrollCallback(m_window, scroll_callback);
+    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback); // OpenGLRenderer
+    glfwSetKeyCallback(m_window, key_callback); // InputManager
+    glfwSetCursorPosCallback(m_window, mouse_callback); // InputManager
+    glfwSetScrollCallback(m_window, scroll_callback); // InputManager
 
     // hide mouse pointer
     glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -289,7 +295,7 @@ void OpenGLBackEnd::_processGlobalInput() {
     }
     // RENDER MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_O)) {
-        m_renderSystem.toggleRenderMode();
+        m_renderSystem.toggleRasterizationMode();
     }
     // RENDER DEBUG MODE
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_P)) {

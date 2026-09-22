@@ -10,10 +10,12 @@
 #include "../../ecs/systems/player_system.h"
 #include "../../ecs/systems/render_system.h"
 #include "../../ecs/systems/transform_system.h"
-#include "../backend.h"
+#include "../i_backend.h"
 
-class OpenGLBackEnd : public BackEnd {
+class OpenGLBackEnd : public IBackEnd {
 public:
+    OpenGLBackEnd();
+
     bool init(unsigned int width, unsigned int height) override;
     void run() override;
     virtual Registry& getRegistry() override { return m_registry; }
@@ -29,7 +31,7 @@ private:
     DirLightMovementSystem m_dirLightMovementSystem{};
     PhysicsSystem m_physicsSystem{};
     PlayerSystem m_playerSystem{};
-    RenderSystem m_renderSystem{};
+    RenderSystem m_renderSystem; // OpenGLRenderer in constructor
     TransformSystem m_transformSystem{};
 
     // for showFps()

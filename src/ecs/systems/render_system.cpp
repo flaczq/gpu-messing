@@ -1,5 +1,5 @@
-#include "../../api/backend.h"
-#include "../../configs/gl_config.hpp"
+#include "../../api/i_backend.h"
+#include "../../api/i_renderer.h"
 #include "../../configs/log_config.hpp"
 #include "../../graphics/material.h"
 #include "../../graphics/shader.h"
@@ -17,13 +17,14 @@
 #include "../systems/camera_system.h"
 #include "render_system.h"
 #include <algorithm>
+#include <memory>
 
-RenderSystem::RenderSystem() = default;
-
-RenderSystem::~RenderSystem() {
-    glDeleteVertexArrays(1, &m_VAOAABB);
-    glDeleteBuffers(1, &m_VBOAABB);
+RenderSystem::RenderSystem(std::unique_ptr<IRenderer> renderer)
+    : m_renderer(std::move(renderer))
+{
 }
+
+RenderSystem::~RenderSystem() = default;
 
 bool RenderSystem::init() {
     // FIXME hardcoded max: 100
@@ -34,82 +35,31 @@ bool RenderSystem::init() {
     m_topLayerQueue.reserve(100);
     m_uiQueue.reserve(100);
 
-    // standard, lines (wireframe), points
-    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-
-    // hardcoded AABB 1x1x1 (with the middle at 0.0)
-    float verticesAABB[] = {
-        // front
-        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
-        // back
-        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
-        // connectors
-        -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
-    };
-    glGenVertexArrays(1, &m_VAOAABB);
-    glGenBuffers(1, &m_VBOAABB);
-    glBindVertexArray(m_VAOAABB);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBOAABB);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesAABB), verticesAABB, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-
-    _renderFrameBufferTexture();
+    m_renderer->init();
 
     return true;
 }
 
-void RenderSystem::beginFrame(unsigned int width, unsigned int height) const {
-    glViewport(0, 0, width, height);
-
-    // Z-depth test
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    // face culling
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-
-    glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+void RenderSystem::beginFrame(int width, int height) const {
+    RendererState state{
+        .depthTest = true,
+        .faceCulling = true,
+        .clearColor = glm::vec4(0.2f, 0.1f, 0.1f, 1.0f),
+        .clearColorBB = true,
+        .clearDepthBB = true,
+        .clearStencilBB = true
+    };
+    m_renderer->beginFrame(0, 0, width, height, state);
 }
 
-void RenderSystem::beginFrameMinimap(unsigned int minimapWidth, unsigned int minimapHeight) {
-    unsigned int minimapX = minimapWidth * 3;
-    unsigned int minimapY = minimapHeight * 3;
-    // screen - minimap
-    glViewport(minimapX, minimapY, minimapWidth, minimapHeight);
-
-    glEnable(GL_SCISSOR_TEST);
-    glScissor(minimapX, minimapY, minimapWidth, minimapHeight);
-
-    glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void RenderSystem::customConfiguration(unsigned int phase) {
-    if (phase == 0) {
-        glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-        glClearColor(0.1f, 0.1f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    } else if (phase == 1) {
-        //screenShader.use();
-        //glBindVertexArray(m_quadVAO);
-        //glDisable(GL_DEPTH_TEST);
-        //glBindTexture(GL_TEXTURE_2D, m_fbTexture);
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
-    }
+void RenderSystem::beginFrameMinimap(int minimapWidth, int minimapHeight) {
+    RendererState state{
+        .scissorTest = true,
+        .clearColor = glm::vec4(0.2f, 0.1f, 0.1f, 1.0f),
+        .clearColorBB = true,
+        .clearDepthBB = true
+    };
+    m_renderer->beginFrame(minimapWidth * 3, minimapHeight * 3, minimapWidth, minimapHeight, state);
 }
 
 void RenderSystem::update(Registry& registry, float alpha) {
@@ -270,11 +220,7 @@ void RenderSystem::execute() {
     //     ▄████████▀     ▄████▀     ██████████  ▀█   █▀  ████████▀  █▀   █████▄▄██ 
     //                                                                    ▀         
     if (!m_stencilQueue.empty()) {
-        glEnable(GL_STENCIL_TEST);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);
-
+        m_renderer->stencilPass();
         _sortQueueByMaterial(m_stencilQueue);
         _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.cameraProjection);
     }
@@ -289,17 +235,10 @@ void RenderSystem::execute() {
     //     ▀██████▀  ████████▀     ▄████▀   █████▄▄██ █▀    ▀█   █▀    ██████████ 
     //                                      ▀                                     
     if (!m_outlineQueue.empty()) {
-        glDisable(GL_DEPTH_TEST);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-
+        m_renderer->outlinePass();
         _sortQueueByMaterial(m_outlineQueue);
         _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.cameraProjection);
-
-        glEnable(GL_DEPTH_TEST);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glStencilMask(0xFF);
-        glDisable(GL_STENCIL_TEST);
+        m_renderer->outlinePass(false);
     }
 
     //    ▀█████████▄   ▄█          ▄████████ ███▄▄▄▄   ████████▄   ▄█  ███▄▄▄▄      ▄██████▄  
@@ -312,17 +251,10 @@ void RenderSystem::execute() {
     //    ▄█████████▀  █████▄▄██   ██████████  ▀█   █▀  ████████▀  █▀    ▀█   █▀    ████████▀  
     //                 ▀                                                                       
     if (!m_blendingQueue.empty()) {
-        glDisable(GL_CULL_FACE);
-        glEnable(GL_BLEND);
-        // src: factor == source color vector, dst: factor == 1 - source color vector
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-
+        m_renderer->blendingPass();
         _sortQueueByDistance(m_blendingQueue);
         _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.cameraProjection);
-
-        glEnable(GL_CULL_FACE);
-        glDisable(GL_BLEND);
+        m_renderer->blendingPass(false);
     }
 
     //        ███      ▄██████▄     ▄███████▄                        
@@ -345,7 +277,7 @@ void RenderSystem::execute() {
     //    ▀                                               ███    ███ 
     if (!m_topLayerQueue.empty()) {
         // always last (before UI)
-        glClear(GL_DEPTH_BUFFER_BIT);
+        m_renderer->topLayerPass();
         glm::mat4 topLayerProjection = Utils::Math::calculateProjection(
             45.0f,
             m_renderContext.cameraAspect,
@@ -470,10 +402,11 @@ void RenderSystem::renderImmediate() {
             LOG_D("nothing to render immediately, sad QQ");
             return;
         }
-        VAO = m_VAOAABB;
+        VAO = m_renderer->getVAOAABB();
         break;
     }
 
+    // FIXME: m_renderer!
     glDisable(GL_DEPTH_TEST);
     glBindVertexArray(VAO);
 
@@ -497,90 +430,16 @@ void RenderSystem::renderImmediate() {
     m_renderImmediateCommands.clear();
 }
 
-// TUTORIAL: unused
-void RenderSystem::_renderFrameBufferTexture() {
-    //unsigned int fbo{};
-    glGenFramebuffers(1, &m_framebuffer);
-    // off-screen rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-
-    //unsigned int texture{};
-    glGenTextures(1, &m_fbTexture);
-    glBindTexture(GL_TEXTURE_2D, m_fbTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // target, attachment, textarget, texture, level
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fbTexture, 0);
-
-    // renderbuffer
-    unsigned int rbo{};
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 768);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    // attach renderbuffer to framebuffer's depth and stencil attachments
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_E("RENDER_SYSTEM::FRAMEBUFFER_NOT_COMPLETE");
-    }
-
-    // main window rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //glDeleteFramebuffers(1, &m_framebuffer);
-
-    // screen quad VAO
-    float quadVertices[] = {
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-    unsigned int quadVBO;
-    glGenVertexArrays(1, &m_quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(m_quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
-}
-
 void RenderSystem::endFrame(GLFWwindow* window) {
-    // no need to unbind it every time but w/e
-    glBindVertexArray(0);
-
-    //glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_STENCIL_TEST);
-    //glDisable(GL_BLEND);
-
-    glfwSwapBuffers(window);
+    // FIXME: cant use GLFWwindow here!
+    m_renderer->endFrame(window);
 }
 
-void RenderSystem::endFrameMinimap() {
-    glDisable(GL_SCISSOR_TEST);
-}
-
-void RenderSystem::toggleRenderMode() {
-    m_renderMode = Utils::Enum::getNext(m_renderMode);
-    glPolygonMode(GL_FRONT_AND_BACK, static_cast<GLenum>(m_renderMode));
-    LOG_D("Changed RenderMode to: " << Utils::Enum::getName(m_renderMode));
+void RenderSystem::toggleRasterizationMode() {
+    m_renderer->toggleRasterizationMode();
 }
 
 void RenderSystem::toggleRenderDebugMode() {
     m_renderDebugMode = Utils::Enum::getNext(m_renderDebugMode);
     LOG_D("Changed RenderDebugMode to: " << Utils::Enum::getName(m_renderDebugMode));
-}
-
-void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
-    // crazy static BS
-    BackEnd* backEnd = static_cast<BackEnd*>(glfwGetWindowUserPointer(window));
-    backEnd->getCameraSystem().updateAspect(backEnd->getRegistry(), width, height);
-    backEnd->setViewport(0, 0, width, height);
 }

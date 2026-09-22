@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #define _CRTDBG_MAP_ALLOC
-#include "api/backend.h"
+#include "api/i_backend.h"
 #include <crtdbg.h>
 #include <iostream>
 #include <memory>
@@ -17,7 +17,7 @@ int main() {
     // no printf sync -> make std::cout faster
     std::ios_base::sync_with_stdio(false);
 
-    std::unique_ptr<BackEnd> backEnd = BackEnd::create(GraphicsAPI::OPENGL);
+    std::unique_ptr<IBackEnd> backEnd = IBackEnd::create(GraphicsAPI::OPENGL);
     if (!backEnd->init(SCREEN_WIDTH, SCREEN_HEIGHT)) {
         return -1;
     }
