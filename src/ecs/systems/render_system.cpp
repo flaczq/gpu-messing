@@ -109,15 +109,15 @@ void RenderSystem::update(Registry& registry, float alpha) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
 
-        glm::vec3 AABBSize = Utils::Math::calculateSize(physics->AABB.worldMin, physics->AABB.worldMax);
-        glm::vec3 AABBCenter = Utils::Math::calculateCenter(physics->AABB.worldMin, physics->AABB.worldMax);
+        glm::vec3 aabbSize = Utils::Math::calculateSize(physics->AABB.worldMin, physics->AABB.worldMax);
+        glm::vec3 aabbCenter = Utils::Math::calculateCenter(physics->AABB.worldMin, physics->AABB.worldMax);
         glm::vec3 color = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
         RenderImmediateCommand command = {
                 transform->position,
                 transform->rotation,
                 transform->scale,
-                AABBSize,
-                AABBCenter,
+                aabbSize,
+                aabbCenter,
                 color
         };
         m_renderImmediateCommands.push_back(command);

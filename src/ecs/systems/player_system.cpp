@@ -2,6 +2,7 @@
 #include "../../managers/input_manager.h"
 #include "../../utils/math_utils.hpp"
 #include "../components/camera_component.hpp"
+#include "../components/physics_component.hpp"
 #include "../components/player_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -57,8 +58,9 @@ void PlayerSystem::processInput(Registry& registry) {
 }
 
 void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
-    for (Entity entity : registry.view<TransformComponent, PlayerComponent>()) {
+    for (Entity entity : registry.view<TransformComponent, PhysicsComponent, PlayerComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
+        auto* physics = registry.getComponent<PhysicsComponent>(entity);
         auto* player = registry.getComponent<PlayerComponent>(entity);
         auto* optionalCamera = registry.getComponent<CameraComponent>(entity);
 
@@ -78,7 +80,7 @@ void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
                     flatFront * player->moveDir.z +
                     // left-right
                     right * player->moveDir.x;
-                float velocity = Constants::Stats::Player::MOVEMENT_SPEED * fixedt;
+                float velocity = physics->speed * fixedt;
                 transform->position += direction * velocity;
             }
             if (!player->isGodMode) {

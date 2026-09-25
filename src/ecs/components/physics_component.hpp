@@ -18,14 +18,20 @@ struct AABB {
 };
 
 struct PhysicsComponent : public IComponent {
-	bool isColliding = false;
 	AABB AABB{};
+	bool isColliding = false;
+	bool isStatic{};
+	float speed{};
 	PhysicsLayer layer{};
 
 	PhysicsComponent() = default;
 	PhysicsComponent(const glm::vec3& AABBmin,
 					 const glm::vec3& AABBmax,
-					 PhysicsLayer layer = PhysicsLayer::BOT)
+					 bool isStatic_ = false,
+					 float speed_ = 0.0f,
+					 PhysicsLayer layer_ = PhysicsLayer::BOT)
 		: AABB(AABBmin, AABBmax, AABBmin, AABBmax),
-		  layer(layer) {}
+		  isStatic(isStatic_),
+		  speed(speed_),
+		  layer(layer_) {}
 };

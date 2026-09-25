@@ -72,11 +72,11 @@ namespace Utils {
 			return glm::perspective(glm::radians(fov), aspect, nearPlane, farPlane);
 		}
 
-		constexpr glm::vec3 calculateSize(const glm::vec3& worldMin, const glm::vec3& worldMax) {
-			return worldMax - worldMin;
+		constexpr glm::vec3 calculateSize(const glm::vec3& min, const glm::vec3& max) {
+			return max - min;
 		}
-		constexpr glm::vec3 calculateCenter(const glm::vec3& worldMin, const glm::vec3& worldMax) {
-			return (worldMin + worldMax) * 0.5f;
+		constexpr glm::vec3 calculateCenter(const glm::vec3& min, const glm::vec3& max) {
+			return (min + max) * 0.5f;
 		}
 	}
 }

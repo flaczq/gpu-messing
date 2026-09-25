@@ -1,11 +1,13 @@
 #pragma once
 
 #include "../../configs/math_config.hpp"
+#include "../components/identity_component.hpp"
 #include "../components/physics_component.hpp"
 #include "../components/transform_component.hpp"
 #include <vector>
 
 struct PhysicsCommand {
+	IdentityComponent& identity;
 	TransformComponent& transform;
 	PhysicsComponent& physics;
 };
@@ -25,7 +27,6 @@ private:
 
 	void _registerInQueue(const PhysicsCommand& command);
 	void _updateAABB(AABB& aabb, const glm::vec3& position, const glm::quat& rotation, const glm::vec3& scale);
-	bool _detectCollision(const PhysicsComponent& physicsX, const PhysicsComponent& physicsY);
-	bool _isCollidingByAABB(const AABB& aabbX, const AABB& aabbY);
-	void _resolveCollisionByMTV(PhysicsCommand& commandX, PhysicsCommand& commandY);
+	glm::vec3 _findMinimumTranslationVector(const AABB& aabbA, const AABB& aabbB);
+	void _resolveCollisionWithMTV(PhysicsCommand& commandX, PhysicsCommand& commandY, const glm::vec3& mtv);
 };
