@@ -20,6 +20,7 @@ struct AABB {
 struct PhysicsComponent : public IComponent {
 	AABB AABB{};
 	bool isColliding = false;
+	bool isMoving = false;
 	bool isStatic{};
 	float speed{};
 	PhysicsLayer layer{};

@@ -24,6 +24,8 @@ void PhysicsSystem::fixedUpdate(Registry& registry, float fixedt) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
 
+        physics->isMoving = Utils::Math::areDiff(transform->position, transform->prevPosition);
+
         _updateAABB(physics->AABB, transform->position, transform->rotation, transform->scale);
 
         PhysicsCommand command = {
@@ -48,7 +50,7 @@ void PhysicsSystem::execute() {
         if (cmd.physics.isColliding) {
             continue;
         }
-        if (cmd.physics.isStatic) {
+        if (cmd.physics.isStatic || !cmd.physics.isMoving) {
             // static objects can only be the target
             continue;
         }
@@ -73,7 +75,7 @@ void PhysicsSystem::execute() {
 
             // i want my...
             glm::vec3 mtv = _findMinimumTranslationVector(cmd.physics.AABB, targetCmd.physics.AABB);
-            if (glm::length(mtv) > 0.0f) {
+            if (Utils::Math::isPositive(mtv)) {
                 cmd.physics.isColliding = true;
                 targetCmd.physics.isColliding = true;
 
@@ -115,34 +117,32 @@ glm::vec3 PhysicsSystem::_findMinimumTranslationVector(const AABB& aabbA, const 
     // calculate vector direction
     glm::vec3 aabbACenter = Utils::Math::calculateCenter(aabbA.worldMin, aabbA.worldMax);
     glm::vec3 aabbBCenter = Utils::Math::calculateCenter(aabbB.worldMin, aabbB.worldMax);
-    glm::vec3 fromYtoX = aabbACenter - aabbBCenter;
-    if (glm::dot(normal, fromYtoX) < 0.0f) {
+    glm::vec3 fromBtoA = aabbACenter - aabbBCenter;
+    if (glm::dot(normal, fromBtoA) < 0.0f) {
         normal *= -1;
     }
 
     return minOverlap * normal;
 }
 
-void PhysicsSystem::_resolveCollisionWithMTV(PhysicsCommand& commandX, PhysicsCommand& commandY, const glm::vec3& mtv) {
-    LOG_D(commandX.identity.name << " <-> " << commandY.identity.name << ": " << Utils::Math::getVec3Values(mtv));
+void PhysicsSystem::_resolveCollisionWithMTV(PhysicsCommand& commandA, PhysicsCommand& commandB, const glm::vec3& mtv) {
+    LOG_D(commandA.identity.name << " <-> " << commandB.identity.name << ": " << Utils::Math::getVec3Values(mtv));
     // position adjustment
-    if (commandY.physics.isStatic) {
-        // whole force used to adjust only other object
-        commandX.transform.position += mtv;
+    if (commandB.physics.isStatic || !commandB.physics.isMoving) {
+        // origin cannot be static = always moving
+        commandA.transform.position += mtv;
     } else {
-        // TODO adjust only objects that are moving
         // FIXME split based on mass
-        // 50/50 adjustment
-        commandX.transform.position += mtv * 0.5f;
-        commandY.transform.position += mtv * 0.5f;
+        commandA.transform.position += mtv * 0.5f;
+        commandB.transform.position -= mtv * 0.5f;
     }
 
     // speed adjustment
     // Zerujemy prędkość A skierowaną w stronę przeszkody, aby obiekt nie "drgał"
-    //float speedAdj = glm::dot(commandX.physics.speed, normal);
+    //float speedAdj = glm::dot(commandA.physics.speed, normal);
     //if (speedAdj < 0.0f) {
     //    // jitter safe
-    //    commandX.physics.speed -= normal * speedAdj;
+    //    commandA.physics.speed -= normal * speedAdj;
     //}
 }
 

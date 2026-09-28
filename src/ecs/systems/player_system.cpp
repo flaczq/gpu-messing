@@ -50,7 +50,7 @@ void PlayerSystem::processInput(Registry& registry) {
                 }
             }
             // normalize diagonal movement
-            player->moveDir = glm::length(moveDir) > 0.0f ? glm::normalize(moveDir) : glm::vec3(0.0f);
+            player->moveDir = Utils::Math::isPositive(moveDir) ? glm::normalize(moveDir) : glm::vec3(0.0f);
             // TODO only primary Player for now
             break;
         }
@@ -69,7 +69,7 @@ void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
         }
 
         if (player->isPrimary && optionalCamera->isPrimary) {
-            if (glm::length(player->moveDir) > 0.0f) {
+            if (Utils::Math::isPositive(player->moveDir)) {
                 glm::vec3 up = Constants::Stats::World::WORLD_UP;
                 glm::vec3 flatFront = Utils::Math::calculateFlatFront(optionalCamera->yaw);
                 glm::vec3 right = Utils::Math::calculateRight(optionalCamera->yaw, optionalCamera->pitch);
