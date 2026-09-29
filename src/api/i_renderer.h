@@ -13,6 +13,7 @@ public:
 	virtual void outlinePass(bool start = true) = 0;
 	virtual void blendingPass(bool start = true) = 0;
 	virtual void topLayerPass() = 0;
+	//virtual void renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) = 0;
 	virtual void setRasterizationMode() = 0;
 	virtual void toggleRasterizationMode() = 0;
 	virtual unsigned int getVAOAABB() const = 0;

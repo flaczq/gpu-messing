@@ -25,6 +25,7 @@ public:
 	void outlinePass(bool start = true) override;
 	void blendingPass(bool start = true) override;
 	void topLayerPass() override;
+	//void renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) override;
 	void setRasterizationMode() override;
 	void toggleRasterizationMode() override;
 	unsigned int getVAOAABB() const override { return m_VAOAABB; }
@@ -40,5 +41,5 @@ private:
 	// FRAMEBUFFER
 	unsigned int m_framebuffer{};
 	unsigned int m_fbTexture{};
-	unsigned int m_quadVAO;
+	unsigned int m_quadVAO{};
 };

@@ -64,11 +64,11 @@ namespace MeshGenerator {
 		float halfDepth = depth * 0.5f;
 
 		Vertex d0{}, d1{}, d2{}, d3{}, // down  (0-3)
-				     u0{}, u1{}, u2{}, u3{}, // up    (4-7)
-				     b0{}, b1{}, b2{}, b3{}, // back  (8-11)
-				     f0{}, f1{}, f2{}, f3{}, // front (12-15)
-				     l0{}, l1{}, l2{}, l3{}, // left  (16-19)
-				     r0{}, r1{}, r2{}, r3{}; // right (20-23)
+			   u0{}, u1{}, u2{}, u3{}, // up    (4-7)
+			   b0{}, b1{}, b2{}, b3{}, // back  (8-11)
+			   f0{}, f1{}, f2{}, f3{}, // front (12-15)
+			   l0{}, l1{}, l2{}, l3{}, // left  (16-19)
+			   r0{}, r1{}, r2{}, r3{}; // right (20-23)
 
 		d0.Position = { -halfWidth, -halfHeight, -halfDepth };
 		d1.Position = {  halfWidth, -halfHeight, -halfDepth };
@@ -108,12 +108,12 @@ namespace MeshGenerator {
 		l2.TexCoords = r2.TexCoords = { depth * uvTiling, height * uvTiling };
 		l3.TexCoords = r3.TexCoords = { 0.0f,             height * uvTiling };
 
-		d0.Normal = d1.Normal = d2.Normal = d3.Normal = { 0.0f, -1.0f,  0.0f };
-		u0.Normal = u1.Normal = u2.Normal = u3.Normal = { 0.0f,  1.0f,  0.0f };
-		b0.Normal = b1.Normal = b2.Normal = b3.Normal = { 0.0f,  0.0f, -1.0f };
-		f0.Normal = f1.Normal = f2.Normal = f3.Normal = { 0.0f,  0.0f,  1.0f };
+		d0.Normal = d1.Normal = d2.Normal = d3.Normal = {  0.0f, -1.0f,  0.0f };
+		u0.Normal = u1.Normal = u2.Normal = u3.Normal = {  0.0f,  1.0f,  0.0f };
+		b0.Normal = b1.Normal = b2.Normal = b3.Normal = {  0.0f,  0.0f, -1.0f };
+		f0.Normal = f1.Normal = f2.Normal = f3.Normal = {  0.0f,  0.0f,  1.0f };
 		l0.Normal = l1.Normal = l2.Normal = l3.Normal = { -1.0f,  0.0f,  0.0f };
-		r0.Normal = r1.Normal = r2.Normal = r3.Normal = { 1.0f,  0.0f,  0.0f };
+		r0.Normal = r1.Normal = r2.Normal = r3.Normal = {  1.0f,  0.0f,  0.0f };
 
 		vertices = {
 			d0, d1, d2, d3,
@@ -158,7 +158,7 @@ namespace MeshGenerator {
 			unsigned int idx = static_cast<unsigned int>(vertices.size()) - 2;
 			indices.push_back(idx);
 			indices.push_back(idx + 1);
-			};
+		};
 
 		// perpendicular to X-axis
 		for (float x : {-half, half}) {
@@ -191,15 +191,16 @@ namespace MeshGenerator {
 		return Mesh(vertices, indices, textures, true, glm::vec3(1.0f, 0.0f, 0.5f), GL_LINES);
 	}
 
-	std::vector<Mesh> createRoom(float width, float height, float depth, float uvTiling) {
-		std::vector<Mesh> meshes;
-		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
-		std::vector<std::shared_ptr<Texture>> textures;
+	Mesh createWall(float width, float height, float depth, float uvTiling) {
+		//std::vector<Mesh> meshes;
+		//std::vector<Vertex> vertices;
+		//std::vector<unsigned int> indices;
+		//std::vector<std::shared_ptr<Texture>> textures;
 
-		// TODO
-		meshes.push_back(Mesh(vertices, indices, textures));
+		//// TODO
+		//meshes.push_back(Mesh(vertices, indices, textures));
 
-		return meshes;
+		//return meshes;
+		return createCuboid(width, height, depth);
 	}
 }

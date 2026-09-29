@@ -332,7 +332,7 @@ void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const
 }
 
 // TODO: use UBO
-void RenderSystem::_renderSortedQueue(std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const {
+void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const {
     if (queue.empty()) {
         //LOG_D("Empty queue for: " << name << " - nothing to render");
         return;

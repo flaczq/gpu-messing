@@ -2,7 +2,7 @@
 #include "../../configs/log_config.hpp"
 #include "../../ecs/registry.h"
 #include "../../ecs/systems/camera_system.h"
-#include "../../ecs/systems/render_system.h"
+#include "../../managers/resource_manager.h"
 #include "../../utils/enum_utils.hpp"
 #include "../i_backend.h"
 #include "../i_renderer.h"
@@ -182,6 +182,29 @@ void OpenGLRenderer::blendingPass(bool start) {
 void OpenGLRenderer::topLayerPass() {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
+
+//void OpenGLRenderer::renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) {
+//    glDisable(GL_DEPTH_TEST);
+//    glBindVertexArray(m_VAOAABB);
+//
+//    // FIXME move to mesh?
+//    auto shader = ResourceManager::getInstance().getShader("simple_shader");
+//    shader->use();
+//    shader->setMat4fv("view", view);
+//    shader->setMat4fv("projection", projection);
+//    for (auto& cmd : queue) {
+//        glm::mat4 model = glm::mat4(1.0f);
+//        model = glm::translate(model, cmd.center);
+//        model = glm::scale(model, cmd.size);
+//        shader->setMat4fv("model", model);
+//        shader->setBool("hasMatColor", true);
+//        shader->setVec3fv("matColor", cmd.color);
+//        glDrawArrays(GL_LINES, 0, 24);
+//    }
+//
+//    glBindVertexArray(0);
+//    glEnable(GL_DEPTH_TEST);
+//}
 
 void OpenGLRenderer::setRasterizationMode() {
     // standard, lines (wireframe), points

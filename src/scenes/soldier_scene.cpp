@@ -62,6 +62,7 @@ bool SoldierScene::init(Registry& registry) {
     auto texShader = ResourceManager::getInstance().getShader("tex_shader");
     // MATERIALS
     ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
+    ResourceManager::getInstance().loadMaterial("wall_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("light_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("grid_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
@@ -87,6 +88,12 @@ bool SoldierScene::init(Registry& registry) {
     auto floorMM = std::make_shared<Model>("floor_model", std::move(floorM), -floorSize * 0.5f, floorSize * 0.5f);
     // TODO maybe wrap into sigle method call
     ResourceManager::getInstance().addModel(std::move(floorMM));
+    // --- wall
+    float wallHeight = 2.0f;
+    auto wall = MeshGenerator::createWall(14.0f, wallHeight);
+    auto wallM = std::make_unique<Mesh>(std::move(wall));
+    auto wallMM = std::make_shared<Model>("wall_model", std::move(wallM));
+    ResourceManager::getInstance().addModel(std::move(wallMM));
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
     auto lightM = std::make_unique<Mesh>(std::move(light));
@@ -144,6 +151,19 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax());
         registry.addComponent<RenderComponent>(floorE, floorModel, floorMaterial);
     }
+    // --- wall
+    auto wallModel = ResourceManager::getInstance().getModel("wall_model");
+    auto wallMaterial = ResourceManager::getInstance().getMaterial("wall_material");
+    if (wallModel && wallMaterial) {
+        wallMaterial->addBoolUniform("hasMatColor", true);
+        wallMaterial->addVec3Uniform("matColor", Constants::Color::BROWN);
+        glm::quat wRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        Entity wallE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(wallE, "wall");
+        registry.addComponent<TransformComponent>(wallE, glm::vec3(2.0f, wallHeight * 0.5f, 9.0f), wRotQ);
+        registry.addComponent<PhysicsComponent>(wallE, wallModel->getAABBMin(), wallModel->getAABBMax());
+        registry.addComponent<RenderComponent>(wallE, wallModel, wallMaterial);
+    }
     // --- light
     auto lightModel = ResourceManager::getInstance().getModel("light_model");
     auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
@@ -164,7 +184,7 @@ bool SoldierScene::init(Registry& registry) {
         gridMaterial->addBoolUniform("hasMatColor", false);
         Entity gridE = registry.createEntity();
         registry.addComponent<IdentityComponent>(gridE, "grid");
-        registry.addComponent<TransformComponent>(gridE, glm::vec3(gridSize / 2.0f));
+        registry.addComponent<TransformComponent>(gridE, glm::vec3(gridSize * 0.5f));
         registry.addComponent<RenderComponent>(gridE, gridModel, gridMaterial);
     }
     // --- gizmo
@@ -182,8 +202,9 @@ bool SoldierScene::init(Registry& registry) {
     if (playerModel && playerMaterial) {
         Entity playerE = registry.createEntity();
         registry.addComponent<IdentityComponent>(playerE, "player");
-        registry.addComponent<TransformComponent>(playerE, glm::vec3(1.7f, 0.0f, 17.0f), glm::quat(), glm::vec3(0.2f));
-        registry.addComponent<PhysicsComponent>(playerE, playerModel->getAABBMin() * 0.1f, playerModel->getAABBMax() * 0.1f, PhysicsLayer::TOP);
+        registry.addComponent<TransformComponent>(playerE, glm::vec3(9.0f, 0.0f, 14.0f), glm::quat(), glm::vec3(0.2f));
+        //(-8.917559, -5.276115, -1.064211)(3.635565, 5.276115, 1.111632)
+        registry.addComponent<PhysicsComponent>(playerE, playerModel->getAABBMin() * 0.2f, playerModel->getAABBMax() * 0.2f, PhysicsLayer::TOP);
         registry.addComponent<PlayerComponent>(playerE, 5.0f);
         registry.addComponent<CameraComponent>(playerE);
         registry.addComponent<RenderComponent>(playerE, playerModel, playerMaterial, RenderQueueType::TOP_LAYER);
@@ -203,7 +224,7 @@ bool SoldierScene::init(Registry& registry) {
             Entity soldierE = registry.createEntity();
             registry.addComponent<IdentityComponent>(soldierE, "soldier_" + std::to_string(i), LayerID::SOLDIERS);
             registry.addComponent<TransformComponent>(soldierE, sPos, sRotQ, glm::vec3(100.0f));
-            registry.addComponent<PhysicsComponent>(soldierE, soldierModel->getAABBMin(), soldierModel->getAABBMax());
+            registry.addComponent<PhysicsComponent>(soldierE, soldierModel->getAABBMin(), soldierModel->getAABBMax(), PhysicsLayer::TOP);
             registry.addComponent<RenderComponent>(soldierE, soldierModel, soldierMaterial);
             if (i == 30) {
                 registry.addComponent<AIComponent>(soldierE, 1.3f);

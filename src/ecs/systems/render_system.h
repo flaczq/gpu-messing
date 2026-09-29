@@ -75,5 +75,5 @@ private:
 	void _registerInQueue(RenderQueueType queueType, const RenderCommand& command);
 	void _sortQueueByMaterial(std::vector<RenderCommand>& queue) const;
 	void _sortQueueByDistance(std::vector<RenderCommand>& queue) const;
-	void _renderSortedQueue(std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const;
+	void _renderSortedQueue(const std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const;
 };

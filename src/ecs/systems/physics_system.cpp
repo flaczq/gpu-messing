@@ -54,10 +54,10 @@ void PhysicsSystem::execute() {
             // static objects can only be the target
             continue;
         }
-        if (cmd.physics.layer != PhysicsLayer::TOP) {
-            // ONLY TO(P)LAYER
-            continue;
-        }
+        //if (cmd.physics.layer != PhysicsLayer::TOP) {
+        //    // ONLY TO(P)LAYER
+        //    continue;
+        //}
 
         for (auto& targetCmd : m_physicsQueue) {
             if (&cmd.physics == &targetCmd.physics) {
