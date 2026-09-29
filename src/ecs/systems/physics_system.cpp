@@ -24,7 +24,7 @@ void PhysicsSystem::fixedUpdate(Registry& registry, float fixedt) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
 
-        physics->isMoving = Utils::Math::areDiff(transform->position, transform->prevPosition);
+        physics->isMoving = Utils::Math::areDifferent(transform->position, transform->prevPosition);
 
         _updateAABB(physics->AABB, transform->position, transform->rotation, transform->scale);
 
@@ -50,7 +50,7 @@ void PhysicsSystem::execute() {
         if (cmd.physics.isColliding) {
             continue;
         }
-        if (cmd.physics.isStatic || !cmd.physics.isMoving) {
+        if (!cmd.physics.isMoving) {
             // static objects can only be the target
             continue;
         }
@@ -64,10 +64,10 @@ void PhysicsSystem::execute() {
                 // same home address
                 continue;
             }
-            if (targetCmd.physics.isStatic) {
-            	// FIXME include floor: isGrounded
-            	continue;
-            }
+            //if (targetCmd.physics.isMoving) {
+            //	// FIXME include floor: isGrounded
+            //	continue;
+            //}
             if (cmd.physics.layer < targetCmd.physics.layer) {
                 // (p)layering
                 continue;
@@ -105,10 +105,11 @@ glm::vec3 PhysicsSystem::_findMinimumTranslationVector(const AABB& aabbA, const 
         minOverlap = overlapX;
         normal = glm::vec3(1.0f, 0.0f, 0.0f);
     }
-    if (overlapY < minOverlap) {
-        minOverlap = overlapY;
-        normal = glm::vec3(0.0f, 1.0f, 0.0f);
-    }
+    // will this ever happen..?
+    //if (overlapY < minOverlap) {
+    //    minOverlap = overlapY;
+    //    normal = glm::vec3(0.0f, 1.0f, 0.0f);
+    //}
     if (overlapZ < minOverlap) {
         minOverlap = overlapZ;
         normal = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -126,19 +127,19 @@ glm::vec3 PhysicsSystem::_findMinimumTranslationVector(const AABB& aabbA, const 
 }
 
 void PhysicsSystem::_resolveCollisionWithMTV(PhysicsCommand& commandA, PhysicsCommand& commandB, const glm::vec3& mtv) {
-    LOG_D(commandA.identity.name << " <-> " << commandB.identity.name << ": " << Utils::Math::getVec3Values(mtv));
+    //LOG_D(commandA.identity.name << " <-> " << commandB.identity.name << ": " << Utils::Math::getVec3Values(mtv));
     // position adjustment
-    if (commandB.physics.isStatic || !commandB.physics.isMoving) {
+    assert(commandA.physics.isMoving);
+    if (commandB.physics.isMoving) {
+        // FIXME split based on mass
+        commandA.transform.position += mtv * 0.5f;//* (masaB / (masaA + masaB))
+        commandB.transform.position -= mtv * 0.5f;//* (masaA / (masaA + masaB))
+    } else {
         // origin cannot be static = always moving
         commandA.transform.position += mtv;
-    } else {
-        // FIXME split based on mass
-        commandA.transform.position += mtv * 0.5f;
-        commandB.transform.position -= mtv * 0.5f;
     }
 
     // speed adjustment
-    // Zerujemy prędkość A skierowaną w stronę przeszkody, aby obiekt nie "drgał"
     //float speedAdj = glm::dot(commandA.physics.speed, normal);
     //if (speedAdj < 0.0f) {
     //    // jitter safe

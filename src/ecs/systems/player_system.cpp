@@ -80,7 +80,7 @@ void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
                     flatFront * player->moveDir.z +
                     // left-right
                     right * player->moveDir.x;
-                float velocity = physics->speed * fixedt;
+                float velocity = player->speed * fixedt;
                 transform->position += direction * velocity;
             }
             if (!player->isGodMode) {

@@ -16,7 +16,7 @@ namespace Utils {
 			float thresholdSq = 0.0001f;
 			return glm::length2(value) > thresholdSq;
 		}
-		inline bool areDiff(const glm::vec3& valueA, const glm::vec3& valueB) {
+		inline bool areDifferent(const glm::vec3& valueA, const glm::vec3& valueB) {
 			float thresholdSq = 0.0001f;
 			return glm::distance2(valueA, valueB) > thresholdSq;
 		}

@@ -141,7 +141,7 @@ bool SoldierScene::init(Registry& registry) {
         Entity floorE = registry.createEntity();
         registry.addComponent<IdentityComponent>(floorE, "floor");
         registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
-        registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax(), true);
+        registry.addComponent<PhysicsComponent>(floorE, floorModel->getAABBMin(), floorModel->getAABBMax());
         registry.addComponent<RenderComponent>(floorE, floorModel, floorMaterial);
     }
     // --- light
@@ -183,8 +183,8 @@ bool SoldierScene::init(Registry& registry) {
         Entity playerE = registry.createEntity();
         registry.addComponent<IdentityComponent>(playerE, "player");
         registry.addComponent<TransformComponent>(playerE, glm::vec3(1.7f, 0.0f, 17.0f), glm::quat(), glm::vec3(0.2f));
-        registry.addComponent<PhysicsComponent>(playerE, glm::vec3(-0.25f), glm::vec3(0.25f), false, 5.0f, PhysicsLayer::TOP);
-        registry.addComponent<PlayerComponent>(playerE);
+        registry.addComponent<PhysicsComponent>(playerE, playerModel->getAABBMin() * 0.1f, playerModel->getAABBMax() * 0.1f, PhysicsLayer::TOP);
+        registry.addComponent<PlayerComponent>(playerE, 5.0f);
         registry.addComponent<CameraComponent>(playerE);
         registry.addComponent<RenderComponent>(playerE, playerModel, playerMaterial, RenderQueueType::TOP_LAYER);
     }

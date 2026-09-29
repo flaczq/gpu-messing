@@ -19,6 +19,7 @@ struct RenderContext {
 	glm::mat4 cameraProjection{};
 	float cameraAspect{};
 	glm::vec3 cameraPosition{};
+	glm::vec3 cameraFlatFront{};
 	bool hasDirLightMovement{};
 	glm::vec3 dirLightMovementDirection{};
 	glm::vec3 dirLightMovementColor{};

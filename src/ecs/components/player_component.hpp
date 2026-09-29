@@ -7,9 +7,12 @@ struct PlayerComponent : public IComponent {
 	glm::vec3 moveDir	= glm::vec3(0.0f);
 	bool isCrouching	= false;
 	bool isGodMode		= false;
+	float speed{};
 	bool isPrimary{};
 
 	//PlayerComponent() = default;
-	PlayerComponent(bool isPrimary_ = true)
-		: isPrimary(isPrimary_) {}
+	PlayerComponent(float speed_ = 0.0f,
+					bool isPrimary_ = true)
+		: speed(speed_),
+		  isPrimary(isPrimary_) {}
 };

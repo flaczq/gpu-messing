@@ -87,6 +87,7 @@ void RenderSystem::update(Registry& registry, float alpha) {
             );
             m_renderContext.cameraAspect = camera->aspect;
             m_renderContext.cameraPosition = transform->position;
+            m_renderContext.cameraFlatFront = Utils::Math::calculateFlatFront(camera->yaw);
             // TODO only primary Camera for now
             break;
         }
@@ -324,8 +325,9 @@ void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const
 
     // sort by the distance to the main camera (furthest to closest)
     glm::vec3 cameraPosition = m_renderContext.cameraPosition;
-    std::sort(queue.begin(), queue.end(), [cameraPosition](const RenderCommand& cmd1, const RenderCommand& cmd2) {
-        return glm::length(cameraPosition - cmd2.position) < glm::length(cameraPosition - cmd1.position);
+    glm::vec3 cameraFlatFront = m_renderContext.cameraFlatFront;
+    std::sort(queue.begin(), queue.end(), [cameraPosition, cameraFlatFront](const RenderCommand& cmdA, const RenderCommand& cmdB) {
+        return glm::dot(cmdB.position - cameraPosition, cameraFlatFront) < glm::dot(cmdA.position - cameraPosition, cameraFlatFront);
     });
 }
 
