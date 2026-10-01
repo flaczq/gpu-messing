@@ -62,7 +62,7 @@ bool SoldierScene::init(Registry& registry) {
     auto texShader = ResourceManager::getInstance().getShader("tex_shader");
     // MATERIALS
     ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
-    ResourceManager::getInstance().loadMaterial("wall_material", simpleShader);
+    ResourceManager::getInstance().loadMaterial("wall_material", lambertShader);
     ResourceManager::getInstance().loadMaterial("light_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("grid_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("gizmo_material", gizmoShader);
@@ -89,10 +89,10 @@ bool SoldierScene::init(Registry& registry) {
     // TODO maybe wrap into sigle method call
     ResourceManager::getInstance().addModel(std::move(floorMM));
     // --- wall
-    float wallHeight = 2.0f;
-    auto wall = MeshGenerator::createWall(14.0f, wallHeight);
+    glm::vec3 wallSize = glm::vec3(14.0f, 2.0f, 0.5f);
+    auto wall = MeshGenerator::createWall(wallSize.x, wallSize.y, wallSize.z);
     auto wallM = std::make_unique<Mesh>(std::move(wall));
-    auto wallMM = std::make_shared<Model>("wall_model", std::move(wallM));
+    auto wallMM = std::make_shared<Model>("wall_model", std::move(wallM), -wallSize * 0.5f, wallSize * 0.5f);
     ResourceManager::getInstance().addModel(std::move(wallMM));
     // --- light
     auto light = MeshGenerator::createCuboid(2.0f, 2.0f, 2.0f);
@@ -143,8 +143,9 @@ bool SoldierScene::init(Registry& registry) {
     auto floorMaterial = ResourceManager::getInstance().getMaterial("floor_material");
     if (floorModel && floorMaterial) {
         // MATERIAL UNIFORMS
-        floorMaterial->addBoolUniform("hasMatColor", true);
-        floorMaterial->addVec3Uniform("matColor", Constants::Color::NATGREEN);
+        floorMaterial->addBoolUniform("material.hasDiffuseColor", false);
+        floorMaterial->addBoolUniform("custom.hasCustomColor", true);
+        floorMaterial->addVec3Uniform("custom.customColor", Constants::Color::NATGREEN);
         Entity floorE = registry.createEntity();
         registry.addComponent<IdentityComponent>(floorE, "floor");
         registry.addComponent<TransformComponent>(floorE, glm::vec3(floorSize.x / 2.0f + 2.0f, 0.0f, floorSize.z / 2.0f + 2.0f));
@@ -155,12 +156,25 @@ bool SoldierScene::init(Registry& registry) {
     auto wallModel = ResourceManager::getInstance().getModel("wall_model");
     auto wallMaterial = ResourceManager::getInstance().getMaterial("wall_material");
     if (wallModel && wallMaterial) {
-        wallMaterial->addBoolUniform("hasMatColor", true);
-        wallMaterial->addVec3Uniform("matColor", Constants::Color::BROWN);
+        wallMaterial->addBoolUniform("material.hasDiffuseColor", false);
+        wallMaterial->addBoolUniform("custom.hasCustomColor", true);
+        wallMaterial->addVec3Uniform("custom.customColor", Constants::Color::BROWN);
         glm::quat wRotQ = glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         Entity wallE = registry.createEntity();
-        registry.addComponent<IdentityComponent>(wallE, "wall");
-        registry.addComponent<TransformComponent>(wallE, glm::vec3(2.0f, wallHeight * 0.5f, 9.0f), wRotQ);
+        registry.addComponent<IdentityComponent>(wallE, "wall_1");
+        registry.addComponent<TransformComponent>(wallE, glm::vec3(2.0f, wallSize.y * 0.5f, 9.0f), wRotQ);
+        registry.addComponent<PhysicsComponent>(wallE, wallModel->getAABBMin(), wallModel->getAABBMax());
+        registry.addComponent<RenderComponent>(wallE, wallModel, wallMaterial);
+        wRotQ = glm::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        wallE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(wallE, "wall_2");
+        registry.addComponent<TransformComponent>(wallE, glm::vec3(16.0f, wallSize.y * 0.5f, 9.0f), wRotQ);
+        registry.addComponent<PhysicsComponent>(wallE, wallModel->getAABBMin(), wallModel->getAABBMax());
+        registry.addComponent<RenderComponent>(wallE, wallModel, wallMaterial);
+        wRotQ = glm::quat();
+        wallE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(wallE, "wall_3");
+        registry.addComponent<TransformComponent>(wallE, glm::vec3(9.0f, wallSize.y * 0.5f, 2.0f), wRotQ);
         registry.addComponent<PhysicsComponent>(wallE, wallModel->getAABBMin(), wallModel->getAABBMax());
         registry.addComponent<RenderComponent>(wallE, wallModel, wallMaterial);
     }
@@ -168,12 +182,13 @@ bool SoldierScene::init(Registry& registry) {
     auto lightModel = ResourceManager::getInstance().getModel("light_model");
     auto lightMaterial = ResourceManager::getInstance().getMaterial("light_material");
     if (lightModel && lightMaterial) {
-        lightMaterial->addBoolUniform("hasMatColor", true);
-        lightMaterial->addVec3Uniform("matColor", Constants::Color::WHITE);
+        lightMaterial->addBoolUniform("material.hasDiffuseColor", false);
+        lightMaterial->addBoolUniform("custom.hasCustomColor", true);
+        lightMaterial->addVec3Uniform("custom.customColor", Constants::Color::WHITE);
         Entity lightE = registry.createEntity();
         registry.addComponent<IdentityComponent>(lightE, "light");
         registry.addComponent<TransformComponent>(lightE, glm::vec3(3.0f, 0.0f, 3.0f), glm::quat(), glm::vec3(0.2f));
-        registry.addComponent<DirLightMovementComponent>(lightE, -glm::vec3(3.0f, 0.0f, 3.0f), Constants::Color::WHITE);
+        registry.addComponent<DirLightMovementComponent>(lightE, -glm::vec3(3.0f, 0.0f, 3.0f), Constants::Color::WHITE, true);
         registry.addComponent<RenderComponent>(lightE, lightModel, lightMaterial);
     }
     // --- grid
@@ -181,7 +196,7 @@ bool SoldierScene::init(Registry& registry) {
     auto gridMaterial = ResourceManager::getInstance().getMaterial("grid_material");
     if (gridModel && gridMaterial) {
         // same shader so it has to be set back to 'false'
-        gridMaterial->addBoolUniform("hasMatColor", false);
+        gridMaterial->addBoolUniform("custom.hasCustomColor", false);
         Entity gridE = registry.createEntity();
         registry.addComponent<IdentityComponent>(gridE, "grid");
         registry.addComponent<TransformComponent>(gridE, glm::vec3(gridSize * 0.5f));
@@ -205,8 +220,8 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<TransformComponent>(playerE, glm::vec3(9.0f, 0.0f, 14.0f), glm::quat(), glm::vec3(0.2f));
         //(-8.917559, -5.276115, -1.064211)(3.635565, 5.276115, 1.111632)
         registry.addComponent<PhysicsComponent>(playerE, playerModel->getAABBMin() * 0.2f, playerModel->getAABBMax() * 0.2f, PhysicsLayer::TOP);
-        registry.addComponent<PlayerComponent>(playerE, 5.0f);
-        registry.addComponent<CameraComponent>(playerE);
+        registry.addComponent<PlayerComponent>(playerE, true);
+        registry.addComponent<CameraComponent>(playerE, true);
         registry.addComponent<RenderComponent>(playerE, playerModel, playerMaterial, RenderQueueType::TOP_LAYER);
     }
     // --- soldier
@@ -214,7 +229,6 @@ bool SoldierScene::init(Registry& registry) {
     auto soldierMaterial = ResourceManager::getInstance().getMaterial("soldier_material");
     if (soldierModel && soldierMaterial) {
         // MATERIAL UNIFORMS
-        //soldierMaterial->addVec3Uniform("lightColor", glm::vec3(1.0f));
         float spacing = 1.5f;
         for (unsigned int i{}; i < 49; i++) {
             unsigned int row = i / 7;
@@ -226,8 +240,8 @@ bool SoldierScene::init(Registry& registry) {
             registry.addComponent<TransformComponent>(soldierE, sPos, sRotQ, glm::vec3(100.0f));
             registry.addComponent<PhysicsComponent>(soldierE, soldierModel->getAABBMin(), soldierModel->getAABBMax(), PhysicsLayer::TOP);
             registry.addComponent<RenderComponent>(soldierE, soldierModel, soldierMaterial);
-            if (i == 30) {
-                registry.addComponent<AIComponent>(soldierE, 1.3f);
+            if (i == 48) {
+                registry.addComponent<AIComponent>(soldierE);
             }
         }
     }

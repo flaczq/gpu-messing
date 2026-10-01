@@ -285,7 +285,7 @@ void OpenGLBackEnd::_processGlobalInput() {
     //    ███   ▄███   ███    ███   ███    ███ ███    ███   ███    ███ 
     //    ████████▀    ██████████ ▄█████████▀  ████████▀    ████████▀  
 #ifdef _DEBUG
-// HOTLOAD SHADERS
+    // HOTLOAD SHADERS
     if (InputManager::getInstance().isKeyPressed(GLFW_KEY_L)) {
         ResourceManager::getInstance().reloadShaders();
     }

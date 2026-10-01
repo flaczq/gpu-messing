@@ -21,6 +21,12 @@ void PlayerSystem::processInput(Registry& registry) {
             if (InputManager::getInstance().isKeyPressed(GLFW_KEY_C)) {
                 _toggleCrouching(*player);
             }
+            // SPRINTING/WALKING (continuous click)
+            if (InputManager::getInstance().isKeyDown(GLFW_KEY_LEFT_SHIFT)) {
+                _setSprinting(*player, true);
+            } else {
+                _setSprinting(*player, false);
+            }
             // GOD MODE
             if (InputManager::getInstance().isKeyPressed(GLFW_KEY_G)) {
                 _toggleGodMode(*player);
@@ -80,7 +86,8 @@ void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
                     flatFront * player->moveDir.z +
                     // left-right
                     right * player->moveDir.x;
-                float velocity = player->speed * fixedt;
+                float speed = player->isSprinting ? player->speedSprinting : player->speedWalking;
+                float velocity = speed * fixedt;
                 transform->position += direction * velocity;
             }
             if (!player->isGodMode) {
@@ -95,6 +102,13 @@ void PlayerSystem::fixedUpdate(Registry& registry, float fixedt) {
 void PlayerSystem::_toggleCrouching(PlayerComponent& player) {
     player.isCrouching = !player.isCrouching;
     LOG_D("Changed Player's crouching to: " << std::boolalpha << player.isCrouching);
+}
+
+void PlayerSystem::_setSprinting(PlayerComponent& player, bool isSprinting) {
+    if (player.isSprinting != isSprinting) {
+        player.isSprinting = isSprinting;
+        LOG_D("Changed Player's sprinting to: " << std::boolalpha << player.isSprinting);
+    }
 }
 
 void PlayerSystem::_toggleGodMode(PlayerComponent& player) {

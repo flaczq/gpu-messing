@@ -14,14 +14,24 @@ void AISystem::fixedUpdate(Registry& registry, float fixedt) {
         auto* physics = registry.getComponent<PhysicsComponent>(entity);
         auto* ai = registry.getComponent<AIComponent>(entity);
         
-        if (!physics->isColliding) {
-            static float tt = 0.0f;
-            tt += fixedt;
-            float x = sin(tt * 0.5f) * 2.0f;
-            float z = cos(tt);
-            glm::vec3 newPos = glm::normalize(glm::vec3(x, 0.0f, z));
-            transform->position = newPos * ai->speedMultiplier;
-            transform->rotation = newPos * ai->speedMultiplier;
+        //if (!physics->isColliding) {
+        //    static float tt = 0.0f;
+        //    tt += fixedt;
+        //    float x = sin(tt * 0.5f) * 2.0f;
+        //    float z = cos(tt);
+        //    glm::vec3 newPos = glm::normalize(glm::vec3(x, 0.0f, z));
+        //    transform->position = newPos * ai->speedMultiplier;
+        //    transform->rotation = newPos * ai->speedMultiplier;
+        //}
+        static float dist = 0.0f;
+        static float maxDist = 5.0f;
+        glm::vec3 direction = glm::vec3(0.0f, 0.0, 1.0f);
+        float step = ai->speedMultiplier * fixedt;
+        transform->position += direction * step;
+        dist += step;
+        if (dist >= maxDist) {
+            direction *= -1.0f;
+            dist = 0.0f;
         }
     }
 }

@@ -197,8 +197,8 @@ void OpenGLRenderer::topLayerPass() {
 //        model = glm::translate(model, cmd.center);
 //        model = glm::scale(model, cmd.size);
 //        shader->setMat4fv("model", model);
-//        shader->setBool("hasMatColor", true);
-//        shader->setVec3fv("matColor", cmd.color);
+//        shader->setBool("custom.hasCustomColor", true);
+//        shader->setVec3fv("custom.customColor", cmd.color);
 //        glDrawArrays(GL_LINES, 0, 24);
 //    }
 //

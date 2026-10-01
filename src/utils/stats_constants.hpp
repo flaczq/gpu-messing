@@ -24,6 +24,8 @@ namespace Constants {
 
         namespace Player {
             inline constexpr int MAX_HEALTH         = 100;
+            inline constexpr float SPEED_WALKING    = 3.5f;
+            inline constexpr float SPEED_SPRINTING  = 6.0f;
         }
 
         namespace Enemy_1 {

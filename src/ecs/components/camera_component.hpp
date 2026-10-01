@@ -16,7 +16,7 @@ struct CameraComponent : public IComponent {
     float pitch             = -1.0f;
     bool isPrimary{};
 
-    //CameraComponent() = default;
-    CameraComponent(bool isPrimary_ = true)
+    CameraComponent() = default;
+    CameraComponent(bool isPrimary_)
         : isPrimary(isPrimary_) {}
 };

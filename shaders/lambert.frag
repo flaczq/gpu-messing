@@ -5,6 +5,10 @@ struct Material {
     bool hasDiffuseColor;
     vec3 diffuseColor;
 };
+struct CustomMaterial {
+    bool hasCustomColor;
+    vec3 customColor;
+};
 
 out vec4 FragColor;
 
@@ -15,6 +19,7 @@ in vec2 TexCoords;
 uniform vec3 lightDir;
 uniform vec3 lightColor;
 uniform Material material;
+uniform CustomMaterial custom;
 
 void main() {
 	vec3 norm = normalize(Normal);
@@ -22,6 +27,8 @@ void main() {
     vec4 texColor;
     if (material.hasDiffuseColor) {
         texColor = vec4(material.diffuseColor, 1.0f);
+    } else if (custom.hasCustomColor) {
+        texColor = vec4(custom.customColor, 1.0f);
     } else {
         texColor = texture(material.diffuse, TexCoords);
     }

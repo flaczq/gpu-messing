@@ -14,5 +14,6 @@ public:
 
 private:
 	void _toggleCrouching(PlayerComponent& player);
+	void _setSprinting(PlayerComponent& player, bool isSprinting);
 	void _toggleGodMode(PlayerComponent& player);
 };
