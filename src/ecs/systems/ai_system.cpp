@@ -23,15 +23,7 @@ void AISystem::fixedUpdate(Registry& registry, float fixedt) {
         //    transform->position = newPos * ai->speedMultiplier;
         //    transform->rotation = newPos * ai->speedMultiplier;
         //}
-        static float dist = 0.0f;
-        static float maxDist = 5.0f;
-        glm::vec3 direction = glm::vec3(0.0f, 0.0, 1.0f);
-        float step = ai->speedMultiplier * fixedt;
-        transform->position += direction * step;
-        dist += step;
-        if (dist >= maxDist) {
-            direction *= -1.0f;
-            dist = 0.0f;
-        }
+        //glm::vec3 direction = glm::vec3(0.0f, 0.0, 1.0f);
+        //transform->position.z += ai->speedMultiplier * fixedt;
     }
 }

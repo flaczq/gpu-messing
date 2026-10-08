@@ -38,8 +38,4 @@ private:
 	// AABB
 	unsigned int m_VAOAABB{};
 	unsigned int m_VBOAABB{};
-	// FRAMEBUFFER
-	unsigned int m_framebuffer{};
-	unsigned int m_fbTexture{};
-	unsigned int m_quadVAO{};
 };

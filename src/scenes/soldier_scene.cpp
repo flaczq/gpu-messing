@@ -89,7 +89,7 @@ bool SoldierScene::init(Registry& registry) {
     // TODO maybe wrap into sigle method call
     ResourceManager::getInstance().addModel(std::move(floorMM));
     // --- wall
-    glm::vec3 wallSize = glm::vec3(14.0f, 2.0f, 0.5f);
+    glm::vec3 wallSize = glm::vec3(14.0f, 3.0f, 0.5f);
     auto wall = MeshGenerator::createWall(wallSize.x, wallSize.y, wallSize.z);
     auto wallM = std::make_unique<Mesh>(std::move(wall));
     auto wallMM = std::make_shared<Model>("wall_model", std::move(wallM), -wallSize * 0.5f, wallSize * 0.5f);
@@ -240,7 +240,7 @@ bool SoldierScene::init(Registry& registry) {
             registry.addComponent<TransformComponent>(soldierE, sPos, sRotQ, glm::vec3(100.0f));
             registry.addComponent<PhysicsComponent>(soldierE, soldierModel->getAABBMin(), soldierModel->getAABBMax(), PhysicsLayer::TOP);
             registry.addComponent<RenderComponent>(soldierE, soldierModel, soldierMaterial);
-            if (i == 48) {
+            if (i > 42) {
                 registry.addComponent<AIComponent>(soldierE);
             }
         }
