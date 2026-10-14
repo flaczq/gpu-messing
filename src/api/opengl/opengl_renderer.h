@@ -28,14 +28,13 @@ public:
 	//void renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) override;
 	void setRasterizationMode() override;
 	void toggleRasterizationMode() override;
-	unsigned int getVAOAABB() const override { return m_VAOAABB; }
 private:
 	// reference to pointer (!!)
-	// have to do it like this because RenderSystem can't now about GLFWWindow
+	// have to do it like this because RenderSystem can't know about GLFWWindow
 	GLFWwindow*& m_windowRef;
 
 	RasterizationMode m_rasterizationMode = RasterizationMode::STANDARD;
 	// AABB
-	unsigned int m_VAOAABB{};
-	unsigned int m_VBOAABB{};
+	unsigned int m_aabbVAO{};
+	unsigned int m_aabbVBO{};
 };

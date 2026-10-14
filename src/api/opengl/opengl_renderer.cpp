@@ -2,6 +2,7 @@
 #include "../../configs/log_config.hpp"
 #include "../../ecs/registry.h"
 #include "../../ecs/systems/camera_system.h"
+#include "../../graphics/frame_buffer.h"
 #include "../../managers/resource_manager.h"
 #include "../../utils/enum_utils.hpp"
 #include "../i_backend.h"
@@ -14,14 +15,14 @@ OpenGLRenderer::OpenGLRenderer(GLFWwindow*& windowRef)
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
-    glDeleteVertexArrays(1, &m_VAOAABB);
-    glDeleteBuffers(1, &m_VBOAABB);
+    glDeleteVertexArrays(1, &m_aabbVAO);
+    glDeleteBuffers(1, &m_aabbVBO);
 }
 
 void OpenGLRenderer::init() {
     // FIXME: move to new AABBMesh()
     // hardcoded AABB 1x1x1 (with the middle at 0.0)
-    float verticesAABB[] = {
+    float aabbVertices[] = {
         // front
         -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
          0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
@@ -38,67 +39,17 @@ void OpenGLRenderer::init() {
          0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
         -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
     };
-    glGenVertexArrays(1, &m_VAOAABB);
-    glGenBuffers(1, &m_VBOAABB);
-    glBindVertexArray(m_VAOAABB);
-    glBindBuffer(GL_ARRAY_BUFFER, m_VBOAABB);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(verticesAABB), verticesAABB, GL_STATIC_DRAW);
+    glGenVertexArrays(1, &m_aabbVAO);
+    glGenBuffers(1, &m_aabbVBO);
+    glBindVertexArray(m_aabbVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_aabbVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(aabbVertices), aabbVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
     // FRAMEBUFFER
-    //unsigned int fbo{};
-    glGenFramebuffers(1, &m_framebuffer);
-    // off-screen rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer);
-
-    //unsigned int texture{};
-    glGenTextures(1, &m_fbTexture);
-    glBindTexture(GL_TEXTURE_2D, m_fbTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // target, attachment, textarget, texture, level
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_fbTexture, 0);
-
-    // renderbuffer
-    unsigned int rbo{};
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 1280, 768);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    // attach renderbuffer to framebuffer's depth and stencil attachments
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_E("RENDER_SYSTEM::FRAMEBUFFER_NOT_COMPLETE");
-    }
-
-    // main window rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    //glDeleteFramebuffers(1, &m_framebuffer);
-
-    // screen quad VAO
-    float quadVertices[] = {
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-    unsigned int quadVBO;
-    glGenVertexArrays(1, &m_quadVAO);
-    glGenBuffers(1, &quadVBO);
-    glBindVertexArray(m_quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    FrameBuffer fbo = FrameBuffer();
 }
 
 void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
@@ -185,7 +136,7 @@ void OpenGLRenderer::topLayerPass() {
 
 //void OpenGLRenderer::renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) {
 //    glDisable(GL_DEPTH_TEST);
-//    glBindVertexArray(m_VAOAABB);
+//    glBindVertexArray(m_aabbVAO);
 //
 //    // FIXME move to mesh?
 //    auto shader = ResourceManager::getInstance().getShader("simple_shader");

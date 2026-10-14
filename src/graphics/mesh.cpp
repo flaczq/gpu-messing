@@ -36,7 +36,6 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
         m_VAO = other.m_VAO;
         m_VBO = other.m_VBO;
         m_EBO = other.m_EBO;
-
         m_vertices = std::move(other.m_vertices);
         m_indices = std::move(other.m_indices);
         m_textures = std::move(other.m_textures);
@@ -108,10 +107,15 @@ void Mesh::draw(const Shader& shader) {
         shader.setVec3fv("material.diffuseColor", m_diffuseColor);
     }
 
-    //    ┳┓┳┓┏┓┓ ┏•┳┓┏┓
-    //    ┃┃┣┫┣┫┃┃┃┓┃┃┃┓
-    //    ┻┛┛┗┛┗┗┻┛┗┛┗┗┛
-    //                  
+    //    ████████▄     ▄████████    ▄████████  ▄█     █▄   ▄█  ███▄▄▄▄      ▄██████▄  
+    //    ███   ▀███   ███    ███   ███    ███ ███     ███ ███  ███▀▀▀██▄   ███    ███ 
+    //    ███    ███   ███    ███   ███    ███ ███     ███ ███▌ ███   ███   ███    █▀  
+    //    ███    ███  ▄███▄▄▄▄██▀   ███    ███ ███     ███ ███▌ ███   ███  ▄███        
+    //    ███    ███ ▀▀███▀▀▀▀▀   ▀███████████ ███     ███ ███▌ ███   ███ ▀▀███ ████▄  
+    //    ███    ███ ▀███████████   ███    ███ ███     ███ ███  ███   ███   ███    ███ 
+    //    ███   ▄███   ███    ███   ███    ███ ███ ▄█▄ ███ ███  ███   ███   ███    ███ 
+    //    ████████▀    ███    ███   ███    █▀   ▀███▀███▀  █▀    ▀█   █▀    ████████▀  
+    //                 ███    ███                                                      
     glBindVertexArray(m_VAO);
     // what to render, number of elements, type, offset
     glDrawElements(m_drawType, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
@@ -121,10 +125,14 @@ void Mesh::draw(const Shader& shader) {
 }
 
 void Mesh::_setupMesh() {
-    //    ┏┓┏┓┏┳┓┳┳┏┓
-    //    ┗┓┣  ┃ ┃┃┃┃
-    //    ┗┛┗┛ ┻ ┗┛┣┛
-    //               
+    //       ▄████████    ▄████████     ███     ███    █▄     ▄███████▄ 
+    //      ███    ███   ███    ███ ▀█████████▄ ███    ███   ███    ███ 
+    //      ███    █▀    ███    █▀     ▀███▀▀██ ███    ███   ███    ███ 
+    //      ███         ▄███▄▄▄         ███   ▀ ███    ███   ███    ███ 
+    //    ▀███████████ ▀▀███▀▀▀         ███     ███    ███ ▀█████████▀  
+    //             ███   ███    █▄      ███     ███    ███   ███        
+    //       ▄█    ███   ███    ███     ███     ███    ███   ███        
+    //     ▄████████▀    ██████████    ▄████▀   ████████▀   ▄████▀      
     glGenVertexArrays(1, &m_VAO);
     glGenBuffers(1, &m_VBO);
     glGenBuffers(1, &m_EBO);
