@@ -24,7 +24,7 @@ struct RenderComponent : public IComponent {
 	RenderComponent(std::shared_ptr<Model> model_,
 					std::shared_ptr<Material> material_,
 					RenderQueueType queueType_ = RenderQueueType::OPAQUE)
-		: model(model_),
-		  material(material_),
+		: model(std::move(model_)),
+		  material(std::move(material_)),
 		  queueType(queueType_) {}
 };

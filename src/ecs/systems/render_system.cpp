@@ -2,6 +2,7 @@
 #include "../../api/i_renderer.h"
 #include "../../configs/log_config.hpp"
 #include "../../graphics/material.h"
+#include "../../graphics/mesh.h"
 #include "../../graphics/shader.h"
 #include "../../managers/resource_manager.h"
 #include "../../utils/color_constants.hpp"
@@ -112,14 +113,14 @@ void RenderSystem::update(Registry& registry, float alpha) {
 
         glm::vec3 aabbSize = Utils::Math::calculateSize(physics->AABB.worldMin, physics->AABB.worldMax);
         glm::vec3 aabbCenter = Utils::Math::calculateCenter(physics->AABB.worldMin, physics->AABB.worldMax);
-        glm::vec3 color = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
+        glm::vec3 aabbColor = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
         RenderImmediateCommand command = {
                 transform->position,
                 transform->rotation,
                 transform->scale,
                 aabbSize,
                 aabbCenter,
-                color
+                aabbColor
         };
         m_renderImmediateCommands.push_back(command);
     }
@@ -387,7 +388,7 @@ void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, c
 }
 
 void RenderSystem::renderImmediate() {
-    unsigned int VAO{};
+    Mesh* mesh{};
     std::vector<RenderImmediateCommand> queue{};
 
     switch (m_renderDebugMode) {
@@ -399,13 +400,11 @@ void RenderSystem::renderImmediate() {
             LOG_D("nothing to render immediately, sad QQ");
             return;
         }
-        VAO = m_renderer->getVAOAABB();
+        mesh = m_renderer->getAABBMesh();
         break;
     }
 
-    // FIXME: m_renderer!
-    glDisable(GL_DEPTH_TEST);
-    glBindVertexArray(VAO);
+    m_renderer->renderImmediate();
 
     auto shader = ResourceManager::getInstance().getShader("simple_shader");
     shader->use();
@@ -419,11 +418,11 @@ void RenderSystem::renderImmediate() {
         shader->setBool("material.hasDiffuseColor", false);
         shader->setBool("custom.hasCustomColor", true);
         shader->setVec3fv("custom.customColor", cmd.color);
-        glDrawArrays(GL_LINES, 0, 24);
+        //glDrawArrays(GL_LINES, 0, 24);
+        mesh->draw(*shader);
     }
 
-    glBindVertexArray(0);
-    glEnable(GL_DEPTH_TEST);
+    m_renderer->renderImmediate(false);
 
     m_renderImmediateCommands.clear();
 }

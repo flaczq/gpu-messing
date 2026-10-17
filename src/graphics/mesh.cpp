@@ -50,7 +50,7 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<std::shared_ptr<Texture>>& textures, bool hasDiffuseColor, glm::vec3 diffuseColor, GLenum drawType)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures, bool hasDiffuseColor, glm::vec3 diffuseColor, GLenum drawType)
     : m_vertices(std::move(vertices)),
       m_indices(std::move(indices)),
       m_textures(std::move(textures)),

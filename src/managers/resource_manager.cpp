@@ -25,7 +25,7 @@ void ResourceManager::addModel(std::shared_ptr<Model> model) {
 		return;
 	}
 
-	m_models[name] = model;
+	m_models[name] = std::move(model);
 	LOG("Adding Model: " << name << " with mesh from MeshGenerator");
 }
 

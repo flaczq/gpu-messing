@@ -2,6 +2,7 @@
 
 #include "../../configs/gl_config.hpp"
 #include "../i_renderer.h"
+#include <memory>
 
 enum class RasterizationMode {
 	STANDARD = GL_FILL,
@@ -10,6 +11,9 @@ enum class RasterizationMode {
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
+
+class Mesh;
+class FrameBuffer;
 
 class OpenGLRenderer : public IRenderer {
 public:
@@ -25,9 +29,14 @@ public:
 	void outlinePass(bool start = true) override;
 	void blendingPass(bool start = true) override;
 	void topLayerPass() override;
-	//void renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) override;
+	void renderImmediate(bool start = true) override;
 	void setRasterizationMode() override;
 	void toggleRasterizationMode() override;
+	Mesh* getAABBMesh() override { return aabbMesh.get(); }
+	FrameBuffer* getScreenFrameBuffer() override { return screenFbo.get(); }
+
+	std::unique_ptr<Mesh> aabbMesh{};
+	std::unique_ptr<FrameBuffer> screenFbo{};
 private:
 	// reference to pointer (!!)
 	// have to do it like this because RenderSystem can't know about GLFWWindow

@@ -9,14 +9,14 @@
 
 bool Registry::init() {
 	//m_entitiesData.clear();
-	//m_nextEntityID = 1;
+	//m_entityNextID = 1;
 
 	return true;
 }
 
 Entity Registry::createEntity() {
 	// inside joke
-	Entity nTityID = m_nextEntityID++;
+	Entity nTityID = m_entityNextID++;
 	m_entitiesData[nTityID] = EntityData{};
 	return nTityID;
 }
@@ -33,5 +33,5 @@ std::vector<Entity> Registry::viewAll() const {
 void Registry::end() {
 	m_entitiesData.clear();
 	// 0 = NULL_ENTITY
-	m_nextEntityID = 1;
+	m_entityNextID = 1;
 }

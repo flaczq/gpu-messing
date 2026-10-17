@@ -51,7 +51,7 @@ namespace MeshGenerator {
 			textures.push_back(texture);
 		}
 
-		return Mesh(vertices, indices, textures);
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}
 
 	Mesh createCuboid(float width, float height, float depth, std::shared_ptr<Texture> texture, float uvTiling) {
@@ -139,7 +139,7 @@ namespace MeshGenerator {
 			textures.push_back(texture);
 		}
 
-		return Mesh(vertices, indices, textures);
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}
 
 	Mesh createGrid(float size, float step) {
@@ -188,7 +188,7 @@ namespace MeshGenerator {
 			}
 		}
 
-		return Mesh(vertices, indices, textures, true, glm::vec3(1.0f, 0.0f, 0.5f), GL_LINES);
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures), true, glm::vec3(1.0f, 0.0f, 0.5f), GL_LINES);
 	}
 
 	Mesh createWall(float width, float height, float depth, float uvTiling) {

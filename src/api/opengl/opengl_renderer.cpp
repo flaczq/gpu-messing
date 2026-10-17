@@ -3,11 +3,14 @@
 #include "../../ecs/registry.h"
 #include "../../ecs/systems/camera_system.h"
 #include "../../graphics/frame_buffer.h"
+#include "../../graphics/mesh.h"
+#include "../../graphics/mesh_generator.h"
 #include "../../managers/resource_manager.h"
 #include "../../utils/enum_utils.hpp"
 #include "../i_backend.h"
 #include "../i_renderer.h"
 #include "opengl_renderer.h"
+#include <memory>
 
 OpenGLRenderer::OpenGLRenderer(GLFWwindow*& windowRef)
     : m_windowRef(windowRef)
@@ -48,8 +51,13 @@ void OpenGLRenderer::init() {
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
+    // AABB
+    auto aabbM = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f);
+    aabbMesh = std::make_unique<Mesh>(std::move(aabbM));
+
     // FRAMEBUFFER
-    FrameBuffer fbo = FrameBuffer();
+    auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
+    screenFbo = std::make_unique<FrameBuffer>(std::move(containerTexture));
 }
 
 void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
@@ -134,28 +142,15 @@ void OpenGLRenderer::topLayerPass() {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-//void OpenGLRenderer::renderImmediate(const std::vector<RenderImmediateCommand>& queue, const glm::mat4& view, const glm::mat4& projection) {
-//    glDisable(GL_DEPTH_TEST);
-//    glBindVertexArray(m_aabbVAO);
-//
-//    // FIXME move to mesh?
-//    auto shader = ResourceManager::getInstance().getShader("simple_shader");
-//    shader->use();
-//    shader->setMat4fv("view", view);
-//    shader->setMat4fv("projection", projection);
-//    for (auto& cmd : queue) {
-//        glm::mat4 model = glm::mat4(1.0f);
-//        model = glm::translate(model, cmd.center);
-//        model = glm::scale(model, cmd.size);
-//        shader->setMat4fv("model", model);
-//        shader->setBool("custom.hasCustomColor", true);
-//        shader->setVec3fv("custom.customColor", cmd.color);
-//        glDrawArrays(GL_LINES, 0, 24);
-//    }
-//
-//    glBindVertexArray(0);
-//    glEnable(GL_DEPTH_TEST);
-//}
+void OpenGLRenderer::renderImmediate(bool start) {
+    if (start) {
+        glDisable(GL_DEPTH_TEST);
+        glBindVertexArray(m_aabbVAO);
+    } else {
+        glBindVertexArray(0);
+        glEnable(GL_DEPTH_TEST);
+    }
+}
 
 void OpenGLRenderer::setRasterizationMode() {
     // standard, lines (wireframe), points

@@ -3,48 +3,47 @@
 #include "frame_buffer.h"
 #include "graphics_types.hpp"
 #include <memory>
-#include <vector>
 
 FrameBuffer::FrameBuffer(FrameBuffer&& other) noexcept
     : m_FBO(other.m_FBO),
       m_RBO(other.m_RBO),
-      m_quadVAO(other.m_quadVAO),
-      m_quadVBO(other.m_quadVBO),
-      m_texture(other.m_texture)
+      m_texture(std::move(other.m_texture))
 {
     other.m_FBO = 0;
     other.m_RBO = 0;
-    other.m_quadVAO = 0;
-    other.m_quadVBO = 0;
-    other.m_texture = 0;
 }
 
 FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) noexcept {
     if (this != &other) {
         m_FBO = other.m_FBO;
         m_RBO = other.m_RBO;
-        m_quadVAO = other.m_quadVAO;
-        m_quadVBO = other.m_quadVBO;
-        m_texture = other.m_texture;
+        m_texture = std::move(other.m_texture);
 
         other.m_FBO = 0;
         other.m_RBO = 0;
-        other.m_quadVAO = 0;
-        other.m_quadVBO = 0;
-        other.m_texture = 0;
     }
     return *this;
 }
 
-FrameBuffer::FrameBuffer(std::vector<Vertex>& vertices, std::shared_ptr<Texture> texture) {
+FrameBuffer::FrameBuffer(std::shared_ptr<Texture> texture)
+    : m_texture(std::move(texture))
+{
     _setupFrameBuffer();
 }
 
 FrameBuffer::~FrameBuffer() {
-    glDeleteVertexArrays(1, &m_quadVAO);
-    glDeleteVertexArrays(1, &m_quadVBO);
     glDeleteRenderbuffers(1, &m_RBO);
     glDeleteFramebuffers(1, &m_FBO);
+}
+
+void FrameBuffer::bind() {
+    glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_RBO);
+}
+
+void FrameBuffer::unbind() {
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void FrameBuffer::_setupFrameBuffer() {
@@ -52,11 +51,6 @@ void FrameBuffer::_setupFrameBuffer() {
     // off-screen rendering
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
-    glGenTextures(1, &m_texture->id);
-    glBindTexture(GL_TEXTURE_2D, m_texture->id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1280, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // target, attachment, textarget, texture, level
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture->id, 0);
 
@@ -68,11 +62,8 @@ void FrameBuffer::_setupFrameBuffer() {
     // attach renderbuffer to framebuffer's depth and stencil attachments
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, m_RBO);
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        LOG_E("RENDER_SYSTEM::FRAMEBUFFER_NOT_COMPLETE");
+        LOG_E("FRAME_BUFFER::ERROR_NOT_COMPLETE");
     }
-
-    // main window rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // screen quad VAO
     float quadVertices[] = {

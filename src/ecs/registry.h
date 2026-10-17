@@ -78,6 +78,6 @@ private:
 		std::unordered_map<ComponentTypeID, std::unique_ptr<IComponent>> components{};
 	};
 
-	Entity m_nextEntityID = 1;
+	Entity m_entityNextID = 1;
 	std::unordered_map<Entity, EntityData> m_entitiesData{};
 };
