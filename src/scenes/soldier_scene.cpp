@@ -38,29 +38,18 @@ bool SoldierScene::init(Registry& registry) {
     //      ███    ███          ███          ███   ███    █▄      ███              ███ 
     //      ███    ███    ▄█    ███    ▄█    ███   ███    ███     ███        ▄█    ███ 
     //      ███    █▀   ▄████████▀   ▄████████▀    ██████████    ▄████▀    ▄████████▀  
-    // TEXTURES
-    ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
-    ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
-    ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
-    ResourceManager::getInstance().loadTexture("container_texture", "../assets/container.jpg");
     // MODELS
     ResourceManager::getInstance().loadModel("gizmo_model", "../assets/models/Gizmo.fbx");
     ResourceManager::getInstance().loadModel("player_model", "../assets/models/RiggedFpsArms.fbx");
     ResourceManager::getInstance().loadModel("soldier_model", "../assets/models/Soldier.glb");
     ResourceManager::getInstance().loadModel("tank_model", "../assets/models/ShermanTank.glb");
     // SHADERS
-    ResourceManager::getInstance().loadShader("simple_shader", "../shaders/simple.vert", "../shaders/simple.frag");
-    ResourceManager::getInstance().loadShader("gizmo_shader", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
-    ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
-    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
-    ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
-    ResourceManager::getInstance().loadShader("tex_shader", "../shaders/tex.vert", "../shaders/tex.frag");
     auto simpleShader = ResourceManager::getInstance().getShader("simple_shader");
     auto gizmoShader = ResourceManager::getInstance().getShader("gizmo_shader");
     auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
     auto modelShader = ResourceManager::getInstance().getShader("model_shader");
     auto windowShader = ResourceManager::getInstance().getShader("window_shader");
-    auto texShader = ResourceManager::getInstance().getShader("tex_shader");
+    //auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
     // MATERIALS
     ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("wall_material", lambertShader);
@@ -71,7 +60,7 @@ bool SoldierScene::init(Registry& registry) {
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
     ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
-    ResourceManager::getInstance().loadMaterial("fbs_material", texShader);
+    //ResourceManager::getInstance().loadMaterial("screen_tex_material", screenTexShader);
 
     //       ▄▄▄▄███▄▄▄▄    ▄██████▄  ████████▄     ▄████████  ▄█          ▄████████ 
     //     ▄██▀▀▀███▀▀▀██▄ ███    ███ ███   ▀███   ███    ███ ███         ███    ███ 

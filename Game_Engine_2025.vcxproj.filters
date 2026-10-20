@@ -117,8 +117,8 @@
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
     <None Include="assets\models\RiggedFpsArms.fbx" />
-    <None Include="shaders\tex.vert" />
-    <None Include="shaders\tex.frag" />
+    <None Include="shaders\screen_tex.vert" />
+    <None Include="shaders\screen_tex.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">

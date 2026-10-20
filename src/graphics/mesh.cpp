@@ -90,7 +90,7 @@ void Mesh::draw(const Shader& shader) {
         }
         // FIXME more than one of each material type
         //shader.setInt("material." + name + number, i);
-        shader.setInt("material." + name + "1", i);
+        shader.setInt("material." + name, i);
 
         glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);
     }

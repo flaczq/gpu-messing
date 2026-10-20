@@ -57,8 +57,8 @@
     <None Include="README.md" />
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
-    <None Include="shaders\tex.frag" />
-    <None Include="shaders\tex.vert" />
+    <None Include="shaders\screen_tex.frag" />
+    <None Include="shaders\screen_tex.vert" />
     <None Include="shaders\window.frag" />
     <None Include="shaders\window.vert" />
     <None Include="shaders\lambert.frag" />

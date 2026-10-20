@@ -23,12 +23,12 @@ public:
 	void init() override;
 	void beginFrame(int x, int y, int width, int height) override;
 	void beginFrameMinimap(int x, int y, int width, int height) override;
-	void endFrame() override;
-	void endFrameMinimap() override;
 	void stencilPass() override;
 	void outlinePass(bool start = true) override;
 	void blendingPass(bool start = true) override;
 	void topLayerPass() override;
+	void endFrame() override;
+	void endFrameMinimap() override;
 	void renderImmediate(bool start = true) override;
 	void setRasterizationMode() override;
 	void toggleRasterizationMode() override;
@@ -36,6 +36,7 @@ public:
 	FrameBuffer* getScreenFrameBuffer() override { return screenFbo.get(); }
 
 	std::unique_ptr<Mesh> aabbMesh{};
+	std::unique_ptr<Mesh> fboMesh{};
 	std::unique_ptr<FrameBuffer> screenFbo{};
 private:
 	// reference to pointer (!!)
@@ -46,4 +47,6 @@ private:
 	// AABB
 	unsigned int m_aabbVAO{};
 	unsigned int m_aabbVBO{};
+	unsigned int m_quadVAO{};
+	unsigned int m_quadVBO{};
 };

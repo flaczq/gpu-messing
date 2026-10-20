@@ -5,6 +5,7 @@
 #include "../../graphics/frame_buffer.h"
 #include "../../graphics/mesh.h"
 #include "../../graphics/mesh_generator.h"
+#include "../../graphics/shader.h"
 #include "../../managers/resource_manager.h"
 #include "../../utils/enum_utils.hpp"
 #include "../i_backend.h"
@@ -23,9 +24,38 @@ OpenGLRenderer::~OpenGLRenderer() {
 }
 
 void OpenGLRenderer::init() {
+    //        ███        ▄████████ ▀████    ▐████▀     ███     ███    █▄     ▄████████    ▄████████    ▄████████ 
+    //    ▀█████████▄   ███    ███   ███▌   ████▀  ▀█████████▄ ███    ███   ███    ███   ███    ███   ███    ███ 
+    //       ▀███▀▀██   ███    █▀     ███  ▐███       ▀███▀▀██ ███    ███   ███    ███   ███    █▀    ███    █▀  
+    //        ███   ▀  ▄███▄▄▄        ▀███▄███▀        ███   ▀ ███    ███  ▄███▄▄▄▄██▀  ▄███▄▄▄       ███        
+    //        ███     ▀▀███▀▀▀        ████▀██▄         ███     ███    ███ ▀▀███▀▀▀▀▀   ▀▀███▀▀▀     ▀███████████ 
+    //        ███       ███    █▄    ▐███  ▀███        ███     ███    ███ ▀███████████   ███    █▄           ███ 
+    //        ███       ███    ███  ▄███     ███▄      ███     ███    ███   ███    ███   ███    ███    ▄█    ███ 
+    //       ▄████▀     ██████████ ████       ███▄    ▄████▀   ████████▀    ███    ███   ██████████  ▄████████▀  
+    //                                                                      ███    ███                           
+    ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
+    ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
+    ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
+    ResourceManager::getInstance().loadTexture("container_texture", "../assets/container.jpg");
+    //       ▄████████    ▄█    █▄       ▄████████ ████████▄     ▄████████    ▄████████    ▄████████ 
+    //      ███    ███   ███    ███     ███    ███ ███   ▀███   ███    ███   ███    ███   ███    ███ 
+    //      ███    █▀    ███    ███     ███    ███ ███    ███   ███    █▀    ███    ███   ███    █▀  
+    //      ███         ▄███▄▄▄▄███▄▄   ███    ███ ███    ███  ▄███▄▄▄      ▄███▄▄▄▄██▀   ███        
+    //    ▀███████████ ▀▀███▀▀▀▀███▀  ▀███████████ ███    ███ ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   ▀███████████ 
+    //             ███   ███    ███     ███    ███ ███    ███   ███    █▄  ▀███████████          ███ 
+    //       ▄█    ███   ███    ███     ███    ███ ███   ▄███   ███    ███   ███    ███    ▄█    ███ 
+    //     ▄████████▀    ███    █▀      ███    █▀  ████████▀    ██████████   ███    ███  ▄████████▀  
+    //                                                                       ███    ███              
+    ResourceManager::getInstance().loadShader("simple_shader", "../shaders/simple.vert", "../shaders/simple.frag");
+    ResourceManager::getInstance().loadShader("gizmo_shader", "../shaders/gizmo.vert", "../shaders/gizmo.frag");
+    ResourceManager::getInstance().loadShader("lambert_shader", "../shaders/lambert.vert", "../shaders/lambert.frag");
+    ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
+    ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
+    ResourceManager::getInstance().loadShader("screen_tex_shader", "../shaders/screen_tex.vert", "../shaders/screen_tex.frag");
+
     // FIXME: move to new AABBMesh()
     // hardcoded AABB 1x1x1 (with the middle at 0.0)
-    float aabbVertices[] = {
+    /*float aabbVertices[] = {
         // front
         -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
          0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
@@ -49,7 +79,33 @@ void OpenGLRenderer::init() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(aabbVertices), aabbVertices, GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
     glEnableVertexAttribArray(0);
+    glBindVertexArray(0);*/
+
+    // screen quad VAO
+    float quadVertices[] = {
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         //
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    glGenVertexArrays(1, &m_quadVAO);
+    glGenBuffers(1, &m_quadVBO);
+    glBindVertexArray(m_quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2 * sizeof(float)));
     glBindVertexArray(0);
+
+    auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+    screenTexShader->use();
+    screenTexShader->setInt("screenTexture", 0);
 
     // AABB
     auto aabbM = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f);
@@ -57,12 +113,16 @@ void OpenGLRenderer::init() {
 
     // FRAMEBUFFER
     auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
+    //auto fboM = MeshGenerator::createCuboid(2.0f, 2.0f, 0.0f, containerTexture);
+    //fboMesh = std::make_unique<Mesh>(std::move(fboM));
     screenFbo = std::make_unique<FrameBuffer>(std::move(containerTexture));
 }
 
 void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
     // Viewport
     glViewport(x, y, width, height);
+
+    screenFbo->bind();
 
     // Z-Depth Test
     glEnable(GL_DEPTH_TEST);
@@ -87,22 +147,6 @@ void OpenGLRenderer::beginFrameMinimap(int x, int y, int width, int height) {
 
     glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-}
-
-void OpenGLRenderer::endFrame() {
-    // no need to unbind it every time but w/e
-    glBindVertexArray(0);
-
-    //glDisable(GL_DEPTH_TEST);
-    //glDisable(GL_STENCIL_TEST);
-    //glDisable(GL_BLEND);
-
-    assert(m_windowRef);
-    glfwSwapBuffers(m_windowRef);
-}
-
-void OpenGLRenderer::endFrameMinimap() {
-    glDisable(GL_SCISSOR_TEST);
 }
 
 void OpenGLRenderer::stencilPass() {
@@ -140,6 +184,35 @@ void OpenGLRenderer::blendingPass(bool start) {
 
 void OpenGLRenderer::topLayerPass() {
     glClear(GL_DEPTH_BUFFER_BIT);
+}
+
+void OpenGLRenderer::endFrame() {
+    // no need to unbind it every time but w/e
+    glBindVertexArray(0);
+
+    screenFbo->unbind();
+    glDisable(GL_DEPTH_TEST);
+    glClearColor(0.5f, 0.1f, 0.8f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+    screenTexShader->use();
+    glBindVertexArray(m_quadVAO);
+    glBindTexture(GL_TEXTURE_2D, screenFbo->m_textureColorBuffer->id);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    //auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+    //fboMesh->draw(*screenTexShader);
+
+    //glDisable(GL_DEPTH_TEST);
+    //glDisable(GL_STENCIL_TEST);
+    //glDisable(GL_BLEND);
+
+    assert(m_windowRef);
+    glfwSwapBuffers(m_windowRef);
+}
+
+void OpenGLRenderer::endFrameMinimap() {
+    glDisable(GL_SCISSOR_TEST);
 }
 
 void OpenGLRenderer::renderImmediate(bool start) {

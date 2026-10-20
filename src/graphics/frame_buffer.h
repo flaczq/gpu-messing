@@ -14,11 +14,11 @@ public:
 
 	void bind();
 	void unbind();
+	std::shared_ptr<Texture> m_textureColorBuffer{};
 
 private:
 	unsigned int m_FBO{};
 	unsigned int m_RBO{};
-	std::shared_ptr<Texture> m_texture{};
 
 	void _setupFrameBuffer();
 };
