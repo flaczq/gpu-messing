@@ -75,6 +75,23 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 	LOG("Loading Texture: " << name << " from path: " << path);
 }
 
+void ResourceManager::allocateTextureMemory(const std::string& name, const char* path, int width, int height) {
+	if (m_textures.find(name) != m_textures.end()) {
+		LOG("Already allocated Texture memory: " << name);
+		return;
+	}
+
+	unsigned int textureID = _allocateTextureMemoryFromFile(path, width, height);
+	auto texture = std::make_shared<Texture>();
+	texture->id = textureID;
+	// hardcoded
+	texture->type = "diffuse";
+	texture->path = path;
+
+	m_textures[name] = std::move(texture);
+	LOG("Allocated Texture memory: " << name << " from path: " << path);
+}
+
 std::shared_ptr<Model> ResourceManager::getModel(const std::string& name) {
 	auto it = m_models.find(name);
 	if (it == m_models.end()) {
@@ -120,7 +137,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelNam
 	size_t lastSlash = path.find_last_of('/');
 	std::string name = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
 	std::string uniqueName = name + "_" + modelName;
-	
+
 	auto it = m_textures.find(uniqueName);
 	// just load if texture is cached
 	if (it != m_textures.end()) {
@@ -219,6 +236,13 @@ unsigned int ResourceManager::_loadTextureFromFile(const std::string& path) {
 		LOG_E("RESOURCE_MANAGER::ASSIMP_LOAD_TEXTURE_FROM_FILE_FAILED: " << path);
 	}
 
+	return textureID;
+}
+
+unsigned int ResourceManager::_allocateTextureMemoryFromFile(const std::string& path, int width, int height) {
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	_uploadToGPU(NULL, textureID, width, height, 3, false);
 	return textureID;
 }
 

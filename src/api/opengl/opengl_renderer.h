@@ -10,6 +10,11 @@ enum class RasterizationMode {
 	POINTCLOUD = GL_POINT
 };
 
+// FIXME configuration
+struct RenderConfiguration {
+	bool postProcessingInversion = true;
+};
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 class Mesh;
@@ -20,15 +25,15 @@ public:
 	OpenGLRenderer(GLFWwindow*& windowRef);
 	~OpenGLRenderer() override;
 
-	void init() override;
+	void init(int screenWidth, int screenHeight) override;
 	void beginFrame(int x, int y, int width, int height) override;
-	void beginFrameMinimap(int x, int y, int width, int height) override;
-	void beforeRender(bool postProcessingInversion = false) override;
+	void beginFrameMinimap(int x, int y, int minimapWidth, int minimapHeight) override;
+	void beforeRender() override;
 	void stencilPass() override;
 	void outlinePass(bool start = true) override;
 	void blendingPass(bool start = true) override;
 	void topLayerPass() override;
-	void afterRender(bool postProcessingInversion = false) override;
+	void afterRender() override;
 	void endFrame() override;
 	void endFrameMinimap() override;
 	void renderImmediate(bool start = true) override;
@@ -46,6 +51,7 @@ private:
 	GLFWwindow*& m_windowRef;
 
 	RasterizationMode m_rasterizationMode = RasterizationMode::STANDARD;
+	RenderConfiguration m_renderConfiguration{};
 
 	// AABB
 	unsigned int m_aabbVAO{};

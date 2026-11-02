@@ -94,7 +94,7 @@ bool OpenGLBackEnd::init(unsigned int width, unsigned int height) {
     //      ██████████ ████████▀   ▄████████▀  
     m_registry.init();
     m_physicsSystem.init();
-    m_renderSystem.init();
+    m_renderSystem.init(width, height);
     //       ▄▄▄▄███▄▄▄▄      ▄████████ ███▄▄▄▄      ▄████████    ▄██████▄     ▄████████    ▄████████    ▄████████ 
     //     ▄██▀▀▀███▀▀▀██▄   ███    ███ ███▀▀▀██▄   ███    ███   ███    ███   ███    ███   ███    ███   ███    ███ 
     //     ███   ███   ███   ███    ███ ███   ███   ███    ███   ███    █▀    ███    █▀    ███    ███   ███    █▀  

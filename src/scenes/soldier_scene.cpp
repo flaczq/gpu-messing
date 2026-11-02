@@ -6,7 +6,6 @@
 #include "../ecs/components/identity_component.hpp"
 #include "../ecs/components/physics_component.hpp"
 #include "../ecs/components/player_component.hpp"
-#include "../ecs/components/post_processing_component.hpp"
 #include "../ecs/components/render_component.hpp"
 #include "../ecs/components/stats_component.hpp"
 #include "../ecs/components/transform_component.hpp"
@@ -285,11 +284,6 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<TransformComponent>(grassE, glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         registry.addComponent<RenderComponent>(grassE, grassModel, windowMaterial, RenderQueueType::BLENDING);
     }
-
-    // FIXME render configuration
-    Entity postProcessingE = registry.createEntity();
-    registry.addComponent<IdentityComponent>(postProcessingE, "post_processing");
-    registry.addComponent<PostProcessingComponent>(postProcessingE, PostProcessingType::INVERSION);
 
     return Scene::init(registry);
 }

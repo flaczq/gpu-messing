@@ -92,7 +92,6 @@
     <ClInclude Include="src\ecs\components\camera_component.hpp" />
     <ClInclude Include="src\ecs\components\i_component.hpp" />
     <ClInclude Include="src\ecs\components\identity_component.hpp" />
-    <ClInclude Include="src\ecs\components\post_processing_component.hpp" />
     <ClInclude Include="src\ecs\components\stats_component.hpp" />
     <ClInclude Include="src\ecs\registry.h" />
     <ClInclude Include="src\ecs\components\player_component.hpp" />

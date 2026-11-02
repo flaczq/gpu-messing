@@ -23,7 +23,7 @@ OpenGLRenderer::~OpenGLRenderer() {
     glDeleteBuffers(1, &m_aabbVBO);
 }
 
-void OpenGLRenderer::init() {
+void OpenGLRenderer::init(int screenWidth, int screenHeight) {
     //        ███        ▄████████ ▀████    ▐████▀     ███     ███    █▄     ▄████████    ▄████████    ▄████████ 
     //    ▀█████████▄   ███    ███   ███▌   ████▀  ▀█████████▄ ███    ███   ███    ███   ███    ███   ███    ███ 
     //       ▀███▀▀██   ███    █▀     ███  ▐███       ▀███▀▀██ ███    ███   ███    ███   ███    █▀    ███    █▀  
@@ -36,7 +36,7 @@ void OpenGLRenderer::init() {
     ResourceManager::getInstance().loadTexture("window_texture", "../assets/blending_transparent_window.png");
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
     ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
-    ResourceManager::getInstance().loadTexture("container_texture", "../assets/container.jpg");
+    ResourceManager::getInstance().allocateTextureMemory("container_texture", "../assets/container.jpg", screenWidth, screenHeight);
     //       ▄████████    ▄█    █▄       ▄████████ ████████▄     ▄████████    ▄████████    ▄████████ 
     //      ███    ███   ███    ███     ███    ███ ███   ▀███   ███    ███   ███    ███   ███    ███ 
     //      ███    █▀    ███    ███     ███    ███ ███    ███   ███    █▀    ███    ███   ███    █▀  
@@ -81,10 +81,7 @@ void OpenGLRenderer::init() {
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);*/
 
-    // FIXME configuration is set in a scene and this executes earlier
-    // maybe it's ok to create all this and not use it..?
-    bool postProcessingInversion = true;
-    if (postProcessingInversion) {
+    if (m_renderConfiguration.postProcessingInversion) {
         // screen quad VAO
         float quadVertices[] = {
             // positions   // texCoords
@@ -152,9 +149,12 @@ void OpenGLRenderer::beginFrameMinimap(int x, int y, int width, int height) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void OpenGLRenderer::beforeRender(bool postProcessingInversion) {
-    if (postProcessingInversion) {
+void OpenGLRenderer::beforeRender() {
+    if (m_renderConfiguration.postProcessingInversion) {
         screenFbo->bind();
+        glEnable(GL_DEPTH_TEST);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 }
 
@@ -195,17 +195,17 @@ void OpenGLRenderer::topLayerPass() {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
-void OpenGLRenderer::afterRender(bool postProcessingInversion) {
-    if (postProcessingInversion) {
+void OpenGLRenderer::afterRender() {
+    if (m_renderConfiguration.postProcessingInversion) {
         screenFbo->unbind();
         glDisable(GL_DEPTH_TEST);
-        glClearColor(0.5f, 0.1f, 0.8f, 1.0f);
+        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
         screenTexShader->use();
         glBindVertexArray(m_quadVAO);
-        glBindTexture(GL_TEXTURE_2D, screenFbo->m_textureColorBuffer->id);
+        glBindTexture(GL_TEXTURE_2D, screenFbo->getTextureID());
         glDrawArrays(GL_TRIANGLES, 0, 6);
         //auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
         //fboMesh->draw(*screenTexShader);
@@ -220,7 +220,7 @@ void OpenGLRenderer::endFrame() {
     //glDisable(GL_STENCIL_TEST);
     //glDisable(GL_BLEND);
 
-    assert(m_windowRef);
+    //assert(m_windowRef);
     glfwSwapBuffers(m_windowRef);
 }
 

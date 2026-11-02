@@ -23,7 +23,6 @@ struct RenderContext {
 	bool hasDirLightMovement{};
 	glm::vec3 dirLightMovementDirection{};
 	glm::vec3 dirLightMovementColor{};
-	bool postProcessingInversion{};
 };
 struct RenderCommand {
 	Model* model{};
@@ -48,7 +47,7 @@ public:
 	RenderSystem(std::unique_ptr<IRenderer> renderer);
 	~RenderSystem();
 
-	bool init();
+	bool init(int screenWidth, int screenHeight);
 	void beginFrame(int width, int height) const;
 	void beginFrameMinimap(int minimapWidth, int minimapHeight);
 	void update(Registry& registry, float alpha);

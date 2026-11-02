@@ -12,7 +12,6 @@
 #include "../components/dir_light_movement_component.hpp"
 #include "../components/physics_component.hpp"
 #include "../components/player_component.hpp"
-#include "../components/post_processing_component.hpp"
 #include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -29,7 +28,7 @@ RenderSystem::RenderSystem(std::unique_ptr<IRenderer> renderer)
 
 RenderSystem::~RenderSystem() = default;
 
-bool RenderSystem::init() {
+bool RenderSystem::init(int screenWidth, int screenHeight) {
     // FIXME hardcoded max: 100
     m_opaqueQueue.reserve(100);
     m_stencilQueue.reserve(100);
@@ -38,7 +37,7 @@ bool RenderSystem::init() {
     m_topLayerQueue.reserve(100);
     m_uiQueue.reserve(100);
 
-    m_renderer->init();
+    m_renderer->init(screenWidth, screenHeight);
 
     return true;
 }
@@ -117,17 +116,7 @@ void RenderSystem::update(Registry& registry, float alpha) {
         m_renderImmediateCommands.push_back(command);
     }
 
-    // RENDER CONFIGURATION (POST_PROCESSING...)
-    for (Entity entity : registry.view<PostProcessingComponent>()) {
-        auto* postProcessing = registry.getComponent<PostProcessingComponent>(entity);
-
-        // FIXME more
-        if (postProcessing->type == PostProcessingType::INVERSION) {
-            m_renderContext.postProcessingInversion = true;
-            break;
-        }
-    }
-    // RENDER RENDERING
+    // RENDER
     for (Entity entity : registry.view<TransformComponent, RenderComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* render = registry.getComponent<RenderComponent>(entity);
@@ -198,7 +187,7 @@ void RenderSystem::_registerInQueue(RenderQueueType queueType, const RenderComma
 
 // ORDER: opaque -> transparent back-to-front
 void RenderSystem::execute() {
-    m_renderer->beforeRender(m_renderContext.postProcessingInversion);
+    m_renderer->beforeRender();
 
     //     ▄██████▄     ▄███████▄    ▄████████ ████████▄   ███    █▄     ▄████████ 
     //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███   ███    ███ 
@@ -311,7 +300,7 @@ void RenderSystem::execute() {
     m_topLayerQueue.clear();
     m_uiQueue.clear();
 
-    m_renderer->afterRender(m_renderContext.postProcessingInversion);
+    m_renderer->afterRender();
 }
 
 void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const {

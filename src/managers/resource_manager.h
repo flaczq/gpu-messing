@@ -23,6 +23,8 @@ public:
 	void loadMaterial(const std::string& name, std::shared_ptr<Shader> shader);
 	// manually load texture from file
 	void loadTexture(const std::string& name, const char* path, const std::string& typeName = "diffuse");
+	// framebuffer
+	void allocateTextureMemory(const std::string& name, const char* path, int width, int height);
 
 	std::shared_ptr<Model> getModel(const std::string& name);
 	std::shared_ptr<Shader> getShader(const std::string& name);
@@ -44,5 +46,6 @@ private:
 
 	unsigned int _loadTextureFromMemory(const aiTexture* textureMem, const std::string& path);
 	unsigned int _loadTextureFromFile(const std::string& path);
+	unsigned int _allocateTextureMemoryFromFile(const std::string& path, int width, int height);
 	void _uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
 };
