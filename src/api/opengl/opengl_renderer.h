@@ -23,10 +23,12 @@ public:
 	void init() override;
 	void beginFrame(int x, int y, int width, int height) override;
 	void beginFrameMinimap(int x, int y, int width, int height) override;
+	void beforeRender(bool postProcessingInversion = false) override;
 	void stencilPass() override;
 	void outlinePass(bool start = true) override;
 	void blendingPass(bool start = true) override;
 	void topLayerPass() override;
+	void afterRender(bool postProcessingInversion = false) override;
 	void endFrame() override;
 	void endFrameMinimap() override;
 	void renderImmediate(bool start = true) override;
@@ -44,6 +46,7 @@ private:
 	GLFWwindow*& m_windowRef;
 
 	RasterizationMode m_rasterizationMode = RasterizationMode::STANDARD;
+
 	// AABB
 	unsigned int m_aabbVAO{};
 	unsigned int m_aabbVBO{};

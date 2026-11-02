@@ -12,6 +12,7 @@
 #include "../components/dir_light_movement_component.hpp"
 #include "../components/physics_component.hpp"
 #include "../components/player_component.hpp"
+#include "../components/post_processing_component.hpp"
 #include "../components/render_component.hpp"
 #include "../components/transform_component.hpp"
 #include "../entites/entity.hpp"
@@ -48,14 +49,6 @@ void RenderSystem::beginFrame(int width, int height) const {
 
 void RenderSystem::beginFrameMinimap(int minimapWidth, int minimapHeight) {
     m_renderer->beginFrameMinimap(minimapWidth * 3, minimapHeight * 3, minimapWidth, minimapHeight);
-}
-
-void RenderSystem::endFrame() {
-    m_renderer->endFrame();
-}
-
-void RenderSystem::endFrameMinimap() {
-    m_renderer->endFrameMinimap();
 }
 
 void RenderSystem::update(Registry& registry, float alpha) {
@@ -105,7 +98,6 @@ void RenderSystem::update(Registry& registry, float alpha) {
             break;
         }
     }
-
     // PHYSICS
     for (Entity entity : registry.view<TransformComponent, PhysicsComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
@@ -125,7 +117,17 @@ void RenderSystem::update(Registry& registry, float alpha) {
         m_renderImmediateCommands.push_back(command);
     }
 
-    // RENDER
+    // RENDER CONFIGURATION (POST_PROCESSING...)
+    for (Entity entity : registry.view<PostProcessingComponent>()) {
+        auto* postProcessing = registry.getComponent<PostProcessingComponent>(entity);
+
+        // FIXME more
+        if (postProcessing->type == PostProcessingType::INVERSION) {
+            m_renderContext.postProcessingInversion = true;
+            break;
+        }
+    }
+    // RENDER RENDERING
     for (Entity entity : registry.view<TransformComponent, RenderComponent>()) {
         auto* transform = registry.getComponent<TransformComponent>(entity);
         auto* render = registry.getComponent<RenderComponent>(entity);
@@ -196,6 +198,8 @@ void RenderSystem::_registerInQueue(RenderQueueType queueType, const RenderComma
 
 // ORDER: opaque -> transparent back-to-front
 void RenderSystem::execute() {
+    m_renderer->beforeRender(m_renderContext.postProcessingInversion);
+
     //     ▄██████▄     ▄███████▄    ▄████████ ████████▄   ███    █▄     ▄████████ 
     //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███   ███    ███ 
     //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███   ███    █▀  
@@ -306,6 +310,8 @@ void RenderSystem::execute() {
     m_blendingQueue.clear();
     m_topLayerQueue.clear();
     m_uiQueue.clear();
+
+    m_renderer->afterRender(m_renderContext.postProcessingInversion);
 }
 
 void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const {
@@ -385,6 +391,14 @@ void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, c
 
         cmd.model->draw(*lastShader);
     }
+}
+
+void RenderSystem::endFrame() {
+    m_renderer->endFrame();
+}
+
+void RenderSystem::endFrameMinimap() {
+    m_renderer->endFrameMinimap();
 }
 
 void RenderSystem::renderImmediate() {

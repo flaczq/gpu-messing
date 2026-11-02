@@ -81,48 +81,51 @@ void OpenGLRenderer::init() {
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);*/
 
-    // screen quad VAO
-    float quadVertices[] = {
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         //
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-    glGenVertexArrays(1, &m_quadVAO);
-    glGenBuffers(1, &m_quadVBO);
-    glBindVertexArray(m_quadVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)0);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2 * sizeof(float)));
-    glBindVertexArray(0);
+    // FIXME configuration is set in a scene and this executes earlier
+    // maybe it's ok to create all this and not use it..?
+    bool postProcessingInversion = true;
+    if (postProcessingInversion) {
+        // screen quad VAO
+        float quadVertices[] = {
+            // positions   // texCoords
+            -1.0f,  1.0f,  0.0f, 1.0f,
+            -1.0f, -1.0f,  0.0f, 0.0f,
+             1.0f, -1.0f,  1.0f, 0.0f,
+             //
+            -1.0f,  1.0f,  0.0f, 1.0f,
+             1.0f, -1.0f,  1.0f, 0.0f,
+             1.0f,  1.0f,  1.0f, 1.0f
+        };
+        glGenVertexArrays(1, &m_quadVAO);
+        glGenBuffers(1, &m_quadVBO);
+        glBindVertexArray(m_quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2 * sizeof(float)));
+        glBindVertexArray(0);
 
-    auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
-    screenTexShader->use();
-    screenTexShader->setInt("screenTexture", 0);
+        auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+        screenTexShader->use();
+        screenTexShader->setInt("screenTexture", 0);
+
+        // FRAMEBUFFER
+        auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
+        //auto fboM = MeshGenerator::createCuboid(2.0f, 2.0f, 0.0f, containerTexture);
+        //fboMesh = std::make_unique<Mesh>(std::move(fboM));
+        screenFbo = std::make_unique<FrameBuffer>(std::move(containerTexture));
+    }
 
     // AABB
     auto aabbM = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f);
     aabbMesh = std::make_unique<Mesh>(std::move(aabbM));
-
-    // FRAMEBUFFER
-    auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
-    //auto fboM = MeshGenerator::createCuboid(2.0f, 2.0f, 0.0f, containerTexture);
-    //fboMesh = std::make_unique<Mesh>(std::move(fboM));
-    screenFbo = std::make_unique<FrameBuffer>(std::move(containerTexture));
 }
 
 void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
     // Viewport
     glViewport(x, y, width, height);
-
-    screenFbo->bind();
 
     // Z-Depth Test
     glEnable(GL_DEPTH_TEST);
@@ -147,6 +150,12 @@ void OpenGLRenderer::beginFrameMinimap(int x, int y, int width, int height) {
 
     glClearColor(0.2f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+}
+
+void OpenGLRenderer::beforeRender(bool postProcessingInversion) {
+    if (postProcessingInversion) {
+        screenFbo->bind();
+    }
 }
 
 void OpenGLRenderer::stencilPass() {
@@ -186,22 +195,26 @@ void OpenGLRenderer::topLayerPass() {
     glClear(GL_DEPTH_BUFFER_BIT);
 }
 
+void OpenGLRenderer::afterRender(bool postProcessingInversion) {
+    if (postProcessingInversion) {
+        screenFbo->unbind();
+        glDisable(GL_DEPTH_TEST);
+        glClearColor(0.5f, 0.1f, 0.8f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+        screenTexShader->use();
+        glBindVertexArray(m_quadVAO);
+        glBindTexture(GL_TEXTURE_2D, screenFbo->m_textureColorBuffer->id);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        //auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+        //fboMesh->draw(*screenTexShader);
+    }
+}
+
 void OpenGLRenderer::endFrame() {
     // no need to unbind it every time but w/e
     glBindVertexArray(0);
-
-    screenFbo->unbind();
-    glDisable(GL_DEPTH_TEST);
-    glClearColor(0.5f, 0.1f, 0.8f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
-    screenTexShader->use();
-    glBindVertexArray(m_quadVAO);
-    glBindTexture(GL_TEXTURE_2D, screenFbo->m_textureColorBuffer->id);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    //auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
-    //fboMesh->draw(*screenTexShader);
 
     //glDisable(GL_DEPTH_TEST);
     //glDisable(GL_STENCIL_TEST);
