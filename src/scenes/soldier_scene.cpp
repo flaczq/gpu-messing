@@ -111,12 +111,6 @@ bool SoldierScene::init(Registry& registry) {
     auto grassM = std::make_unique<Mesh>(std::move(grass));
     auto grassModel = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(grassModel);
-    // --- framebuffer screen
-    /*auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
-    auto fbs = MeshGenerator::createPlane(2.0f, 2.0f, containerTexture);
-    auto fbsM = std::make_unique<Mesh>(std::move(fbs));
-    auto fbsModel = std::make_shared<Model>("fbs_model", std::move(fbsM));
-    ResourceManager::getInstance().addModel(fbsModel);*/
 
     //       ▄████████ ███▄▄▄▄       ███      ▄█      ███      ▄█     ▄████████    ▄████████ 
     //      ███    ███ ███▀▀▀██▄ ▀█████████▄ ███  ▀█████████▄ ███    ███    ███   ███    ███ 

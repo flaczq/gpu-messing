@@ -19,6 +19,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 class Mesh;
 class FrameBuffer;
+class Shader;
 
 class OpenGLRenderer : public IRenderer {
 public:
@@ -45,6 +46,7 @@ public:
 	std::unique_ptr<Mesh> aabbMesh{};
 	std::unique_ptr<Mesh> fboMesh{};
 	std::unique_ptr<FrameBuffer> screenFbo{};
+	std::shared_ptr<Shader> screenTexShader{};
 private:
 	// reference to pointer (!!)
 	// have to do it like this because RenderSystem can't know about GLFWWindow
@@ -58,4 +60,5 @@ private:
 	unsigned int m_aabbVBO{};
 	unsigned int m_quadVAO{};
 	unsigned int m_quadVBO{};
+	unsigned int m_quadEBO{};
 };

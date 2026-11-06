@@ -20,7 +20,10 @@ OpenGLRenderer::OpenGLRenderer(GLFWwindow*& windowRef)
 
 OpenGLRenderer::~OpenGLRenderer() {
     glDeleteVertexArrays(1, &m_aabbVAO);
+    glDeleteVertexArrays(1, &m_quadVAO);
     glDeleteBuffers(1, &m_aabbVBO);
+    glDeleteBuffers(1, &m_quadVBO);
+    glDeleteBuffers(1, &m_quadEBO);
 }
 
 void OpenGLRenderer::init(int screenWidth, int screenHeight) {
@@ -84,33 +87,37 @@ void OpenGLRenderer::init(int screenWidth, int screenHeight) {
     if (m_renderConfiguration.postProcessingInversion) {
         // screen quad VAO
         float quadVertices[] = {
-            // positions   // texCoords
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            -1.0f, -1.0f,  0.0f, 0.0f,
-             1.0f, -1.0f,  1.0f, 0.0f,
-             //
-            -1.0f,  1.0f,  0.0f, 1.0f,
-             1.0f, -1.0f,  1.0f, 0.0f,
-             1.0f,  1.0f,  1.0f, 1.0f
+            // positions         // texCoords
+            -1.0f,  1.0f, 0.0f,  0.0f, 1.0f, // upper left
+            -1.0f, -1.0f, 0.0f,  0.0f, 0.0f, // lower left
+             1.0f, -1.0f, 0.0f,  1.0f, 0.0f, // lower right
+             1.0f,  1.0f, 0.0f,  1.0f, 1.0f  // upper right
+        };
+        unsigned int quadIndices[] = {
+            0, 1, 2,
+            0, 2, 3
         };
         glGenVertexArrays(1, &m_quadVAO);
         glGenBuffers(1, &m_quadVBO);
+        glGenBuffers(1, &m_quadEBO);
         glBindVertexArray(m_quadVAO);
         glBindBuffer(GL_ARRAY_BUFFER, m_quadVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_quadEBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(quadIndices), &quadIndices, GL_STATIC_DRAW);
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)0);
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)(2 * sizeof(float)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid*)0);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (GLvoid*)(3 * sizeof(float)));
         glBindVertexArray(0);
 
-        auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+        screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
         screenTexShader->use();
-        screenTexShader->setInt("screenTexture", 0);
+        screenTexShader->setInt("material.diffuse", 0);
 
         // FRAMEBUFFER
         auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
-        //auto fboM = MeshGenerator::createCuboid(2.0f, 2.0f, 0.0f, containerTexture);
+        //auto fboM = MeshGenerator::createPlane(2.0f, 2.0f, containerTexture);
         //fboMesh = std::make_unique<Mesh>(std::move(fboM));
         screenFbo = std::make_unique<FrameBuffer>(std::move(containerTexture));
     }
@@ -199,15 +206,18 @@ void OpenGLRenderer::afterRender() {
     if (m_renderConfiguration.postProcessingInversion) {
         screenFbo->unbind();
         glDisable(GL_DEPTH_TEST);
+        //glDisable(GL_CULL_FACE);
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
         screenTexShader->use();
-        glBindVertexArray(m_quadVAO);
+        screenTexShader->setInt("material.diffuse", 0);
+        //glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, screenFbo->getTextureID());
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        //auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+
+        glBindVertexArray(m_quadVAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         //fboMesh->draw(*screenTexShader);
     }
 }
