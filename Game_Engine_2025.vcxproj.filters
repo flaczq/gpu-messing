@@ -154,6 +154,15 @@
     <Image Include="assets\container.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
+    <Image Include="army4.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="army3.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="army_ecs.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h">

@@ -69,29 +69,11 @@ Mesh::~Mesh() {
 }
 
 void Mesh::draw(const Shader& shader) {
-    unsigned int diffuseNr = 1;
-    unsigned int specularNr = 1;
-    unsigned int normalNr = 1;
-    unsigned int heightNr = 1;
-
     for (unsigned int i{}; i < m_textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
-
-        std::string number;
         std::string name = m_textures[i]->type;
-        if (name == "diffuse") {
-            number = std::to_string(diffuseNr++);
-        } else if (name == "specular") {
-            number = std::to_string(specularNr++);
-        } else if (name == "normal") {
-            number = std::to_string(normalNr++);
-        } else if (name == "height") {
-            number = std::to_string(heightNr++);
-        }
         // FIXME more than one of each material type
-        //shader.setInt("material." + name + number, i);
         shader.setInt("material." + name, i);
-
         glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);
     }
 

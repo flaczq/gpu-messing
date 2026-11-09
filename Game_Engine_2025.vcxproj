@@ -75,6 +75,9 @@
   <ItemGroup>
     <Image Include="army.png" />
     <Image Include="army2.png" />
+    <Image Include="army3.png" />
+    <Image Include="army4.png" />
+    <Image Include="army_ecs.png" />
     <Image Include="assets\abc.jpg" />
     <Image Include="assets\blending_transparent_window.png" />
     <Image Include="assets\clearlyai.jpg" />

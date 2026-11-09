@@ -9,4 +9,5 @@ namespace MeshGenerator {
 	Mesh createCuboid(float width, float depth, float height, std::shared_ptr<Texture> texture = nullptr, float uvTiling = 1.0f);
 	Mesh createGrid(float size, float step);
 	Mesh createWall(float width, float height, float depth = 0.5f, float uvTiling = 1.0f);
+	Mesh createScreenQuad(float width, float height, std::shared_ptr<Texture> texture = nullptr, float uvTiling = 1.0f);
 };

@@ -12,7 +12,7 @@ enum class RasterizationMode {
 
 // FIXME configuration
 struct RenderConfiguration {
-	bool postProcessingInversion = true;
+	bool postProcessing = true;
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -46,7 +46,7 @@ public:
 	std::unique_ptr<Mesh> aabbMesh{};
 	std::unique_ptr<Mesh> fboMesh{};
 	std::unique_ptr<FrameBuffer> screenFbo{};
-	std::shared_ptr<Shader> screenTexShader{};
+
 private:
 	// reference to pointer (!!)
 	// have to do it like this because RenderSystem can't know about GLFWWindow
@@ -58,7 +58,4 @@ private:
 	// AABB
 	unsigned int m_aabbVAO{};
 	unsigned int m_aabbVBO{};
-	unsigned int m_quadVAO{};
-	unsigned int m_quadVBO{};
-	unsigned int m_quadEBO{};
 };

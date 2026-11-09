@@ -230,7 +230,8 @@ unsigned int ResourceManager::_loadTextureFromFile(const std::string& path) {
 	unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
 	if (data) {
 		// always RGB/RGBA so isBGR = false
-		_uploadToGPU(data, textureID, width, height, channels, false);
+		bool isBGR = false;
+		_uploadToGPU(data, textureID, width, height, channels, isBGR);
 		stbi_image_free(data);
 	} else {
 		LOG_E("RESOURCE_MANAGER::ASSIMP_LOAD_TEXTURE_FROM_FILE_FAILED: " << path);
@@ -242,7 +243,12 @@ unsigned int ResourceManager::_loadTextureFromFile(const std::string& path) {
 unsigned int ResourceManager::_allocateTextureMemoryFromFile(const std::string& path, int width, int height) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
-	_uploadToGPU(NULL, textureID, width, height, 3, false);
+
+	unsigned char* data = NULL;
+	int channels = 3;
+	bool isBGR = false;
+	_uploadToGPU(data, textureID, width, height, channels, isBGR);
+
 	return textureID;
 }
 

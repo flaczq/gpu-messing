@@ -342,11 +342,11 @@ void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, c
     for (auto& cmd : queue) {
         Material* currMaterial = cmd.material;
         if (currMaterial != lastMaterial) {
-            const std::string& lastMN = (lastMaterial != nullptr) ? lastMaterial->getName() : "NULL";
+            //const std::string& lastMN = (lastMaterial != nullptr) ? lastMaterial->getName() : "NULL";
             //LOG_D("Switching material from: " << lastMN << " to: " << currMaterial->getName());
             Shader* currShader = currMaterial->getShader();
             if (currShader != lastShader) {
-                unsigned int lastSI = (lastShader != nullptr) ? lastShader->getID() : 999;
+                //unsigned int lastSI = (lastShader != nullptr) ? lastShader->getID() : 999;
                 //LOG_D("Switching shader from: " << lastSI << " to: " << currShader->getID());
                 currShader->use();
 

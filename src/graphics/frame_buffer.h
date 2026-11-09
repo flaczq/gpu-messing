@@ -12,10 +12,10 @@ public:
 	FrameBuffer(std::shared_ptr<Texture> texture);
 	~FrameBuffer();
 
+	unsigned int getTextureID() { return m_textureColorBuffer->id; }
+
 	void bind();
 	void unbind();
-
-	unsigned int getTextureID() { return m_textureColorBuffer->id; }
 
 private:
 	unsigned int m_FBO{};

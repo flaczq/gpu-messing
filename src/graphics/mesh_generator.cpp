@@ -32,8 +32,10 @@ namespace MeshGenerator {
 
 		// up
 		v0.Normal = v1.Normal = v2.Normal = v3.Normal = { 0.0f, 1.0f, 0.0f };
+
 		// parallel to X axis
 		//v0.Tangent = v1.Tangent = v2.Tangent = v3.Tangent = { 1.0f, 0.0f, 0.0f };
+		
 		//v0.Bitangent = v1.Bitangent = v2.Bitangent = v3.Bitangent = { 0.0f, 0.0f, 1.0f };
 
 		// reset bones
@@ -202,5 +204,35 @@ namespace MeshGenerator {
 
 		//return meshes;
 		return createCuboid(width, height, depth);
+	}
+
+	Mesh createScreenQuad(float width, float depth, std::shared_ptr<Texture> texture, float uvTiling) {
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<std::shared_ptr<Texture>> textures;
+
+		float halfWidth = width * 0.5f;
+		float halfDepth = depth * 0.5f;
+
+		Vertex v0{}, v1{}, v2{}, v3{};
+
+		v0.Position = { -halfWidth,  halfDepth, 0.0f };
+		v1.Position = { -halfWidth, -halfDepth, 0.0f };
+		v2.Position = {  halfWidth, -halfDepth, 0.0f };
+		v3.Position = {  halfWidth,  halfDepth, 0.0f };
+
+		v0.TexCoords = { 0.0f,     uvTiling };
+		v1.TexCoords = { 0.0f,     0.0f };
+		v2.TexCoords = { uvTiling, 0.0f };
+		v3.TexCoords = { uvTiling, uvTiling };
+
+		vertices = { v0, v1, v2, v3 };
+		indices = { 0, 1, 2, 0, 2, 3 };
+		textures = {};
+		if (texture) {
+			textures.push_back(texture);
+		}
+
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}
 }
