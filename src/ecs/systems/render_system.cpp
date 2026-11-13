@@ -2,7 +2,6 @@
 #include "../../api/i_renderer.h"
 #include "../../configs/log_config.hpp"
 #include "../../graphics/material.h"
-#include "../../graphics/mesh.h"
 #include "../../graphics/shader.h"
 #include "../../managers/resource_manager.h"
 #include "../../utils/color_constants.hpp"
@@ -164,30 +163,30 @@ void RenderSystem::_registerInQueue(RenderQueueType queueType, const RenderComma
     //      ███          ███    ███    ▄█    ███    ▄█    ███   ███    ███    ▄█    ███ 
     //     ▄████▀        ███    █▀   ▄████████▀   ▄████████▀    ██████████  ▄████████▀  
     switch (queueType) {
-    case RenderQueueType::OPAQUE:
-        m_opaqueQueue.push_back(command);
-        break;
-    case RenderQueueType::STENCIL:
-        m_stencilQueue.push_back(command);
-        break;
-    case RenderQueueType::OUTLINE:
-        m_outlineQueue.push_back(command);
-        break;
-    case RenderQueueType::BLENDING:
-        m_blendingQueue.push_back(command);
-        break;
-    case RenderQueueType::TOP_LAYER:
-        m_topLayerQueue.push_back(command);
-        break;
-    case RenderQueueType::UI:
-        m_uiQueue.push_back(command);
-        break;
+        case RenderQueueType::OPAQUE:
+            m_opaqueQueue.push_back(command);
+            break;
+        case RenderQueueType::STENCIL:
+            m_stencilQueue.push_back(command);
+            break;
+        case RenderQueueType::OUTLINE:
+            m_outlineQueue.push_back(command);
+            break;
+        case RenderQueueType::BLENDING:
+            m_blendingQueue.push_back(command);
+            break;
+        case RenderQueueType::TOP_LAYER:
+            m_topLayerQueue.push_back(command);
+            break;
+        case RenderQueueType::UI:
+            m_uiQueue.push_back(command);
+            break;
     }
 }
 
 // ORDER: opaque -> transparent back-to-front
 void RenderSystem::execute() {
-    m_renderer->beforeRender();
+    m_renderer->render(RenderState::BEFORE);
 
     //     ▄██████▄     ▄███████▄    ▄████████ ████████▄   ███    █▄     ▄████████ 
     //    ███    ███   ███    ███   ███    ███ ███    ███  ███    ███   ███    ███ 
@@ -225,10 +224,10 @@ void RenderSystem::execute() {
     //     ▀██████▀  ████████▀     ▄████▀   █████▄▄██ █▀    ▀█   █▀    ██████████ 
     //                                      ▀                                     
     if (!m_outlineQueue.empty()) {
-        m_renderer->outlinePass();
+        m_renderer->outlinePass(RenderState::BEFORE);
         _sortQueueByMaterial(m_outlineQueue);
         _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.cameraProjection);
-        m_renderer->outlinePass(false);
+        m_renderer->outlinePass(RenderState::AFTER);
     }
 
     //    ▀█████████▄   ▄█          ▄████████ ███▄▄▄▄   ████████▄   ▄█  ███▄▄▄▄      ▄██████▄  
@@ -241,10 +240,10 @@ void RenderSystem::execute() {
     //    ▄█████████▀  █████▄▄██   ██████████  ▀█   █▀  ████████▀  █▀    ▀█   █▀    ████████▀  
     //                 ▀                                                                       
     if (!m_blendingQueue.empty()) {
-        m_renderer->blendingPass();
+        m_renderer->blendingPass(RenderState::BEFORE);
         _sortQueueByDistance(m_blendingQueue);
         _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.cameraProjection);
-        m_renderer->blendingPass(false);
+        m_renderer->blendingPass(RenderState::AFTER);
     }
 
     //        ███      ▄██████▄     ▄███████▄                        
@@ -293,14 +292,14 @@ void RenderSystem::execute() {
         _renderSortedQueue(m_uiQueue, "ui pass", m_renderContext.cameraProjection);
     }
 
+    m_renderer->render(RenderState::AFTER);
+
     m_opaqueQueue.clear();
     m_stencilQueue.clear();
     m_outlineQueue.clear();
     m_blendingQueue.clear();
     m_topLayerQueue.clear();
     m_uiQueue.clear();
-
-    m_renderer->afterRender();
 }
 
 void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const {
@@ -391,26 +390,24 @@ void RenderSystem::endFrameMinimap() {
 }
 
 void RenderSystem::renderImmediate() {
-    Mesh* mesh{};
     std::vector<RenderImmediateCommand> queue{};
 
     switch (m_renderDebugMode) {
-    case RenderDebugMode::NONE:
-        return;
-    case RenderDebugMode::AABB:
-        queue = m_renderImmediateCommands;
-        if (queue.empty()) {
-            LOG_D("nothing to render immediately, sad QQ");
+        case RenderDebugMode::NONE:
             return;
-        }
-        mesh = m_renderer->getAABBMesh();
-        break;
+        case RenderDebugMode::AABB:
+            queue = m_renderImmediateCommands;
+            if (queue.empty()) {
+                LOG_D("nothing to render immediately, sad QQ");
+                return;
+            }
+            break;
     }
 
-    m_renderer->renderImmediate();
+    m_renderer->renderImmediate(RenderState::BEFORE);
 
     auto shader = ResourceManager::getInstance().getShader("simple_shader");
-    shader->use();
+    //shader->use();
     shader->setMat4fv("view", m_renderContext.cameraView);
     shader->setMat4fv("projection", m_renderContext.cameraProjection);
     for (auto& cmd : queue) {
@@ -421,11 +418,11 @@ void RenderSystem::renderImmediate() {
         shader->setBool("material.hasDiffuseColor", false);
         shader->setBool("custom.hasCustomColor", true);
         shader->setVec3fv("custom.customColor", cmd.color);
-        //glDrawArrays(GL_LINES, 0, 24);
-        mesh->draw(*shader);
+
+        m_renderer->renderImmediate(RenderState::THIS);
     }
 
-    m_renderer->renderImmediate(false);
+    m_renderer->renderImmediate(RenderState::AFTER);
 
     m_renderImmediateCommands.clear();
 }

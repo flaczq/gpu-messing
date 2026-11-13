@@ -12,7 +12,7 @@ enum class RasterizationMode {
 
 // FIXME configuration
 struct RenderConfiguration {
-	bool postProcessing = true;
+	bool postProcessing = false;
 };
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -24,28 +24,20 @@ class Shader;
 class OpenGLRenderer : public IRenderer {
 public:
 	OpenGLRenderer(GLFWwindow*& windowRef);
-	~OpenGLRenderer() override;
 
 	void init(int screenWidth, int screenHeight) override;
 	void beginFrame(int x, int y, int width, int height) override;
 	void beginFrameMinimap(int x, int y, int minimapWidth, int minimapHeight) override;
-	void beforeRender() override;
+	void render(RenderState state) override;
 	void stencilPass() override;
-	void outlinePass(bool start = true) override;
-	void blendingPass(bool start = true) override;
+	void outlinePass(RenderState state) override;
+	void blendingPass(RenderState state) override;
 	void topLayerPass() override;
-	void afterRender() override;
 	void endFrame() override;
 	void endFrameMinimap() override;
-	void renderImmediate(bool start = true) override;
+	void renderImmediate(RenderState state) override;
 	void setRasterizationMode() override;
 	void toggleRasterizationMode() override;
-	Mesh* getAABBMesh() override { return aabbMesh.get(); }
-	FrameBuffer* getScreenFrameBuffer() override { return screenFbo.get(); }
-
-	std::unique_ptr<Mesh> aabbMesh{};
-	std::unique_ptr<Mesh> fboMesh{};
-	std::unique_ptr<FrameBuffer> screenFbo{};
 
 private:
 	// reference to pointer (!!)
@@ -55,7 +47,9 @@ private:
 	RasterizationMode m_rasterizationMode = RasterizationMode::STANDARD;
 	RenderConfiguration m_renderConfiguration{};
 
-	// AABB
-	unsigned int m_aabbVAO{};
-	unsigned int m_aabbVBO{};
+	std::unique_ptr<Mesh> m_aabbMesh{};
+	std::unique_ptr<Mesh> m_fboMesh{};
+	std::unique_ptr<FrameBuffer> m_screenFbo{};
+	std::shared_ptr<Shader> m_renderImmediateShader{};
+	std::shared_ptr<Shader> m_screenTexShader{};
 };

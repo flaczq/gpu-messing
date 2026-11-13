@@ -50,6 +50,7 @@ namespace MeshGenerator {
 		textures = {};
 		// FIXME: more than one texture
 		if (texture) {
+			// increasing shared pointer's internal counter
 			textures.push_back(texture);
 		}
 
@@ -61,9 +62,9 @@ namespace MeshGenerator {
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
 
-		float halfWidth = width * 0.5f;
+		float halfWidth  = width  * 0.5f;
 		float halfHeight = height * 0.5f;
-		float halfDepth = depth * 0.5f;
+		float halfDepth  = depth  * 0.5f;
 
 		Vertex d0{}, d1{}, d2{}, d3{}, // down  (0-3)
 			   u0{}, u1{}, u2{}, u3{}, // up    (4-7)
@@ -190,7 +191,7 @@ namespace MeshGenerator {
 			}
 		}
 
-		return Mesh(std::move(vertices), std::move(indices), std::move(textures), true, glm::vec3(1.0f, 0.0f, 0.5f), GL_LINES);
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}
 
 	Mesh createWall(float width, float height, float depth, float uvTiling) {
@@ -206,20 +207,20 @@ namespace MeshGenerator {
 		return createCuboid(width, height, depth);
 	}
 
-	Mesh createScreenQuad(float width, float depth, std::shared_ptr<Texture> texture, float uvTiling) {
+	Mesh createScreenQuad(float width, float height, std::shared_ptr<Texture> texture, float uvTiling) {
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
 
 		float halfWidth = width * 0.5f;
-		float halfDepth = depth * 0.5f;
+		float halfHeight = height * 0.5f;
 
 		Vertex v0{}, v1{}, v2{}, v3{};
 
-		v0.Position = { -halfWidth,  halfDepth, 0.0f };
-		v1.Position = { -halfWidth, -halfDepth, 0.0f };
-		v2.Position = {  halfWidth, -halfDepth, 0.0f };
-		v3.Position = {  halfWidth,  halfDepth, 0.0f };
+		v0.Position = { -halfWidth,  halfHeight, 0.0f };
+		v1.Position = { -halfWidth, -halfHeight, 0.0f };
+		v2.Position = {  halfWidth, -halfHeight, 0.0f };
+		v3.Position = {  halfWidth,  halfHeight, 0.0f };
 
 		v0.TexCoords = { 0.0f,     uvTiling };
 		v1.TexCoords = { 0.0f,     0.0f };
@@ -232,6 +233,41 @@ namespace MeshGenerator {
 		if (texture) {
 			textures.push_back(texture);
 		}
+
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
+	}
+
+	Mesh createAABBCuboid(float width, float height, float depth) {
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<std::shared_ptr<Texture>> textures;
+
+		float halfWidth  = width  * 0.5f;
+		float halfHeight = height * 0.5f;
+		float halfDepth  = depth  * 0.5f;
+
+		Vertex f0{}, f1{}, f2{}, f3{},
+			   b0{}, b1{}, b2{}, b3{};
+
+		f0.Position = { -halfWidth, -halfHeight,  halfDepth };
+		f1.Position = {  halfWidth, -halfHeight,  halfDepth };
+		f2.Position = {  halfWidth,  halfHeight,  halfDepth };
+		f3.Position = { -halfWidth,  halfHeight,  halfDepth };
+		b0.Position = { -halfWidth, -halfHeight, -halfDepth };
+		b1.Position = {  halfWidth, -halfHeight, -halfDepth };
+		b2.Position = {  halfWidth,  halfHeight, -halfDepth };
+		b3.Position = { -halfWidth,  halfHeight, -halfDepth };
+
+		vertices = {
+			f0, f1, f2, f3,
+			b0, b1, b2, b3
+		};
+		indices = {
+			0, 1, 1, 2, 2, 3, 3, 0,
+			4, 5, 5, 6, 6, 7, 7, 4,
+			0, 4, 1, 5, 2, 6, 3, 7
+		};
+		textures = {};
 
 		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}

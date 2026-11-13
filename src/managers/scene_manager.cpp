@@ -35,15 +35,15 @@ void SceneManager::toggleScene(Registry& registry) {
 	// TODO: LOADING
 	LOG_D("Changed CurrentScene to: " << Utils::Enum::getName(nextSceneID));
 	switch (nextSceneID) {
-	case SceneID::SOLDIER:
-		m_currentScene = std::make_unique<SoldierScene>();
-		break;
-	case SceneID::RTX:
-		m_currentScene = std::make_unique<RtxScene>();
-		break;
-		//case SceneID::FPS_GAME:
-		//	nextScene = std::make_unique<FpsGameScene>();
-		//	break;
+		case SceneID::SOLDIER:
+			m_currentScene = std::make_unique<SoldierScene>();
+			break;
+		case SceneID::RTX:
+			m_currentScene = std::make_unique<RtxScene>();
+			break;
+			//case SceneID::FPS_GAME:
+			//	nextScene = std::make_unique<FpsGameScene>();
+			//	break;
 	}
 
 	m_currentScene->init(registry);

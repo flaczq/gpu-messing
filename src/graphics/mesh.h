@@ -19,6 +19,9 @@ public:
 	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures, bool hasDiffuseColor = false, glm::vec3 diffuseColor = glm::vec3(1.0f), GLenum drawType = GL_TRIANGLES);
 	~Mesh();
 
+	void setDiffuseColor(glm::vec3 diffuseColor) { m_diffuseColor = diffuseColor; m_hasDiffuseColor = true; };
+	void setDrawType(GLenum drawType) { m_drawType = drawType; };
+
 	void draw(const Shader &shader);
 
 private:

@@ -7,7 +7,7 @@
 
 Material::Material(const std::string& name, std::shared_ptr<Shader> shader)
 	: m_name(name),
-	  m_shader(std::move(shader))
+	  m_shader(shader)
 {
 }
 

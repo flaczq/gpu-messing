@@ -18,11 +18,6 @@ OpenGLRenderer::OpenGLRenderer(GLFWwindow*& windowRef)
 {
 }
 
-OpenGLRenderer::~OpenGLRenderer() {
-    glDeleteVertexArrays(1, &m_aabbVAO);
-    glDeleteBuffers(1, &m_aabbVBO);
-}
-
 void OpenGLRenderer::init(int screenWidth, int screenHeight) {
     //        ███        ▄████████ ▀████    ▐████▀     ███     ███    █▄     ▄████████    ▄████████    ▄████████ 
     //    ▀█████████▄   ███    ███   ███▌   ████▀  ▀█████████▄ ███    ███   ███    ███   ███    ███   ███    ███ 
@@ -53,45 +48,21 @@ void OpenGLRenderer::init(int screenWidth, int screenHeight) {
     ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
     ResourceManager::getInstance().loadShader("screen_tex_shader", "../shaders/screen_tex.vert", "../shaders/screen_tex.frag");
 
-    // FIXME: move to new AABBMesh()
-    // hardcoded AABB 1x1x1 (with the middle at 0.0)
-    /*float aabbVertices[] = {
-        // front
-        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,
-         0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,
-         0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,
-        -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,  0.5f,
-        // back
-        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,
-         0.5f,  0.5f, -0.5f, -0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f, -0.5f, -0.5f, -0.5f, -0.5f,
-        // connectors
-        -0.5f, -0.5f,  0.5f, -0.5f, -0.5f, -0.5f,
-         0.5f, -0.5f,  0.5f,  0.5f, -0.5f, -0.5f,
-         0.5f,  0.5f,  0.5f,  0.5f,  0.5f, -0.5f,
-        -0.5f,  0.5f,  0.5f, -0.5f,  0.5f, -0.5f
-    };
-    glGenVertexArrays(1, &m_aabbVAO);
-    glGenBuffers(1, &m_aabbVBO);
-    glBindVertexArray(m_aabbVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_aabbVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(aabbVertices), aabbVertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);*/
+    m_renderImmediateShader = ResourceManager::getInstance().getShader("simple_shader");
+    m_screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
 
     if (m_renderConfiguration.postProcessing) {
         // FRAMEBUFFER
         auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
         auto fboM = MeshGenerator::createScreenQuad(2.0f, 2.0f, containerTexture);
-        fboMesh = std::make_unique<Mesh>(std::move(fboM));
-        screenFbo = std::make_unique<FrameBuffer>(std::move(containerTexture));
+        m_fboMesh = std::make_unique<Mesh>(std::move(fboM));
+        m_screenFbo = std::make_unique<FrameBuffer>(containerTexture);
     }
 
     // AABB
-    auto aabbM = MeshGenerator::createCuboid(1.0f, 1.0f, 1.0f);
-    aabbMesh = std::make_unique<Mesh>(std::move(aabbM));
+    auto aabbM = MeshGenerator::createAABBCuboid(1.0f, 1.0f, 1.0f);
+    aabbM.setDrawType(GL_LINES);
+    m_aabbMesh = std::make_unique<Mesh>(std::move(aabbM));
 }
 
 void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
@@ -123,12 +94,28 @@ void OpenGLRenderer::beginFrameMinimap(int x, int y, int width, int height) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
-void OpenGLRenderer::beforeRender() {
+void OpenGLRenderer::render(RenderState state) {
     if (m_renderConfiguration.postProcessing) {
-        screenFbo->bind();
-        glEnable(GL_DEPTH_TEST);
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        switch (state) {
+            case RenderState::BEFORE:
+                m_screenFbo->bind();
+                
+                glEnable(GL_DEPTH_TEST);
+                glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                break;
+            case RenderState::AFTER:
+                m_screenFbo->unbind();
+
+                glDisable(GL_DEPTH_TEST);
+                //glDisable(GL_CULL_FACE);
+                glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+
+                m_screenTexShader->use();
+                m_fboMesh->draw(*m_screenTexShader);
+                break;
+        }
     }
 }
 
@@ -139,48 +126,40 @@ void OpenGLRenderer::stencilPass() {
     glStencilMask(0xFF);
 }
 
-void OpenGLRenderer::outlinePass(bool start) {
-    if (start) {
-        glDisable(GL_DEPTH_TEST);
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-    } else {
-        glEnable(GL_DEPTH_TEST);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glStencilMask(0xFF);
-        glDisable(GL_STENCIL_TEST);
+void OpenGLRenderer::outlinePass(RenderState state) {
+    switch (state) {
+        case RenderState::BEFORE:
+            glDisable(GL_DEPTH_TEST);
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            break;
+        case RenderState::AFTER:
+            glEnable(GL_DEPTH_TEST);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+            glStencilMask(0xFF);
+            glDisable(GL_STENCIL_TEST);
+            break;
     }
 }
 
-void OpenGLRenderer::blendingPass(bool start) {
-    if (start) {
-        glDisable(GL_CULL_FACE);
-        glEnable(GL_BLEND);
-        // src: factor == source color vector, dst: factor == 1 - source color vector
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
-    } else {
-        glEnable(GL_CULL_FACE);
-        glDisable(GL_BLEND);
+void OpenGLRenderer::blendingPass(RenderState state) {
+    switch (state) {
+        case RenderState::BEFORE:
+            glDisable(GL_CULL_FACE);
+            glEnable(GL_BLEND);
+            // src: factor == source color vector, dst: factor == 1 - source color vector
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+            break;
+        case RenderState::AFTER:
+            glEnable(GL_CULL_FACE);
+            glDisable(GL_BLEND);
+            break;
     }
 }
 
 void OpenGLRenderer::topLayerPass() {
     glClear(GL_DEPTH_BUFFER_BIT);
-}
-
-void OpenGLRenderer::afterRender() {
-    if (m_renderConfiguration.postProcessing) {
-        screenFbo->unbind();
-        glDisable(GL_DEPTH_TEST);
-        //glDisable(GL_CULL_FACE);
-        glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        auto screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
-        screenTexShader->use();
-        fboMesh->draw(*screenTexShader);
-    }
 }
 
 void OpenGLRenderer::endFrame() {
@@ -191,7 +170,7 @@ void OpenGLRenderer::endFrame() {
     //glDisable(GL_STENCIL_TEST);
     //glDisable(GL_BLEND);
 
-    //assert(m_windowRef);
+    assert(m_windowRef);
     glfwSwapBuffers(m_windowRef);
 }
 
@@ -199,13 +178,19 @@ void OpenGLRenderer::endFrameMinimap() {
     glDisable(GL_SCISSOR_TEST);
 }
 
-void OpenGLRenderer::renderImmediate(bool start) {
-    if (start) {
-        glDisable(GL_DEPTH_TEST);
-        glBindVertexArray(m_aabbVAO);
-    } else {
-        glBindVertexArray(0);
-        glEnable(GL_DEPTH_TEST);
+void OpenGLRenderer::renderImmediate(RenderState state) {
+    switch (state) {
+        case RenderState::BEFORE:
+            glDisable(GL_DEPTH_TEST);
+
+            m_renderImmediateShader->use();
+            break;
+        case RenderState::THIS:
+            m_aabbMesh->draw(*m_renderImmediateShader);
+            break;
+        case RenderState::AFTER:
+            glEnable(GL_DEPTH_TEST);
+            break;
     }
 }
 

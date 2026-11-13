@@ -6,8 +6,7 @@
 
 FrameBuffer::FrameBuffer(FrameBuffer&& other) noexcept
     : m_FBO(other.m_FBO),
-      m_RBO(other.m_RBO),
-      m_textureColorBuffer(std::move(other.m_textureColorBuffer))
+      m_RBO(other.m_RBO)
 {
     other.m_FBO = 0;
     other.m_RBO = 0;
@@ -17,7 +16,6 @@ FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) noexcept {
     if (this != &other) {
         m_FBO = other.m_FBO;
         m_RBO = other.m_RBO;
-        m_textureColorBuffer = std::move(other.m_textureColorBuffer);
 
         other.m_FBO = 0;
         other.m_RBO = 0;
@@ -25,10 +23,8 @@ FrameBuffer& FrameBuffer::operator=(FrameBuffer&& other) noexcept {
     return *this;
 }
 
-FrameBuffer::FrameBuffer(std::shared_ptr<Texture> texture)
-    : m_textureColorBuffer(std::move(texture))
-{
-    _setupFrameBuffer();
+FrameBuffer::FrameBuffer(std::shared_ptr<Texture> texture) {
+    _setupFrameBuffer(texture);
 }
 
 FrameBuffer::~FrameBuffer() {
@@ -46,13 +42,13 @@ void FrameBuffer::unbind() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void FrameBuffer::_setupFrameBuffer() {
+void FrameBuffer::_setupFrameBuffer(std::shared_ptr<Texture> texture) {
     glGenFramebuffers(1, &m_FBO);
     // off-screen rendering
     glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 
     // target, attachment, textarget, texture, level
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_textureColorBuffer->id, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->id, 0);
 
     // renderbuffer
     glGenRenderbuffers(1, &m_RBO);

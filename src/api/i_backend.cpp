@@ -8,13 +8,13 @@ IBackEnd::~IBackEnd() = default;
 
 std::unique_ptr<IBackEnd> IBackEnd::create(GraphicsAPI api) {
     switch (api) {
-    case GraphicsAPI::OPENGL:
-        LOG("*** OpenGL for Windows");
-        return std::make_unique<OpenGLBackEnd>();
+        case GraphicsAPI::OPENGL:
+            LOG("*** OpenGL for Windows");
+            return std::make_unique<OpenGLBackEnd>();
 
-    case GraphicsAPI::VULKAN:
-        LOG_E("BACKEND::VULKAN_WINDOWS_NOT_IMPLEMENTED..._YET");
-        throw std::logic_error("Not implemented for Vulkan... yet");
+        case GraphicsAPI::VULKAN:
+            LOG_E("BACKEND::VULKAN_WINDOWS_NOT_IMPLEMENTED..._YET");
+            throw std::logic_error("Not implemented for Vulkan... yet");
     }
     return nullptr;
 }
