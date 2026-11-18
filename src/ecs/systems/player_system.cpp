@@ -1,3 +1,4 @@
+#include "../../configs/gl_config.hpp"
 #include "../../configs/math_config.hpp"
 #include "../../managers/input_manager.h"
 #include "../../utils/math_utils.hpp"

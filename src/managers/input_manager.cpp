@@ -1,3 +1,4 @@
+#include "../configs/gl_config.hpp"
 #include "input_manager.h"
 #include <algorithm>
 

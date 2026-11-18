@@ -96,23 +96,46 @@ void RenderSystem::update(Registry& registry, float alpha) {
             break;
         }
     }
-    // PHYSICS
-    for (Entity entity : registry.view<TransformComponent, PhysicsComponent>()) {
-        auto* transform = registry.getComponent<TransformComponent>(entity);
-        auto* physics = registry.getComponent<PhysicsComponent>(entity);
 
-        glm::vec3 aabbSize = Utils::Math::calculateSize(physics->AABB.worldMin, physics->AABB.worldMax);
-        glm::vec3 aabbCenter = Utils::Math::calculateCenter(physics->AABB.worldMin, physics->AABB.worldMax);
-        glm::vec3 aabbColor = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
-        RenderImmediateCommand command = {
-                transform->position,
-                transform->rotation,
-                transform->scale,
-                aabbSize,
-                aabbCenter,
-                aabbColor
-        };
-        m_renderImmediateCommands.push_back(command);
+    // RENDER IMMEDIATE
+    switch (m_renderDebugMode) {
+        case RenderDebugMode::NONE:
+            break;
+        case RenderDebugMode::AABB:
+            for (Entity entity : registry.view<TransformComponent, PhysicsComponent>()) {
+                auto* transform = registry.getComponent<TransformComponent>(entity);
+                auto* physics = registry.getComponent<PhysicsComponent>(entity);
+
+                glm::vec3 aabbSize = Utils::Math::calculateSize(physics->AABB.worldMin, physics->AABB.worldMax);
+                glm::vec3 aabbCenter = Utils::Math::calculateCenter(physics->AABB.worldMin, physics->AABB.worldMax);
+                glm::vec3 aabbColor = physics->isColliding ? Constants::Color::RED : Constants::Color::GREEN;
+                RenderImmediateCommand command = {
+                        transform->position,
+                        transform->rotation,
+                        transform->scale,
+                        aabbSize,
+                        aabbCenter,
+                        aabbColor
+                };
+                m_renderImmediateCommands.push_back(command);
+            }
+            break;
+        case RenderDebugMode::LIGHTS:
+            for (Entity entity : registry.view<TransformComponent, DirLightMovementComponent>()) {
+                auto* transform = registry.getComponent<TransformComponent>(entity);
+                auto* dirLightMovement = registry.getComponent<DirLightMovementComponent>(entity);
+
+                RenderImmediateCommand command = {
+                        transform->position,
+                        transform->rotation,
+                        transform->scale,
+                        glm::vec3(0.4f),
+                        transform->position,
+                        Constants::Color::PURPLE
+                };
+                m_renderImmediateCommands.push_back(command);
+            }
+            break;
     }
 
     // RENDER
@@ -390,27 +413,23 @@ void RenderSystem::endFrameMinimap() {
 }
 
 void RenderSystem::renderImmediate() {
-    std::vector<RenderImmediateCommand> queue{};
-
-    switch (m_renderDebugMode) {
-        case RenderDebugMode::NONE:
-            return;
-        case RenderDebugMode::AABB:
-            queue = m_renderImmediateCommands;
-            if (queue.empty()) {
-                LOG_D("nothing to render immediately, sad QQ");
-                return;
-            }
-            break;
+    if (m_renderDebugMode == RenderDebugMode::NONE) {
+        return;
+    }
+    if (m_renderImmediateCommands.empty()) {
+        LOG_D("nothing to render immediately, sad QQ");
+        return;
     }
 
+    //RenderDebugMode::AABB
+    //RenderDebugMode::LIGHTS
     m_renderer->renderImmediate(RenderState::BEFORE);
 
     auto shader = ResourceManager::getInstance().getShader("simple_shader");
     //shader->use();
     shader->setMat4fv("view", m_renderContext.cameraView);
     shader->setMat4fv("projection", m_renderContext.cameraProjection);
-    for (auto& cmd : queue) {
+    for (auto& cmd : m_renderImmediateCommands) {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cmd.center);
         model = glm::scale(model, cmd.size);

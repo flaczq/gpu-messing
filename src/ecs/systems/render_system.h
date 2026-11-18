@@ -11,7 +11,8 @@
 
 enum class RenderDebugMode {
 	NONE,
-	AABB
+	AABB,
+	LIGHTS
 };
 
 struct RenderContext {
