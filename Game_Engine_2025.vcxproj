@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -31,6 +31,7 @@
     <ClCompile Include="src\ecs\systems\transform_system.cpp" />
     <ClCompile Include="src\ecs\systems\player_system.cpp" />
     <ClCompile Include="src\ecs\systems\render_system.cpp" />
+    <ClCompile Include="src\graphics\cube_map.cpp" />
     <ClCompile Include="src\graphics\frame_buffer.cpp" />
     <ClCompile Include="src\scenes\rtx_scene.cpp" />
     <ClCompile Include="src\graphics\material.cpp" />
@@ -55,6 +56,8 @@
     <None Include="Game_Engine_2025.aps" />
     <None Include="LICENSE" />
     <None Include="README.md" />
+    <None Include="shaders\cubemap.frag" />
+    <None Include="shaders\cubemap.vert" />
     <None Include="shaders\gizmo.frag" />
     <None Include="shaders\gizmo.vert" />
     <None Include="shaders\screen_tex.frag" />
@@ -86,6 +89,12 @@
     <Image Include="assets\container2_specular.png" />
     <Image Include="assets\grass.png" />
     <Image Include="assets\potato.jpg" />
+    <Image Include="assets\skybox\back.jpg" />
+    <Image Include="assets\skybox\bottom.jpg" />
+    <Image Include="assets\skybox\front.jpg" />
+    <Image Include="assets\skybox\left.jpg" />
+    <Image Include="assets\skybox\right.jpg" />
+    <Image Include="assets\skybox\top.jpg" />
     <Image Include="assets\wall.jpg" />
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +113,7 @@
     <ClInclude Include="src\ecs\systems\transform_system.h" />
     <ClInclude Include="src\ecs\systems\player_system.h" />
     <ClInclude Include="src\ecs\systems\render_system.h" />
+    <ClInclude Include="src\graphics\cube_map.h" />
     <ClInclude Include="src\graphics\frame_buffer.h" />
     <ClInclude Include="src\scenes\rtx_scene.h" />
     <ClInclude Include="src\ecs\components\physics_component.hpp" />

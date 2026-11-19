@@ -10,6 +10,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 ResourceManager& ResourceManager::getInstance() {
 	static ResourceManager instance;
@@ -72,10 +73,27 @@ void ResourceManager::loadTexture(const std::string& name, const char* path, con
 	texture->path = path;
 
 	m_textures[name] = std::move(texture);
-	LOG("Loading Texture: " << name << " from path: " << path);
+	LOG("Loading Texture: " << name << " from path : " << path);
 }
 
-void ResourceManager::allocateTextureMemory(const std::string& name, const char* path, int width, int height) {
+void ResourceManager::loadCubeMapTexture(const std::string& name, const std::vector<std::string>& cubeMapPaths) {
+	if (m_textures.find(name) != m_textures.end()) {
+		LOG("Already loaded Texture: " << name);
+		return;
+	}
+
+	unsigned int textureID = _loadCubeMapTextureFromFile(cubeMapPaths);
+	auto texture = std::make_shared<Texture>();
+	texture->id = textureID;
+	texture->type = "cubemap";
+	// FIXME save all paths
+	texture->path = cubeMapPaths[0];
+
+	m_textures[name] = std::move(texture);
+	LOG("Loading CubeMap Texture: " << name << " from path (0): " << cubeMapPaths[0]);
+}
+
+void ResourceManager::allocateTextureMemory(const std::string& name, const char* path, int width, int height, const std::string& typeName) {
 	if (m_textures.find(name) != m_textures.end()) {
 		LOG("Already allocated Texture memory: " << name);
 		return;
@@ -84,8 +102,7 @@ void ResourceManager::allocateTextureMemory(const std::string& name, const char*
 	unsigned int textureID = _allocateTextureMemoryFromFile(path, width, height);
 	auto texture = std::make_shared<Texture>();
 	texture->id = textureID;
-	// hardcoded
-	texture->type = "diffuse";
+	texture->type = typeName;
 	texture->path = path;
 
 	m_textures[name] = std::move(texture);
@@ -132,7 +149,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& name) {
 	return it->second;
 }
 
-std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelName, const std::string& path, const std::string& type, const aiScene* scene) {
+std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelName, const std::string& path, const std::string& typeName, const aiScene* scene) {
 	// filename for Assimp
 	size_t lastSlash = path.find_last_of('/');
 	std::string name = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
@@ -146,7 +163,7 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelNam
 	}
 
 	auto texture = std::make_shared<Texture>();
-	texture->type = type;
+	texture->type = typeName;
 	texture->path = path;
 
 	// check if texture is embedded (.glb file)
@@ -161,7 +178,6 @@ std::shared_ptr<Texture> ResourceManager::getTexture(const std::string& modelNam
 	} else {
 		texture->id = _loadTextureFromFile(path);
 	}
-
 
 	m_textures[uniqueName] = std::move(texture);
 	return m_textures[uniqueName];
@@ -240,6 +256,25 @@ unsigned int ResourceManager::_loadTextureFromFile(const std::string& path) {
 	return textureID;
 }
 
+unsigned int ResourceManager::_loadCubeMapTextureFromFile(const std::vector<std::string>& cubeMapPaths) {
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, channels;
+	unsigned char* data;
+	for (unsigned int i{}; i < cubeMapPaths.size(); i++) {
+		data = stbi_load(cubeMapPaths[i].c_str(), &width, &height, &channels, 0);
+		if (data) {
+			_uploadCubeMapToGPU(data, textureID, width, height, channels, i);
+			stbi_image_free(data);
+		} else {
+			LOG_E("RESOURCE_MANAGER::ASSIMP_LOAD_CUBE_MAP_TEXTURE_FROM_FILE_FAILED: " << cubeMapPaths[i]);
+		}
+	}
+
+	return textureID;
+}
+
 unsigned int ResourceManager::_allocateTextureMemoryFromFile(const std::string& path, int width, int height) {
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
@@ -274,4 +309,32 @@ void ResourceManager::_uploadToGPU(unsigned char* data, unsigned int& textureID,
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, gpuFormat == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+void ResourceManager::_uploadCubeMapToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, int index) {
+	GLenum gpuFormat = GL_RGBA;
+	GLenum dataFormat = GL_RGBA;
+
+	if (channels == 1) {
+		gpuFormat = dataFormat = GL_RED;
+	} else if (channels == 3) {
+		gpuFormat = dataFormat = GL_RGB;
+	} else if (channels == 4) {
+		gpuFormat = GL_RGBA;
+		dataFormat = GL_RGBA;
+	}
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + index, 0, gpuFormat, width, height, 0, dataFormat, GL_UNSIGNED_BYTE, data);
+	
+	// last texture
+	if (index == 5) {
+		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	}
 }

@@ -20,6 +20,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 class Mesh;
 class FrameBuffer;
 class Shader;
+class CubeMap;
 
 class OpenGLRenderer : public IRenderer {
 public:
@@ -48,8 +49,10 @@ private:
 	RenderConfiguration m_renderConfiguration{};
 
 	std::unique_ptr<Mesh> m_aabbMesh{};
-	std::unique_ptr<Mesh> m_fboMesh{};
+	std::unique_ptr<Mesh> m_framebufferMesh{};
+	std::unique_ptr<Mesh> m_skyboxMesh{};
 	std::unique_ptr<FrameBuffer> m_screenFbo{};
 	std::shared_ptr<Shader> m_renderImmediateShader{};
 	std::shared_ptr<Shader> m_screenTexShader{};
+	std::shared_ptr<Shader> m_skyboxShader{};
 };

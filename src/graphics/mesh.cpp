@@ -71,9 +71,9 @@ Mesh::~Mesh() {
 void Mesh::draw(const Shader& shader) {
     for (unsigned int i{}; i < m_textures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i);
-        std::string name = m_textures[i]->type;
+        std::string typeName = m_textures[i]->type;
         // FIXME more than one of each material type
-        shader.setInt("material." + name, i);
+        shader.setInt("material." + typeName, i);
         glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);
     }
 

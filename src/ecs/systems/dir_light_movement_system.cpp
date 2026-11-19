@@ -21,7 +21,7 @@ void DirLightMovementSystem::fixedUpdate(Registry& registry, float fixedt) {
             glm::vec3 lightPos = glm::normalize(glm::vec3(x, 1.0f, z));
             transform->position = lightPos * 11.0f;
             dirLightMovement->direction = -lightPos;
-            dirLightMovement->color = Constants::Color::WHITE;
+            //dirLightMovement->color = Constants::Color::WHITE;
             // TODO more than single directional light
             break;
         }

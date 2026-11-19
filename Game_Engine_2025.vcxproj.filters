@@ -93,6 +93,9 @@
     <ClCompile Include="src\graphics\frame_buffer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
+    <ClCompile Include="src\graphics\cube_map.cpp">
+      <Filter>Pliki źródłowe</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -119,6 +122,8 @@
     <None Include="assets\models\RiggedFpsArms.fbx" />
     <None Include="shaders\screen_tex.vert" />
     <None Include="shaders\screen_tex.frag" />
+    <None Include="shaders\cubemap.frag" />
+    <None Include="shaders\cubemap.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
@@ -161,6 +166,24 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="army_ecs.png">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\skybox\back.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\skybox\bottom.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\skybox\front.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\skybox\left.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\skybox\right.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="assets\skybox\top.jpg">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>
@@ -298,6 +321,9 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\frame_buffer.h">
+      <Filter>Pliki nagłówkowe</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\cube_map.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

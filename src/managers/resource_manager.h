@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 class ResourceManager {
 public:
@@ -21,17 +22,18 @@ public:
 	void loadModel(const std::string& name, const std::string& path);
 	void loadShader(const std::string& name, const char* vertPath, const char* fragPath);
 	void loadMaterial(const std::string& name, std::shared_ptr<Shader> shader);
+	void loadCubeMapTexture(const std::string& name, const std::vector<std::string>& cubeMapPaths);
 	// manually load texture from file
 	void loadTexture(const std::string& name, const char* path, const std::string& typeName = "diffuse");
 	// framebuffer
-	void allocateTextureMemory(const std::string& name, const char* path, int width, int height);
+	void allocateTextureMemory(const std::string& name, const char* path, int width, int height, const std::string& typeName = "diffuse");
 
 	std::shared_ptr<Model> getModel(const std::string& name);
 	std::shared_ptr<Shader> getShader(const std::string& name);
 	std::shared_ptr<Material> getMaterial(const std::string& name);
 	std::shared_ptr<Texture> getTexture(const std::string& name);
 	// used by Assimp to load textures from Model
-	std::shared_ptr<Texture> getTexture(const std::string& modelName, const std::string& path, const std::string& type, const aiScene* scene);
+	std::shared_ptr<Texture> getTexture(const std::string& modelName, const std::string& path, const std::string& typeName, const aiScene* scene);
 
 	void reloadShaders();
 
@@ -46,6 +48,8 @@ private:
 
 	unsigned int _loadTextureFromMemory(const aiTexture* textureMem, const std::string& path);
 	unsigned int _loadTextureFromFile(const std::string& path);
+	unsigned int _loadCubeMapTextureFromFile(const std::vector<std::string>& cubeMapPaths);
 	unsigned int _allocateTextureMemoryFromFile(const std::string& path, int width, int height);
 	void _uploadToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, bool isBGR);
+	void _uploadCubeMapToGPU(unsigned char* data, unsigned int& textureID, int width, int height, int channels, int index);
 };

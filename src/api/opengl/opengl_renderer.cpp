@@ -12,6 +12,8 @@
 #include "../i_renderer.h"
 #include "opengl_renderer.h"
 #include <memory>
+#include <string>
+#include <vector>
 
 OpenGLRenderer::OpenGLRenderer(GLFWwindow*& windowRef)
     : m_windowRef(windowRef)
@@ -32,6 +34,13 @@ void OpenGLRenderer::init(int screenWidth, int screenHeight) {
     ResourceManager::getInstance().loadTexture("grass_texture", "../assets/grass.png");
     ResourceManager::getInstance().loadTexture("potato_texture", "../assets/potato.jpg");
     ResourceManager::getInstance().allocateTextureMemory("container_texture", "../assets/container.jpg", screenWidth, screenHeight);
+    std::vector<std::string> skybox = {
+        "../assets/skybox/back.jpg",   "../assets/skybox/front.jpg",
+        "../assets/skybox/left.jpg",   "../assets/skybox/right.jpg",
+        "../assets/skybox/bottom.jpg", "../assets/skybox/top.jpg"
+    };
+    ResourceManager::getInstance().loadCubeMapTexture("skybox_texture", skybox);
+
     //       ▄████████    ▄█    █▄       ▄████████ ████████▄     ▄████████    ▄████████    ▄████████ 
     //      ███    ███   ███    ███     ███    ███ ███   ▀███   ███    ███   ███    ███   ███    ███ 
     //      ███    █▀    ███    ███     ███    ███ ███    ███   ███    █▀    ███    ███   ███    █▀  
@@ -47,22 +56,60 @@ void OpenGLRenderer::init(int screenWidth, int screenHeight) {
     ResourceManager::getInstance().loadShader("model_shader", "../shaders/model.vert", "../shaders/model.frag");
     ResourceManager::getInstance().loadShader("window_shader", "../shaders/window.vert", "../shaders/window.frag");
     ResourceManager::getInstance().loadShader("screen_tex_shader", "../shaders/screen_tex.vert", "../shaders/screen_tex.frag");
+    ResourceManager::getInstance().loadShader("skybox_shader", "../shaders/skybox.vert", "../shaders/skybox.frag");
 
     m_renderImmediateShader = ResourceManager::getInstance().getShader("simple_shader");
     m_screenTexShader = ResourceManager::getInstance().getShader("screen_tex_shader");
+    m_skyboxShader = ResourceManager::getInstance().getShader("skybox_shader");
 
-    if (m_renderConfiguration.postProcessing) {
-        // FRAMEBUFFER
-        auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
-        auto fboM = MeshGenerator::createScreenQuad(2.0f, 2.0f, containerTexture);
-        m_fboMesh = std::make_unique<Mesh>(std::move(fboM));
-        m_screenFbo = std::make_unique<FrameBuffer>(containerTexture);
-    }
-
-    // AABB
+    //       ▄████████    ▄████████ ▀█████████▄  ▀█████████▄  
+    //      ███    ███   ███    ███   ███    ███   ███    ███ 
+    //      ███    ███   ███    ███   ███    ███   ███    ███ 
+    //      ███    ███   ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄██▀  
+    //    ▀███████████ ▀███████████ ▀▀███▀▀▀██▄  ▀▀███▀▀▀██▄  
+    //      ███    ███   ███    ███   ███    ██▄   ███    ██▄ 
+    //      ███    ███   ███    ███   ███    ███   ███    ███ 
+    //      ███    █▀    ███    █▀  ▄█████████▀  ▄█████████▀  
     auto aabbM = MeshGenerator::createAABBCuboid(1.0f, 1.0f, 1.0f);
     aabbM.setDrawType(GL_LINES);
     m_aabbMesh = std::make_unique<Mesh>(std::move(aabbM));
+
+    //       ▄████████    ▄████████    ▄████████   ▄▄▄▄███▄▄▄▄      ▄████████         
+    //      ███    ███   ███    ███   ███    ███ ▄██▀▀▀███▀▀▀██▄   ███    ███         
+    //      ███    █▀    ███    ███   ███    ███ ███   ███   ███   ███    █▀          
+    //     ▄███▄▄▄      ▄███▄▄▄▄██▀   ███    ███ ███   ███   ███  ▄███▄▄▄             
+    //    ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   ▀███████████ ███   ███   ███ ▀▀███▀▀▀             
+    //      ███        ▀███████████   ███    ███ ███   ███   ███   ███    █▄          
+    //      ███          ███    ███   ███    ███ ███   ███   ███   ███    ███         
+    //      ███          ███    ███   ███    █▀   ▀█   ███   █▀    ██████████         
+    //                   ███    ███                                                   
+    //    ▀█████████▄  ███    █▄     ▄████████    ▄████████    ▄████████    ▄████████ 
+    //      ███    ███ ███    ███   ███    ███   ███    ███   ███    ███   ███    ███ 
+    //      ███    ███ ███    ███   ███    █▀    ███    █▀    ███    █▀    ███    ███ 
+    //     ▄███▄▄▄██▀  ███    ███  ▄███▄▄▄      ▄███▄▄▄      ▄███▄▄▄      ▄███▄▄▄▄██▀ 
+    //    ▀▀███▀▀▀██▄  ███    ███ ▀▀███▀▀▀     ▀▀███▀▀▀     ▀▀███▀▀▀     ▀▀███▀▀▀▀▀   
+    //      ███    ██▄ ███    ███   ███          ███          ███    █▄  ▀███████████ 
+    //      ███    ███ ███    ███   ███          ███          ███    ███   ███    ███ 
+    //    ▄█████████▀  ████████▀    ███          ███          ██████████   ███    ███ 
+    //                                                                     ███    ███ 
+    if (m_renderConfiguration.postProcessing) {
+        auto containerTexture = ResourceManager::getInstance().getTexture("container_texture");
+        auto fboM = MeshGenerator::createScreenQuad(2.0f, 2.0f, containerTexture);
+        m_framebufferMesh = std::make_unique<Mesh>(std::move(fboM));
+        m_screenFbo = std::make_unique<FrameBuffer>(containerTexture);
+    }
+
+    //     ▄████████ ███    █▄  ▀█████████▄     ▄████████   ▄▄▄▄███▄▄▄▄      ▄████████    ▄███████▄ 
+    //    ███    ███ ███    ███   ███    ███   ███    ███ ▄██▀▀▀███▀▀▀██▄   ███    ███   ███    ███ 
+    //    ███    █▀  ███    ███   ███    ███   ███    █▀  ███   ███   ███   ███    ███   ███    ███ 
+    //    ███        ███    ███  ▄███▄▄▄██▀   ▄███▄▄▄     ███   ███   ███   ███    ███   ███    ███ 
+    //    ███        ███    ███ ▀▀███▀▀▀██▄  ▀▀███▀▀▀     ███   ███   ███ ▀███████████ ▀█████████▀  
+    //    ███    █▄  ███    ███   ███    ██▄   ███    █▄  ███   ███   ███   ███    ███   ███        
+    //    ███    ███ ███    ███   ███    ███   ███    ███ ███   ███   ███   ███    ███   ███        
+    //    ████████▀  ████████▀  ▄█████████▀    ██████████  ▀█   ███   █▀    ███    █▀   ▄████▀      
+    auto skyboxTexture = ResourceManager::getInstance().getTexture("skybox_texture");
+    auto skyboxM = MeshGenerator::createAABBCuboid(1.0f, 1.0f, 1.0f, skyboxTexture);
+    m_skyboxMesh = std::make_unique<Mesh>(std::move(skyboxM));
 }
 
 void OpenGLRenderer::beginFrame(int x, int y, int width, int height) {
@@ -99,7 +146,7 @@ void OpenGLRenderer::render(RenderState state) {
         switch (state) {
             case RenderState::BEFORE:
                 m_screenFbo->bind();
-                
+
                 glEnable(GL_DEPTH_TEST);
                 glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -113,7 +160,7 @@ void OpenGLRenderer::render(RenderState state) {
                 glClear(GL_COLOR_BUFFER_BIT);
 
                 m_screenTexShader->use();
-                m_fboMesh->draw(*m_screenTexShader);
+                m_framebufferMesh->draw(*m_screenTexShader);
                 break;
         }
     }
