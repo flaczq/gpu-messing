@@ -16,11 +16,12 @@ public:
 	Mesh(const Mesh&) = delete;
 	// block copy assignment operator
 	Mesh& operator=(const Mesh&) = delete;
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures, bool hasDiffuseColor = false, glm::vec3 diffuseColor = glm::vec3(1.0f), GLenum drawType = GL_TRIANGLES);
+	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures);
 	~Mesh();
 
 	void setDiffuseColor(glm::vec3 diffuseColor) { m_diffuseColor = diffuseColor; m_hasDiffuseColor = true; };
 	void setDrawType(GLenum drawType) { m_drawType = drawType; };
+	void setTextureType(GLenum textureType) { m_textureType = textureType; };
 
 	void draw(const Shader &shader);
 
@@ -33,6 +34,7 @@ private:
 	bool m_hasDiffuseColor{};
 	glm::vec3 m_diffuseColor{};
 	GLenum m_drawType{};
+	GLenum m_textureType{};
 
 	void _setupMesh();
 };

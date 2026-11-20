@@ -93,9 +93,6 @@
     <ClCompile Include="src\graphics\frame_buffer.cpp">
       <Filter>Pliki źródłowe</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\cube_map.cpp">
-      <Filter>Pliki źródłowe</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -122,8 +119,8 @@
     <None Include="assets\models\RiggedFpsArms.fbx" />
     <None Include="shaders\screen_tex.vert" />
     <None Include="shaders\screen_tex.frag" />
-    <None Include="shaders\cubemap.frag" />
-    <None Include="shaders\cubemap.vert" />
+    <None Include="shaders\skybox.frag" />
+    <None Include="shaders\skybox.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\clearlyai.jpg">
@@ -184,6 +181,9 @@
       <Filter>Pliki zasobów</Filter>
     </Image>
     <Image Include="assets\skybox\top.jpg">
+      <Filter>Pliki zasobów</Filter>
+    </Image>
+    <Image Include="army_skybox.png">
       <Filter>Pliki zasobów</Filter>
     </Image>
   </ItemGroup>
@@ -321,9 +321,6 @@
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\frame_buffer.h">
-      <Filter>Pliki nagłówkowe</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\cube_map.h">
       <Filter>Pliki nagłówkowe</Filter>
     </ClInclude>
   </ItemGroup>

@@ -11,4 +11,4 @@
 🖌️ [for those who come after](ATTRIBUTIONS.md)
 
 ## What it can do for now
-![army4](army4.png)
+![army_skybox](army_skybox.png)

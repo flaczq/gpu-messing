@@ -49,6 +49,7 @@ bool SoldierScene::init(Registry& registry) {
     auto lambertShader = ResourceManager::getInstance().getShader("lambert_shader");
     auto modelShader = ResourceManager::getInstance().getShader("model_shader");
     auto windowShader = ResourceManager::getInstance().getShader("window_shader");
+    auto skyboxShader = ResourceManager::getInstance().getShader("skybox_shader");
     // MATERIALS
     ResourceManager::getInstance().loadMaterial("floor_material", simpleShader);
     ResourceManager::getInstance().loadMaterial("wall_material", lambertShader);
@@ -59,6 +60,7 @@ bool SoldierScene::init(Registry& registry) {
     ResourceManager::getInstance().loadMaterial("soldier_material", modelShader);
     ResourceManager::getInstance().loadMaterial("tank_material", modelShader);
     ResourceManager::getInstance().loadMaterial("window_material", windowShader);
+    ResourceManager::getInstance().loadMaterial("skybox_material", skyboxShader);
 
     //       ▄▄▄▄███▄▄▄▄    ▄██████▄  ████████▄     ▄████████  ▄█          ▄████████ 
     //     ▄██▀▀▀███▀▀▀██▄ ███    ███ ███   ▀███   ███    ███ ███         ███    ███ 
@@ -90,9 +92,9 @@ bool SoldierScene::init(Registry& registry) {
     float gridSize = 18.0f;
     float gridStep = 1.0f;
     auto grid = MeshGenerator::createGrid(gridSize, gridStep);
-    //grid.setDiffuseColor(glm::vec3(1.0f, 0.0f, 0.5f));
-    grid.setDrawType(GL_LINES);
     auto gridM = std::make_unique<Mesh>(std::move(grid));
+    //gridM->setDiffuseColor(glm::vec3(1.0f, 0.0f, 0.5f));
+    gridM->setDrawType(GL_LINES);
     auto gridMM = std::make_shared<Model>("grid_model", std::move(gridM));
     ResourceManager::getInstance().addModel(std::move(gridMM));
     // --- stencil boxes
@@ -112,6 +114,13 @@ bool SoldierScene::init(Registry& registry) {
     auto grassM = std::make_unique<Mesh>(std::move(grass));
     auto grassMM = std::make_shared<Model>("grass_model", std::move(grassM));
     ResourceManager::getInstance().addModel(std::move(grassMM));
+    // --- skybox
+    auto skyboxTexture = ResourceManager::getInstance().getTexture("skybox_texture");
+    auto skybox = MeshGenerator::createSkybox(skyboxTexture);
+    auto skyboxM = std::make_unique<Mesh>(std::move(skybox));
+    skyboxM->setTextureType(GL_TEXTURE_CUBE_MAP);
+    auto skyboxMM = std::make_shared<Model>("skybox_model", std::move(skyboxM));
+    ResourceManager::getInstance().addModel(std::move(skyboxMM));
 
     //       ▄████████ ███▄▄▄▄       ███      ▄█      ███      ▄█     ▄████████    ▄████████ 
     //      ███    ███ ███▀▀▀██▄ ▀█████████▄ ███  ▀█████████▄ ███    ███    ███   ███    ███ 
@@ -278,6 +287,15 @@ bool SoldierScene::init(Registry& registry) {
         registry.addComponent<IdentityComponent>(grassE, "grass_2");
         registry.addComponent<TransformComponent>(grassE, glm::vec3(-2.0f, 1.0f, 2.0f), glm::angleAxis(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f)));
         registry.addComponent<RenderComponent>(grassE, grassModel, windowMaterial, RenderQueueType::BLENDING);
+    }
+    // --- skybox
+    auto skyboxModel = ResourceManager::getInstance().getModel("skybox_model");
+    auto skyboxMaterial = ResourceManager::getInstance().getMaterial("skybox_material");
+    if (skyboxModel && skyboxMaterial) {
+        Entity skyboxE = registry.createEntity();
+        registry.addComponent<IdentityComponent>(skyboxE, "skybox");
+        registry.addComponent<TransformComponent>(skyboxE, glm::vec3(0.0f));
+        registry.addComponent<RenderComponent>(skyboxE, skyboxModel, skyboxMaterial, RenderQueueType::SINGLES);
     }
 
     return Scene::init(registry);

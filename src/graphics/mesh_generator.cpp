@@ -237,7 +237,7 @@ namespace MeshGenerator {
 		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}
 
-	Mesh createAABBCuboid(float width, float height, float depth) {
+	Mesh createAABB(float width, float height, float depth) {
 		std::vector<Vertex> vertices;
 		std::vector<unsigned int> indices;
 		std::vector<std::shared_ptr<Texture>> textures;
@@ -268,6 +268,51 @@ namespace MeshGenerator {
 			0, 4, 1, 5, 2, 6, 3, 7
 		};
 		textures = {};
+
+		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
+	}
+
+	Mesh createSkybox(std::shared_ptr<Texture> texture) {
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<std::shared_ptr<Texture>> textures;
+
+		float size = 1.0f;
+
+		Vertex f0{}, f1{}, f2{}, f3{},
+			   b0{}, b1{}, b2{}, b3{};
+
+		f0.Position = { -size, -size,  size };
+		f1.Position = {  size, -size,  size };
+		f2.Position = {  size,  size,  size };
+		f3.Position = { -size,  size,  size };
+		b0.Position = { -size, -size, -size };
+		b1.Position = {  size, -size, -size };
+		b2.Position = {  size,  size, -size };
+		b3.Position = { -size,  size, -size };
+
+		vertices = {
+			f0, f1, f2, f3,
+			b0, b1, b2, b3
+		};
+		indices = {
+			// front (+Z)
+			0, 2, 1,  0, 3, 2,
+			// back (-Z)
+			5, 7, 4,  5, 6, 7,
+			// left (-X)
+			4, 3, 0,  4, 7, 3,
+			// right (+X)
+			1, 6, 5,  1, 2, 6,
+			// up (+Y)
+			3, 6, 2,  3, 7, 6,
+			// down (-Y)
+			4, 1, 5,  4, 0, 1
+		};
+		textures = {};
+		if (texture) {
+			textures.push_back(texture);
+		}
 
 		return Mesh(std::move(vertices), std::move(indices), std::move(textures));
 	}

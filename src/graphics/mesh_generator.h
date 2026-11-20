@@ -10,5 +10,6 @@ namespace MeshGenerator {
 	Mesh createGrid(float size, float step);
 	Mesh createWall(float width, float height, float depth = 0.5f, float uvTiling = 1.0f);
 	Mesh createScreenQuad(float width, float height, std::shared_ptr<Texture> texture = nullptr, float uvTiling = 1.0f);
-	Mesh createAABBCuboid(float width, float height, float depth);
+	Mesh createAABB(float width, float height, float depth);
+	Mesh createSkybox(std::shared_ptr<Texture> texture = nullptr);
 };

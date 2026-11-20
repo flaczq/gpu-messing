@@ -17,6 +17,7 @@ public:
 	virtual void stencilPass() = 0;
 	virtual void outlinePass(RenderState state) = 0;
 	virtual void blendingPass(RenderState state) = 0;
+	virtual void singlesPass(RenderState state) = 0;
 	virtual void topLayerPass() = 0;
 	virtual void endFrame() = 0;
 	virtual void endFrameMinimap() = 0;

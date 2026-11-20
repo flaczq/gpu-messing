@@ -20,7 +20,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 class Mesh;
 class FrameBuffer;
 class Shader;
-class CubeMap;
 
 class OpenGLRenderer : public IRenderer {
 public:
@@ -33,6 +32,7 @@ public:
 	void stencilPass() override;
 	void outlinePass(RenderState state) override;
 	void blendingPass(RenderState state) override;
+	void singlesPass(RenderState state) override;
 	void topLayerPass() override;
 	void endFrame() override;
 	void endFrameMinimap() override;
@@ -54,5 +54,4 @@ private:
 	std::unique_ptr<FrameBuffer> m_screenFbo{};
 	std::shared_ptr<Shader> m_renderImmediateShader{};
 	std::shared_ptr<Shader> m_screenTexShader{};
-	std::shared_ptr<Shader> m_skyboxShader{};
 };

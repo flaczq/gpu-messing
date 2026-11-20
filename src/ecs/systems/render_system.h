@@ -17,6 +17,7 @@ enum class RenderDebugMode {
 
 struct RenderContext {
 	glm::mat4 cameraView{};
+	glm::mat4 noTranslationCameraView{};
 	glm::mat4 cameraProjection{};
 	float cameraAspect{};
 	glm::vec3 cameraPosition{};
@@ -67,6 +68,7 @@ private:
 	std::vector<RenderCommand> m_stencilQueue{};
 	std::vector<RenderCommand> m_outlineQueue{};
 	std::vector<RenderCommand> m_blendingQueue{};
+	std::vector<RenderCommand> m_singlesQueue{};
 	std::vector<RenderCommand> m_topLayerQueue{};
 	std::vector<RenderCommand> m_uiQueue{};
 	std::vector<RenderImmediateCommand> m_renderImmediateCommands{};
@@ -76,5 +78,5 @@ private:
 	void _registerInQueue(RenderQueueType queueType, const RenderCommand& command);
 	void _sortQueueByMaterial(std::vector<RenderCommand>& queue) const;
 	void _sortQueueByDistance(std::vector<RenderCommand>& queue) const;
-	void _renderSortedQueue(const std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const;
+	void _renderSortedQueue(const std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection, const glm::mat4& view) const;
 };

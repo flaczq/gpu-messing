@@ -33,6 +33,7 @@ bool RenderSystem::init(int screenWidth, int screenHeight) {
     m_stencilQueue.reserve(100);
     m_outlineQueue.reserve(100);
     m_blendingQueue.reserve(100);
+    m_singlesQueue.reserve(100);
     m_topLayerQueue.reserve(100);
     m_uiQueue.reserve(100);
 
@@ -71,6 +72,7 @@ void RenderSystem::update(Registry& registry, float alpha) {
                                                                     camera->pitch,
                                                                     alpha,
                                                                     yOffset);
+            m_renderContext.noTranslationCameraView = glm::mat4(glm::mat3(m_renderContext.cameraView));
             m_renderContext.cameraProjection = Utils::Math::calculateProjection(
                 camera->fov,
                 camera->aspect,
@@ -198,6 +200,9 @@ void RenderSystem::_registerInQueue(RenderQueueType queueType, const RenderComma
         case RenderQueueType::BLENDING:
             m_blendingQueue.push_back(command);
             break;
+        case RenderQueueType::SINGLES:
+            m_singlesQueue.push_back(command);
+            break;
         case RenderQueueType::TOP_LAYER:
             m_topLayerQueue.push_back(command);
             break;
@@ -219,8 +224,10 @@ void RenderSystem::execute() {
     //    ███    ███   ███          ███    ███ ███    ███  ███    ███   ███    █▄  
     //    ███    ███   ███          ███    ███ ███  ▀ ███  ███    ███   ███    ███ 
     //     ▀██████▀   ▄████▀        ███    █▀   ▀██████▀▄█ ████████▀    ██████████ 
-    _sortQueueByMaterial(m_opaqueQueue);
-    _renderSortedQueue(m_opaqueQueue, "opaque pass", m_renderContext.cameraProjection);
+    if (!m_opaqueQueue.empty()) {
+        _sortQueueByMaterial(m_opaqueQueue);
+        _renderSortedQueue(m_opaqueQueue, "opaque pass", m_renderContext.cameraProjection, m_renderContext.cameraView);
+    }
 
     //       ▄████████     ███        ▄████████ ███▄▄▄▄    ▄████████  ▄█   ▄█       
     //      ███    ███ ▀█████████▄   ███    ███ ███▀▀▀██▄ ███    ███ ███  ███       
@@ -234,7 +241,7 @@ void RenderSystem::execute() {
     if (!m_stencilQueue.empty()) {
         m_renderer->stencilPass();
         _sortQueueByMaterial(m_stencilQueue);
-        _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.cameraProjection);
+        _renderSortedQueue(m_stencilQueue, "stencil pass", m_renderContext.cameraProjection, m_renderContext.cameraView);
     }
 
     //     ▄██████▄  ███    █▄      ███      ▄█        ▄█  ███▄▄▄▄      ▄████████ 
@@ -249,7 +256,7 @@ void RenderSystem::execute() {
     if (!m_outlineQueue.empty()) {
         m_renderer->outlinePass(RenderState::BEFORE);
         _sortQueueByMaterial(m_outlineQueue);
-        _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.cameraProjection);
+        _renderSortedQueue(m_outlineQueue, "outline pass", m_renderContext.cameraProjection, m_renderContext.cameraView);
         m_renderer->outlinePass(RenderState::AFTER);
     }
 
@@ -265,8 +272,25 @@ void RenderSystem::execute() {
     if (!m_blendingQueue.empty()) {
         m_renderer->blendingPass(RenderState::BEFORE);
         _sortQueueByDistance(m_blendingQueue);
-        _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.cameraProjection);
+        _renderSortedQueue(m_blendingQueue, "blending pass", m_renderContext.cameraProjection, m_renderContext.cameraView);
         m_renderer->blendingPass(RenderState::AFTER);
+    }
+
+    //       ▄████████  ▄█  ███▄▄▄▄      ▄██████▄   ▄█          ▄████████    ▄████████ 
+    //      ███    ███ ███  ███▀▀▀██▄   ███    ███ ███         ███    ███   ███    ███ 
+    //      ███    █▀  ███▌ ███   ███   ███    █▀  ███         ███    █▀    ███    █▀  
+    //      ███        ███▌ ███   ███  ▄███        ███        ▄███▄▄▄       ███        
+    //    ▀███████████ ███▌ ███   ███ ▀▀███ ████▄  ███       ▀▀███▀▀▀     ▀███████████ 
+    //             ███ ███  ███   ███   ███    ███ ███         ███    █▄           ███ 
+    //       ▄█    ███ ███  ███   ███   ███    ███ ███▌    ▄   ███    ███    ▄█    ███ 
+    //     ▄████████▀  █▀    ▀█   █▀    ████████▀  █████▄▄██   ██████████  ▄████████▀  
+    //                                             ▀                                   
+    if (!m_singlesQueue.empty()) {
+        // single models: skybox, ...
+        m_renderer->singlesPass(RenderState::BEFORE);
+        _sortQueueByMaterial(m_singlesQueue);
+        _renderSortedQueue(m_singlesQueue, "singles pass", m_renderContext.cameraProjection, m_renderContext.noTranslationCameraView);
+        m_renderer->singlesPass(RenderState::AFTER);
     }
 
     //        ███      ▄██████▄     ▄███████▄                        
@@ -297,7 +321,7 @@ void RenderSystem::execute() {
             10.0f
         );
         _sortQueueByMaterial(m_topLayerQueue);
-        _renderSortedQueue(m_topLayerQueue, "top layer pass", topLayerProjection);
+        _renderSortedQueue(m_topLayerQueue, "top layer pass", topLayerProjection, m_renderContext.cameraView);
     }
 
     //    ███    █▄   ▄█  
@@ -312,7 +336,7 @@ void RenderSystem::execute() {
     if (!m_uiQueue.empty()) {
         // always last (last last)
         _sortQueueByMaterial(m_uiQueue);
-        _renderSortedQueue(m_uiQueue, "ui pass", m_renderContext.cameraProjection);
+        _renderSortedQueue(m_uiQueue, "ui pass", m_renderContext.cameraProjection, m_renderContext.cameraView);
     }
 
     m_renderer->render(RenderState::AFTER);
@@ -321,12 +345,13 @@ void RenderSystem::execute() {
     m_stencilQueue.clear();
     m_outlineQueue.clear();
     m_blendingQueue.clear();
+    m_singlesQueue.clear();
     m_topLayerQueue.clear();
     m_uiQueue.clear();
 }
 
 void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const {
-    if (queue.empty()) {
+    if (queue.size() < 2) {
         return;
     }
 
@@ -337,7 +362,7 @@ void RenderSystem::_sortQueueByMaterial(std::vector<RenderCommand>& queue) const
 }
 
 void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const {
-    if (queue.empty()) {
+    if (queue.size() < 2) {
         return;
     }
 
@@ -350,7 +375,7 @@ void RenderSystem::_sortQueueByDistance(std::vector<RenderCommand>& queue) const
 }
 
 // TODO: use UBO
-void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection) const {
+void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, const std::string& name, const glm::mat4& projection, const glm::mat4& view) const {
     if (queue.empty()) {
         //LOG_D("Empty queue for: " << name << " - nothing to render");
         return;
@@ -373,7 +398,7 @@ void RenderSystem::_renderSortedQueue(const std::vector<RenderCommand>& queue, c
                 currShader->use();
 
                 // draws per-shader (rarely)
-                currShader->setMat4fv("view", m_renderContext.cameraView);
+                currShader->setMat4fv("view", view);
                 currShader->setMat4fv("projection", projection);
                 currShader->setVec3fv("viewPos", cmd.position);
                 if (m_renderContext.hasDirLightMovement) {

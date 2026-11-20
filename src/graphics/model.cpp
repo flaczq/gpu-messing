@@ -154,7 +154,11 @@ std::unique_ptr<Mesh> Model::_processMesh(const aiMesh* mesh, const aiScene* sce
 		}
 	}
 
-	return std::make_unique<Mesh>(vertices, indices, textures, hasDiffuseColor, diffuseColor);
+	std::unique_ptr<Mesh> processedMesh = std::make_unique<Mesh>(vertices, indices, textures);
+	if (hasDiffuseColor) {
+		processedMesh->setDiffuseColor(diffuseColor);
+	}
+	return processedMesh;
 }
 
 std::vector<std::shared_ptr<Texture>> Model::_loadMaterialTextures(const aiMaterial* mat, const aiTextureType type, const std::string& typeName, const aiScene* scene) const {

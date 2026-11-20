@@ -8,6 +8,7 @@ enum class RenderQueueType {
 	STENCIL,
 	OUTLINE,
 	BLENDING,
+	SINGLES,
 	TOP_LAYER,
 	UI
 };

@@ -15,9 +15,10 @@ Mesh::Mesh(Mesh&& other) noexcept
       m_vertices(std::move(other.m_vertices)),
       m_indices(std::move(other.m_indices)),
       m_textures(std::move(other.m_textures)),
-      m_hasDiffuseColor(other.m_hasDiffuseColor),
-      m_diffuseColor(other.m_diffuseColor),
-      m_drawType(other.m_drawType)
+      m_hasDiffuseColor(false),
+      m_diffuseColor(glm::vec3(1.0f)),
+      m_drawType(GL_TRIANGLES),
+      m_textureType(GL_TEXTURE_2D)
 {
     // reset IDs to not deconstruct them
     other.m_VAO = 0;
@@ -39,9 +40,10 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
         m_vertices = std::move(other.m_vertices);
         m_indices = std::move(other.m_indices);
         m_textures = std::move(other.m_textures);
-        m_hasDiffuseColor = other.m_hasDiffuseColor;
-        m_diffuseColor = other.m_diffuseColor;
-        m_drawType = other.m_drawType;
+        m_hasDiffuseColor = false;
+        m_diffuseColor = glm::vec3(1.0f);
+        m_drawType = GL_TRIANGLES;
+        m_textureType = GL_TEXTURE_2D;
 
         other.m_VAO = 0;
         other.m_VBO = 0;
@@ -50,13 +52,14 @@ Mesh& Mesh::operator=(Mesh&& other) noexcept {
     return *this;
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures, bool hasDiffuseColor, glm::vec3 diffuseColor, GLenum drawType)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::shared_ptr<Texture>> textures)
     : m_vertices(std::move(vertices)),
       m_indices(std::move(indices)),
       m_textures(std::move(textures)),
-      m_hasDiffuseColor(hasDiffuseColor),
-      m_diffuseColor(diffuseColor),
-      m_drawType(drawType)
+      m_hasDiffuseColor(false),
+      m_diffuseColor(glm::vec3(1.0f)),
+      m_drawType(GL_TRIANGLES),
+      m_textureType(GL_TEXTURE_2D)
 {
 	_setupMesh();
 }
@@ -74,14 +77,14 @@ void Mesh::draw(const Shader& shader) {
         std::string typeName = m_textures[i]->type;
         // FIXME more than one of each material type
         shader.setInt("material." + typeName, i);
-        glBindTexture(GL_TEXTURE_2D, m_textures[i]->id);
+        glBindTexture(m_textureType, m_textures[i]->id);
     }
 
     // state reset
     glActiveTexture(GL_TEXTURE0);
     if (m_textures.empty()) {
         // reset binded texture to prevent using one from earlier entity
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(m_textureType, 0);
     }
 
     if (m_hasDiffuseColor) {
